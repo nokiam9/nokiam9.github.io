@@ -81,3 +81,10 @@ deploy:
   type: git
   repository: https://github.com/nokiam9/nokiam9.github.io
   branch: master
+
+# 添加百度/谷歌/本地 自定义站点内容搜索
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 10000
