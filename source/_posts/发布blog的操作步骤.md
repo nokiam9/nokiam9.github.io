@@ -1,6 +1,8 @@
-# nokiam9.github.io
-
-## HEXO发布新blog的操作方法
+---
+title: 发布blog的操作步骤
+date: 2018-12-23 21:13:09
+tags:
+---
 
 1. 开启新blog
 
