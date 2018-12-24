@@ -7,13 +7,13 @@ title: Alex的技术博客
 subtitle:
 description:
 keywords:
-author: John Doe
-language:
+author: Alex Sun
+language: zh-Hans
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
+url: https://blog.caogo.cn
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -56,6 +56,9 @@ index_generator:
 # Category & Tag
 default_category: uncategorized
 category_map:
+  编程: programming
+  生活: life
+  其他: other
 tag_map:
 
 # Date / Time format

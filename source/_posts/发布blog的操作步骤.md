@@ -1,7 +1,10 @@
 ---
 title: 发布blog的操作步骤
 date: 2018-12-23 21:13:09
-tags:
+categories: 编程
+tags: 
+    - hexo
+    - github
 ---
 
 1. 开启新blog
