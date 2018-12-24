@@ -1,10 +1,10 @@
 ---
-title: HEXO设置categories、tags页面的方法
-date: 2018-12-24 11:54:51
+title: 'HEXO设置About, Categories, Tags页面的方法'
+date: 2018-12-24 13:16:16
 categories: 编程
 tags:
     - hexo
-    - blog
+    - 操作手册
 ---
 
 ## 添加`关于`页面
@@ -41,17 +41,6 @@ type: "categories"
 ---
 ```
 
-- 在个人文章的注释信息中，添加分类信息
-```
-# ~/source/_posts/hello-world.md
-
----
-title: hello-world
-categories:
-    - 生活                       （这个就是文章的分类了）
----
-```
-
 ## 添加`标签`页面
 - 运行hexo新建一个名为`tags`的页面
 ```bash
@@ -67,18 +56,7 @@ type: "tags"
 ---
 ```
 
-- 在个人md文件的注释信息中，添加分类信息
-```
-# ~/source/_posts/hello-world.md
----
-title: hello-world
-tags:
-    - 生活                       
-    - 有病              （这个就是文章的标签了）
----
-```
-
-## 统一设置`menu`的入口
+## 设置`menu`的入口
 - 设置**主题配置文件**的 menu信息
 ```
 # ~/themes/next/_config.yml
@@ -89,8 +67,32 @@ menu:
   tags: /tags                   //标签，自定义
   about: /about                 //关于，自定义           
 ```
-- 运行hexo，生成并部署项目
-```bash
+
+## 如何使用`标签`和`分类`信息
+- 在个人md文件的注释信息中，可以添加**catagories**和**tags**信息
+```
+# ~/source/_posts/hello-world.md
+---
+title: hello-world
+categories:
+    - 生活                        （这个就是文章的分类了）
+tags:
+    - 生活                       
+    - 有病                        （这个就是文章的标签了）
+---
+```
+
+- 如果用户md文件设置了分类和标签的注释信息，hexo在生成页面时将自动进行索引
+``` bash
 $ hexo s
 $ hexo d -g
 ```
+
+- 打开blog主页，顶层菜单出现了**About**、**Catagories**和**Tags**的入口，点击进去就可以使用了
+
+
+**tags的页面效果**
+{% asset_img tags.png 这是tags的图片说明 %}
+
+**categories的页面效果**
+{% asset_img categories.png 这是categories的图片说明 %}
