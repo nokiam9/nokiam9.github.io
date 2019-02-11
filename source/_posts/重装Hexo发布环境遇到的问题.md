@@ -19,4 +19,7 @@ tags:
    > 修改`package.json`文件，要求版本>1.0.0后告警消失
 
 5. 完成发布环境的安装，现在可以自由发布blog。
-   > 发布了一个new page，但是内容为空，结果发现是新安装的Vscode没有设置autosave！！！
+   > 发布了一个new page，但是内容为空，结果发现是新安装的Vscode没有设置autosave！！！  
+
+Note:  
+提交hexo发布环境时，Github给出严重告警信息，原因是提交的 `package-lock.json`文件包含了敏感信息，解决方法是将该文件名添加到`.gitignore`，以避免git提交
