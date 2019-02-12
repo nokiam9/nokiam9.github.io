@@ -39,3 +39,4 @@ $ npm install
 
 >- 创建了一个new page并编辑内容，但是发布结果内容为空，原因是新安装的Vscode没有设置autosave！！！  
 >- 提交hexo编辑环境时，Github给出严重告警信息，原因是提交的 `package-lock.json`文件包含了敏感信息，解决方法是将该文件名添加到`.gitignore`，以阻止git提交
+>- Github Page设置了Custom Domain，但hexo提交后经常丢失，解决方法是在编辑环境的`/sources`目录增加CNAME配置文件，详细内容见[参考文档](http://www.mdslq.cn/archives/82234085.html)
