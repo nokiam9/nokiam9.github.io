@@ -22,6 +22,11 @@ sudo npm install -g cnpm --registry=https://registry.npm.taobao.org
 ```
 
 3、从Github下载blog的源代码hexo分支，并进入自动新建的子目录。
+
+``` bash
+git clone https://github.com/nokiam9/nokiam9.github.io.git
+```
+
 4、根据当前目录的`package.json`安装项目的依赖包， 方法是：
 
 ``` bash
