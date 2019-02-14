@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title><![CDATA[重装Hexo编辑环境遇到的问题]]></title>
+    <url>%2F2019%2F02%2F12%2F%E9%87%8D%E8%A3%85Hexo%E5%8F%91%E5%B8%83%E7%8E%AF%E5%A2%83%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98%2F</url>
+    <content type="text"><![CDATA[昨天在新Mac上重新安装Hexo Blog的编辑环境出现了不少问题，解决情况如下。 1、确认已经安装node.js和npm，最简单的办法是采用图形化的安装包。2、至少需要全局安装hexo和hexco-cli（hexo的命令行工具包），方法是 12$ sudo npm install hexo -g$ sudo npm install hexo-cli -g npm全局安装方式时，默认存储目录是/usr/local/lib/node_modules/，普通用户可能出现权限问题，需要sudo提权 为了加快npm安装速度，可以提前全局安装cnpm，以后的命令可以用cnpm替代npm 1$ sudo npm install -g cnpm --registry=https://registry.npm.taobao.org 3、从Github下载blog的源代码hexo分支，并进入自动新建的子目录。 1$ git clone https://github.com/nokiam9/nokiam9.github.io.git 4、根据当前目录的package.json安装项目的依赖包， 方法是： 1$ npm install 安装过程提示告警信息，通过npm audit分析，是hexo-deployer-git的版本过低。修改package.json文件，要求版本不低于1.0.0，告警消失。 5、完成发布环境的安装，现在可以自由发布blog。 创建了一个new page并编辑内容，但是发布结果内容为空，原因是新安装的Vscode没有设置autosave！！！ 提交hexo编辑环境时，Github给出严重告警信息，原因是提交的 package-lock.json文件包含了敏感信息，解决方法是将该文件名添加到.gitignore，以阻止git提交 Github Page设置了Custom Domain，但hexo提交后经常丢失，解决方法是在编辑环境的/sources目录增加CNAME配置文件，详细内容见参考文档]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[搬家了]]></title>
+    <url>%2F2019%2F01%2F17%2F%E6%90%AC%E5%AE%B6%E4%BA%86%2F</url>
+    <content type="text"><![CDATA[已经是2019年了！从兰州搬家，终于回到了北京！ 阿里云的香港ECS到期了，续费太贵，就把域名搬到了成都的腾讯云！效果还不错，就是不得不做了域名备案。]]></content>
+  </entry>
+  <entry>
+    <title><![CDATA[HEXO设置About, Categories, Tags页面的方法]]></title>
+    <url>%2F2018%2F12%2F24%2FHEXO%E8%AE%BE%E7%BD%AEAbout-Categories-Tags%E9%A1%B5%E9%9D%A2%E7%9A%84%E6%96%B9%E6%B3%95%2F</url>
+    <content type="text"><![CDATA[添加关于页面 运行hexo新建一个名为about的页面 1$ hexo new page "about" 找到source/about/index.md文件，自由编辑并存盘 添加分类页面 打开项目配置文件，设置所有分类的属性和目录名 12345678# ~/_config.ymldefault_category: uncategorizedcategory_map: 编程: programming 生活: life 其他: othertag_map: 运行hexo新建一个名为caterogies的页面 1$ hexo new page "categories" 找到source/caterogies/index.md文件，确认type的设置信息 123456# ~/source/caterogies/index.md---title: 分类date: 2014-12-22 12:39:04type: &quot;categories&quot;--- 添加标签页面 运行hexo新建一个名为tags的页面 1$ hexo new page "tags" 找到source/tags/index.md文件，确认type的设置信息 123456# ~/source/tags/index.md---title: 分类date: 2014-12-22 12:39:04type: &quot;tags&quot;--- 设置menu的入口 设置主题配置文件的 menu信息1234567# ~/themes/next/_config.ymlmenu: home: / //主页，默认 categories: /categories //分类，自定义 archives: /archives //归档，默认 tags: /tags //标签，自定义 about: /about //关于，自定义 如何使用标签和分类信息 在个人md文件的注释信息中，可以添加catagories和tags信息 123456789# ~/source/_posts/hello-world.md---title: hello-worldcategories: - 生活 （这个就是文章的分类了）tags: - 生活 - 有病 （这个就是文章的标签了）--- 如果用户md文件设置了分类和标签的注释信息，hexo在生成页面时将自动进行索引 12$ hexo s$ hexo d -g 打开blog主页，顶层菜单出现了About、Catagories和Tags的入口，点击进去就可以使用了 tags的页面效果 categories的页面效果]]></content>
+      <categories>
+        <category>编程</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>操作手册</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[今天晚上忘了吃药]]></title>
+    <url>%2F2018%2F12%2F23%2F%E4%BB%8A%E5%A4%A9%E6%99%9A%E4%B8%8A%E5%BF%98%E4%BA%86%E5%90%83%E8%8D%AF%2F</url>
+    <content type="text"><![CDATA[饭可以不吃，药不能停！！！好多药啊！ 拜糖平 二甲双瓜 甲钴胺 阿斯匹林]]></content>
+      <categories>
+        <category>生活</category>
+      </categories>
+      <tags>
+        <tag>兰州</tag>
+        <tag>有病</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[发布blog的操作步骤]]></title>
+    <url>%2F2018%2F12%2F23%2F%E5%8F%91%E5%B8%83blog%E7%9A%84%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4%2F</url>
+    <content type="text"><![CDATA[开启新blog 1$ hexo new '圣诞节怎么过？` 在 /source/_posts目录下发现一个新文件圣诞节怎么过？.md，自由编辑该文件 在md文件的注释部分，可以标记category和tag，具体方法为： 12345# hello-world.mdcategories: 编程tags: - hexo - github 文章写完了，看看效果如何，并点击本地浏览器地址看看效果如何 1$ hexo s 文章写的很精彩！现在，发布到blog主页 1$ hexo d -g 文章在Github上存个备份 如果使用vscode等IDE，可以直接点击git commit和git push的快捷方式 123$ git add .$ git commit -m 'Updated'$ git push origin hexo Game Over！大吉大利，今晚吃鸡！！！]]></content>
+      <categories>
+        <category>编程</category>
+      </categories>
+      <tags>
+        <tag>hexo</tag>
+        <tag>github</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[冬至在兰州]]></title>
+    <url>%2F2018%2F12%2F23%2F%E5%86%AC%E8%87%B3%E5%9C%A8%E5%85%B0%E5%B7%9E%2F</url>
+    <content type="text"><![CDATA[老孙打了好几个电话过来]]></content>
+      <categories>
+        <category>生活</category>
+      </categories>
+      <tags>
+        <tag>兰州</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Hello World]]></title>
+    <url>%2F2018%2F12%2F21%2Fhello-world%2F</url>
+    <content type="text"><![CDATA[Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick StartCreate a new post1$ hexo new "My New Post" More info: Writing Run server1$ hexo server More info: Server Generate static files1$ hexo generate More info: Generating Deploy to remote sites1$ hexo deploy More info: Deployment]]></content>
+      <tags>
+        <tag>hexo</tag>
+        <tag>default</tag>
+      </tags>
+  </entry>
+</search>
