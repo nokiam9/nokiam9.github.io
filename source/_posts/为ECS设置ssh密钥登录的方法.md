@@ -79,3 +79,4 @@ $ ssh root@119.22.33.44
 
 - [腾讯云-如何添加云服务器的密钥对](https://cloud.tencent.com/document/product/213/16691#1.-创建密钥)
 - [腾讯云-如何使用SSH密钥文件进行终端接入](https://cloud.tencent.com/document/product/213/5436#.E4.BD.BF.E7.94.A8-ssh-.E7.99.BB.E5.BD.95.EF.BC.88.E6.9C.AC.E5.9C.B0.E7.B3.BB.E7.BB.9F.E4.B8.BA-linux.2Fmac-os.EF.BC.89)
+- [菜鸟学堂-设置SSH密钥的方法](https://www.runoob.com/w3cnote/set-ssh-login-key.html)
