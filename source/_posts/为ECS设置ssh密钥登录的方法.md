@@ -25,26 +25,27 @@ ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也�
 
 {% asset_img ecs-2.png %}
 
-# 在MAC上，用Terminal的命令行登录（需要指定密钥文件）
+# 调用方法1：在MAC上，用Terminal的命令行登录（需要指定密钥文件）
 
 - Mac OS 用户请打开系统自带的终端（Terminal）并输入以下命令，**赋予私钥文件仅本人可读权限（必须设置！）**。
 
-```bash
+``` bash
 $ chmod 400 $HOME/Downloads/TENCENT_ECS.txt
 ```
 
 - 在Terminal窗口中执行以下命令，进行远程登录。
 
-```bash
+``` bash
 $ ssh -i $HOME/Downloads/TENCENT_ECS.txt root@119.22.33.44
 ```
 
-# 更简单的，Terminal无密码直接登录
+# 调用方法2：更简单的，Terminal无密码直接登录
 
 在ssh指定密钥文件的基础上，还可以将ssh进一步简化为不需要指定密钥文件的信任方式，具体步骤如下：
 
 1. 在mac终端生成公钥文件`id_rsa.pub`和私钥文件`id_rsa`。
-```bash
+
+``` bash
 $ ssh-keygen -t rsa
 ```
 
@@ -57,19 +58,24 @@ $ ssh-keygen -t rsa
 3. 编辑该文件，添加`id_rsa.pub`里面的公钥数据。
 
 4. 修改该文件的权限为644
-```bash
+
+``` bash
 $ chmod 644 $HOME/.ssh/authorized_keys
 ```
 
 5. 现在MAC终端上可免密登录你的Linux服务器了，登录命令:
-```bash
+
+``` bash
 $ ssh root@119.22.33.44
 ```
 
-> 实际上，你现在也可以在`Terminal`的菜单上直接选择`选择远程连接`，而不需要先打开本地的字符终端了
+或者，你也可以在`Terminal`的菜单上直接选择`选择远程连接`，而不需要先打开本地的字符终端了
+
+> - 实际上，这就是腾讯云配置`使用已有公钥`的原理：首先在Client生成一对私钥和公钥，然后并将公钥内容加入到Server的`authorized_keys`文件中，使得其成为可信任的Client，这也是Github上代码自动化加载用户自定义运行环境配置的通用方法。
+> - 注意：方法1需要在ssh命令行中指定私钥文件，而方法2不要指定私钥文件的原因是，Terminal自动调用Client的默认存储文件`$HOME/.ssh/id_rsa`，但前提是密钥是在这个Client生成的，如果其他client想要调用就需要自己去配置Server的公钥文件了。
 
 ---
 # 参考文档
 
-- [腾讯云-添加密钥对的操作手册](https://cloud.tencent.com/document/product/213/16691#1.-创建密钥)
+- [腾讯云-如何添加云服务器的密钥对](https://cloud.tencent.com/document/product/213/16691#1.-创建密钥)
 - [腾讯云-如何使用SSH密钥文件进行终端接入](https://cloud.tencent.com/document/product/213/5436#.E4.BD.BF.E7.94.A8-ssh-.E7.99.BB.E5.BD.95.EF.BC.88.E6.9C.AC.E5.9C.B0.E7.B3.BB.E7.BB.9F.E4.B8.BA-linux.2Fmac-os.EF.BC.89)
