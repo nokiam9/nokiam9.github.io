@@ -65,7 +65,60 @@ root      4367  4366  0 18:30 ?        00:00:00 /bin/sh -c (/usr/bin/ybznfa2||/u
 
 ---
 
-# 附录：关于crontab的使用方法
+# 附录1: 关于lsof命令
+
+查看被占用端口的归属进程，可用使用`lsof -i:<port>`命令。
+
+```
+[root@VM_0_17_centos log]# lsof -i:80
+COMMAND PID  USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+nginx   936  root    6u  IPv4  15296      0t0  TCP *:http (LISTEN)
+nginx   937 nginx    6u  IPv4  15296      0t0  TCP *:http (LISTEN)
+```
+
+查看某个进程使用的系统资源信息，包括文件、端口等，可以使用`lsof -p <pid>` 命令。
+
+```
+[root@VM_0_17_centos log]# lsof -p 527
+COMMAND   PID USER   FD      TYPE             DEVICE SIZE/OFF   NODE NAME
+YDService 527 root  cwd       DIR              253,1     4096 525988 /usr/local/qcloud/YunJing/YDEyes
+YDService 527 root  rtd       DIR              253,1     4096      2 /
+YDService 527 root  txt       REG              253,1  5194952 525989 /usr/local/qcloud/YunJing/YDEyes/YDService
+YDService 527 root  mem       REG              253,1    68192 266804 /usr/lib64/libbz2.so.1.0.6
+YDService 527 root  mem       REG              253,1   157424 266780 /usr/lib64/liblzma.so.5.2.2
+YDService 527 root  mem       REG              253,1    90248 265916 /usr/lib64/libz.so.1.2.7
+YDService 527 root  mem       REG              253,1    99944 266803 /usr/lib64/libelf-0.170.so
+YDService 527 root  mem       REG              253,1    19896 266044 /usr/lib64/libattr.so.1.1.0
+YDService 527 root  mem       REG              253,1   297360 274746 /usr/lib64/libdw-0.170.so
+YDService 527 root  mem       REG              253,1    20032 266047 /usr/lib64/libcap.so.2.22
+YDService 527 root  mem       REG              253,1    86544 274509 /usr/lib64/libnss_myhostname.so.2
+YDService 527 root  mem       REG              253,1   106848 265653 /usr/lib64/libresolv-2.17.so
+YDService 527 root  mem       REG              253,1    31824 265641 /usr/lib64/libnss_dns-2.17.so
+YDService 527 root  mem       REG              253,1    62184 265643 /usr/lib64/libnss_files-2.17.so
+YDService 527 root  mem       REG              253,1  2173512 265625 /usr/lib64/libc-2.17.so
+YDService 527 root  mem       REG              253,1    88720 262170 /usr/lib64/libgcc_s-4.8.5-20150702.so.1
+YDService 527 root  mem       REG              253,1  1139680 265633 /usr/lib64/libm-2.17.so
+YDService 527 root  mem       REG              253,1   995840 265950 /usr/lib64/libstdc++.so.6.0.19
+YDService 527 root  mem       REG              253,1    19776 265631 /usr/lib64/libdl-2.17.so
+YDService 527 root  mem       REG              253,1   144792 265651 /usr/lib64/libpthread-2.17.so
+YDService 527 root  mem       REG              253,1    44448 265655 /usr/lib64/librt-2.17.so
+YDService 527 root  mem       REG              253,1   164240 265618 /usr/lib64/ld-2.17.so
+YDService 527 root    0w      REG              253,1   227581 525140 /usr/local/qcloud/YunJing/log/ydservice.20190505.log
+YDService 527 root    1u      CHR                1,3      0t0   5078 /dev/null
+YDService 527 root    2u  a_inode               0,10        0   5074 [eventpoll]
+YDService 527 root    3uW     REG               0,19        3  13104 /run/YDService.pid
+YDService 527 root    4u     IPv4              17010      0t0    TCP VM_0_17_centos:45598->169.254.0.55:lsi-bobcat (ESTABLISHED)
+YDService 527 root    5u     unix 0xffff8da7babcec00      0t0  17082 /usr/local/yd.socket.server
+YDService 527 root    6u  a_inode               0,10        0   5074 [timerfd]
+YDService 527 root    7r  a_inode               0,10        0   5074 inotify
+YDService 527 root    8u  a_inode               0,10        0   5074 [timerfd]
+YDService 527 root    9u  a_inode               0,10        0   5074 [timerfd]
+YDService 527 root   10u  a_inode               0,10        0   5074 [timerfd]
+YDService 527 root   11u  a_inode               0,10        0   5074 [timerfd]
+YDService 527 root   24u     unix 0xffff8da7bb51fc00      0t0  17639 /usr/local/yd.socket.server
+```
+
+# 附录2：关于crontab的使用方法
 
 - crond是常用的木马启动入口，主要的配置文件存放在 `/var/spool/cron/`目录下。
 
