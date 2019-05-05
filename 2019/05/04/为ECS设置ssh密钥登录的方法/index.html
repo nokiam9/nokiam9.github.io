@@ -104,20 +104,20 @@
 
 
 
-  <meta name="description" content="最近租用的腾讯ECS中招了，被来自伦敦的黑客用ssh暴力破解root密码，并种上了木马（估计是挖矿的），看来需要重视安全防护工作了。ECS上必须开放80和443端口提供http和https服务，还需要维护用的ssh端口22。虽然可以为root设置复杂的密码，但是也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下： 在腾讯云上，配置ECS采用ssh密钥">
+  <meta name="description" content="最近，租用的腾讯云服务器ECS中招了，来自伦敦IDC的黑客通过ssh访问暴力破解root密码，并种上了木马（估计是挖矿的），看来必须重视安全加固工作了。ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也是必须的。虽然可以为root设置更加复杂的密码，但也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下： 在腾讯云上，配">
 <meta property="og:type" content="article">
 <meta property="og:title" content="为ECS设置ssh密钥登录的方法">
 <meta property="og:url" content="https://blog.caogo.cn/2019/05/04/为ECS设置ssh密钥登录的方法/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="最近租用的腾讯ECS中招了，被来自伦敦的黑客用ssh暴力破解root密码，并种上了木马（估计是挖矿的），看来需要重视安全防护工作了。ECS上必须开放80和443端口提供http和https服务，还需要维护用的ssh端口22。虽然可以为root设置复杂的密码，但是也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下： 在腾讯云上，配置ECS采用ssh密钥">
+<meta property="og:description" content="最近，租用的腾讯云服务器ECS中招了，来自伦敦IDC的黑客通过ssh访问暴力破解root密码，并种上了木马（估计是挖矿的），看来必须重视安全加固工作了。ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也是必须的。虽然可以为root设置更加复杂的密码，但也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下： 在腾讯云上，配">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://blog.caogo.cn/2019/05/04/为ECS设置ssh密钥登录的方法/ecs-1.png">
 <meta property="og:image" content="https://blog.caogo.cn/2019/05/04/为ECS设置ssh密钥登录的方法/ecs-2.png">
 <meta property="og:image" content="https://blog.caogo.cn/2019/05/04/为ECS设置ssh密钥登录的方法/ecs-3.jpeg">
-<meta property="og:updated_time" content="2019-05-04T16:16:13.162Z">
+<meta property="og:updated_time" content="2019-05-05T02:39:41.822Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="为ECS设置ssh密钥登录的方法">
-<meta name="twitter:description" content="最近租用的腾讯ECS中招了，被来自伦敦的黑客用ssh暴力破解root密码，并种上了木马（估计是挖矿的），看来需要重视安全防护工作了。ECS上必须开放80和443端口提供http和https服务，还需要维护用的ssh端口22。虽然可以为root设置复杂的密码，但是也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下： 在腾讯云上，配置ECS采用ssh密钥">
+<meta name="twitter:description" content="最近，租用的腾讯云服务器ECS中招了，来自伦敦IDC的黑客通过ssh访问暴力破解root密码，并种上了木马（估计是挖矿的），看来必须重视安全加固工作了。ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也是必须的。虽然可以为root设置更加复杂的密码，但也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下： 在腾讯云上，配">
 <meta name="twitter:image" content="https://blog.caogo.cn/2019/05/04/为ECS设置ssh密钥登录的方法/ecs-1.png">
 
 
@@ -440,7 +440,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-05-05 00:16:13" itemprop="dateModified" datetime="2019-05-05T00:16:13+08:00">2019-05-05</time>
+                <time title="Modified: 2019-05-05 10:39:41" itemprop="dateModified" datetime="2019-05-05T10:39:41+08:00">2019-05-05</time>
               
             
           </span>
@@ -473,44 +473,69 @@
       
 
       
-        <p>最近租用的腾讯ECS中招了，被来自伦敦的黑客用ssh暴力破解root密码，并种上了木马（估计是挖矿的），看来需要重视安全防护工作了。<br>ECS上必须开放80和443端口提供http和https服务，还需要维护用的ssh端口22。虽然可以为root设置复杂的密码，但是也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下：</p>
-<h1 id="在腾讯云上，配置ECS采用ssh密钥登录方式"><a href="#在腾讯云上，配置ECS采用ssh密钥登录方式" class="headerlink" title="在腾讯云上，配置ECS采用ssh密钥登录方式"></a>在腾讯云上，配置ECS采用ssh密钥登录方式</h1><ul>
-<li>登录腾讯云，并转到ECS控制台</li>
-<li>选择<code>SSH密钥</code>-<code>创建密钥</code>，在pop窗口中选择<code>创建新密钥对</code><img src="/2019/05/04/为ECS设置ssh密钥登录的方法/ecs-1.png">
-<strong>如果选择弹窗中的<code>使用已有公钥</code>，是指导入用户自己手工产生的公钥文件</strong></li>
-<li>根据提示信息下载私钥文件（通常文件后缀名为dms，可以改为txt），注意自行妥善保存</li>
-<li>将新生成的密钥对与需要的ECS进行绑定。注意：密钥对绑定ECS成功后，ECS就不再支持密码登录，<img src="/2019/05/04/为ECS设置ssh密钥登录的方法/ecs-2.png">
-<strong>屏幕显示的公钥内容ssa-rsa，其实就是ECS服务器上<code>$HOME/.ssh/authorized_keys</code>的内容</strong><br><strong>注意：为保障安全，ECS将在关机状态才能修改登录方式！</strong></li>
-<li><a href="https://cloud.tencent.com/document/product/213/16691#1.-创建密钥" target="_blank" rel="noopener">腾讯的参考文档</a></li>
+        <p>最近，租用的腾讯云服务器ECS中招了，来自伦敦IDC的黑客通过ssh访问暴力破解root密码，并种上了木马（估计是挖矿的），看来必须重视安全加固工作了。<br>ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也是必须的。虽然可以为root设置更加复杂的密码，但也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下：</p>
+<h1 id="在腾讯云上，配置ECS采用ssh密钥登录方式"><a href="#在腾讯云上，配置ECS采用ssh密钥登录方式" class="headerlink" title="在腾讯云上，配置ECS采用ssh密钥登录方式"></a>在腾讯云上，配置ECS采用ssh密钥登录方式</h1><ol>
+<li><p>登录腾讯云，并转到ECS控制台。<strong>注意：为保障安全，ECS在关机状态才能修改登录方式！</strong></p>
+</li>
+<li><p>选择<code>SSH密钥</code>-<code>创建密钥</code>，在弹出式窗口中选择<code>创建新密钥对</code>，并按提示进行操作。</p>
+</li>
+</ol>
+<blockquote>
+<p>弹窗中的<code>使用已有公钥</code>按钮，其功能是：导入用户自己手工产生的公钥文件</p>
+</blockquote>
+<img src="/2019/05/04/为ECS设置ssh密钥登录的方法/ecs-1.png">
+<ol start="3">
+<li><p>根据提示信息下载私钥文件,注意自行妥善保存。默认文件后缀名为.dms，可以改为.txt。</p>
+</li>
+<li><p>将新生成的密钥对与需要的ECS进行绑定。<strong>绑定ECS成功后，ECS就不再支持密码登录了</strong></p>
+</li>
+</ol>
+<blockquote>
+<p>屏幕显示的公钥内容ssa-rsa，其实就是ECS服务器上<code>$HOME/.ssh/authorized_keys</code>的内容</p>
+</blockquote>
+<img src="/2019/05/04/为ECS设置ssh密钥登录的方法/ecs-2.png">
+<h1 id="调用方法1：在MAC上，用Terminal的命令行登录（需要指定密钥文件）"><a href="#调用方法1：在MAC上，用Terminal的命令行登录（需要指定密钥文件）" class="headerlink" title="调用方法1：在MAC上，用Terminal的命令行登录（需要指定密钥文件）"></a>调用方法1：在MAC上，用Terminal的命令行登录（需要指定密钥文件）</h1><ul>
+<li>Mac OS 用户请打开系统自带的终端（Terminal）并输入以下命令，<strong>赋予私钥文件仅本人可读权限（必须设置！）</strong>。</li>
 </ul>
-<h1 id="在MAC上，用Terminal的命令行登录（需要指定密钥文件）"><a href="#在MAC上，用Terminal的命令行登录（需要指定密钥文件）" class="headerlink" title="在MAC上，用Terminal的命令行登录（需要指定密钥文件）"></a>在MAC上，用Terminal的命令行登录（需要指定密钥文件）</h1><ul>
-<li><p>Mac OS 用户请打开系统自带的终端（Terminal）并输入以下命令，赋予私钥文件仅本人可读权限。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ chmod 400 <span class="variable">$HOME</span>/Downloads/TENCENT_ECS.txt</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>在Terminal窗口中执行以下命令，进行远程登录。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh -i <span class="variable">$HOME</span>/Downloads/TENCENT_ECS.txt<span class="string">" root@119.22.33.44</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p><a href="https://cloud.tencent.com/document/product/213/5436#.E4.BD.BF.E7.94.A8-ssh-.E7.99.BB.E5.BD.95.EF.BC.88.E6.9C.AC.E5.9C.B0.E7.B3.BB.E7.BB.9F.E4.B8.BA-linux.2Fmac-os.EF.BC.89" target="_blank" rel="noopener">腾讯的参考文档</a></p>
-</li>
-</ul>
-<h1 id="更简单的，Terminal无密码直接登录"><a href="#更简单的，Terminal无密码直接登录" class="headerlink" title="更简单的，Terminal无密码直接登录"></a>更简单的，Terminal无密码直接登录</h1><p>在ssh指定密钥文件的基础上，还可以将ssh进一步简化为不需要指定密钥文件的信任方式，具体步骤如下：</p>
 <ul>
-<li>在mac终端生成公钥和私钥<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
-</li>
+<li>在Terminal窗口中执行以下命令，进行远程登录。</li>
 </ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh -i <span class="variable">$HOME</span>/Downloads/TENCENT_ECS.txt root@119.22.33.44</span><br></pre></td></tr></table></figure>
+<h1 id="调用方法2：更简单的，Terminal无密码直接登录"><a href="#调用方法2：更简单的，Terminal无密码直接登录" class="headerlink" title="调用方法2：更简单的，Terminal无密码直接登录"></a>调用方法2：更简单的，Terminal无密码直接登录</h1><p>在ssh指定密钥文件的基础上，还可以将ssh进一步简化为不需要指定密钥文件的信任方式，具体步骤如下：</p>
+<ol>
+<li>在mac终端生成公钥文件<code>id_rsa.pub</code>和私钥文件<code>id_rsa</code>。</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh-keygen -t rsa</span><br></pre></td></tr></table></figure>
 <img src="/2019/05/04/为ECS设置ssh密钥登录的方法/ecs-3.jpeg">
+<blockquote>
 <p>图中红色标识的是是否对公钥和私钥进行对称加密，如果你输入了的话，那么在后续利用私钥登录的时候，需要输入该密码对私钥进行解密。如果安全性要求不高，可以不输入，直接点击enter跳过。</p>
-<ul>
-<li>生成秘钥文件<code>id_rsa.pub</code>后，在ECS服务器上寻找文件<code>$HOME/.ssh/authorized_keys</code></li>
-<li>编辑该文件，添加<code>id_rsa.pub</code>里面的公钥信息</li>
-<li><p>修改该文件的权限</p>
+</blockquote>
+<ol start="2">
+<li><p>在ECS服务器上寻找文件<code>$HOME/.ssh/authorized_keys</code></p>
+</li>
+<li><p>编辑该文件，添加<code>id_rsa.pub</code>里面的公钥数据。</p>
+</li>
+<li><p>修改该文件的权限为644</p>
+</li>
+</ol>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ chmod 644 <span class="variable">$HOME</span>/.ssh/authorized_keys</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>现在MAC终端上可免密登录你的 Linux 服务器了，登录命令:</p>
+<ol start="5">
+<li>现在MAC终端上可免密登录你的Linux服务器了，登录命令:</li>
+</ol>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ssh root@119.22.33.44</span><br></pre></td></tr></table></figure>
-</li>
+<p>或者，你也可以在<code>Terminal</code>的菜单上直接选择<code>选择远程连接</code>，而不需要先打开本地的字符终端了</p>
+<blockquote>
+<ul>
+<li>实际上，这就是腾讯云配置<code>使用已有公钥</code>的原理：首先在Client生成一对私钥和公钥，然后并将公钥内容加入到Server的<code>authorized_keys</code>文件中，使得其成为可信任的Client，这也是Github上代码自动化加载用户自定义运行环境配置的通用方法。</li>
+<li>注意：方法1需要在ssh命令行中指定私钥文件，而方法2不要指定私钥文件的原因是，Terminal自动调用Client的默认存储文件<code>$HOME/.ssh/id_rsa</code>，但前提是密钥是在这个Client生成的，如果其他client想要调用就需要自己去配置Server的公钥文件了。</li>
 </ul>
-<p>实际上，你现在也可以在<code>Terminal</code>的菜单上直接选择<code>选择远程连接</code>，而不需要先打开本地的字符终端了</p>
+</blockquote>
+<hr>
+<h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><ul>
+<li><a href="https://cloud.tencent.com/document/product/213/16691#1.-创建密钥" target="_blank" rel="noopener">腾讯云-如何添加云服务器的密钥对</a></li>
+<li><a href="https://cloud.tencent.com/document/product/213/5436#.E4.BD.BF.E7.94.A8-ssh-.E7.99.BB.E5.BD.95.EF.BC.88.E6.9C.AC.E5.9C.B0.E7.B3.BB.E7.BB.9F.E4.B8.BA-linux.2Fmac-os.EF.BC.89" target="_blank" rel="noopener">腾讯云-如何使用SSH密钥文件进行终端接入</a></li>
+</ul>
 
       
     </div>
@@ -696,7 +721,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#在腾讯云上，配置ECS采用ssh密钥登录方式"><span class="nav-number">1.</span> <span class="nav-text">在腾讯云上，配置ECS采用ssh密钥登录方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#在MAC上，用Terminal的命令行登录（需要指定密钥文件）"><span class="nav-number">2.</span> <span class="nav-text">在MAC上，用Terminal的命令行登录（需要指定密钥文件）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更简单的，Terminal无密码直接登录"><span class="nav-number">3.</span> <span class="nav-text">更简单的，Terminal无密码直接登录</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#在腾讯云上，配置ECS采用ssh密钥登录方式"><span class="nav-number">1.</span> <span class="nav-text">在腾讯云上，配置ECS采用ssh密钥登录方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调用方法1：在MAC上，用Terminal的命令行登录（需要指定密钥文件）"><span class="nav-number">2.</span> <span class="nav-text">调用方法1：在MAC上，用Terminal的命令行登录（需要指定密钥文件）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调用方法2：更简单的，Terminal无密码直接登录"><span class="nav-number">3.</span> <span class="nav-text">调用方法2：更简单的，Terminal无密码直接登录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文档"><span class="nav-number">4.</span> <span class="nav-text">参考文档</span></a></li></ol></div>
             
 
           </div>
