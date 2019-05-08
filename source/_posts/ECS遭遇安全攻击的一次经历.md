@@ -118,7 +118,7 @@ YDService 527 root   11u  a_inode               0,10        0   5074 [timerfd]
 YDService 527 root   24u     unix 0xffff8da7bb51fc00      0t0  17639 /usr/local/yd.socket.server
 ```
 
-# 附录2：关于crontab的使用方法
+# 附录2：关于crontab命令
 
 - crond是常用的木马启动入口，主要的配置文件存放在 `/var/spool/cron/`目录下。
 

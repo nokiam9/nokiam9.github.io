@@ -88,6 +88,6 @@ token:      eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZ
 ## 问题1：激活Kubernetes时，一直停留在‘Kubernetes is starting...’
 - 根本原因：激活k8s需要自动下载google的镜像文件，但一直无法通过GW
 - 解决方法：在docker-Preferences-Proxies-Manunal Proxy Configration中，设置代理服务器为`host.docker.internal:1087`，由于国际传输速度较慢，可能需要几个小时
-- 补充说明：由于docker是运行在Mac的虚拟机上，无法直接使用Shadowsocks的默认代理设置`http://127.0.0.1:1087`，需要将localhost地址替换为Mac网卡的物理地址
+- 补充说明：由于docker是运行在Mac的虚拟机上，无法直接使用Shadowsocks的默认代理设置`http://127.0.0.1:1087`，需要将localhost地址替换为Mac网卡的物理地址，最佳建议是使用docker的内部DNS域名`host.docker.internal:1087`，以避免WIFI切换时修改物理地址
 
 ## 问题2：
