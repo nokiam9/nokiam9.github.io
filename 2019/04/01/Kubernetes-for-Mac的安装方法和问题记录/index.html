@@ -114,7 +114,7 @@
 <meta property="og:image" content="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/k8s-install.png">
 <meta property="og:image" content="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/dash-login.png">
 <meta property="og:image" content="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/dash-main.png">
-<meta property="og:updated_time" content="2019-04-01T09:38:11.497Z">
+<meta property="og:updated_time" content="2019-05-08T10:00:39.403Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kubernetes for Mac的安装方法和问题记录">
 <meta name="twitter:description" content="安装Kubernetes的最简单方法著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴械投降了，目前Kubernets已经集成到了Docker中。最简单的安装方法，就是在菜单Docker">
@@ -423,12 +423,24 @@
                 
               
 
-              <time title="Created: 2019-04-01 16:21:24 / Modified: 17:38:11" itemprop="dateCreated datePublished" datetime="2019-04-01T16:21:24+08:00">2019-04-01</time>
+              <time title="Created: 2019-04-01 16:21:24" itemprop="dateCreated datePublished" datetime="2019-04-01T16:21:24+08:00">2019-04-01</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-08 18:00:39" itemprop="dateModified" datetime="2019-05-08T18:00:39+08:00">2019-05-08</time>
               
             
           </span>
@@ -496,7 +508,7 @@
 <h2 id="问题1：激活Kubernetes时，一直停留在‘Kubernetes-is-starting…’"><a href="#问题1：激活Kubernetes时，一直停留在‘Kubernetes-is-starting…’" class="headerlink" title="问题1：激活Kubernetes时，一直停留在‘Kubernetes is starting…’"></a>问题1：激活Kubernetes时，一直停留在‘Kubernetes is starting…’</h2><ul>
 <li>根本原因：激活k8s需要自动下载google的镜像文件，但一直无法通过GW</li>
 <li>解决方法：在docker-Preferences-Proxies-Manunal Proxy Configration中，设置代理服务器为<code>host.docker.internal:1087</code>，由于国际传输速度较慢，可能需要几个小时</li>
-<li>补充说明：由于docker是运行在Mac的虚拟机上，无法直接使用Shadowsocks的默认代理设置<code>http://127.0.0.1:1087</code>，需要将localhost地址替换为Mac网卡的物理地址</li>
+<li>补充说明：由于docker是运行在Mac的虚拟机上，无法直接使用Shadowsocks的默认代理设置<code>http://127.0.0.1:1087</code>，需要将localhost地址替换为Mac网卡的物理地址，最佳建议是使用docker的内部DNS域名<code>host.docker.internal:1087</code>，以避免WIFI切换时修改物理地址</li>
 </ul>
 <h2 id="问题2："><a href="#问题2：" class="headerlink" title="问题2："></a>问题2：</h2>
       
