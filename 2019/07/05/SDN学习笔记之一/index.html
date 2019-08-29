@@ -104,28 +104,31 @@
 
 
 
-  <meta name="description" content="安装Kubernetes的最简单方法著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴械投降了，目前Kubernets已经集成到了Docker中。最简单的安装方法，就是在菜单Docker">
+  <meta name="description" content="传统的三层网络架构 特点：  每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用  汇聚层和接入层走二层交换，和核心层走三层路由  所有 OpenStack 网关配置在核心层路由器  防火墙和核心路由器直连，做一些安全策略   简化的大二层网络架构 Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：  转发路径更短。以图 7 的 Spine-Leaf（两级 Clos">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Kubernetes for Mac的安装方法和问题记录">
-<meta property="og:url" content="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/index.html">
+<meta property="og:title" content="SDN学习笔记之一">
+<meta property="og:url" content="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="安装Kubernetes的最简单方法著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴械投降了，目前Kubernets已经集成到了Docker中。最简单的安装方法，就是在菜单Docker">
+<meta property="og:description" content="传统的三层网络架构 特点：  每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用  汇聚层和接入层走二层交换，和核心层走三层路由  所有 OpenStack 网关配置在核心层路由器  防火墙和核心路由器直连，做一些安全策略   简化的大二层网络架构 Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：  转发路径更短。以图 7 的 Spine-Leaf（两级 Clos">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/k8s-install.png">
-<meta property="og:image" content="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/dash-login.png">
-<meta property="og:image" content="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/dash-main.png">
-<meta property="og:updated_time" content="2019-05-08T10:00:39.403Z">
+<meta property="og:image" content="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/core-aggregate-access.png">
+<meta property="og:image" content="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/spine-leaf.png">
+<meta property="og:image" content="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/spine-leaf-2.png">
+<meta property="og:image" content="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/SDN控制器的两种模式.png">
+<meta property="og:image" content="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/openstack-provider-network.png">
+<meta property="og:image" content="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/简化的openstack-provider-network.png">
+<meta property="og:updated_time" content="2019-08-29T09:42:56.339Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Kubernetes for Mac的安装方法和问题记录">
-<meta name="twitter:description" content="安装Kubernetes的最简单方法著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴械投降了，目前Kubernets已经集成到了Docker中。最简单的安装方法，就是在菜单Docker">
-<meta name="twitter:image" content="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/k8s-install.png">
+<meta name="twitter:title" content="SDN学习笔记之一">
+<meta name="twitter:description" content="传统的三层网络架构 特点：  每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用  汇聚层和接入层走二层交换，和核心层走三层路由  所有 OpenStack 网关配置在核心层路由器  防火墙和核心路由器直连，做一些安全策略   简化的大二层网络架构 Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：  转发路径更短。以图 7 的 Spine-Leaf（两级 Clos">
+<meta name="twitter:image" content="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/core-aggregate-access.png">
 
 
 
 
 
 
-  <link rel="canonical" href="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/">
+  <link rel="canonical" href="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/">
 
 
 
@@ -135,7 +138,7 @@
   };
 </script>
 
-  <title>Kubernetes for Mac的安装方法和问题记录 | Alex的技术博客</title>
+  <title>SDN学习笔记之一 | Alex的技术博客</title>
   
 
 
@@ -380,7 +383,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -397,7 +400,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Kubernetes for Mac的安装方法和问题记录
+          <h1 class="post-title" itemprop="name headline">SDN学习笔记之一
 
               
             
@@ -423,7 +426,7 @@
                 
               
 
-              <time title="Created: 2019-04-01 16:21:24" itemprop="dateCreated datePublished" datetime="2019-04-01T16:21:24+08:00">2019-04-01</time>
+              <time title="Created: 2019-07-05 11:38:52" itemprop="dateCreated datePublished" datetime="2019-07-05T11:38:52+08:00">2019-07-05</time>
             
 
             
@@ -440,7 +443,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-05-08 18:00:39" itemprop="dateModified" datetime="2019-05-08T18:00:39+08:00">2019-05-08</time>
+                <time title="Modified: 2019-08-29 17:42:56" itemprop="dateModified" datetime="2019-08-29T17:42:56+08:00">2019-08-29</time>
               
             
           </span>
@@ -473,44 +476,64 @@
       
 
       
-        <h2 id="安装Kubernetes的最简单方法"><a href="#安装Kubernetes的最简单方法" class="headerlink" title="安装Kubernetes的最简单方法"></a>安装Kubernetes的最简单方法</h2><p>著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。<br>docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴械投降了，目前Kubernets已经集成到了Docker中。<br>最简单的安装方法，就是在菜单Docker-Preferences-Kubernetes中，Enable即可。<br><img src="/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/k8s-install.png"><br>如果看到‘Kubernetes is running…’，就是成功加载了！！！</p>
-<h2 id="Dashboard的安装和启动"><a href="#Dashboard的安装和启动" class="headerlink" title="Dashboard的安装和启动"></a>Dashboard的安装和启动</h2><p>Kubernetes Dashboard是k8s集群的一个WEB UI管理工具。<br>代码托管在<a href="https://github.com/kubernetes/dashboard" target="_blank" rel="noopener">https://github.com/kubernetes/dashboard</a></p>
+        <h2 id="传统的三层网络架构"><a href="#传统的三层网络架构" class="headerlink" title="传统的三层网络架构"></a>传统的三层网络架构</h2><img src="/2019/07/05/SDN学习笔记之一/core-aggregate-access.png" title="传统的三层网络架构">
+<p>特点：</p>
 <ul>
-<li><p>部署并启动Dashboard组件</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml</span><br></pre></td></tr></table></figure>
+<li><p>每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用</p>
 </li>
-<li><p>启动proxy代理服务，提供外部访问Kubernetes cluster</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl proxy</span><br></pre></td></tr></table></figure>
+<li><p>汇聚层和接入层走二层交换，和核心层走三层路由</p>
 </li>
-<li><p>浏览器打开UI界面，URL地址是：<br><a href="http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/" target="_blank" rel="noopener">http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/</a></p>
+<li><p>所有 OpenStack 网关配置在核心层路由器</p>
+</li>
+<li><p>防火墙和核心路由器直连，做一些安全策略</p>
 </li>
 </ul>
-<p><strong>注意：版本v1.8.3可以跳过认证方式</strong></p>
-<h2 id="如何创建Dashboard的认证鉴权文件（基于v1-10-1版本）"><a href="#如何创建Dashboard的认证鉴权文件（基于v1-10-1版本）" class="headerlink" title="如何创建Dashboard的认证鉴权文件（基于v1.10.1版本）"></a>如何创建Dashboard的认证鉴权文件（基于v1.10.1版本）</h2><p>NOTE: apiVersion of ClusterRoleBinding resource may differ between Kubernetes versions. Prior to Kubernetes v1.8 the apiVersion was rbac.authorization.k8s.io/v1beta1.</p>
+<h2 id="简化的大二层网络架构"><a href="#简化的大二层网络架构" class="headerlink" title="简化的大二层网络架构"></a>简化的大二层网络架构</h2><img src="/2019/07/05/SDN学习笔记之一/spine-leaf.png" title="简化的大二层网络架构">
+<p>Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：</p>
 <ul>
-<li><p>创建权限文件<code>dashboard-adminuser.yaml</code></p>
-<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">admin-user</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">rbac.authorization.k8s.io/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ClusterRoleBinding</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">admin-user</span></span><br><span class="line"><span class="attr">roleRef:</span></span><br><span class="line"><span class="attr">  apiGroup:</span> <span class="string">rbac.authorization.k8s.io</span></span><br><span class="line"><span class="attr">  kind:</span> <span class="string">ClusterRole</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">cluster-admin</span></span><br><span class="line"><span class="attr">subjects:</span></span><br><span class="line"><span class="attr">- kind:</span> <span class="string">ServiceAccount</span></span><br><span class="line"><span class="attr">  name:</span> <span class="string">admin-user</span></span><br><span class="line"><span class="attr">  namespace:</span> <span class="string">kube-system</span></span><br></pre></td></tr></table></figure>
+<li><p>转发路径更短。以图 7 的 Spine-Leaf（两级 Clos 架构）为例，任何两台服务器经过三跳（Leaf1 -&gt; Spine -&gt; Leaf2）就可以到达，延迟更低，并且可保障（可以按跳数精确计算出来）。</p>
 </li>
-<li><p>执行命令脚本，以创建admin-user用户角色，并获取token</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl apply -f dashboard-adminuser.yaml</span><br><span class="line">$ kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk <span class="string">'&#123;print $1&#125;'</span>)</span><br></pre></td></tr></table></figure>
+<li><p>水平可扩展性更好，任何一层有带宽或性能瓶颈，只需新加一台设备，然后跟另一层的所有设备直连。</p>
+</li>
+<li><p>所有设备都是 active 的，一个设备挂掉之后，影响面比三层模型里挂掉一个设备小得多。</p>
 </li>
 </ul>
-<p>输出结果的示例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Name:         admin-user-token-6gl6l</span><br><span class="line">Namespace:    kube-system</span><br><span class="line">Labels:       &lt;none&gt;</span><br><span class="line">Annotations:  kubernetes.io/service-account.name=admin-user</span><br><span class="line">              kubernetes.io/service-account.uid=b16afba9-dfec-11e7-bbb9-901b0e532516</span><br><span class="line"></span><br><span class="line">Type:  kubernetes.io/service-account-token</span><br><span class="line"></span><br><span class="line">Data</span><br><span class="line">====</span><br><span class="line">ca.crt:     1025 bytes</span><br><span class="line">namespace:  11 bytes</span><br><span class="line">token:      eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhZG1pbi11c2VyLXRva2VuLTZnbDZsIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFkbWluLXVzZXIiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiJiMTZhZmJhOS1kZmVjLTExZTctYmJiOS05MDFiMGU1MzI1MTYiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06YWRtaW4tdXNlciJ9.M70CU3lbu3PP4OjhFms8PVL5pQKj-jj4RNSLA4YmQfTXpPUuxqXjiTf094_Rzr0fgN_IVX6gC4fiNUL5ynx9KU-lkPfk0HnX8scxfJNzypL039mpGt0bbe1IXKSIRaq_9VW59Xz-yBUhycYcKPO9RM2Qa1Ax29nqNVko4vLn1_1wPqJ6XSq3GYI8anTzV8Fku4jasUwjrws6Cn6_sPEGmL54sq5R4Z5afUtv-mItTmqZZdxnkRqcJLlg2Y8WbCPogErbsaCDJoABQ7ppaqHetwfM_0yMun6ABOQbIwwl8pspJhpplKwyo700OSpvTT9zlBsu-b35lzXGBRHzv5g_RA</span><br></pre></td></tr></table></figure></p>
-<ul>
-<li><p>在Dashboard的UI登陆界面中，粘贴<code>token</code>的数据字段，</p>
-<img src="/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/dash-login.png">
+<p>宿主机方面，我们升级到了 10G 和 25G 的网卡。</p>
+<h2 id="SDN的控制平面和数据平面"><a href="#SDN的控制平面和数据平面" class="headerlink" title="SDN的控制平面和数据平面"></a>SDN的控制平面和数据平面</h2><ul>
+<li>数据平面基于 VxLAN，控制平面基于 MP-BGP EVPN 协议，在设备之间同步控制平面信息。 </li>
+<li>网关是分布式的，每个 leaf 节点都是网关。</li>
+<li>VxLAN 和 MP-BGP EVPN 都是 RFC 标准协议，更多信息参考 [2]。</li>
+<li>VxLAN 的封装和解封装都在 leaf 完成，leaf 以下是 VLAN 网络，以上是 VxLAN 网络。</li>
+<li>这套方案在物理上支持真正的租户隔离。</li>
+</ul>
+<img src="/2019/07/05/SDN学习笔记之一/spine-leaf-2.png" title="大二层网络的整体架构">
+<p>图 9 是我们软件 + 硬件的网络拓扑：</p>
+<p>1）以 leaf 为边界，leaf 以下是 underlay，走 VLAN；上面 overlay，走 VxLAN</p>
+<p>2）underlay 由 neutron、OVS 和 neutron OVS agent 控制；overlay 是 CNC 控制</p>
+<p>3）Neutron 和 CNC 之间通过 plugin 集成</p>
+<h2 id="SDN控制器的两种模式"><a href="#SDN控制器的两种模式" class="headerlink" title="SDN控制器的两种模式"></a>SDN控制器的两种模式</h2><img src="/2019/07/05/SDN学习笔记之一/SDN控制器的两种模式.png" title="SDN控制器的两种工作模式对比">
+<p>从控制器是否参与转发设备的的转发控制来看，当前主要有两种控制器类型:</p>
+<h3 id="弱控制模式"><a href="#弱控制模式" class="headerlink" title="弱控制模式"></a>弱控制模式</h3><ul>
+<li><p>弱控制模式下，控制平面基于网络设备自学习，控制器不在转发平面，仅负责配 置下发，实现自动部署。主要解决网络虚拟化，提供适应应用的虚拟网络。</p>
 </li>
-<li><p>成功展示UI！！！</p>
-<img src="/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/dash-main.png">
+<li><p>弱控制模式的优点是转发控制面下移，减轻和减少对控制器的依赖。</p>
 </li>
 </ul>
+<h3 id="强控制模式"><a href="#强控制模式" class="headerlink" title="强控制模式"></a>强控制模式</h3><ul>
+<li><p>在强控制模式下，控制器负责整个网络的集中控制，体现SDN集中管理的优势。</p>
+</li>
+<li><p>基于openflow的强控制使得网络具备更多的灵活性和可编程性。除了能够给用 户提供适合应用需要的网络，还可以集成FW等提供安全方案;可以支持混合 Overlay 模型，通过控制器同步主机和拓扑信息, 将各种异构的转发模型同一处理;可以提供基于 openflow 的服务链功能对安全服务进行编排，可以提供更为灵活的网络诊断手段，如虚机仿真和雷达探测等。</p>
+</li>
+</ul>
+<p>用户可能会担心强控制模式下控制器全部故障对网络转发功能的影响，这个影响因素可以通过下述两点来降低和消除:</p>
+<ol>
+<li>通过控制器集群增加控制器可靠性，避免单点故障</li>
+<li>逃生机制:设备与所有控制器失联后，切换为自转模式，业务不受影响。</li>
+</ol>
 <hr>
-<h2 id="问题1：激活Kubernetes时，一直停留在‘Kubernetes-is-starting…’"><a href="#问题1：激活Kubernetes时，一直停留在‘Kubernetes-is-starting…’" class="headerlink" title="问题1：激活Kubernetes时，一直停留在‘Kubernetes is starting…’"></a>问题1：激活Kubernetes时，一直停留在‘Kubernetes is starting…’</h2><ul>
-<li>根本原因：激活k8s需要自动下载google的镜像文件，但一直无法通过GW</li>
-<li>解决方法：在docker-Preferences-Proxies-Manunal Proxy Configration中，设置代理服务器为<code>host.docker.internal:1087</code>，由于国际传输速度较慢，可能需要几个小时</li>
-<li>补充说明：由于docker是运行在Mac的虚拟机上，无法直接使用Shadowsocks的默认代理设置<code>http://127.0.0.1:1087</code>，需要将localhost地址替换为Mac网卡的物理地址，最佳建议是使用docker的内部DNS域名<code>host.docker.internal:1087</code>，以避免WIFI切换时修改物理地址</li>
-</ul>
-<h2 id="问题2："><a href="#问题2：" class="headerlink" title="问题2："></a>问题2：</h2>
+<h2 id="附录1-标准的openstack-provider-network"><a href="#附录1-标准的openstack-provider-network" class="headerlink" title="附录1:标准的openstack-provider-network"></a>附录1:标准的openstack-provider-network</h2><img src="/2019/07/05/SDN学习笔记之一/openstack-provider-network.png" title="标准的Openstack Provider Network的整体架构">
+<h2 id="附录2-简化的openstack-provider-network"><a href="#附录2-简化的openstack-provider-network" class="headerlink" title="附录2:简化的openstack-provider-network"></a>附录2:简化的openstack-provider-network</h2><img src="/2019/07/05/SDN学习笔记之一/简化的openstack-provider-network.png" title="简化的Openstack Provider Network的整体架构">
+
       
     </div>
 
@@ -540,8 +563,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/04/01/Kubernetes的基本组件/" rel="next" title="Kubernetes的基本组件">
-                <i class="fa fa-chevron-left"></i> Kubernetes的基本组件
+              <a href="/2019/05/28/又搬家了/" rel="next" title="又搬家了">
+                <i class="fa fa-chevron-left"></i> 又搬家了
               </a>
             
           </div>
@@ -550,8 +573,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/05/04/ECS遭遇安全攻击的一次经历/" rel="prev" title="ECS遭遇安全攻击的一次经历">
-                ECS遭遇安全攻击的一次经历 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/08/29/国密标准的简介/" rel="prev" title="国密标准的简介">
+                国密标准的简介 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -701,7 +724,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Kubernetes的最简单方法"><span class="nav-number">1.</span> <span class="nav-text">安装Kubernetes的最简单方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dashboard的安装和启动"><span class="nav-number">2.</span> <span class="nav-text">Dashboard的安装和启动</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何创建Dashboard的认证鉴权文件（基于v1-10-1版本）"><span class="nav-number">3.</span> <span class="nav-text">如何创建Dashboard的认证鉴权文件（基于v1.10.1版本）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题1：激活Kubernetes时，一直停留在‘Kubernetes-is-starting…’"><span class="nav-number">4.</span> <span class="nav-text">问题1：激活Kubernetes时，一直停留在‘Kubernetes is starting…’</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题2："><span class="nav-number">5.</span> <span class="nav-text">问题2：</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#传统的三层网络架构"><span class="nav-number">1.</span> <span class="nav-text">传统的三层网络架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简化的大二层网络架构"><span class="nav-number">2.</span> <span class="nav-text">简化的大二层网络架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDN的控制平面和数据平面"><span class="nav-number">3.</span> <span class="nav-text">SDN的控制平面和数据平面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDN控制器的两种模式"><span class="nav-number">4.</span> <span class="nav-text">SDN控制器的两种模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#弱控制模式"><span class="nav-number">4.1.</span> <span class="nav-text">弱控制模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#强控制模式"><span class="nav-number">4.2.</span> <span class="nav-text">强控制模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录1-标准的openstack-provider-network"><span class="nav-number">5.</span> <span class="nav-text">附录1:标准的openstack-provider-network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录2-简化的openstack-provider-network"><span class="nav-number">6.</span> <span class="nav-text">附录2:简化的openstack-provider-network</span></a></li></ol></div>
             
 
           </div>
