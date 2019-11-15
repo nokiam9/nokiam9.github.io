@@ -104,20 +104,24 @@
 
 
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Alex的技术博客">
-<meta property="og:url" content="https://blog.caogo.cn/archives/2019/05/index.html">
+  <meta name="description" content="Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。  配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。 分析该脚本文件可以发现其基本步骤是：  下载Mongo数据库的代码，并以免鉴权方式启动。 如果OS设置了环境变量MONGO_INITDB_ROOT_US">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mongo数据库设置鉴权登录的方法">
+<meta property="og:url" content="https://blog.caogo.cn/2019/11/15/Mongo数据库设置鉴权登录的方法/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。  配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。 分析该脚本文件可以发现其基本步骤是：  下载Mongo数据库的代码，并以免鉴权方式启动。 如果OS设置了环境变量MONGO_INITDB_ROOT_US">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-11-15T10:17:14.552Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Alex的技术博客">
+<meta name="twitter:title" content="Mongo数据库设置鉴权登录的方法">
+<meta name="twitter:description" content="Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。  配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。 分析该脚本文件可以发现其基本步骤是：  下载Mongo数据库的代码，并以免鉴权方式启动。 如果OS设置了环境变量MONGO_INITDB_ROOT_US">
 
 
 
 
 
 
-  <link rel="canonical" href="https://blog.caogo.cn/archives/2019/05/">
+  <link rel="canonical" href="https://blog.caogo.cn/2019/11/15/Mongo数据库设置鉴权登录的方法/">
 
 
 
@@ -127,7 +131,7 @@
   };
 </script>
 
-  <title>Archive | Alex的技术博客</title>
+  <title>Mongo数据库设置鉴权登录的方法 | Alex的技术博客</title>
   
 
 
@@ -175,7 +179,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
@@ -281,7 +285,7 @@
         
         
           
-          <li class="menu-item menu-item-archives menu-item-active">
+          <li class="menu-item menu-item-archives">
 
     
     
@@ -310,28 +314,6 @@
 
   
     
-
-    
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-    
-
-  
-
 
   
 
@@ -378,148 +360,215 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
+  <div id="posts" class="posts-expand">
+    
 
-      
-      <span class="archive-page-counter">
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/11/15/Mongo数据库设置鉴权登录的方法/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
         
         
+          <h1 class="post-title" itemprop="name headline">Mongo数据库设置鉴权登录的方法
+
+              
+            
+          </h1>
         
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-11-15 16:57:17 / Modified: 18:17:14" itemprop="dateCreated datePublished" datetime="2019-11-15T16:57:17+08:00">2019-11-15</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
           
-        
-        Um..! 15 posts in total. Keep on posting.
-      </span>
-      
 
-      
-
-        
-        
-        
-
-        
           
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2019">2019</h1>
-          </div>
-        
-        
+            
+          
 
-        
+          
+          
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
+          
 
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/05/28/又搬家了/" itemprop="url">
-              
-                <span itemprop="name">又搬家了</span>
-              
-            </a>
-        
-      </h2>
+          
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-05-28T09:12:08+08:00" content="2019-05-28">
-          05-28
-        </time>
-      </div>
+          
 
-    </header>
-  </article>
+        </div>
+      </header>
+    
 
-
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/05/04/为ECS设置ssh密钥登录的方法/" itemprop="url">
-              
-                <span itemprop="name">为ECS设置ssh密钥登录的方法</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-05-04T20:11:55+08:00" content="2019-05-04">
-          05-04
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
 
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2019/05/04/ECS遭遇安全攻击的一次经历/" itemprop="url">
-              
-                <span itemprop="name">ECS遭遇安全攻击的一次经历</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2019-05-04T20:11:03+08:00" content="2019-05-04">
-          05-04
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+      
+        <p>Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。 </p>
+<h1 id="配置初始化用户和口令"><a href="#配置初始化用户和口令" class="headerlink" title="配置初始化用户和口令"></a>配置初始化用户和口令</h1><p>以<a href="https://github.com/docker-library/mongo/tree/master/3.6" target="_blank" rel="noopener">mongo:3.6镜像文件</a>为例，启动命令是<code>/usr/local/bin/docker-entrypoint.sh</code>。</p>
+<p>分析该脚本文件可以发现其基本步骤是：</p>
+<ol>
+<li>下载Mongo数据库的代码，并以免鉴权方式启动。</li>
+<li>如果OS设置了环境变量<code>MONGO_INITDB_ROOT_USERNAME</code>和<code>MONGO_INITDB_ROOT_PASSWORD</code>，则新建数据库用户并设置权限规则。<br> 注意：mongo初始化用户的角色级别为root，需要授权创建和修改database。</li>
+<li>重新启动数据库。 </li>
+</ol>
+<h1 id="以鉴权方式连接Mongo"><a href="#以鉴权方式连接Mongo" class="headerlink" title="以鉴权方式连接Mongo"></a>以鉴权方式连接Mongo</h1><ul>
+<li><p>以mongo shell为例，在命令行中带入用户名和密码，就可以以鉴权方式登录了。</p>
+  <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> mongo -u username -p password --authenticationDatabase admin</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>如果采用pymong登录，示例代码为：</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">from</span> pymongo <span class="keyword">import</span> MongoClient</span><br><span class="line"></span><br><span class="line">uri = <span class="string">"mongodb://username:password@localhost:27017"</span></span><br><span class="line">client = MongoClient(uri)</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="comment"># Test with this ismaster command is cheap and does not require auth.</span></span><br><span class="line">    client.admin.command(<span class="string">'ismaster'</span>)</span><br><span class="line">    logger.info(<span class="string">u"Connected to MongoDB, uri=&#123;0&#125;."</span>.format(uri))</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">    logger.error(<span class="string">u"Connect MongoDB sever failed and abort now! uri=&#123;0&#125;."</span>.format(uri))</span><br><span class="line">    <span class="keyword">raise</span> SyntaxError</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<h1 id="关于flask-mongoengine的疑难问题"><a href="#关于flask-mongoengine的疑难问题" class="headerlink" title="关于flask-mongoengine的疑难问题"></a>关于flask-mongoengine的疑难问题</h1><h2 id="现象描述"><a href="#现象描述" class="headerlink" title="现象描述"></a>现象描述</h2><p>调用<code>flask-mongoengine</code>连接mongo，采用URI方式配置参数一直报各类鉴权错误</p>
+<h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><p>根本原因是flask-mongoengine对pymongo的封装存在bug，请看如下技术文档：</p>
+<p><a href="http://docs.mongoengine.org/guide/connecting.html" target="_blank" rel="noopener">MongoEngine关于connect的规定</a> ：</p>
+<blockquote>
+<ul>
+<li>If the database requires authentication, username, password and authentication_source arguments should be provided.</li>
+<li>Database, username and password from URI string overrides corresponding parameters in connect().</li>
+</ul>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> mongoengine <span class="keyword">import</span> connect</span><br><span class="line"></span><br><span class="line">connect(</span><br><span class="line">    db=<span class="string">'test'</span>,</span><br><span class="line">    username=<span class="string">'user'</span>,</span><br><span class="line">    password=<span class="string">'12345'</span>,</span><br><span class="line">    host=<span class="string">'mongodb://admin:qwerty@localhost/production'</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p><a href="https://mongoengine-odm.readthedocs.io/guide/connecting.html" target="_blank" rel="noopener">Flask Mongoengine关于connect的规定</a>:  </p>
+<blockquote>
+<ul>
+<li>Uri style connections are also supported, just supply the uri as the host in the ‘MONGODB_SETTINGS’ dictionary with app.config.</li>
+<li>Note that database name from uri has priority over name.</li>
+</ul>
+</blockquote>
+<h2 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h2><ol>
+<li>在使用Mongoengine方式连接Mongo数据库时，不要采用URI方式，而是单独设置每个参数;</li>
+<li>启用鉴权方式时，必须显式包含username、password、authentication_source。</li>
+</ol>
+<p>示例代码如下：</p>
+<ul>
+<li><p>在配置文件<code>settings.py</code>中设置Mongo的配置参数：</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">MONGODB_SETTINGS = &#123;</span><br><span class="line">    <span class="string">'db'</span>: <span class="string">'cmccb2b'</span>,</span><br><span class="line">    <span class="string">'username'</span>: os.getenv(<span class="string">'MONGODB_USERNAME'</span>),</span><br><span class="line">    <span class="string">'password'</span>: os.getenv(<span class="string">'MONGODB_PASSWORD'</span>),</span><br><span class="line">    <span class="string">'host'</span>: os.getenv(<span class="string">'MONGODB_HOST'</span>),</span><br><span class="line">    <span class="string">'port'</span>: int(os.getenv(<span class="string">'MONGODB_PORT'</span>)),</span><br><span class="line">    <span class="string">'connect'</span>: <span class="keyword">False</span>,  <span class="comment"># set for pymongo bug fix</span></span><br><span class="line">    <span class="string">'authentication_source'</span>: <span class="string">'admin'</span>, <span class="comment"># set authentication source database， default is MONGODB_NAME</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在主入口<code>main.py</code>中启动flask：</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask</span><br><span class="line"><span class="keyword">from</span> flask_mongoengine <span class="keyword">import</span> MongoEngine</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化app，原型在flask，并从settings.py中提取自定义的类属性，包括MongoDB配置，debug配置等</span></span><br><span class="line">app = Flask(__name__,</span><br><span class="line">            static_folder=<span class="string">'static'</span>,</span><br><span class="line">            template_folder=<span class="string">'templates'</span>)</span><br><span class="line">app.config.from_pyfile(filename=<span class="string">'settings.py'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化数据库连接db</span></span><br><span class="line">db = MongoEngine()  </span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接flask和mongoengine，注意db在models.py中初始化，参数设置已经从app.config中加载</span></span><br><span class="line">db.init_app(app)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>相关示范案例，请参见<a href="https://www.techcoil.com/blog/how-to-enable-authenticated-mongodb-access-for-flask-mongoengine-applications/" target="_blank" rel="noopener">Mongo配置鉴权方式的经验</a>  </p>
+</li>
+</ul>
 
       
-
     </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/29/国密标准的简介/" rel="next" title="国密标准的简介">
+                <i class="fa fa-chevron-left"></i> 国密标准的简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+  </div>
 
 
           </div>
           
+
+  
+
+
 
         </div>
         
@@ -540,8 +589,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -625,6 +683,22 @@
         </div>
       </div>
 
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#配置初始化用户和口令"><span class="nav-number">1.</span> <span class="nav-text">配置初始化用户和口令</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#以鉴权方式连接Mongo"><span class="nav-number">2.</span> <span class="nav-text">以鉴权方式连接Mongo</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#关于flask-mongoengine的疑难问题"><span class="nav-number">3.</span> <span class="nav-text">关于flask-mongoengine的疑难问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#现象描述"><span class="nav-number">3.1.</span> <span class="nav-text">现象描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原因分析"><span class="nav-number">3.2.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方法"><span class="nav-number">3.3.</span> <span class="nav-text">解决方法</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
       
 
       
@@ -753,6 +827,10 @@
   
 
   
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
 
   
 
