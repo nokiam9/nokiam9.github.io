@@ -6,17 +6,18 @@ tags:
 
 Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。 
 
-# 配置初始化用户和口令
+## 配置初始化用户和口令
 
 以[mongo:3.6镜像文件](https://github.com/docker-library/mongo/tree/master/3.6)为例，启动命令是`/usr/local/bin/docker-entrypoint.sh`。
 
 分析该脚本文件可以发现其基本步骤是：
+
 1. 下载Mongo数据库的代码，并以免鉴权方式启动。
 2. 如果OS设置了环境变量`MONGO_INITDB_ROOT_USERNAME`和`MONGO_INITDB_ROOT_PASSWORD`，则新建数据库用户并设置权限规则。 
     注意：mongo初始化用户的角色级别为root，需要授权创建和修改database。
 3. 重新启动数据库。 
 
-# 以鉴权方式连接Mongo
+## 以鉴权方式连接Mongo
 
 - 以mongo shell为例，在命令行中带入用户名和密码，就可以以鉴权方式登录了。
 
@@ -25,6 +26,7 @@ Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有
     ```
 
 - 如果采用pymong登录，示例代码为：
+  
     ``` python
     import logging
     from pymongo import MongoClient
@@ -42,14 +44,23 @@ Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有
     ```
 
 ---
-# 关于flask-mongoengine的疑难问题
+
+## 关于flask-mongoengine的疑难问题
 
 ## 现象描述
+
 调用`flask-mongoengine`连接mongo，采用URI方式配置参数一直报各类鉴权错误
 
 ## 原因分析
 
-根本原因是flask-mongoengine对pymongo的封装存在bug，请看如下技术文档：
+根本原因是flask-pymongo的封装存在bug，其规则是：
+
+- MONGO_DBNAME如果没有设置的话，用于验证的数据库就会被设置成app.name。
+- 如果设置了MONGO_DBNAME，用于验证和连接的数据库都会变成MONGO_DBNAME。
+
+所以经过分析，我们可以不使用MONGO_DBNAME，然后让DBNAME通过app.name来进行设置。
+
+请看如下技术文档：
 
 [MongoEngine关于connect的规定](http://docs.mongoengine.org/guide/connecting.html) ：
 
@@ -94,6 +105,7 @@ connect(
         'authentication_source': 'admin', # set authentication source database， default is MONGODB_NAME
     }
     ```
+
 - 在主入口`main.py`中启动flask：
 
     ``` python  
@@ -113,4 +125,5 @@ connect(
     db.init_app(app)
     ```
 
-- 相关示范案例，请参见[Mongo配置鉴权方式的经验](https://www.techcoil.com/blog/how-to-enable-authenticated-mongodb-access-for-flask-mongoengine-applications/)  
+- 相关示范案例，请参见[Mongo配置鉴权方式的经验](https://www.techcoil.com/blog/how-to-enable-authenticated-mongodb-access-for-flask-mongoengine-applications/)
+- [Flask-Pymongo登陆验证问题小记](https://nladuo.github.io/2018/10/25/Flask-Pymongo%E7%99%BB%E9%99%86%E9%AA%8C%E8%AF%81%E9%97%AE%E9%A2%98%E5%B0%8F%E8%AE%B0/) 
