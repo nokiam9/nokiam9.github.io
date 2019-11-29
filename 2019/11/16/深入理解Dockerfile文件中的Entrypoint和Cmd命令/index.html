@@ -104,20 +104,24 @@
 
 
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Alex的技术博客">
-<meta property="og:url" content="https://blog.caogo.cn/archives/2018/12/index.html">
+  <meta name="description" content="CMD链接  主要目的  提供默认的命令 提供默认的参数，与ENTRYPOINT协同作用 如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT 该方式的命令，会被docker run image cmd arg1 arg2命令行方式覆盖 dockerfile 中最后一个CMD参数才会生效   格式   exec form(推荐的方式): CMD [&amp;quot;executable">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解Dockerfile文件中的Entrypoint和Cmd命令">
+<meta property="og:url" content="https://blog.caogo.cn/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="CMD链接  主要目的  提供默认的命令 提供默认的参数，与ENTRYPOINT协同作用 如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT 该方式的命令，会被docker run image cmd arg1 arg2命令行方式覆盖 dockerfile 中最后一个CMD参数才会生效   格式   exec form(推荐的方式): CMD [&amp;quot;executable">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-11-29T10:52:56.662Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Alex的技术博客">
+<meta name="twitter:title" content="深入理解Dockerfile文件中的Entrypoint和Cmd命令">
+<meta name="twitter:description" content="CMD链接  主要目的  提供默认的命令 提供默认的参数，与ENTRYPOINT协同作用 如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT 该方式的命令，会被docker run image cmd arg1 arg2命令行方式覆盖 dockerfile 中最后一个CMD参数才会生效   格式   exec form(推荐的方式): CMD [&amp;quot;executable">
 
 
 
 
 
 
-  <link rel="canonical" href="https://blog.caogo.cn/archives/2018/12/">
+  <link rel="canonical" href="https://blog.caogo.cn/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/">
 
 
 
@@ -127,7 +131,7 @@
   };
 </script>
 
-  <title>Archive | Alex的技术博客</title>
+  <title>深入理解Dockerfile文件中的Entrypoint和Cmd命令 | Alex的技术博客</title>
   
 
 
@@ -175,7 +179,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
@@ -281,7 +285,7 @@
         
         
           
-          <li class="menu-item menu-item-archives menu-item-active">
+          <li class="menu-item menu-item-archives">
 
     
     
@@ -310,28 +314,6 @@
 
   
     
-
-    
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-      
-      
-    
-    
-
-  
-
 
   
 
@@ -378,218 +360,211 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
+  <div id="posts" class="posts-expand">
+    
 
-      
-      <span class="archive-page-counter">
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
         
         
+          <h1 class="post-title" itemprop="name headline">深入理解Dockerfile文件中的Entrypoint和Cmd命令
+
+              
+            
+          </h1>
         
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-11-16 15:50:06" itemprop="dateCreated datePublished" datetime="2019-11-16T15:50:06+08:00">2019-11-16</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-11-29 18:52:56" itemprop="dateModified" datetime="2019-11-29T18:52:56+08:00">2019-11-29</time>
+              
+            
+          </span>
+
           
-        
-        Um..! 18 posts in total. Keep on posting.
-      </span>
-      
 
-      
-
-        
-        
-        
-
-        
           
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2018">2018</h1>
-          </div>
-        
-        
+            
+          
 
-        
+          
+          
 
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
+          
 
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/12/24/HEXO设置About-Categories-Tags页面的方法/" itemprop="url">
-              
-                <span itemprop="name">HEXO设置About, Categories, Tags页面的方法</span>
-              
-            </a>
-        
-      </h2>
+          
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-12-24T13:16:16+08:00" content="2018-12-24">
-          12-24
-        </time>
-      </div>
+          
 
-    </header>
-  </article>
+        </div>
+      </header>
+    
 
-
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/12/23/今天晚上忘了吃药/" itemprop="url">
-              
-                <span itemprop="name">今天晚上忘了吃药</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-12-23T21:35:41+08:00" content="2018-12-23">
-          12-23
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
       
 
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/12/23/发布blog的操作步骤/" itemprop="url">
-              
-                <span itemprop="name">发布blog的操作步骤</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-12-23T21:13:09+08:00" content="2018-12-23">
-          12-23
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
+      
+        <h2 id="CMD"><a href="#CMD" class="headerlink" title="CMD"></a>CMD</h2><p><a href="https://docs.docker.com/engine/reference/builder/#cmd" target="_blank" rel="noopener">链接</a></p>
+<ol>
+<li><p>主要目的</p>
+<ul>
+<li>提供默认的命令</li>
+<li>提供默认的参数，与ENTRYPOINT协同作用</li>
+<li>如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT</li>
+<li>该方式的命令，会被<code>docker run image cmd arg1 arg2</code>命令行方式覆盖</li>
+<li>dockerfile 中最后一个CMD参数才会生效</li>
+</ul>
+</li>
+<li><p>格式</p>
+</li>
+</ol>
+<p>exec form(推荐的方式): <code>CMD [&quot;executable&quot;,&quot;param1&quot;,&quot;param2&quot;]</code><br>最终会被解析成json array， 必须有双引号<br>不提供shell环境，[“echo”, “$HOME”], HOME不会像shell一样解析<br>executable 要使用绝对路径<br>default parameters to ENTRYPOINT: CMD [“param1”,”param2”]<br>shell form: CMD command param1 param2 (shell form) 最好不要用<br>命令解析成： <code>/bin/sh -c command param1 param2</code></p>
+<h2 id="ENTRYPOINT"><a href="#ENTRYPOINT" class="headerlink" title="ENTRYPOINT"></a>ENTRYPOINT</h2><p><a href="https://docs.docker.com/engine/reference/builder/#entrypoint" target="_blank" rel="noopener">链接</a></p>
+<ol>
+<li><p>主要目的</p>
+<ul>
+<li>将镜像作为一个可执行文件，就像命令一样启动，无须指定命令：docker run -i -t –rm -p 80:80 nginx</li>
+<li>ENTRYPOINT 命令参数的来源：<br>dockerfile 中CMD的参数<br>docker run命令行后面的参数列表。如<code>docker run &lt;image&gt; -d -c</code>, -d -c 将作为参数会给entrypoint。<br>一般镜像都是以CMD多于ENTRYPOINT: 因为用cmd，docker run image cmd arg1 arg2, 可以很方便覆盖默认的命令，如果镜像是以ENTRYPOINT做为最终的执行命令，必须用 –entrypoint cmd 。 eg: d run –entrypoint /bin/sh -it xxx_image -c “echo hello”<br>dockerfile 中最后一个ENTRYPOINT才会生效</li>
+</ul>
+</li>
+<li><p>格式</p>
+<p> exec form(推荐方式): ENTRYPOINT [“executable”, “param1”, “param2”]<br> shell form: ENTRYPOINT command param1 param2<br> 以/bin/sh -c 的形式运行命令<br> 会忽略signal信号，docker stop 无法停止<br> 坑较多，不要用<br> ENTRYPOINT vs CMD</p>
+<p> <a href="https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact" target="_blank" rel="noopener">asd</a></p>
+</li>
+</ol>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>用最简单的方式 CMD [“cmd”, “arg1”, “arg2”]<br>其他方式坑太多，细节太多</p>
 
       
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/12/23/冬至在兰州/" itemprop="url">
-              
-                <span itemprop="name">冬至在兰州</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-12-23T17:34:33+08:00" content="2018-12-23">
-          12-23
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
-        
-        
-        
-
-        
-        
-
-        
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <h2 class="post-title">
-        
-            <a class="post-title-link" href="/2018/12/21/hello-world/" itemprop="url">
-              
-                <span itemprop="name">Hello World</span>
-              
-            </a>
-        
-      </h2>
-
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2018-12-21T17:34:33+08:00" content="2018-12-21">
-          12-21
-        </time>
-      </div>
-
-    </header>
-  </article>
-
-
-
-      
-
     </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/15/Mongo数据库设置鉴权登录的方法/" rel="next" title="Mongo数据库设置鉴权登录的方法">
+                <i class="fa fa-chevron-left"></i> Mongo数据库设置鉴权登录的方法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/29/基于区块链的三种开源技术平台/" rel="prev" title="基于区块链的三种开源技术平台">
+                基于区块链的三种开源技术平台 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+  </div>
 
 
           </div>
           
+
+  
+
+
 
         </div>
         
@@ -610,8 +585,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <div class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
@@ -695,6 +679,22 @@
         </div>
       </div>
 
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#CMD"><span class="nav-number">1.</span> <span class="nav-text">CMD</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ENTRYPOINT"><span class="nav-number">2.</span> <span class="nav-text">ENTRYPOINT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结论"><span class="nav-number">3.</span> <span class="nav-text">结论</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
       
 
       
@@ -823,6 +823,10 @@
   
 
   
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
 
   
 

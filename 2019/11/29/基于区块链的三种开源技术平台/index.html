@@ -113,7 +113,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://blog.caogo.cn/2019/11/29/基于区块链的三种开源技术平台/640.jpeg">
 <meta property="og:image" content="https://blog.caogo.cn/2019/11/29/基于区块链的三种开源技术平台/libra.jpg">
-<meta property="og:updated_time" content="2019-11-29T10:52:29.510Z">
+<meta property="og:updated_time" content="2019-11-29T11:01:44.394Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于区块链的三种开源技术平台">
 <meta name="twitter:description" content="区块链的本质是DLT，即分布式账本技术（Distributed Ledger Technologies），目前比较活跃的有三个开源软件框架，分别是Hyperledger Fabric、R3 Corda、Ethereum（分别简称为 Fabric、Corda、以太坊）。 三种不同的框架在可能的应用领域上分别具有完全不同的想法，其中：  Corda 的用例来自于金融服务行业，这也是 Corda 可见的">
@@ -422,7 +422,7 @@
                 
               
 
-              <time title="Created: 2019-11-29 14:14:48 / Modified: 18:52:29" itemprop="dateCreated datePublished" datetime="2019-11-29T14:14:48+08:00">2019-11-29</time>
+              <time title="Created: 2019-11-29 14:14:48 / Modified: 19:01:44" itemprop="dateCreated datePublished" datetime="2019-11-29T14:14:48+08:00">2019-11-29</time>
             
 
             
@@ -475,7 +475,7 @@
 <li><strong>无授权模式</strong>（permissionless）：交易的参与者无需授权，网络中的任何实体都可以参与交易，并获得全量账本。<br>  作为公共区块链的以太坊采用无授权模式。</li>
 <li><strong>有授权模式</strong>（permissioned）：交易的参与者是网络中少数预先选择（授权）的节点，并且仅限于这些参与者维护全量账本，而绝大多数最终用户只能作为Client，以代理或网关方式通过某些特定的授权节点参与交易。<br>  Fabric和 Corda都属于有授权模式。</li>
 </ul>
-<h3 id="Fabric"><a href="#Fabric" class="headerlink" title="Fabric"></a>Fabric</h3><p>与Fabric v0.6相比，v1.0的运行模式有了巨大变化，几乎彻底改变了<strong>去中心化</strong>的方向，最新的v1.4的节点定义为：</p>
+<h3 id="Fabric"><a href="#Fabric" class="headerlink" title="Fabric"></a>Fabric</h3><p>与Fabric v0.6相比，v1.0的运行模式有了巨大变化，可以称之为”<strong>伪去中心化</strong>”，最新的v1.4的节点定义为：</p>
 <ul>
 <li>客户节点（Client）：客户节点代表最终用户，创建并调用交易。他们与对等节点和订购节点沟通。</li>
 <li>对等节点（Peer）：对等节点维护账本，并接收订购节点订购的更新消息，以向账本提交新的交易。其中，背书节点（Endorser）是一类特殊的对等节点，任务是通过检查自身是否满足一些必要的和充分的条件（例如提供所需的签名），对交易提供背书。</li>
@@ -503,6 +503,9 @@
 <p>但由于涉及多个互不信任的订购节点，在传递消息时也可能会出现错误，因此仍然必须引入一致性算法，使得在出现故障（例如，消息顺序不一致）时可以达成一致，从而使分布式账本的复制过程支持容错。</p>
 <p>Fabric所采用的算法是“<strong>可插入的</strong>”，即可以根据特定应用的需求而使用各种算法，不再仅仅局限于基于<strong>PoW</strong>或其它衍生物的挖矿。例如，为了处理如上所述的随机或恶意复制错误，我们可以使用<strong>拜占庭式容错</strong>（BFT）的一种变体算法。</p>
 <p>不同于以太坊，Fabric运行在授权模式下，只有参与交易的节点（Peer &amp; Orderer）才必须要达成共识，因此性能上有了明显提高。此外，由于通道划分了消息流，这意味着Client只能看到它们连接通道中的消息及相关联的交易，而不知道其它通道的情况，因此可为记录提供更细粒度的访问控制，从而增强了隐私。</p>
+<blockquote>
+<p>目前Orderer是用一个中心化的Kafka cluster来做的，所以这里也没有拜占庭容错共识了！但是IBM说，这个地方是留给你自己开发BFT接口的，或者，你付钱给我来开发？？？</p>
+</blockquote>
 <h3 id="Corda"><a href="#Corda" class="headerlink" title="Corda"></a>Corda</h3><p>类似于 Fabric，Corda 的共识也是在交易层面达成的，仅涉及交易的各方。交易取决于共识是满足<strong>交易合法性</strong>（validity），还是<strong>交易唯一性</strong>（uniqueness）。</p>
 <p>交易合法性通过运行与交易相关联的智能合约代码（智能合约将在下文给出详细介绍），检查需要的所有签名，并确保所引用的任何交易也是有效的。  </p>
 <p>交易唯一性涉及交易的输入状态。具体而言，必须确保有疑问的交易是所有输入状态的唯一消费者。换句话说，不存在任何消耗同一状态的其它交易。这是为了避免产生双重支付。</p>
@@ -553,8 +556,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/11/15/Mongo数据库设置鉴权登录的方法/" rel="next" title="Mongo数据库设置鉴权登录的方法">
-                <i class="fa fa-chevron-left"></i> Mongo数据库设置鉴权登录的方法
+              <a href="/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/" rel="next" title="深入理解Dockerfile文件中的Entrypoint和Cmd命令">
+                <i class="fa fa-chevron-left"></i> 深入理解Dockerfile文件中的Entrypoint和Cmd命令
               </a>
             
           </div>
@@ -631,7 +634,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-count">18</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
