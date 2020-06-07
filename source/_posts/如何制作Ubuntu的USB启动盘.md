@@ -63,13 +63,13 @@ tags:
 制作过Ubuntu iso的U盘会变成只有几M的空间，格式化也没有用，原因是Etcher修改了硬盘分区表。
 解决办法是，在Windows下搜索运行`diskpart`软件，参考命令行是：
 
-```
-DISKPART> list disk
-DISKPART> select disk 2 （具体选1还是2要根据实际情况，小心操作！！）
-DISKPART> clean
-DISKPART> create partition primary
-DISKPART> exit
-```
+    ``` cmd
+    DISKPART> list disk
+    DISKPART> select disk 2 （具体选1还是2要根据实际情况，小心操作！！）
+    DISKPART> clean
+    DISKPART> create partition primary
+    DISKPART> exit
+    ```
 
 ## 参考资料
 
