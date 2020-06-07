@@ -32,9 +32,6 @@ tags:
 
 ## Step 2：格式化U盘
 
->
-    准备一个U盘，并确保至少有4G空间
-
 - 在Mac中打开`应用->其它->磁盘工具`
 - 选择U盘，然后擦除。***千万别选错了Mac的硬盘啊！！***
 - 选择格式: MS-DOS (FAT)，并执行“擦除”
@@ -42,8 +39,8 @@ tags:
 ## Step 3: 下载并安装Etcher工具
 
 >
-    Ether是Balena公司提供的USB启动盘制作工具
-    Ether是开源软件，最大的优点是可以跨平台使用
+    用于格式化和创建可引导USB闪存盘的工具主要有：Etcher 和 Rufus
+    Ether是Balena公司提供的开源软件，最大的优点是可以跨平台使用
 
 - Browser打开[Ether下载页面](https://www.balena.io/etcher/)，选择mac版本并下载
 - 打开DMG文件，并根据提示信息完成安装，过程中可能出现需要允许安装第三方软件的告警提示
@@ -78,4 +75,3 @@ tags:
 - [制作启动USB盘的Ubuntu官方教程](https://tutorials.ubuntu.com/tutorial/tutorial-create-a-usb-stick-on-macos)
 - [Windows如何制作Ubuntu系统的USB启动盘](http://www.eguidedog.net/doc/doc-create-usb-stick-on-windows.php)
 - [Etcher的Github地址](`https://github.com/balena-io/etcher`)
-- [Rufus](https://rufus.ie)也是一个类似的工具，用于帮助格式化和创建可引导USB闪存盘。
