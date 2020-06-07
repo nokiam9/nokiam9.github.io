@@ -4,7 +4,7 @@ date: 2019-11-15 16:57:17
 tags:
 ---
 
-Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。 
+Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。
 
 ## 配置初始化用户和口令
 
@@ -13,9 +13,9 @@ Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有
 分析该脚本文件可以发现其基本步骤是：
 
 1. 下载Mongo数据库的代码，并以免鉴权方式启动。
-2. 如果OS设置了环境变量`MONGO_INITDB_ROOT_USERNAME`和`MONGO_INITDB_ROOT_PASSWORD`，则新建数据库用户并设置权限规则。 
+2. 如果OS设置了环境变量`MONGO_INITDB_ROOT_USERNAME`和`MONGO_INITDB_ROOT_PASSWORD`，则新建数据库用户并设置权限规则。
     注意：mongo初始化用户的角色级别为root，需要授权创建和修改database。
-3. 重新启动数据库。 
+3. 重新启动数据库。
 
 ## 以鉴权方式连接Mongo
 
@@ -23,6 +23,7 @@ Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有
 
     ``` console
     $ mongo -u username -p password --authenticationDatabase admin
+    ...
     ```
 
 - 如果采用pymong登录，示例代码为：
@@ -126,4 +127,4 @@ connect(
     ```
 
 - 相关示范案例，请参见[Mongo配置鉴权方式的经验](https://www.techcoil.com/blog/how-to-enable-authenticated-mongodb-access-for-flask-mongoengine-applications/)
-- [Flask-Pymongo登陆验证问题小记](https://nladuo.github.io/2018/10/25/Flask-Pymongo%E7%99%BB%E9%99%86%E9%AA%8C%E8%AF%81%E9%97%AE%E9%A2%98%E5%B0%8F%E8%AE%B0/) 
+- [Flask-Pymongo登陆验证问题小记](https://nladuo.github.io/2018/10/25/Flask-Pymongo%E7%99%BB%E9%99%86%E9%AA%8C%E8%AF%81%E9%97%AE%E9%A2%98%E5%B0%8F%E8%AE%B0/)
