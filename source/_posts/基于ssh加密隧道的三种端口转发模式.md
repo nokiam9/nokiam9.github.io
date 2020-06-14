@@ -75,12 +75,12 @@ SSH的加密原理中，使用了RSA非对称加密算法。
 
 最后，关于SSH命令的全部参数解释，请见[参考文档](http://linux.51yip.com/search/ssh)，并列出几个典型的命令示范：
 
-``` bash
-ssh -R 10022:localhost:22 jumpbox
-ssh -NR 0.0.0.0:18000:localhost:8000 jumpbox
-ssh -NL 20022:localhost:10022 jumpbox
-ssh -ND 1080 workplace
-```
+    ``` bash
+    ssh -R 10022:localhost:22 jumpbox
+    ssh -NR 0.0.0.0:18000:localhost:8000 jumpbox
+    ssh -NL 20022:localhost:10022 jumpbox
+    ssh -ND 1080 workplace
+    ```
 
 >
     附录：关于在“本地转发，远端转发，动态转发”中提及到的“[bind_address:]port”的补充说明
@@ -113,9 +113,9 @@ ssh -ND 1080 workplace
     注意：`-M 0` 意味着关闭心跳监控，如果ssh子进程失败则直接退出autossh。
     但是，基于[autossh的man 文档](https://www.harding.motd.ca/autossh/README.txt)的说明，最佳实践恰恰是关闭监控，改为`autossh`命令中增加几个`ssh`的重要选项，包括`ServerAliveInterval` 和`ServerAliveCountMax`，具体示例为：
 
-    ``` bash
-    autossh -M 0 -fNR 7322:localhost:22 -o ServerAliveInterval=15 -o ServerAliveCountMax=6 root@example.com
-    ```
+        ``` bash
+        autossh -M 0 -fNR 7322:localhost:22 -o ServerAliveInterval=15 -o ServerAliveCountMax=6 root@example.com
+        ```
 
 3. autossh开机自启动的设置方法
 
@@ -129,20 +129,20 @@ ssh -ND 1080 workplace
 
 4. ssh端口占用情况的检查方法
 
-    ``` bash
-    [root@local_host ~]# netstat -an |grep LISTEN
-    ......
+        ``` bash
+        [root@local_host ~]# netstat -an |grep LISTEN
+        ......
 
-    [root@local_host ~]# lsof -i:4010
-    COMMAND   PID    USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
-    ssh      6710 lixl    5u  IPv6 0x15699cecfe8a4995      0t0  TCP localhost:altserviceboot (LISTEN)
-    autossh 46984 lixl    3u  IPv4 0x15699cece41d5e95      0t0  TCP localhost:altserviceboot (LISTEN)
-    ​
-    [root@remote_host ~]# lsof -i:8080
-    COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
-    sshd    9762 root   10u  IPv4 473994      0t0  TCP *:webcache (LISTEN)
-    sshd    9762 root   11u  IPv6 473995      0t0  TCP *:webcache (LISTEN)
-    ```
+        [root@local_host ~]# lsof -i:4010
+        COMMAND   PID    USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+        ssh      6710 lixl    5u  IPv6 0x15699cecfe8a4995      0t0  TCP localhost:altserviceboot (LISTEN)
+        autossh 46984 lixl    3u  IPv4 0x15699cece41d5e95      0t0  TCP localhost:altserviceboot (LISTEN)
+        ​
+        [root@remote_host ~]# lsof -i:8080
+        COMMAND  PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+        sshd    9762 root   10u  IPv4 473994      0t0  TCP *:webcache (LISTEN)
+        sshd    9762 root   11u  IPv6 473995      0t0  TCP *:webcache (LISTEN)
+        ```
 
 ## 五、关于动态端口转发
 
