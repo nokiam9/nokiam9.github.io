@@ -68,10 +68,24 @@ tags:
     DISKPART> exit
     ```
 
+而如果在Linux下，那就更简单了，用fdisk命令就行。
+
+    ``` shell
+    $ fdisk -l 
+    列出/dev 下面的所有硬盘设备，例如 /dev/sda， /dev/sdb， /dev/sdc
+
+    $ fdisk /dev/sdb
+    选择需要修改的硬盘，按照命令提升处理，大致是：
+        p 列出分区表
+        d 删除分区
+        n 新建分区
+        w 存盘退出！！！
+    ```
+
 ## 参考资料
 
 - [Ubuntu关于NUC安装的官方说明](https://ubuntu.com/download/intel-nuc-desktop)
 - [NUC主机安装Ubuntu的操作案例](https://linux.cn/article-11477-1.html)
 - [制作启动USB盘的Ubuntu官方教程](https://tutorials.ubuntu.com/tutorial/tutorial-create-a-usb-stick-on-macos)
 - [Windows如何制作Ubuntu系统的USB启动盘](http://www.eguidedog.net/doc/doc-create-usb-stick-on-windows.php)
-- [Etcher的Github地址](`https://github.com/balena-io/etcher`)
+- [Etcher的Github地址](https://github.com/balena-io/etcher)
