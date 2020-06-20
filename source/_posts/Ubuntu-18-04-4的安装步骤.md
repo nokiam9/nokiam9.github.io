@@ -23,12 +23,12 @@ tags:
 1. 插入Ubuntu安装U盘，开机启动后进入安装界面，各种参数选默认
 
 2. 完成安装后拔出U盘，重新启动并登录进入新安装的Ubuntu Server
+   开机启动过程中，可能需要在BIOS设置启动顺序（USB---STAT---LAN），进入方法是加电过程中持续按F2
+   强烈建议安装Openssh Server，以后可以拔掉键盘和鼠标，直接远程登录管理主机
+   安装过程中需要设置一个默认用户，root尚未激活
+   由于安装过程中未接网线，完成后所有网络接口都不可用
 
->- 开机启动过程中，可能需要在BIOS设置启动顺序（USB---STAT---LAN），进入方法是加电过程中持续按F2
->- 安装过程中需要设置一个默认用户，root尚未激活  
->- 由于安装过程中未接网线，完成后所有网络接口都不可用
-
-{% asset_img intel-bios.png %}
+    {% asset_img intel-bios.png %}
 
 ## step 2: 激活root用户
 
@@ -40,8 +40,10 @@ tags:
     Enter new UNIX password:
     Retype new UNIX password:
     passwd: password updated successfully
+
     sj@nuc5i3:~$ su -
     Password:
+
     root@nuc5i3:~#
     ```
 
@@ -53,7 +55,9 @@ tags:
 
 ## Step 3: 设置有线网络接入
 
-1. 编辑网卡配置文件`/etc/netplan/50-cloud-init.yaml`，至少需要设置IP地址和默认网关
+1. 插入有线网络，没啥动静？ 别着急，还没配置网络参数呢！
+
+2. 编辑网卡配置文件`/etc/netplan/50-cloud-init.yaml`，至少需要设置IP地址和默认网关
 
     ``` yaml
     # This file is generated from information provided by the datasource.  Changes
@@ -71,13 +75,13 @@ tags:
                 gateway4: 192.168.0.1
     ```
 
-2. 插入有线网络，`netpaln generate`刷新网络配置，`netplan apply`启动有线网卡
+3. 使用`netpaln generate`刷新网络配置，`netplan apply`启动有线网卡
+   最后用`ifconfig`检查网络状态，确认有线网卡`enp0s25`启动成功
 
-3. 检查网络状态，`ifconfig`确认有线网卡`enp0s25`启动成功
-
-    ``` cmd
+    ``` shell
     root@nuc5i3:/etc/netplan# netplan generate
     root@nuc5i3:/etc/netplan# netplan apply
+
     root@nuc5i3:/etc/netplan# ifconfig
     enp0s25: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
             inet 192.168.0.130  netmask 255.255.255.0  broadcast 192.168.0.255
@@ -99,14 +103,83 @@ tags:
             TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
     ```
 
-## Step 4: 设置Wifi网络接入（可选）
+## Step 4: 设置DNS服务
 
-1. 在确认已连接公网的条件下，在线安装`network-manager`（其中包括了无线网卡驱动程序等必需的软件包）
+1. 在基本安装完成后，默认DNS指向的是`127.0.0.53:53`，无法解析公网域名！！！
+   解决办法：停止并禁用系统默认的DNS服务`systemd-resolved`，并删除`/etc/resolv.conf`软连接
 
-   ``` cmd
+    ``` shell
+    root@nuc5i3:~# ping t.cn
+    ping: t.cn: Temporary failure in name resolution
+
+    root@nuc5i3:~# netstat -tunpl
+    Active Internet connections (only servers)
+    Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+    tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      1001/systemd-resolv
+    tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      2012/sshd
+    tcp6       0      0 :::22                   :::*                    LISTEN      2012/sshd
+    udp        0      0 127.0.0.53:53           0.0.0.0:*                           1001/systemd-resolv
+
+    root@nuc5i3:~# systemctl stop systemd-resolved
+    root@nuc5i3:~# systemctl disable systemd-resolved
+    root@nuc5i3:~# systemctl status systemd-resolved
+    ● systemd-resolved.service - Network Name Resolution
+    Loaded: loaded (/lib/systemd/system/systemd-resolved.service; disabled; vendor preset: enabled)
+    Active: inactive (dead)
+        Docs: man:systemd-resolved.service(8)
+            https://www.freedesktop.org/wiki/Software/systemd/resolved
+            https://www.freedesktop.org/wiki/Software/systemd/writing-network-configuration-managers
+            https://www.freedesktop.org/wiki/Software/systemd/writing-resolver-clients
+
+    root@nuc5i3:/# ls -l /etc/resolv.conf
+    lrwxrwxrwx 1 root root 39 Feb  3 18:22 /etc/resolv.conf -> ../run/systemd/resolve/stub-resolv.conf
+
+    root@nuc5i3:/# rm /etc/resolv.conf
+    ```
+
+2. 重新创建文件`/etc/resolv.conf`，并写入自定义的nameserver
+
+    ``` shell
+    root@nuc5i3:~# cat /etc/resolv.conf
+    nameserver 192.168.0.1
+    nameserver 8.8.8.8
+    ```
+
+3. 简单用`dig`测试一下，DNS现在正常工作了。
+
+   ``` shell
+    root@nuc5i3:~# dig t.cn
+
+    ; <<>> DiG 9.11.3-1ubuntu1.11-Ubuntu <<>> t.cn
+    ;; global options: +cmd
+    ;; Got answer:
+    ;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 22813
+    ;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+    ;; OPT PSEUDOSECTION:
+    ; EDNS: version: 0, flags:; udp: 512
+    ;; QUESTION SECTION:
+    ;t.cn.    IN  A
+
+    ;; ANSWER SECTION:
+    t.cn.    59  IN  A  116.211.169.137
+
+    ;; Query time: 197 msec
+    ;; SERVER: 8.8.8.8#53(8.8.8.8)
+    ;; WHEN: Sat Jun 20 13:05:06 UTC 2020
+    ;; MSG SIZE  rcvd: 49
+   ```
+
+## Step 5: 设置Wifi网络接入（可选）
+
+1. 在确认已连接公网、且**DNS正常工作**的前提下，在线安装`network-manager`（其中包括了无线网卡驱动程序等必需的软件包）
+
+   ``` shell
    # apt update
    # apt install network-manager
    ```
+
+    > 注意：如果有线网卡没有配置nameserver，而且缺少上一步强行设置nameserver的情况下，由于不能正确解析公网域名，apt无法工作！！！
 
 2. 再次编辑`/etc/netplan/50-cloud-init.yaml`，至少需要配置`Access-points`的SSID和接入密码等。
    注意：必须显示定义渲染方式为`NetworkManager`，这也是上一步需要apt安装的原因。
@@ -138,11 +211,10 @@ tags:
     ```
 
 3. 再次`netplan generate`检查并刷新网络配置，`netplan apply`启动无线网卡。
+   检查网络状态，`ifconfig`确认无线网卡`wlp2s0`启动成功
    注意：`netplan`有中间配置文件的刷新机制，generate + apply是一个良好的操作习惯。
 
-4. 检查网络状态，`ifconfig`确认无线网卡`wlp2s0`启动成功
-
-    ``` cmd
+    ``` shell
     root@nuc5i3:/etc/netplan# netplan generate
     root@nuc5i3:/etc/netplan# netplan apply
     root@nuc5i3:/etc# ifconfig
@@ -157,80 +229,15 @@ tags:
             TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
     ```
 
-## Step 5: 设置DNS服务
-
 ---
 
-## 附录一：关于硬盘分区表
-
-### 名词解释
-
-磁盘管理模式：
-
-- MBR（Master Boot Record）：即硬盘的主引导记录分区列表，在主引导扇区，位于硬盘的cylinder 0， head 0， sector 1 （Sector是从1开始的）。
-
-- GPT（GUID Partition Table）：即全局唯一标识分区列表，是一个物理硬盘的分区结构。它用来替代BIOS中的主引导记录分区表（MBR）。
-
-主板接口标准：
-
-- BIOS（Basic Input Output System）：它的全称应该是ROM－BIOS，意思是只读存储器基本输入输出系统。其实，它是一组固化到计算机内主板上一个ROM芯片上的程序，它保存着计算机最重要的基本输入输出的程序、系统设置信息、开机上电自检程序和系统启动自举程序。 其主要功能是为计算机提供最底层的、最直接的硬件设置和控制。
-
-- UEFI（Unified Extensible Firmware Interface)：全称“统一的可扩展固件接口”， 是一种详细描述全新类型接口的标准。这种接口用于操作系统自动从预启动的操作环境，加载到一种操作系统上，从而使开机程序化繁为简，节省时间。
-
-### 技术分析
-
-MBR是传统的分区表类型，最大的缺点则是不支持容量大于2T的硬盘。GPT则弥补了MBR这个缺点，最大支持18EB的硬盘，是基于UEFI使用的磁盘分区架构。
-
-传统BIOS主要支持MBR引导，UEFI则是取代传统BIOS，它加入了对新硬件的支持，其中就有2TB以上硬盘。
-
-目前所有Windows系统均支持MBR，而GPT只有64位系统才能支持。BIOS只支持MBR引导系统，而GPT仅可用UEFI引导系统。正因为这样，现在主板大多采用BIOS集成UEFI，或UEFI集成BIOS，以此达到同时兼容MBR和GPT引导系统的目的。
-
-UEFI启动引导系统的方法是查找硬盘分区中第一个FAT分区内的引导文件进行系统引导，这里并无指定分区表格式。所以U盘和移动硬盘可以用MBR分区表，创建一个FAT分区放置引导文件，从而达到可以双模式启动的目的。但需要注意的是，UEFI虽然支持MBR启动，但必须要有UEFI引导文件存放在FAT分区下；UEFI是无法使用传统MBR引导来启动系统的。
-
-由于GPT引导系统的方式与MBR不同，故而使用传统系统安装办法（如Ghost、Win$Man等）会导致出现系统无法引导的现象。而且使用GPT引导系统的话，必要时还得调整主板设置，开启UEFI（大部分主板默认开启UEFI）。但是使用UEFI和GPT，只是支持大于容量2T的硬盘，并不会带来质的提升（开机硬件自检会稍微快了那么1、2秒）。所以，如果不用大于2T的硬盘做系统的话，就没必要使用UEFI。
-
-- BIOS+MBR：这是最传统的，系统都会支持；唯一的缺点就是不支持容量大于2T的硬盘。
-
-- BIOS+GPT：BIOS是可以使用GPT分区表的硬盘来作为资料盘的，但不能引导系统；若电脑同时带有容量小于2T的硬盘和容量大于2T的硬盘，小于2T的可以用MBR分区表安装系统，而大于2T的可以使用GPT分区表来存放资料。但系统须使用64位系统。
-
-- UEFI+MBR：可以把UEFI设置成Legacy模式（传统模式）让其支持传统MBR启动，效果同BIOS+MBR；也可以建立FAT分区，放置UEFI启动文件来，可应用在U盘和移动硬盘上实现双模式启动。
-
-- UEFI+GPT：如果要把大于2T的硬盘作为系统盘来安装系统的话，就必须如此。而且系统须使用64位系统，否则无法引导。但系统又不是传统在PE下安装后就能直接使用的，引导还得经过处理才行。
-
-### 实际案例
-
-Ubuntu安装完成后，主机硬盘的默认分区表为GPT格式（不是MBR格式），包含了两个分区，其中：
-
-- `/dev/sda1`：用于EFI启动，512M
-- `/dev/sda2`：Linunx系统盘
-
-``` sh
-root@nuc5i3:~# fdisk -l
-Disk /dev/loop0: 89.1 MiB, 93417472 bytes, 182456 sectors
-Units: sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-
-
-Disk /dev/sda: 111.8 GiB, 120034123776 bytes, 234441648 sectors
-Units: sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-Disklabel type: gpt
-Disk identifier: D8D94899-BC23-4D81-96EB-ECAFE4710A7E
-
-Device       Start       End   Sectors   Size Type
-/dev/sda1     2048   1050623   1048576   512M EFI System
-/dev/sda2  1050624 234438655 233388032 111.3G Linux filesystem
-```
-
-## 附录二： 如何查看各类网卡的逻辑设备名
+## 附录： 如何查看网卡的逻辑设备名
 
 不同型号的硬件设备，由于其驱动程序的差异，在Ubuntu安装完成后会有不同的设备名。
 
 使用`lshw`命令，可以查询全部硬件设备信息，并找到其逻辑设备名。
 
-``` cmd
+``` shell
 # lshw
 nuc5i3
     description: Desktop Computer
@@ -266,4 +273,22 @@ nuc5i3
 ......
 ```
 
-## 附录三： 关于DNS Server
+还有一个办法，就是命令`ip a`查看网卡的简要信息。
+
+``` shell
+root@nuc5i3:~# ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host
+       valid_lft forever preferred_lft forever
+2: enp0s25: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether b8:ae:ed:73:87:fb brd ff:ff:ff:ff:ff:ff
+    inet 192.168.0.130/24 brd 192.168.0.255 scope global enp0s25
+       valid_lft forever preferred_lft forever
+    inet6 fe80::baae:edff:fe73:87fb/64 scope link
+       valid_lft forever preferred_lft forever
+3: wlp2s0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN group default qlen 1000
+    link/ether 34:13:e8:25:20:d8 brd ff:ff:ff:ff:ff:ff
+```
