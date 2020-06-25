@@ -328,6 +328,10 @@ kubeadm join master1:6443 --token c4y5zm.rarmxapvrozfslcr \
 
     worker节点的名字可执行 `kubectl get nodes` 命令获得
 
+## Step 8. 移除Master节点（参考）
+
+1. 在准备移除的 Master 节点上，执行`kubeadm reset`
+
 ---
 
 ## 问题记录
