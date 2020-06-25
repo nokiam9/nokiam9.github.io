@@ -332,6 +332,8 @@ kubeadm join master1:6443 --token c4y5zm.rarmxapvrozfslcr \
 
 1. 在准备移除的 Master 节点上，执行`kubeadm reset`
 
+2. 如果想要再次启动Master节点，重复Step4、Step5即可
+
 ---
 
 ## 问题记录

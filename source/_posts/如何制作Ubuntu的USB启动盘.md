@@ -82,6 +82,64 @@ tags:
         w 存盘退出！！！
     ```
 
+补充以下，如果在Mac OS上，虽然没有`fdisk`命令，但是可以用`diskutil`命令代替
+
+    ``` sh
+    JiandeiMac:~ sj$ diskutil
+    Disk Utility Tool
+    Utility to manage local disks and volumes
+    Most commands require an administrator or root user
+
+    WARNING: Most destructive operations are not prompted
+
+    Usage:  diskutil [quiet] <verb> <options>, where <verb> is as follows:
+
+        list                 (List the partitions of a disk)
+        info[rmation]        (Get information on a specific disk or partition)
+        listFilesystems      (List file systems available for formatting)
+        activity             (Continuous log of system-wide disk arbitration)
+
+        u[n]mount            (Unmount a single volume)
+        unmountDisk          (Unmount an entire disk (all volumes))
+        eject                (Eject a disk)
+        mount                (Mount a single volume)
+        mountDisk            (Mount an entire disk (all mountable volumes))
+
+        enableJournal        (Enable HFS+ journaling on a mounted HFS+ volume)
+        disableJournal       (Disable HFS+ journaling on a mounted HFS+ volume)
+        moveJournal          (Move the HFS+ journal onto another volume)
+        enableOwnership      (Exact on-disk User/Group IDs on a mounted volume)
+        disableOwnership     (Ignore on-disk User/Group IDs on a mounted volume)
+
+        rename[Volume]       (Rename a volume)
+
+        verifyVolume         (Verify the file system data structures of a volume)
+        repairVolume         (Repair the file system data structures of a volume)
+
+        verifyDisk           (Verify the components of a partition map of a disk)
+        repairDisk           (Repair the components of a partition map of a disk)
+
+        eraseDisk            (Erase an existing disk, removing all volumes)
+        eraseVolume          (Erase an existing volume)
+        reformat             (Erase an existing volume with same name and type)
+        eraseOptical         (Erase optical media (CD/RW, DVD/RW, etc.))
+        zeroDisk             (Erase a disk, writing zeros to the media)
+        randomDisk           (Erase a disk, writing random data to the media)
+        secureErase          (Securely erase a disk or freespace on a volume)
+
+        partitionDisk        ((re)Partition a disk, removing all volumes)
+        resizeVolume         (Resize a volume, increasing or decreasing its size)
+        splitPartition       (Split an existing partition into two or more)
+        mergePartitions      (Combine two or more existing partitions into one)
+
+        appleRAID <verb>     (Perform additional verbs related to AppleRAID)
+        coreStorage <verb>   (Perform additional verbs related to CoreStorage)
+        apfs <verb>          (Perform additional verbs related to APFS)
+
+    diskutil <verb> with no options will provide help on that verb
+
+    ```
+
 ## 参考资料
 
 - [Ubuntu关于NUC安装的官方说明](https://ubuntu.com/download/intel-nuc-desktop)
