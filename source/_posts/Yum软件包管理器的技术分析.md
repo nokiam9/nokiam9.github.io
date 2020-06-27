@@ -12,10 +12,10 @@ yum 的关键之处是要有可靠的repository，顾名思义，这是软件的
 
 以Centos 7.8为例，yum软件包主要包含以下部分：
 
-- /usr/bin/yum          可执行程序
-- /etc/yum.conf         主配置文件
-- /etc/yum.repos.d/     REPO源文件配置目录
-- /etc/yum/             辅助配置文件目录
+- `/usr/bin/yum`          可执行程序
+- `/etc/yum.conf`         主配置文件
+- `/etc/yum.repos.d/`    REPO源文件配置目录
+- `/etc/yum/`             辅助配置文件目录
 
 ## 主配置文件 /etc/yum.conf
 
@@ -94,7 +94,7 @@ REPO源文件中，经常用到的变量有：
 
 ## REPO源配置文件目录 /etc/yum.repos.d/
 
-repository 部分定义了每个源/服务器的具体配置，可以有一到多个。常位于`/etc/yum.repo.d`目录下的各文件中。
+repository 部分定义了每个源/服务器的具体配置，可以有一到多个。常位于`/etc/yum.repo.d\`目录下的各文件中。
 
 `yum repolist`命令列出全部生效的源配置，具体判断逻辑是：
 
