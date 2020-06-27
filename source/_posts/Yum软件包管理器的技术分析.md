@@ -17,7 +17,7 @@ yum是用python编写的，因此你会发现它和pip的功能非常相似，�
 - /etc/yum.repos.d/     REPO源文件配置目录
 - /etc/yum/             辅助配置文件目录
 
-## 1. 主配置文件 /etc/yum.conf
+## 主配置文件 /etc/yum.conf
 
 yum 的配置文件分为两部分：main 和repository
 
@@ -92,7 +92,7 @@ REPO源文件中，经常用到的变量有：
 - `/etc/yum.conf` 中定义的各个变量。 由于yum是用Python写的，该配置文件中的变量均可以在repo定义中被引用
 - `/etc/yum/vars` 中各个文件包含的自定义变量，例如`$infra`等
 
-## 2. REPO源配置文件目录 /etc/yum.repos.d/
+## REPO源配置文件目录 /etc/yum.repos.d/
 
 repository 部分定义了每个源/服务器的具体配置，可以有一到多个。常位于`/etc/yum.repo.d`目录下的各文件中。
 
@@ -207,7 +207,7 @@ http://mirror.hoster.kz/centos-altarch/7.8.2003/kernel/x86_64/
 http://centosu7.centos.org/altarch/7.8.2003/kernel/x86_64/
 ```
 
-## 3. yum辅助配置文件目录 /etc/yum/
+## yum辅助配置文件目录 /etc/yum/
 
 ``` sh
 [root@VM_0_17_centos etc]# tree /etc/yum
@@ -228,7 +228,7 @@ http://centosu7.centos.org/altarch/7.8.2003/kernel/x86_64/
 
 ---
 
-## 附录1: Using Yum Variables
+## 附录: Using Yum Variables
 
 You can use and reference the following built-in variables inyum commands and in all Yum configuration files (that is,/etc/yum.conf and all .repo files in the /etc/yum.repos.d/directory):
 
