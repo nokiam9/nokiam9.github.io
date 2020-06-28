@@ -373,7 +373,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/04/01/Kubernetes的基本组件/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/11/29/基于区块链的五种开源技术平台/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -393,7 +393,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/04/01/Kubernetes的基本组件/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Kubernetes的基本组件</a>
+                <a href="/2019/11/29/基于区块链的五种开源技术平台/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">基于区块链的五种开源技术平台</a>
               
             
           </h1>
@@ -418,7 +418,7 @@
                 
               
 
-              <time title="Created: 2019-04-01 15:12:29" itemprop="dateCreated datePublished" datetime="2019-04-01T15:12:29+08:00">2019-04-01</time>
+              <time title="Created: 2019-11-29 14:14:48" itemprop="dateCreated datePublished" datetime="2019-11-29T14:14:48+08:00">2019-11-29</time>
             
 
             
@@ -435,7 +435,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-05-28 09:17:09" itemprop="dateModified" datetime="2019-05-28T09:17:09+08:00">2019-05-28</time>
+                <time title="Modified: 2020-06-08 08:50:00" itemprop="dateModified" datetime="2020-06-08T08:50:00+08:00">2020-06-08</time>
               
             
           </span>
@@ -470,14 +470,12 @@
       
         
           
-          Kubernetes 是一个跨主机集群的 开源的容器调度平台，它可以自动化应用容器的部署、扩展和操作，提供以容器为中心的基础架构。Kubernetes集群主要包括一个Master组件，和多个Node组件。
-
-一、Master组件Master 组件提供的集群控制。Master 组件对集群做出全局性决策
+          区块链的本质是DLT，即分布式账本技术（Distributed Ledger Technologies），目前比较活跃的有5个开源软件，分别是Hyperledger Fabric、R3 Corda、Ethereum、Facebook Libra、FISCO BCOS（分别简称为 Fabric、Cor
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/04/01/Kubernetes的基本组件/#more" rel="contents">
+              <a class="btn" href="/2019/11/29/基于区块链的五种开源技术平台/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -537,7 +535,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/02/12/重装Hexo发布环境遇到的问题/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -557,7 +555,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/02/12/重装Hexo发布环境遇到的问题/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">重装Hexo编辑环境遇到的问题</a>
+                <a href="/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">深入理解Dockerfile文件中的Entrypoint和Cmd命令</a>
               
             
           </h1>
@@ -582,7 +580,7 @@
                 
               
 
-              <time title="Created: 2019-02-12 00:10:07" itemprop="dateCreated datePublished" datetime="2019-02-12T00:10:07+08:00">2019-02-12</time>
+              <time title="Created: 2019-11-16 15:50:06" itemprop="dateCreated datePublished" datetime="2019-11-16T15:50:06+08:00">2019-11-16</time>
             
 
             
@@ -599,7 +597,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-02-13 17:25:23" itemprop="dateModified" datetime="2019-02-13T17:25:23+08:00">2019-02-13</time>
+                <time title="Modified: 2019-11-29 18:52:56" itemprop="dateModified" datetime="2019-11-29T18:52:56+08:00">2019-11-29</time>
               
             
           </span>
@@ -634,14 +632,20 @@
       
         
           
-          昨天在新Mac上重新安装Hexo Blog的编辑环境出现了不少问题，解决情况如下。
-1、确认已经安装node.js和npm，最简单的办法是采用图形化的安装包。2、至少需要全局安装hexo和hexco-cli（hexo的命令行工具包），方法是
-12$ sudo npm install hexo -g$
+          CMD链接
+
+主要目的
+
+提供默认的命令
+提供默认的参数，与ENTRYPOINT协同作用
+如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT
+该方式的命令，会被docker run image cmd arg1 arg2命令行方式覆盖
+dockerfile 中最后一个CMD参数才
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/02/12/重装Hexo发布环境遇到的问题/#more" rel="contents">
+              <a class="btn" href="/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -701,7 +705,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/01/17/搬家了/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/11/15/Mongo数据库设置鉴权登录的方法/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -721,7 +725,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/01/17/搬家了/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">搬家了</a>
+                <a href="/2019/11/15/Mongo数据库设置鉴权登录的方法/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Mongo数据库设置鉴权登录的方法</a>
               
             
           </h1>
@@ -746,7 +750,7 @@
                 
               
 
-              <time title="Created: 2019-01-17 15:03:30" itemprop="dateCreated datePublished" datetime="2019-01-17T15:03:30+08:00">2019-01-17</time>
+              <time title="Created: 2019-11-15 16:57:17" itemprop="dateCreated datePublished" datetime="2019-11-15T16:57:17+08:00">2019-11-15</time>
             
 
             
@@ -763,7 +767,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-02-13 17:25:23" itemprop="dateModified" datetime="2019-02-13T17:25:23+08:00">2019-02-13</time>
+                <time title="Modified: 2020-06-08 08:50:00" itemprop="dateModified" datetime="2020-06-08T08:50:00+08:00">2020-06-08</time>
               
             
           </span>
@@ -798,204 +802,16 @@
       
         
           
-          已经是2019年了！从兰州搬家，终于回到了北京！
-阿里云的香港ECS到期了，续费太贵，就把域名搬到了成都的腾讯云！效果还不错，就是不得不做了域名备案。
+          Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。
+配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。
+分析该脚本文件可以发现其基本步骤是：
 
-          
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2019/01/17/搬家了/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2018/12/24/HEXO设置About-Categories-Tags页面的方法/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Alex Sun">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/12/24/HEXO设置About-Categories-Tags页面的方法/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">HEXO设置About, Categories, Tags页面的方法</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-12-24 13:16:16" itemprop="dateCreated datePublished" datetime="2018-12-24T13:16:16+08:00">2018-12-24</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
-                <time title="Modified: 2019-05-28 09:17:09" itemprop="dateModified" datetime="2019-05-28T09:17:09+08:00">2019-05-28</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/programming/" itemprop="url" rel="index"><span itemprop="name">编程</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          添加关于页面
-运行hexo新建一个名为about的页面
-
-1$ hexo new page "about"
-
-找到source/about/index.md文件，自由编辑并存盘
-
-添加分类页面
-打开项目配置文件，设置所有分类的属性和目录名
-
-12345678# ~/_config.ymldefaul
+下载Mongo
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2018/12/24/HEXO设置About-Categories-Tags页面的方法/#more" rel="contents">
+              <a class="btn" href="/2019/11/15/Mongo数据库设置鉴权登录的方法/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1055,7 +871,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2018/12/23/今天晚上忘了吃药/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/10/26/Centos宿主机如何安装docker最新版本/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -1075,7 +891,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2018/12/23/今天晚上忘了吃药/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">今天晚上忘了吃药</a>
+                <a href="/2019/10/26/Centos宿主机如何安装docker最新版本/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Centos宿主机如何安装docker最新版本</a>
               
             
           </h1>
@@ -1100,7 +916,7 @@
                 
               
 
-              <time title="Created: 2018-12-23 21:35:41" itemprop="dateCreated datePublished" datetime="2018-12-23T21:35:41+08:00">2018-12-23</time>
+              <time title="Created: 2019-10-26 14:55:27" itemprop="dateCreated datePublished" datetime="2019-10-26T14:55:27+08:00">2019-10-26</time>
             
 
             
@@ -1117,29 +933,11 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-02-13 17:25:23" itemprop="dateModified" datetime="2019-02-13T17:25:23+08:00">2019-02-13</time>
+                <time title="Modified: 2019-11-15 18:18:03" itemprop="dateModified" datetime="2019-11-15T18:18:03+08:00">2019-11-15</time>
               
             
           </span>
 
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/life/" itemprop="url" rel="index"><span itemprop="name">生活</span></a></span>
-
-                
-                
-              
-            </span>
           
 
           
@@ -1170,209 +968,13 @@
       
         
           
-          饭可以不吃，药不能停！！！好多药啊！
-
-
-拜糖平
-二甲双瓜
-甲钴胺
-阿斯匹林
-
-
-
-          
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2018/12/23/今天晚上忘了吃药/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2018/12/23/发布blog的操作步骤/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Alex Sun">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/12/23/发布blog的操作步骤/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">发布blog的操作步骤</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-12-23 21:13:09" itemprop="dateCreated datePublished" datetime="2018-12-23T21:13:09+08:00">2018-12-23</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
-                <time title="Modified: 2019-02-13 17:25:23" itemprop="dateModified" datetime="2019-02-13T17:25:23+08:00">2019-02-13</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/programming/" itemprop="url" rel="index"><span itemprop="name">编程</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          
-开启新blog
-
-1$ hexo new '圣诞节怎么过？`
-
-在 /source/_posts目录下发现一个新文件圣诞节怎么过？.md，自由编辑该文件
-
-在md文件的注释部分，可以标记category和tag，具体方法为：
-12345# hello-world.mdcategories: 编程t
+          问题现象测试成功的APP软件包，但在宿主机上安装失败，显示docker container的DNS不成功，判断是宿主机的Docker版本太低，对Docker DNS的支持不好。  
+宿主机是Centos, 内核版本3.10.0-1062.4.1.el7.x86_64, 使用yum install d
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2018/12/23/发布blog的操作步骤/#more" rel="contents">
+              <a class="btn" href="/2019/10/26/Centos宿主机如何安装docker最新版本/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1432,7 +1034,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2018/12/23/冬至在兰州/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/08/29/国密标准的简介/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -1452,7 +1054,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2018/12/23/冬至在兰州/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">冬至在兰州</a>
+                <a href="/2019/08/29/国密标准的简介/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">国密标准的简介</a>
               
             
           </h1>
@@ -1477,205 +1079,12 @@
                 
               
 
-              <time title="Created: 2018-12-23 17:34:33" itemprop="dateCreated datePublished" datetime="2018-12-23T17:34:33+08:00">2018-12-23</time>
+              <time title="Created: 2019-08-29 10:21:00 / Modified: 17:31:28" itemprop="dateCreated datePublished" datetime="2019-08-29T10:21:00+08:00">2019-08-29</time>
             
 
             
               
 
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
-                <time title="Modified: 2019-02-13 17:25:23" itemprop="dateModified" datetime="2019-02-13T17:25:23+08:00">2019-02-13</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">In</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/life/" itemprop="url" rel="index"><span itemprop="name">生活</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          老孙打了好几个电话过来
-
-          
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2018/12/23/冬至在兰州/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2018/12/21/hello-world/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Alex Sun">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/12/21/hello-world/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Hello World</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-12-21 17:34:33" itemprop="dateCreated datePublished" datetime="2018-12-21T17:34:33+08:00">2018-12-21</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
-                <time title="Modified: 2019-02-13 17:25:23" itemprop="dateModified" datetime="2019-02-13T17:25:23+08:00">2019-02-13</time>
               
             
           </span>
@@ -1710,12 +1119,835 @@
       
         
           
-          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in 
+          国密算法的概述国密即国家密码局认定的国产密码算法。主要有SM1，SM2，SM3，SM4。密钥长度和分组长度均为128位。
+2011年，国家密码管理局发布了《关于做好公钥密码算法升级工作的通知》，要求“自2011年3月1日起，在建和拟建公钥密码基础设施电子认证系统和密钥管理系统应使用国密算法。自201
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2018/12/21/hello-world/#more" rel="contents">
+              <a class="btn" href="/2019/08/29/国密标准的简介/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/07/05/SDN学习笔记之一/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">SDN学习笔记之一</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-05 11:38:52" itemprop="dateCreated datePublished" datetime="2019-07-05T11:38:52+08:00">2019-07-05</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-08-29 17:42:56" itemprop="dateModified" datetime="2019-08-29T17:42:56+08:00">2019-08-29</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          传统的三层网络架构
+特点：
+
+每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用
+
+汇聚层和接入层走二层交换，和核心层走三层路由
+
+所有 OpenStack 网关配置在核心层路由器
+
+防火墙和核心路由器直连，做一些安全策略
+
+
+简化的大二层网络架构
+Spine-Leaf 是 full-mesh
+          ...
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/07/05/SDN学习笔记之一/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/05/28/又搬家了/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/05/28/又搬家了/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">又搬家了</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-05-28 09:12:08 / Modified: 09:16:52" itemprop="dateCreated datePublished" datetime="2019-05-28T09:12:08+08:00">2019-05-28</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          昨天开始在北二环上班了。优点很多就不说了，至于缺点嘛……
+一是开车上班要90分钟，地铁也差不多，通勤很痛苦！
+二是物业餐饮真的不咋样，中饭25块钱，还吃不饱！
+慢慢适应吧:)
+
+          
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/05/28/又搬家了/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/05/04/为ECS设置ssh密钥登录的方法/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/05/04/为ECS设置ssh密钥登录的方法/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">为ECS设置ssh密钥登录的方法</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-05-04 20:11:55" itemprop="dateCreated datePublished" datetime="2019-05-04T20:11:55+08:00">2019-05-04</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2020-06-15 07:56:19" itemprop="dateModified" datetime="2020-06-15T07:56:19+08:00">2020-06-15</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          最近，租用的腾讯云服务器ECS中招了，来自伦敦IDC的黑客通过ssh访问暴力破解root密码，并种上了木马（估计是挖矿的），看来必须重视安全加固工作了。ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也是必须的。虽然可以为root设置更加复杂的密码，但也是给自己找麻烦
+          ...
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/05/04/为ECS设置ssh密钥登录的方法/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/05/04/ECS遭遇安全攻击的一次经历/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/05/04/ECS遭遇安全攻击的一次经历/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">ECS遭遇安全攻击的一次经历</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-05-04 20:11:03" itemprop="dateCreated datePublished" datetime="2019-05-04T20:11:03+08:00">2019-05-04</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-11-15 18:18:03" itemprop="dateModified" datetime="2019-11-15T18:18:03+08:00">2019-11-15</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！
+服务器的问题表现
+
+登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中/tmp/vThHH严重消耗资源，确认中招了！
+
+
+
+服务
+          ...
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/05/04/ECS遭遇安全攻击的一次经历/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Kubernetes for Mac的安装方法和问题记录</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-04-01 16:21:24" itemprop="dateCreated datePublished" datetime="2019-04-01T16:21:24+08:00">2019-04-01</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-05-08 18:00:39" itemprop="dateModified" datetime="2019-05-08T18:00:39+08:00">2019-05-08</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          安装Kubernetes的最简单方法著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴
+          ...
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1764,7 +1996,7 @@
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -1807,7 +2039,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-count">28</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -1890,7 +2122,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

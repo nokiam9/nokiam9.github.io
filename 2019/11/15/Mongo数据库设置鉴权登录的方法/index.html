@@ -104,17 +104,17 @@
 
 
 
-  <meta name="description" content="Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。  配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。 分析该脚本文件可以发现其基本步骤是：  下载Mongo数据库的代码，并以免鉴权方式启动。 如果OS设置了环境变量MONGO_INITDB_ROOT_US">
+  <meta name="description" content="Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。 配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。 分析该脚本文件可以发现其基本步骤是：  下载Mongo数据库的代码，并以免鉴权方式启动。 如果OS设置了环境变量MONGO_INITDB_ROOT_USE">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mongo数据库设置鉴权登录的方法">
 <meta property="og:url" content="https://blog.caogo.cn/2019/11/15/Mongo数据库设置鉴权登录的方法/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。  配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。 分析该脚本文件可以发现其基本步骤是：  下载Mongo数据库的代码，并以免鉴权方式启动。 如果OS设置了环境变量MONGO_INITDB_ROOT_US">
+<meta property="og:description" content="Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。 配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。 分析该脚本文件可以发现其基本步骤是：  下载Mongo数据库的代码，并以免鉴权方式启动。 如果OS设置了环境变量MONGO_INITDB_ROOT_USE">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-11-29T10:52:56.662Z">
+<meta property="og:updated_time" content="2020-06-08T00:50:00.664Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Mongo数据库设置鉴权登录的方法">
-<meta name="twitter:description" content="Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。  配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。 分析该脚本文件可以发现其基本步骤是：  下载Mongo数据库的代码，并以免鉴权方式启动。 如果OS设置了环境变量MONGO_INITDB_ROOT_US">
+<meta name="twitter:description" content="Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。 配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。 分析该脚本文件可以发现其基本步骤是：  下载Mongo数据库的代码，并以免鉴权方式启动。 如果OS设置了环境变量MONGO_INITDB_ROOT_USE">
 
 
 
@@ -436,7 +436,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-11-29 18:52:56" itemprop="dateModified" datetime="2019-11-29T18:52:56+08:00">2019-11-29</time>
+                <time title="Modified: 2020-06-08 08:50:00" itemprop="dateModified" datetime="2020-06-08T08:50:00+08:00">2020-06-08</time>
               
             
           </span>
@@ -469,17 +469,17 @@
       
 
       
-        <p>Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。 </p>
+        <p>Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。</p>
 <h2 id="配置初始化用户和口令"><a href="#配置初始化用户和口令" class="headerlink" title="配置初始化用户和口令"></a>配置初始化用户和口令</h2><p>以<a href="https://github.com/docker-library/mongo/tree/master/3.6" target="_blank" rel="noopener">mongo:3.6镜像文件</a>为例，启动命令是<code>/usr/local/bin/docker-entrypoint.sh</code>。</p>
 <p>分析该脚本文件可以发现其基本步骤是：</p>
 <ol>
 <li>下载Mongo数据库的代码，并以免鉴权方式启动。</li>
 <li>如果OS设置了环境变量<code>MONGO_INITDB_ROOT_USERNAME</code>和<code>MONGO_INITDB_ROOT_PASSWORD</code>，则新建数据库用户并设置权限规则。<br> 注意：mongo初始化用户的角色级别为root，需要授权创建和修改database。</li>
-<li>重新启动数据库。 </li>
+<li>重新启动数据库。</li>
 </ol>
 <h2 id="以鉴权方式连接Mongo"><a href="#以鉴权方式连接Mongo" class="headerlink" title="以鉴权方式连接Mongo"></a>以鉴权方式连接Mongo</h2><ul>
 <li><p>以mongo shell为例，在命令行中带入用户名和密码，就可以以鉴权方式登录了。</p>
-  <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> mongo -u username -p password --authenticationDatabase admin</span><br></pre></td></tr></table></figure>
+  <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> mongo -u username -p password --authenticationDatabase admin</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>如果采用pymong登录，示例代码为：</p>
   <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">from</span> pymongo <span class="keyword">import</span> MongoClient</span><br><span class="line"></span><br><span class="line">uri = <span class="string">"mongodb://username:password@localhost:27017"</span></span><br><span class="line">client = MongoClient(uri)</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="comment"># Test with this ismaster command is cheap and does not require auth.</span></span><br><span class="line">    client.admin.command(<span class="string">'ismaster'</span>)</span><br><span class="line">    logger.info(<span class="string">u"Connected to MongoDB, uri=&#123;0&#125;."</span>.format(uri))</span><br><span class="line"><span class="keyword">except</span>:</span><br><span class="line">    logger.error(<span class="string">u"Connect MongoDB sever failed and abort now! uri=&#123;0&#125;."</span>.format(uri))</span><br><span class="line">    <span class="keyword">raise</span> SyntaxError</span><br></pre></td></tr></table></figure>
@@ -523,7 +523,7 @@
 </li>
 <li><p>相关示范案例，请参见<a href="https://www.techcoil.com/blog/how-to-enable-authenticated-mongodb-access-for-flask-mongoengine-applications/" target="_blank" rel="noopener">Mongo配置鉴权方式的经验</a></p>
 </li>
-<li><a href="https://nladuo.github.io/2018/10/25/Flask-Pymongo%E7%99%BB%E9%99%86%E9%AA%8C%E8%AF%81%E9%97%AE%E9%A2%98%E5%B0%8F%E8%AE%B0/" target="_blank" rel="noopener">Flask-Pymongo登陆验证问题小记</a> </li>
+<li><a href="https://nladuo.github.io/2018/10/25/Flask-Pymongo%E7%99%BB%E9%99%86%E9%AA%8C%E8%AF%81%E9%97%AE%E9%A2%98%E5%B0%8F%E8%AE%B0/" target="_blank" rel="noopener">Flask-Pymongo登陆验证问题小记</a></li>
 </ul>
 
       
@@ -637,7 +637,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-count">28</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -736,7 +736,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

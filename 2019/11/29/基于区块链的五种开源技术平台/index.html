@@ -114,7 +114,7 @@
 <meta property="og:image" content="https://blog.caogo.cn/2019/11/29/基于区块链的五种开源技术平台/640.jpeg">
 <meta property="og:image" content="https://blog.caogo.cn/2019/11/29/基于区块链的五种开源技术平台/corda.jpeg">
 <meta property="og:image" content="https://blog.caogo.cn/2019/11/29/基于区块链的五种开源技术平台/libra.jpg">
-<meta property="og:updated_time" content="2019-12-03T04:13:16.950Z">
+<meta property="og:updated_time" content="2020-06-08T00:50:00.665Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="基于区块链的五种开源技术平台">
 <meta name="twitter:description" content="区块链的本质是DLT，即分布式账本技术（Distributed Ledger Technologies），目前比较活跃的有5个开源软件，分别是Hyperledger Fabric、R3 Corda、Ethereum、Facebook Libra、FISCO BCOS（分别简称为 Fabric、Corda、以太坊、Libra、BCOS）。 三种不同的框架在可能的应用领域上分别具有完全不同的想法，其中">
@@ -440,7 +440,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-12-03 12:13:16" itemprop="dateModified" datetime="2019-12-03T12:13:16+08:00">2019-12-03</time>
+                <time title="Modified: 2020-06-08 08:50:00" itemprop="dateModified" datetime="2020-06-08T08:50:00+08:00">2020-06-08</time>
               
             
           </span>
@@ -482,7 +482,7 @@
 </ul>
 <img src="/2019/11/29/基于区块链的五种开源技术平台/640.jpeg">
 <h2 id="运行模式（节点之间的地位）"><a href="#运行模式（节点之间的地位）" class="headerlink" title="运行模式（节点之间的地位）"></a>运行模式（节点之间的地位）</h2><p>在传统的集中式数据存储中，只有一个实体（即Owner，所有者）可以保留账本这一底层数据库的副本，这个Owner控制了全部的数据存储，并决定对其它实体提供什么数据。</p>
-<p>DLT的出现，从根本上改变了集中的数据存储方式，实现了多个实体都拥有底层数据库副本，形成一种由所谓“节点”或“对等端”构成的网络。 </p>
+<p>DLT的出现，从根本上改变了集中的数据存储方式，实现了多个实体都拥有底层数据库副本，形成一种由所谓“节点”或“对等端”构成的网络。</p>
 <p>根据网络架构中各个节点的地位是否相同或对等，存在两种不同的运行模式：</p>
 <ul>
 <li><strong>无授权模式</strong>（permissionless）：交易的参与者无需授权，网络中的任何实体都可以参与交易，并获得全量账本。<br>  作为公共区块链的以太坊采用无授权模式。</li>
@@ -512,11 +512,11 @@
 <li>验证器（validator）：validators就像是元老会，会轮流着产生提议者（leader），用来将当前的交易定序、打包形成区块，并且共同维护着数据库的一致性。</li>
 </ul>
 <img src="/2019/11/29/基于区块链的五种开源技术平台/libra.jpg">
-<h2 id="共识算法（多个节点的工作协同）"><a href="#共识算法（多个节点的工作协同）" class="headerlink" title="共识算法（多个节点的工作协同）"></a>共识算法（多个节点的工作协同）</h2><p>选择无授权或有授权的参与模式，将对达成共识具有深远的影响。 </p>
+<h2 id="共识算法（多个节点的工作协同）"><a href="#共识算法（多个节点的工作协同）" class="headerlink" title="共识算法（多个节点的工作协同）"></a>共识算法（多个节点的工作协同）</h2><p>选择无授权或有授权的参与模式，将对达成共识具有深远的影响。</p>
 <p>由于数据是分布式存储（或者，更准确的描述是分布式管理）的，因此难以确保所有节点对一些“共同事实”（例如，账本的正确性）达成一致。因为一个节点所做的更改，必须传播到网络中的所有其它的对等节点上。达成共同事实的结果，称之为节点间的<strong>共识</strong>(consensus)。</p>
 <p>在区块链中，无论参与者是否参与了某个特定的<strong>交易</strong>（Transaction），所有参与者必须就全部已发生交易的顺序达成共识。交易的顺序对账本的一致状态至关重要。如果无法建立明确的交易顺序，那么可能会出现双重支付（double-spends，也叫<strong>双花交易</strong>）问题，即两笔并行交易将同一枚货币转账给了不同的收款人，使其凭空受益。</p>
 <h3 id="以太坊"><a href="#以太坊" class="headerlink" title="以太坊"></a>以太坊</h3><p>由于网络所涉及的各方可能是互不信任的，并且是匿名的，因此必须采用共识机制来保护账本免受双重支付欺诈，或者心怀鬼胎参与者的影响。在目前的以太坊实现中，这种共识机制的建立是使用挖矿方案，也叫<strong>基于工作量的证明</strong>（PoW，Proof of Work）。</p>
-<p>所有参与者必须认同一个共同账本，并且可以访问账本中所有的记录条目。其结果是<strong>PoW</strong>会对交易的处理性能产生不利的影响。尽管记录是匿名的，但是存储在账本中的数据仍然可供所有参与者访问。因此对于有更高隐私度需求的应用而言，这种机制存在问题。 </p>
+<p>所有参与者必须认同一个共同账本，并且可以访问账本中所有的记录条目。其结果是<strong>PoW</strong>会对交易的处理性能产生不利的影响。尽管记录是匿名的，但是存储在账本中的数据仍然可供所有参与者访问。因此对于有更高隐私度需求的应用而言，这种机制存在问题。</p>
 <h3 id="Fabric-1"><a href="#Fabric-1" class="headerlink" title="Fabric"></a>Fabric</h3><p>Fabric的节点在达成共识的过程中承担了不同的角色和任务，其交易流的的基本步骤为：</p>
 <ol>
 <li>Client向已连接的Endorser（Peer）发送交易，启动对账本的更新。</li>
@@ -546,9 +546,9 @@
 <h3 id="Corda-2"><a href="#Corda-2" class="headerlink" title="Corda"></a>Corda</h3><p>Corda为确保交易的有效性，会提醒读者在共识机制中使用智能合同代码。同时，Corda的智能合约不仅可以包含代码，还允许包含法律行文（Legal Prose）。因此，上述智能法律合约是法律行文，其制定方式可以通过智能合同代码来表达和实施。</p>
 <p>其背后的基本原理，是赋予植根于相关法律行为的代码以合法性。这种结构称为“Ricardian 合约”。这清晰地表明，Corda 是设计用于金融服务行业这一受严格监管的环境。而 Fabric 和 Ethereum 都不具备此功能。</p>
 <hr>
-<h2 id="总结：定制平台-Vs-通用平台"><a href="#总结：定制平台-Vs-通用平台" class="headerlink" title="总结：定制平台 Vs 通用平台"></a>总结：定制平台 Vs 通用平台</h2><h3 id="以太坊-2"><a href="#以太坊-2" class="headerlink" title="以太坊"></a>以太坊</h3><p>以太坊是一种强大的智能合约引擎，基本上可作为任何类型应用的通用平台。<br>但是，以太坊的无授权操作模式及全面透明度，是以牺牲性能可扩展性和隐私性为代价的。</p>
-<h3 id="Fabric-3"><a href="#Fabric-3" class="headerlink" title="Fabric"></a>Fabric</h3><p>Fabric采用有授权的操作模式，即使用 BFT 算法和细粒度访问控制解决了性能可扩展性和隐私问题。<br>此外，Fabric的模块化体系结构使其可以针对众多应用进行定制。我们可将 Fabric 比做一个多功能的工具箱。</p>
-<h3 id="Corda-3"><a href="#Corda-3" class="headerlink" title="Corda"></a>Corda</h3><p>Corda被设计为一种专门用于金融服务行业的DLT，专注于金融服务交易使Corda得以简化其架构设计，因此Corda可以提供更多的开箱即可用体验。 </p>
+<h2 id="总结：定制平台-Vs-通用平台"><a href="#总结：定制平台-Vs-通用平台" class="headerlink" title="总结：定制平台 Vs 通用平台"></a>总结：定制平台 Vs 通用平台</h2><h3 id="1-以太坊"><a href="#1-以太坊" class="headerlink" title="1.以太坊"></a>1.以太坊</h3><p>以太坊是一种强大的智能合约引擎，基本上可作为任何类型应用的通用平台。<br>但是，以太坊的无授权操作模式及全面透明度，是以牺牲性能可扩展性和隐私性为代价的。</p>
+<h3 id="2-Fabric"><a href="#2-Fabric" class="headerlink" title="2.Fabric"></a>2.Fabric</h3><p>Fabric采用有授权的操作模式，即使用 BFT 算法和细粒度访问控制解决了性能可扩展性和隐私问题。<br>此外，Fabric的模块化体系结构使其可以针对众多应用进行定制。我们可将 Fabric 比做一个多功能的工具箱。</p>
+<h3 id="3-Corda"><a href="#3-Corda" class="headerlink" title="3.Corda"></a>3.Corda</h3><p>Corda被设计为一种专门用于金融服务行业的DLT，专注于金融服务交易使Corda得以简化其架构设计，因此Corda可以提供更多的开箱即可用体验。</p>
 <p>值得注意的是，Corda通过增加法律行文的智能合同，考虑了受高度管制的环境。</p>
 <p>不过，Fabric的模块化支持定制类似于Corda的功能集，一些工作力图将Corda纳入Hyperledger项目。因此，不能将Corda视为Fabric的竞争对手，而更多的是一种补充。</p>
 
@@ -590,6 +590,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/07/如何制作Ubuntu的USB启动盘/" rel="prev" title="如何制作Ubuntu的USB启动盘">
+                如何制作Ubuntu的USB启动盘 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -659,7 +663,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-count">28</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -738,7 +742,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#运行模式（节点之间的地位）"><span class="nav-number">1.</span> <span class="nav-text">运行模式（节点之间的地位）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Corda"><span class="nav-number">1.1.</span> <span class="nav-text">Corda</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fabric"><span class="nav-number">1.2.</span> <span class="nav-text">Fabric</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Libra"><span class="nav-number">1.3.</span> <span class="nav-text">Libra</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#共识算法（多个节点的工作协同）"><span class="nav-number">2.</span> <span class="nav-text">共识算法（多个节点的工作协同）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#以太坊"><span class="nav-number">2.1.</span> <span class="nav-text">以太坊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fabric-1"><span class="nav-number">2.2.</span> <span class="nav-text">Fabric</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Corda-1"><span class="nav-number">2.3.</span> <span class="nav-text">Corda</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内建代币"><span class="nav-number">3.</span> <span class="nav-text">内建代币</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#智能合约"><span class="nav-number">4.</span> <span class="nav-text">智能合约</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#以太坊-1"><span class="nav-number">4.1.</span> <span class="nav-text">以太坊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fabric-2"><span class="nav-number">4.2.</span> <span class="nav-text">Fabric</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Corda-2"><span class="nav-number">4.3.</span> <span class="nav-text">Corda</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结：定制平台-Vs-通用平台"><span class="nav-number">5.</span> <span class="nav-text">总结：定制平台 Vs 通用平台</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#以太坊-2"><span class="nav-number">5.1.</span> <span class="nav-text">以太坊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fabric-3"><span class="nav-number">5.2.</span> <span class="nav-text">Fabric</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Corda-3"><span class="nav-number">5.3.</span> <span class="nav-text">Corda</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#运行模式（节点之间的地位）"><span class="nav-number">1.</span> <span class="nav-text">运行模式（节点之间的地位）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Corda"><span class="nav-number">1.1.</span> <span class="nav-text">Corda</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fabric"><span class="nav-number">1.2.</span> <span class="nav-text">Fabric</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Libra"><span class="nav-number">1.3.</span> <span class="nav-text">Libra</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#共识算法（多个节点的工作协同）"><span class="nav-number">2.</span> <span class="nav-text">共识算法（多个节点的工作协同）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#以太坊"><span class="nav-number">2.1.</span> <span class="nav-text">以太坊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fabric-1"><span class="nav-number">2.2.</span> <span class="nav-text">Fabric</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Corda-1"><span class="nav-number">2.3.</span> <span class="nav-text">Corda</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内建代币"><span class="nav-number">3.</span> <span class="nav-text">内建代币</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#智能合约"><span class="nav-number">4.</span> <span class="nav-text">智能合约</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#以太坊-1"><span class="nav-number">4.1.</span> <span class="nav-text">以太坊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Fabric-2"><span class="nav-number">4.2.</span> <span class="nav-text">Fabric</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Corda-2"><span class="nav-number">4.3.</span> <span class="nav-text">Corda</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结：定制平台-Vs-通用平台"><span class="nav-number">5.</span> <span class="nav-text">总结：定制平台 Vs 通用平台</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-以太坊"><span class="nav-number">5.1.</span> <span class="nav-text">1.以太坊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Fabric"><span class="nav-number">5.2.</span> <span class="nav-text">2.Fabric</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Corda"><span class="nav-number">5.3.</span> <span class="nav-text">3.Corda</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -758,7 +762,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
