@@ -29,11 +29,11 @@ tags:
 - 关闭SElinux和Firewalld服务
   
     SELinux是一个安全体系结构，它通过LSM(Linux Security Modules)框架被集成到Linux Kernel 2.6.x中。关闭selinux的目的是允许容器直接访问宿主机的文件系统。
-    
+
     SELinux 有三种工作模式，分别是：enforcing强制模式 / permissive宽容模式 / disabled禁用模式，可以在 `/etc/selinux/config` 中设定。
-    
+
     enforcing 和 permissive 模式可以通过 `setenforce 1|0` 命令快速切换。如果想从 disabled 切换到 enforcing 或者 permissive 的话，需要重启系统。反过来也一样。
-    
+
     Iptables防火墙，会对所有网络流量进行过滤、转发，如果是内网机器一般都会直接关闭，省的影响网络性能，但k8s不能直接关了，k8s需要用防火墙做ip转发和修改的，关闭firewalld的目的是防止产生重复的防火墙规则。
 
 ``` shell
@@ -211,6 +211,7 @@ kubeadm init \
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 # 在$HOME/.kube下生成config文件，保存master的登录信息
+# 注意：重复安装时， -i参数可能导致输入中断！！！
 
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 # 用于为普通用户分配kubectl权限
