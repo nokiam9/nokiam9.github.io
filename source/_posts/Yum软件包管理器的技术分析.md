@@ -143,6 +143,9 @@ baseurl=http://mirrors.tencentyun.com/centos/$releasever/os/$basearch/
 # baseurl 定义rpm包的寻址方式，具体解释见下文
 name=Qcloud centos os - $basearch
 # 定义列表中显示的“”源名称“
+priority=2
+# 顺序指令：priority=N （N为1到99的正整数，数值越小越优先）。注意：需要yum-priorities插件支持
+# 一般配置[base], [addons], [updates], [extras] 的priority=1，[CentOSplus], [contrib] 的priority=2，其他第三的软件源为：priority=N （推荐N>10）
 
 [updates]
 ...

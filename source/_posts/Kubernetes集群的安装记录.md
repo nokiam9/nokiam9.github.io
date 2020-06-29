@@ -284,6 +284,8 @@ echo $(kubectl -n kube-system get secret $(kubectl -n kube-system get secret | g
 echo $(kubectl -n kube-system get secret $(kubectl -n kube-system get secret | grep kuboard-viewer | awk '{print $1}') -o go-template='{{.data.token}}' | base64 -d)
 ```
 
+> 注意：Mac OS的base64指令有差异，`base64 -d` 更改为 `base64 -D`
+
 - 浏览器打开地址: `http://192.168.0.132:32567`，访问主监控界面，并粘贴上一步的屏幕显示输入Token
 
 {% asset_img dashboard.png %}
