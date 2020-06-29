@@ -28,9 +28,13 @@ tags:
 
 - 关闭SElinux和Firewalld服务
   
-    SELinux是一个安全体系结构，它通过LSM(Linux Security Modules)框架被集成到Linux Kernel 2.6.x中。
-
-    SELinux提供了一种灵活的强制访问控制(MAC)系统，且内嵌于Linux Kernel中。SELinux定义了系统中每个【用户】、【进程】、【应用】和【文件】的访问和转变的权限，然后它使用一个安全策略来控制这些实体(用户、进程、应用和文件)之间的交互，安全策略指定如何严格或宽松地进行检查
+    SELinux是一个安全体系结构，它通过LSM(Linux Security Modules)框架被集成到Linux Kernel 2.6.x中。关闭selinux的目的是允许容器直接访问宿主机的文件系统。
+    
+    SELinux 有三种工作模式，分别是：enforcing强制模式 / permissive宽容模式 / disabled禁用模式，可以在 `/etc/selinux/config` 中设定。
+    
+    enforcing 和 permissive 模式可以通过 `setenforce 1|0` 命令快速切换。如果想从 disabled 切换到 enforcing 或者 permissive 的话，需要重启系统。反过来也一样。
+    
+    Iptables防火墙，会对所有网络流量进行过滤、转发，如果是内网机器一般都会直接关闭，省的影响网络性能，但k8s不能直接关了，k8s需要用防火墙做ip转发和修改的，关闭firewalld的目的是防止产生重复的防火墙规则。
 
 ``` shell
 sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
@@ -362,3 +366,11 @@ docker 17.03使用的Cgroup Driver为`cgroupfs`，而kubelet 1.8.1 使用的cgro
 本次安装默认K8s的版本是`1.18.4`，报错信息显示时无法正常拉取默认镜像版本。
 
 解决办法是：强制修改K8s的版本号为`1.18.2`，结果下载成功!!!
+
+---
+
+## 参考文档
+
+- [Kubernetes集群安装手册-阿里云社区](https://developer.aliyun.com/article/763983?spm=a2c6h.12873581.0.0.1bb92784z8JOcM&groupCode=mirror)
+- [Kubernetes集群安装手册-kuboard.cn的测试手册](https://kuboard.cn/install/install-k8s.html)
+- [关于SELINUX的详细介绍](https://www.cnblogs.com/kelelipeng/p/10371593.html)
