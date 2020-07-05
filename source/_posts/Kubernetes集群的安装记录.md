@@ -70,7 +70,7 @@ sysctl -p
 - 安装几个基础的工具软件
   
 ``` shell
-yum -y install yum-utils lvm2 device-mapper-persistent-data nfs-utils xfsprogs wget net-tools
+yum -y install yum-utils lvm2 device-mapper-persistent-data nfs-utils xfsprogs wget net-tools bind-utils bzip2 tar tree
 ```
 
 ## Step 2. 安装Docker服务
@@ -367,6 +367,52 @@ docker 17.03使用的Cgroup Driver为`cgroupfs`，而kubelet 1.8.1 使用的cgro
 本次安装默认K8s的版本是`1.18.4`，报错信息显示时无法正常拉取默认镜像版本。
 
 解决办法是：强制修改K8s的版本号为`1.18.2`，结果下载成功!!!
+
+### 4. Master节点无法启动`metrics-server`
+
+``` sh
+[root@localhost ~]# kubectl get pods -A
+NAMESPACE     NAME                                      READY   STATUS    RESTARTS   AGE
+kube-system   calico-kube-controllers-75d555c48-fl5nw   1/1     Running   0          8m44s
+kube-system   calico-node-hkz4f                         1/1     Running   0          8m44s
+kube-system   coredns-546565776c-6c6sj                  1/1     Running   0          9m14s
+kube-system   coredns-546565776c-rk7zx                  1/1     Running   0          9m14s
+kube-system   etcd-master1                              1/1     Running   0          9m31s
+kube-system   kube-apiserver-master1                    1/1     Running   0          9m31s
+kube-system   kube-controller-manager-master1           1/1     Running   0          9m31s
+kube-system   kube-proxy-l62qs                          1/1     Running   0          9m14s
+kube-system   kube-scheduler-master1                    1/1     Running   0          9m30s
+kube-system   kuboard-7bb89b4cc4-gm2jq                  1/1     Running   0          4m24s
+kube-system   metrics-server-7f96bbcc66-dfhs2           0/1     Pending   0          4m19s
+```
+
+``` sh
+[root@localhost ~]# kubectl describe nodes
+Name:               master1
+Roles:              master
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=master1
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/master=
+Annotations:        kubeadm.alpha.kubernetes.io/cri-socket: /var/run/dockershim.sock
+                    node.alpha.kubernetes.io/ttl: 0
+                    projectcalico.org/IPv4Address: 192.168.0.81/24
+                    projectcalico.org/IPv4IPIPTunnelAddr: 10.10.137.64
+                    volumes.kubernetes.io/controller-managed-attach-detach: true
+CreationTimestamp:  Sat, 04 Jul 2020 02:50:40 -0400
+Taints:             node-role.kubernetes.io/master:NoSchedule
+...
+
+```
+
+这就是为什么master1+worker1的配置时，metrics自动好了的原因，因为默认master1不运行应用pod
+
+``` sh
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
+```
 
 ---
 
