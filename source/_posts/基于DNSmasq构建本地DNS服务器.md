@@ -82,9 +82,9 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
 
     ``` sh
     [root@localhost ~]# netstat -tunpl |grep 53
-    tcp        0      0 0.0.0.0:53              0.0.0.0:*               LISTEN      9863/dnsmasq        
-    tcp6       0      0 :::53                   :::*                    LISTEN      9863/dnsmasq        
-    udp        0      0 0.0.0.0:53              0.0.0.0:*                           9863/dnsmasq        
+    tcp        0      0 0.0.0.0:53              0.0.0.0:*               LISTEN      9863/dnsmasq
+    tcp6       0      0 :::53                   :::*                    LISTEN      9863/dnsmasq
+    udp        0      0 0.0.0.0:53              0.0.0.0:*                           9863/dnsmasq
     udp6       0      0 :::53                   :::*                                9863/dnsmasq  
     ```
 
