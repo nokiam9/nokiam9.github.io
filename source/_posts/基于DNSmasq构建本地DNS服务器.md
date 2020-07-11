@@ -8,11 +8,13 @@ tags:
 
 为了解决KX上网的问题，经常需要修改DNS设置，干脆就在自己的局域网搭建一个本地DNS服务器，作为今后Linux系统安装的基础设施，一劳永逸解决问题。
 
-原本想用BIND（named），虽然功能强大但是安装配置太复杂，研究发现局域网直接用DNSmasq最合适。
-
 局域网Domain：  caogo.lan
 DNS服务器：     192.168.0.130， dnsmasq, dnsmasq.caogo.lan
-> 局域网的Domain要明显区别于公网域名，本来考虑`.local`，但是好像 Mac 的 Banjour打印服务使用了这个域名，目前采用`.lan`
+
+原本想用BIND（named），虽然功能强大但是安装配置太复杂，研究发现局域网直接用DNSmasq最合适。
+另外，局域网的Domain本来考虑`.local`，但发现Mac的Banjour服务默认使用了该域名后缀
+
+> Bonjour服务是基于mDNS(Multicast DNS)协议实现的，mDNS协议适用于局域网内的设备通过组播的方式交互DNS记录来完成域名解析，约定的组播地址是：224.0.0.251，端口号是5353，mdns协议使用DNS协议一样的报文格式。详细资料见参考目录
 
 ## DNSmasq概述
 
@@ -104,3 +106,5 @@ nameserver 192.169.0.130
 - [DNSmasq详细解析及详细配置-腾讯云](https://cloud.tencent.com/developer/article/1174717)
 - [CentOS 7 安装配置本地DNS (BIND) 服务器（Master-Slave）](https://www.kclouder.cn/centos-7-dns-bind/)
 - [BIND的官方网站](https://wiki.archlinux.org/index.php/BIND)
+- [局域网设备发现之Bonjour协议](https://blog.csdn.net/yueqian_scut/article/details/52694411)
+- [RFC-6762](https://en.wikipedia.org/wiki/Multicast_DNS)
