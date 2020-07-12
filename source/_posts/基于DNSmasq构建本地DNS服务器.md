@@ -24,26 +24,47 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
 
 ## DNS服务器的配置步骤
 
-1. 设置网卡的静态IP地址130（必须的），并安装必要的基础软件
+1. 安装操作系统后，找到网卡参数文件并设置静态IP地址130（必须的），至少包含以下参数：BOOTPROTO、ONBOOT、IPADDR、NETMASK、GATEWAY。
+   然后，激活该网络配置`systemctl restart network`并确认成功联网。
+
+2. 刚装好的Centos必须马上关闭firewalld，否则后面虽然netestat显示53端口开放，但是外网死活就访问不了
+   为了后续yum安装访问Internet，临时设置域名服务器安装必要的基础网络工具。
 
     ``` sh
+    # 赶紧关闭防火墙
+    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+    setenforce 0
+    systemctl disable firewalld
+    systemctl stop firewalld
+
+    # 为安装工具软件，临时设置DNS
+    cat > /etc/resolv.conf << EOF
+    nameserver 8.8.8.8
+    EOF
+
     yum install dnsmasq net-tools bind-utils yum-utils tree -y
     ```
 
-2. 编辑DNSmasq核心配置文件`/etc/dnsmasq.conf`
+3. 定义DNSmasq核心配置文件`/etc/dnsmasq.conf`
 
-    ``` conf
-    conf-dir=/etc/dnsmasq.d,.rpmnew,.rpmsave,.rpmorig
-    domain=caogo.lan, 192.168.0.0/24
-    expand-hosts
+    ``` sh
+    mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+
+    cat > /etc/dnsmasq.conf << EOF
     listen-address=127.0.0.1, 192.168.0.130
+    expand-hosts
+    domain=caogo.lan
+    server=8.8.8.8
+    server=114.114.114.114
+    address=/caogo.lan/127.0.0.1
+    address=/caogo.lan/192.168.0.130
+    EOF
     ```
 
-3. 编辑本地域名解析文件`/etc/hosts`
+4. 导入本地域名解析文件`/etc/hosts`，先定义这些hosts，以后要增加就编辑这个文件
 
-    ``` conf
-    127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-    ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+    ``` sh
+    cat >> /etc/hosts << EOF
 
     127.0.0.1       dnsmasq
     192.168.0.130   dnsmasq
@@ -57,19 +78,19 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
 
     192.168.0.132   master1
     192.168.0.130   worker1
+    EOF
     ```
 
-4. 最关键的一步：编辑域名解析核心配置文件`/etc/resolv.conf`
+5. 最关键的一步：编辑域名解析核心配置文件`/etc/resolv.conf`
 
-    ```conf
-    domain      caogo.lan
-
+    ``` sh
+    cat > /etc/resolv.conf << EOF
+    # set localhost as the unique namserver
     nameserver  127.0.0.1
-    nameserver  8.8.8.8
-    nameserver  114.114.114.114
+    EOF
     ```
 
-5. 设置运行环境等
+6. 设置运行环境等
 
     ``` sh
     # 禁止修改配置文件，以防止NetworkManger等默默修改域名解析配置
@@ -80,7 +101,7 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
     systemctl restart dnsmasq
     ```
 
-6. 确认DNS解析服务运行正常
+7. 确认DNS解析服务运行正常
 
     ``` sh
     [root@localhost ~]# netstat -tunpl |grep 53
@@ -96,7 +117,7 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
 
 ``` conf
 # domain caogo.lan
-nameserver 192.169.0.130
+nameserver 192.168.0.130
 ```
 
 ## 参考资料
