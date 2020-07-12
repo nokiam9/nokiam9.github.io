@@ -49,6 +49,21 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
         ```
 
     运行命令`install.sh`，自动拉取压缩包的镜像文件，并生成`docker-compose.yml`，这就是以后的部署配置。
+    最后，Harbor主目录的结构是这样的：
+
+        ``` sh
+        [root@dnsmasq harbor]# tree /root/harbor -L 2
+        /root/harbor                    ## Harbor Sever的主目录
+        ├── common
+        │   └── config
+        ├── common.sh   
+        ├── docker-compose.yml          ## 最后生成的Depolyment配置文件
+        ├── harbor.v1.10.3.tar.gz       ## 离线安装的镜像文件包，docker save && docker load
+        ├── harbor.yml                  ## 初始化安装的配置文件
+        ├── install.sh                  ## 安装入口程序
+        ├── LICENSE
+        └── prepare
+        ```
 
 4. 启动harbor并检查
 
@@ -111,6 +126,32 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 {% asset_img admin.png %}
 
 ## 注意事项
+
+### 自制的image push小工具（还要优化......）
+
+    ``` sh
+    cat > harbor-push.sh << EOF
+    #!/bin/bash 
+
+    count=1
+    while read repo tag others   # 从docker images的输出中获得镜像信息，注意剔除第一行 
+    do 
+        src_image=$repo":"$tag
+        dst_image=192.168.0.130:7350/library/$src_image
+
+        echo "$count: $src_image is pushing..." >& 2
+        
+        echo docker tag $src_image $dst_image
+        echo docker push $dst_image
+        echo docker rmi $dst_image
+
+        count=$(($count + 1))
+    done
+    EOF
+
+    chmod a+x harbor-push.sh
+    docker images |tail -n +2 |./harbor-push.sh 
+    ```
 
 ### Harbor Server的启动和停止方式
 
