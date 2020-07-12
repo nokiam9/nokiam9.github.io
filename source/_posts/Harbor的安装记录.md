@@ -23,7 +23,7 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 
 1. 安装docker-ce、docker-compose
 
-    通过阿里云的镜像加速服务，yum安装docker-ce，详细操作方式参见[Kubernetes集群的安装记录](Kubernetes集群的安装记录.md)
+    通过阿里云的镜像加速服务，yum安装docker-ce，详细操作方式参见[Kubernetes集群的安装记录](https://blog.caogo.cn/2020/06/25/Kubernetes集群的安装记录/)
 
     docker-compose的标准安装方法是从docker.com下载，速度太慢无法忍受。
     还好，阿里云提供了[Docker-toolbox的下载地址](http://mirrors.aliyun.com/docker-toolbox/linux/)。
