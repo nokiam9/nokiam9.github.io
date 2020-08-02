@@ -167,7 +167,7 @@ systemctl start kubelet
 hostnamectl set-hostname master1
 # 设置 hostname，保存在 /etc/hostname
 
-export MASTER_IP=192.168.0.132
+export MASTER_IP=192.168.0.210
 export APISERVER_NAME=master1
 echo "${MASTER_IP}    ${APISERVER_NAME}" >> /etc/hosts
 # 设置Master节点的IP地址和Hostname，并保存在DNS本地解析配置文件 /etc/hosts
@@ -291,7 +291,7 @@ echo $(kubectl -n kube-system get secret $(kubectl -n kube-system get secret | g
 
 > 注意：Mac OS的base64指令有差异，`base64 -d` 更改为 `base64 -D`
 
-- 浏览器打开地址: `http://192.168.0.132:32567`，访问主监控界面，并粘贴上一步的屏幕显示输入Token
+- 浏览器打开地址: `http://192.168.0.210:32567`，访问主监控界面，并粘贴上一步的屏幕显示输入Token
 
 {% asset_img dashboard.png %}
 
@@ -304,7 +304,7 @@ echo $(kubectl -n kube-system get secret $(kubectl -n kube-system get secret | g
 - 在Worker节点上，配置 APISERVER 的地址信息，实际上就是在`/etc/hosts`中增加如下域名:
   
 ``` txt
-192.168.0.132    master1
+192.168.0.210    master1
 ```
 
 - 在Master节点上，获得允许Worker节点加入的Token信息，有两种方法：
