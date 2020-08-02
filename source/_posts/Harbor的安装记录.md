@@ -153,7 +153,7 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
     docker images |tail -n +2 |./harbor-push.sh 
     ```
 
-### Harbor Server的启动和停止方式
+### 手工启动和停止Harbor的操作方法
 
 由于Harbor是采用docker-compose方式启动的，因此关机之前最好手工停止服务，输入：
 
@@ -162,6 +162,33 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 开机后，启动Harbor服务的方式也类似，执行命令:
 
 `cd /root/harbor && docker-compose up -d --build`
+
+### 通过Systemd设置Harbor开机自启动
+
+    ``` shell
+    echo > /usr/lib/systemd/system/harbor.service <<EOF
+    [Unit]
+    Description=Harbor
+    After=docker.service systemd-networkd.service systemd-resolved.service
+    Requires=docker.service
+    Documentation=http://github.com/vmware/harbor
+
+    [Service]
+    Type=simple
+    Restart=on-failure
+    RestartSec=5
+    ExecStart=/usr/bin/docker-compose -f /root/harbor/docker-compose.yml up
+    ExecStop=/usr/bin/docker-compose -f /root/harbor/docker-compose.yml down
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+
+    # 重载Systemd并设置Harbor自启动
+    systemctl daemon-reload
+    systemctl enable harbor
+    systemctl status harbor
+    ```
 
 ## 参考资料
 
