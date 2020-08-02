@@ -51,13 +51,13 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
     mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 
     cat > /etc/dnsmasq.conf << EOF
-    listen-address=127.0.0.1, 192.168.0.130
+    listen-address=127.0.0.1, 192.168.0.199
     expand-hosts
     domain=caogo.lan
     server=8.8.8.8
     server=114.114.114.114
     address=/caogo.lan/127.0.0.1
-    address=/caogo.lan/192.168.0.130
+    address=/caogo.lan/192.168.0.199
     EOF
     ```
 
@@ -67,19 +67,24 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
     cat >> /etc/hosts << EOF
 
     127.0.0.1       dnsmasq
-    192.168.0.130   dnsmasq
     192.168.0.1     gateway
     192.168.0.5     ap
+    192.168.0.8     proxy
     192.168.0.11    plc
 
-    192.168.0.130   mirror
-    192.168.0.130   reg
-    192.168.0.130   nfs
+    192.168.0.132   pve01
 
-    192.168.0.132   master1
-    192.168.0.130   worker1
+    192.168.0.199   dnsmasq dns ns ns01 ns02
+    192.168.0.120   nfs
+    192.168.0.121   reg
+    192.168.0.122   mirror
+
+    192.168.0.210   master1
+    192.168.0.212   worker1
     EOF
     ```
+
+    > 注意：在PVE虚拟机中，Cloud-init启动会修改`/etc/hosts`，解决办法是修改 `/etc/cloud/cloud.cfg`，注释其中的`update_etc_hosts`字段
 
 5. 最关键的一步：编辑域名解析核心配置文件`/etc/resolv.conf`
 
@@ -117,7 +122,7 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
 
 ``` conf
 # domain caogo.lan
-nameserver 192.168.0.130
+nameserver 192.168.0.199
 ```
 
 ## 参考资料
