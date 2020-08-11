@@ -114,3 +114,4 @@ Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读
 - [proxmox中cloud-init使用方法](https://kinkinlu.com/2019/04/18/proxmox%E4%B8%ADcloud-init%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/)
 - [Cloud-init的基本原理](https://xixiliguo.github.io/post/cloud-init-1/)
 - [CentOS 7 下 yum 安装和配置 NFS](https://qizhanming.com/blog/2018/08/08/how-to-install-nfs-on-centos-7)
+- [PVE CLoud-Init的官方文档](https://pve.proxmox.com/wiki/Cloud-Init_Support)
