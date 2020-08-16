@@ -160,14 +160,14 @@ EOF
 
 ### 4. 部署storageclass
 
-定义StorageClass的名称为`managed-nfs-storage`，并从名为`fuseim.pri/ifs` 的provisioner获得动态PV资源，
+定义StorageClass的名称为`nfs-client`，并从名为`fuseim.pri/ifs` 的provisioner获得动态PV资源，
 
 ``` sh
 cat > nfs-client-class.yaml << EOF
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-    name: managed-nfs-storage
+    name: nfs-client
 provisioner: fuseim.pri/ifs     # or choose another name, must match deployment's env PROVISIONER_NAME'
 parameters:
     archiveOnDelete: "false"    # When set to "false" your PVs will not be archived
@@ -194,13 +194,13 @@ kubectl create -f nfs-client-class.yaml
 设置为默认 StorageClass
 
 ``` sh
-kubectl patch storageclass managed-nfs-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+kubectl patch storageclass nfs-client -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
 取消原来的默认 StorageClass
 
 ``` sh
-kubectl patch storageclass managed-nfs-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+kubectl patch storageclass nfs-clinet -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
 ```
 
 ### 2. 常用的检查方法
@@ -273,7 +273,7 @@ drwxrwxrwx.  2 root    root   4096 8月  16 00:23 archived-default-kkk-harbor-re
 
 如果能够KX上网，从HELM直接安装NFS StorageClass也是很方便的。
 
-`helm install hhh stable/nfs-client-provisioner --set nfs.server=192.168.0.200 --set nfs.path=/data`
+`helm install stable/nfs-client-provisioner --set nfs.server=192.168.0.200 --set nfs.path=/data --generate-name`
 
 安装完成后将部署一个名为`nfs-client`的StorageClass，其配置信息为：
 
