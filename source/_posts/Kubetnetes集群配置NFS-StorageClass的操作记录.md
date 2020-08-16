@@ -273,7 +273,7 @@ drwxrwxrwx.  2 root    root   4096 8月  16 00:23 archived-default-kkk-harbor-re
 
 如果能够KX上网，从HELM直接安装NFS StorageClass也是很方便的。
 
-`$ helm install hhh stable/nfs-client-provisioner --set nfs.server=192.168.0.200 --set nfs.path=/data`
+`helm install hhh stable/nfs-client-provisioner --set nfs.server=192.168.0.200 --set nfs.path=/data`
 
 安装完成后将部署一个名为`nfs-client`的StorageClass，其配置信息为：
 
