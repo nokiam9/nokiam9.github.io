@@ -41,6 +41,8 @@ Kubernetes 目前支持多种 Volume 类型，大致如下：
 - 持久化卷声明（PVC - PersistentVolumeClaim)：负责为POD请求存储资源。PVC 是用户存储的一种声明，PVC 和 Pod 比较类似，Pod 消耗的是节点，PVC 消耗的是 PV 资源，Pod 可以请求 CPU 和内存，而 PVC 可以请求特定的存储空间和访问模式。对于真正使用存储的用户不需要关心底层的存储实现细节，只需要直接使用 PVC 即可。
 - 存储类（SC - StorageClass）：负责动态创建 PV，可以封装不同类型的存储供 PVC 选用。通过 StorageClass 的定义，管理员可以将存储资源定义为某种类型的资源，比如快速存储、慢速存储等，用户根据 StorageClass 的描述就可以非常直观的知道各种存储资源的具体特性了，这样就可以根据应用的特性去申请合适的存储资源了。
 
+{% asset_img sc.png %}
+
 StorageClass 包括四个部分:
 
 - provisioner：指定 Volume 插件的类型，包括内置插件（如 kubernetes.io/glusterfs）和外部插件（如 external-storage 提供的 ceph.com/cephfs）。
@@ -108,6 +110,8 @@ EOF
 ```
 
 ### 3. 为存储供应卷创建并绑定权限规则集
+
+由于Kubernetes 1.6以后默认开启RABC，因此必须配置权限规则。
 
 ``` sh
 cat > nfs-client-sa.yaml << EOF
