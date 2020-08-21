@@ -84,27 +84,27 @@ spec:
   template:
     metadata:
     labels:
-        app: nfs-client-provisioner
+      app: nfs-client-provisioner
     spec:
     serviceAccountName: nfs-client-provisioner
     containers:
-        - name: nfs-client-provisioner
+      - name: nfs-client-provisioner
         image: quay.io/external_storage/nfs-client-provisioner:latest
         volumeMounts:
-            - name: nfs-client-root
+          - name: nfs-client-root
             mountPath: /persistentvolumes
         env:
-            - name: PROVISIONER_NAME
+          - name: PROVISIONER_NAME
             value: fuseim.pri/ifs
-            - name: NFS_SERVER
+          - name: NFS_SERVER
             value: 192.168.0.200        # < Your NFS Server IP >
-            - name: NFS_PATH
+          - name: NFS_PATH
             value: /data                # < Your NFS Server MountDir >
     volumes:
-        - name: nfs-client-root
+      - name: nfs-client-root
         nfs:
-            server: 192.168.0.200       # < Your NFS Server IP >
-            path: /data                 # < Your NFS Server MountDir >
+          server: 192.168.0.200       # < Your NFS Server IP >
+          path: /data                 # < Your NFS Server MountDir >
 EOF
 ```
 
