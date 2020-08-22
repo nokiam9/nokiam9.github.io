@@ -60,3 +60,24 @@ UUID=3646-00B9          /boot/efi               vfat    umask=0077,shortname=win
 192.168.0.210   master1
 192.168.0.212   worker1
 ```
+
+``` bash
+[root@master1 ~]# cat /etc/docker/daemon.json
+{
+    "exec-opts": ["native.cgroupdriver=systemd"],
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "100m"
+    },
+    "storage-driver": "overlay2",
+    "insecure-registries": [
+        "192.168.0.130"
+    ],
+    "registry-mirrors":[
+        "http://192.168.0.130",
+        "http://hub-mirror.c.163.com",
+        "https://docker.mirrors.ustc.edu.cn",
+        "https://registry.docker-cn.com"
+    ]
+}
+```

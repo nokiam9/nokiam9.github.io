@@ -80,31 +80,31 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-    app: nfs-client-provisioner
+      app: nfs-client-provisioner
   template:
     metadata:
-    labels:
-      app: nfs-client-provisioner
+      labels:
+        app: nfs-client-provisioner
     spec:
-    serviceAccountName: nfs-client-provisioner
-    containers:
-      - name: nfs-client-provisioner
-        image: quay.io/external_storage/nfs-client-provisioner:latest
-        volumeMounts:
-          - name: nfs-client-root
-            mountPath: /persistentvolumes
-        env:
-          - name: PROVISIONER_NAME
-            value: fuseim.pri/ifs
-          - name: NFS_SERVER
-            value: 192.168.0.200        # < Your NFS Server IP >
-          - name: NFS_PATH
-            value: /data                # < Your NFS Server MountDir >
-    volumes:
-      - name: nfs-client-root
-        nfs:
-          server: 192.168.0.200       # < Your NFS Server IP >
-          path: /data                 # < Your NFS Server MountDir >
+      serviceAccountName: nfs-client-provisioner
+      containers:
+        - name: nfs-client-provisioner
+          image: quay.io/external_storage/nfs-client-provisioner:latest
+          volumeMounts:
+            - name: nfs-client-root
+              mountPath: /persistentvolumes
+          env:
+            - name: PROVISIONER_NAME
+              value: fuseim.pri/ifs
+            - name: NFS_SERVER
+              value: 192.168.0.130        # < Your NFS Server IP >
+            - name: NFS_PATH
+              value: /data                # < Your NFS Server MountDir >
+      volumes:
+        - name: nfs-client-root
+          nfs:
+            server: 192.168.0.130       # < Your NFS Server IP >
+            path: /data                 # < Your NFS Server MountDir >
 EOF
 ```
 
@@ -151,9 +151,9 @@ subjects:
     name: nfs-client-provisioner
     namespace: default
 roleRef:
-kind: ClusterRole
-name: nfs-client-provisioner-runner
-apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nfs-client-provisioner-runner
+  apiGroup: rbac.authorization.k8s.io
 EOF
 ```
 
