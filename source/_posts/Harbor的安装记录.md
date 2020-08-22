@@ -166,7 +166,7 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 ### 通过Systemd设置Harbor开机自启动
 
     ``` shell
-    echo > /etc/systemd/system/harbor.service <<EOF
+    cat > /etc/systemd/system/harbor.service << EOF
     [Unit]
     Description=Harbor
     After=docker.service systemd-networkd.service systemd-resolved.service

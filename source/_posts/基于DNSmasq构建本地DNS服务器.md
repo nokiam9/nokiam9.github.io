@@ -53,11 +53,11 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
     cat > /etc/dnsmasq.conf << EOF
     listen-address=127.0.0.1, 192.168.0.199
     expand-hosts
-    domain=caogo.lan
+    domain=caogo.local
     server=8.8.8.8
     server=114.114.114.114
-    address=/caogo.lan/127.0.0.1
-    address=/caogo.lan/192.168.0.199
+    address=/caogo.local/127.0.0.1
+    address=/caogo.local/192.168.0.199
     EOF
     ```
 
@@ -121,7 +121,7 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
 在局域网中，为每台服务器的`/etc/resolv.conf`中设置：
 
 ``` conf
-# domain caogo.lan
+# domain caogo.local
 nameserver 192.168.0.199
 ```
 
