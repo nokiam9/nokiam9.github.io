@@ -69,43 +69,42 @@ Client的配置参数为：
 - 供应者(provisioner)的名称为`fuseim.pri/ifs`
 
 ``` bash
-
 cat > nfs-client.yaml << EOF
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-name: nfs-client-provisioner
+  name: nfs-client-provisioner
 spec:
-replicas: 1
-strategy:
+  replicas: 1
+  strategy:
     type: Recreate
-selector:
+  selector:
     matchLabels:
     app: nfs-client-provisioner
-template:
+  template:
     metadata:
     labels:
-        app: nfs-client-provisioner
+      app: nfs-client-provisioner
     spec:
     serviceAccountName: nfs-client-provisioner
     containers:
-        - name: nfs-client-provisioner
+      - name: nfs-client-provisioner
         image: quay.io/external_storage/nfs-client-provisioner:latest
         volumeMounts:
-            - name: nfs-client-root
+          - name: nfs-client-root
             mountPath: /persistentvolumes
         env:
-            - name: PROVISIONER_NAME
+          - name: PROVISIONER_NAME
             value: fuseim.pri/ifs
-            - name: NFS_SERVER
+          - name: NFS_SERVER
             value: 192.168.0.200        # < Your NFS Server IP >
-            - name: NFS_PATH
+          - name: NFS_PATH
             value: /data                # < Your NFS Server MountDir >
     volumes:
-        - name: nfs-client-root
+      - name: nfs-client-root
         nfs:
-            server: 192.168.0.200       # < Your NFS Server IP >
-            path: /data                 # < Your NFS Server MountDir >
+          server: 192.168.0.200       # < Your NFS Server IP >
+          path: /data                 # < Your NFS Server MountDir >
 EOF
 ```
 
@@ -118,27 +117,27 @@ cat > nfs-client-sa.yaml << EOF
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-name: nfs-client-provisioner
+  name: nfs-client-provisioner
 
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-name: nfs-client-provisioner-runner
+  name: nfs-client-provisioner-runner
 rules:
-- apiGroups: [""]
+  - apiGroups: [""]
     resources: ["persistentvolumes"]
     verbs: ["get", "list", "watch", "create", "delete"]
-- apiGroups: [""]
+  - apiGroups: [""]
     resources: ["persistentvolumeclaims"]
     verbs: ["get", "list", "watch", "update"]
-- apiGroups: ["storage.k8s.io"]
+  - apiGroups: ["storage.k8s.io"]
     resources: ["storageclasses"]
     verbs: ["get", "list", "watch"]
-- apiGroups: [""]
+  - apiGroups: [""]
     resources: ["events"]
     verbs: ["list", "watch", "create", "update", "patch"]
-- apiGroups: [""]
+  - apiGroups: [""]
     resources: ["endpoints"]
     verbs: ["create", "delete", "get", "list", "watch", "patch", "update"]
 
@@ -146,9 +145,9 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-name: run-nfs-client-provisioner
+  name: run-nfs-client-provisioner
 subjects:
-- kind: ServiceAccount
+  - kind: ServiceAccount
     name: nfs-client-provisioner
     namespace: default
 roleRef:
@@ -167,10 +166,11 @@ cat > nfs-client-class.yaml << EOF
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-    name: nfs-client
-provisioner: fuseim.pri/ifs     # or choose another name, must match deployment's env PROVISIONER_NAME'
+  name: nfs-client
+provisioner: fuseim.pri/ifs     # or choose another name, 
+                                # must match deployment's env PROVISIONER_NAME'
 parameters:
-    archiveOnDelete: "false"    # When set to "false" your PVs will not be archived
+  archiveOnDelete: "false"      # When set to "false" your PVs will not be archived
                                 # by the provisioner upon deletion of the PVC.
 EOF
 ```
