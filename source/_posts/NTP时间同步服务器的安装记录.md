@@ -81,3 +81,25 @@ UUID=3646-00B9          /boot/efi               vfat    umask=0077,shortname=win
     ]
 }
 ```
+---
+
+``` bash
+# 手工推送本地镜像到本地仓库
+# 编辑 push.sh
+
+#!/bin/sh
+HUB=hub.io
+IMG=$1
+echo $IMG
+IMG=`echo $IMG | sed 's|k8s.gcr.io/||g'`
+IMG=`echo $IMG | sed 's|gcr.io/||g'`
+IMG=`echo $IMG | sed 's|quay.io/||g'`
+echo $HUB/$IMG
+docker tag $1 $HUB/$IMG
+docker push $HUB/$IMG
+docker rmi $HUB/$IMG
+一行命令即可将本地所有镜像推送到本地仓库中，供其他主机下载。
+
+$ chmod +x push.sh
+$ for tag in $(docker images | grep -v TAG | awk '{print $1":"$2}'); do ./push.sh $tag; done;
+```
