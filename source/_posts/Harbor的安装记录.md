@@ -133,9 +133,11 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 - 生成证书颁发机构证书：ca.key，ca.csr
 - 生成服务器证书： harbor.caogo.local.key, harbor.caogo.local.crt, v3.ext
 - 提供证书给Harbor和Docker: 注意Docker默认使用.cert文件，而非.crt
-- 部署或重新配置harbor: 编辑harbor.yml，运行install.sh进行设置，通过dockercompose启动
+- 部署或重新配置harbor: 编辑harbor.yml，运行install.sh进行设置，通过docker-compose启动
 
 也可以参见[Harbor配置HTTPS的官方文档](https://goharbor.io/docs/2.0.0/install-config/configure-https/)
+
+> 配置HTTPS方式后，客户端Docker访问Harbor就可以不需要设置`unsecure-registries`参数了。
 
 ---
 

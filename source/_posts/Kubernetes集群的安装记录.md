@@ -37,7 +37,7 @@ tags:
     Iptables防火墙，会对所有网络流量进行过滤、转发，如果是内网机器一般都会直接关闭，省的影响网络性能，但k8s不能直接关了，k8s需要用防火墙做ip转发和修改的，关闭firewalld的目的是防止产生重复的防火墙规则。
 
 ``` shell
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 setenforce 0
 systemctl disable firewalld
 systemctl stop firewalld
