@@ -8,7 +8,7 @@ tags:
 ``` bash
 [root@localhost etc]# cat /etc/ntp.conf
 # 允许内网其他机器同步时间
-restrict 192.168.1.0 mask 255.255.255.0 nomodify notrap
+restrict 192.168.0.0 mask 255.255.255.0 nomodify notrap
 
 # 配置上级时间服务器
 server ntp.ntsc.ac.cn prefer
@@ -103,3 +103,38 @@ docker rmi $HUB/$IMG
 $ chmod +x push.sh
 $ for tag in $(docker images | grep -v TAG | awk '{print $1":"$2}'); do ./push.sh $tag; done;
 ```
+
+---
+
+## 客户端的NTP设置方法
+
+方式一 : 通过ntp服务同步
+
+``` sh
+# 客户端安装ntp服务
+yum install -y ntpdate
+
+# 更改"/etc/ntp.conf"，注释掉原有NTP服务器地址，加入"server 时间服务器IP"
+cat > /etc/ntp.conf << EOF
+# 设置内网NTP服务器地址
+server 192.168.0.130
+
+#允许时间服务器(上游时间服务器)修改本机时间
+restrict 192.168.0.130 nomodify notrap noquery
+
+EOF
+
+# 设置并启动系统服务
+systemctl enable ntpdate
+systemctl restart ntpdata
+ntpq -p
+```
+
+> 注意事项：防火墙的问题，如果无法同步，则检查防火墙
+
+---
+
+## 参考资料
+
+- [快速部署ntp时间服务器](https://www.jianshu.com/p/8b4befdd9196)
+- [NTP时间服务器配置详解](https://blog.51cto.com/wolfgang/1127162)

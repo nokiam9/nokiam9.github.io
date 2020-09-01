@@ -125,7 +125,19 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 
 {% asset_img admin.png %}
 
-## 注意事项
+## HTPPS访问的设置方法
+
+可以采用基于IP地址的访问方式，但是更推荐采用域名方式，具体步骤参见[harbor安装并配置https](https://blog.csdn.net/networken/article/details/107502461)
+主要包括以下环节：
+
+- 生成证书颁发机构证书：ca.key，ca.csr
+- 生成服务器证书： harbor.caogo.local.key, harbor.caogo.local.crt, v3.ext
+- 提供证书给Harbor和Docker: 注意Docker默认使用.cert文件，而非.crt
+- 部署或重新配置harbor: 编辑harbor.yml，运行install.sh进行设置，通过dockercompose启动
+
+也可以参见[Harbor配置HTTPS的官方文档](https://goharbor.io/docs/2.0.0/install-config/configure-https/)
+
+---
 
 ### 自制的image push小工具（还要优化......）
 
