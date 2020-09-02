@@ -65,6 +65,6 @@ SELinux status:                 disabled
 
 ## 参考资料
 
-* [关闭selinux的彻底解决办法](https://blog.51cto.com/jschu/2084898)
-* [Redhat关于关闭Selinux的官方文档](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/4/html/reference_guide/s2-selinux-files-etc)
-
+* [关闭SELinux的彻底解决办法](https://blog.51cto.com/jschu/2084898)
+* [Redhat关于关闭SELinux的官方文档](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/4/html/reference_guide/s2-selinux-files-etc)
+* [SELinux三种模式之间的转换](https://www.cnblogs.com/gailuo/p/3805223.html)
