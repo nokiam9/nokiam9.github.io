@@ -7,6 +7,7 @@ tags:
 ## 概述
 
 基于Centos 7.8的基线版本，同步yum软件源，为客户端提供内网下载服务
+Server采用Nginx提供下载服务，默认采用http方式
 
 ## Sever的配置方法
 
@@ -226,6 +227,25 @@ systemctl status nginx
 ```
 
 > Nginx服务如果网络端口或目录权限等问题导致不能正常启动，往往是SELinux在搞鬼，可以通过`setenforce 0`强制关闭
+
+### 7. Server的后续同步更新方式
+
+``` sh
+###参数-n指下载最新软件包，-p指定目录，指定本地的源--repoid（如果不指定就同步本地服务器所有的源）,下载过程比较久
+reposync -n --repoid=extras --repoid=updates --repoid=base --repoid=centosplus -p /data/centos
+reposync -n --repoid=epel -p /data/epel
+reposync -n --repoid=docker-ce -p /data/docker-ce
+reposync -n --repoid=kubernetes -p /data/kubernetes
+
+createrepo --update /data/centos/base
+createrepo --update /data/centos/extras
+createrepo --update /data/centos/updates
+createrepo --update /data/centos/centosplus
+createrepo --update /data/epel
+createrepo --update /data/docker-ce
+createrepo --update /data/kubernetes
+
+```
 
 ## Client配置方案
 
