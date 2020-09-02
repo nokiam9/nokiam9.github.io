@@ -9,7 +9,7 @@ tags:
 基于Centos 7.8的基线版本，同步yum软件源，为客户端提供内网下载服务
 Server采用Nginx提供下载服务，默认采用http方式
 
-## Sever的配置方法
+## Sever的安装步骤
 
 ### 1. 准备工作
 
@@ -247,7 +247,7 @@ createrepo --update /data/kubernetes
 
 ```
 
-## Client配置方案
+## Client的使用方法
 
 要在内网使用自建YUM源就很简单了。
 
