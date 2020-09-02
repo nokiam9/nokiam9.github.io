@@ -294,7 +294,7 @@ EOF
 
 cat > /etc/yum.repos.d/Caogo-Docker-CE.repo <<- EOF
 [docker-ce]
-name=Docker CE Stable 
+name=Docker CE Stable
 baseurl=http://mirror.caogo.local/docker-ce/
 enabled=1
 gpgcheck=0
@@ -302,7 +302,7 @@ EOF
 
 cat > /etc/yum.repos.d/Caogo-EPEL.repo <<- EOF
 [epel]
-name=Extra Packages for Enterprise Linux 7 
+name=Extra Packages for Enterprise Linux 7
 baseurl=http://mirror.caogo.local/epel/
 enabled=1
 gpgcheck=0
