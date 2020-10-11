@@ -114,3 +114,4 @@ npm config set registry http://mirrors.cloud.tencent.com/npm/
 - [npm的常用命令格式](https://segmentfault.com/a/1190000012099112)
 - [npm scripts高级命令指南](https://www.ruanyifeng.com/blog/2016/10/npm_scripts.html)
 - [10个 NPM 使用技巧](https://www.techug.com/post/10-npm-tips-and-tricks.html)
+- [滥用cnpm可能导致npm版本依赖的混乱问题](http://www.skyjia.com/2017/05/05/npm-error-extraneous/)
