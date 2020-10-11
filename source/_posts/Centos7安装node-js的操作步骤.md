@@ -27,7 +27,7 @@ mv node-v14.2.0-linux-x64 /usr/local/node
 ls -l /usr/local/node/bin
 ```
 
-### 设置环境变量PATH
+## 设置环境变量PATH
 
 手工编辑全局配置文件`vi /etc/profile`，并在最后添加
 
