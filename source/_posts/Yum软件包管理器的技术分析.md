@@ -231,6 +231,25 @@ http://centosu7.centos.org/altarch/7.8.2003/kernel/x86_64/
 
 ---
 
+## 解决yum软件依赖的有效方法
+
+若安装失败，并提示缺少依赖，如提示`can not find libXss.so.1 libappindicator3.so.1`，可先获取依赖包信息 查询命令：
+
+``` sh
+repoquery --nvr --whatprovides libXss.so.1
+repoquery --nvr --whatprovides libappindicator3.so.1
+```
+
+查询repoquery的输出结果 ,找到该文件所在的软件包，例如`libXScrnSaver-1.2.2-6.1.el7`
+立即安装该依赖软件
+
+``` bash
+yum install libXScrnSaver*
+yum install libappindicator*
+```
+
+---
+
 ## 附录: Using Yum Variables
 
 You can use and reference the following built-in variables inyum commands and in all Yum configuration files (that is,/etc/yum.conf and all .repo files in the /etc/yum.repos.d/directory):
