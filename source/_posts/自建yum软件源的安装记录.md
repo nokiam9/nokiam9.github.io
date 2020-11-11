@@ -322,8 +322,65 @@ yum repolist
 
 ---
 
+## 附录：如何生成组包（group）的yum源
+
+要想使用groupinstall命令安装一个组的包，其实和单个包的类似，你可以参考系统光盘中repodata目录下，以comps-xxx-Server.xml结尾的文件，自己手动写一个；也可以用命令自动生成一个
+
+用到的命令为：yum-groups-manager
+
+安装软件包：
+
+`#yum -y install  yum-utils-1.1.30-14.el6.noarch`
+
+建立repo时，如何保持或者创建一些group让其关联安装一些列RPM包呢（可用yum grouplist命令查看的）？
+方法是在createrepo时，添加-g参数来指定准备好的关于group信息的XML文件，命令为：
+`[user@machine] createrepo -g comps.xml MyRepo`
+
+这个comps.xml文件可以用命令来生成：
+`yum-groups-manager -n "My Group" --id=mygroup --save=mygroups.xml --mandatory yum glibc rpm`
+
+Create the repository
+Now we are ready to create our new local repository.
+
+ # createrepo . 
+Enable group support
+
+ # cp /mnt/repodata/*comps*.xml repodata/comps.xml 
+# createrepo -g repodata/comps.xml . 
+Setup your local repo file
+
+Create a file called /etc/yum.repos.d/rhel65-local.repo and add the follow lines and save it:
+
+ [rhel65_x64-local]
+ name=RHEL 6.5 local repository
+ baseurl=file:///var/repo/rhel/6/u5/x86_64
+ enabled=1
+ gpgcheck=0
+Clean and recreate the yum db
+
+ # yum clean all 
+ # yum makecache 
+Test it
+
+ # yum list 
+ # yum grouplist 
+ # yum groupinstall "X Window System" Desktop -y 
+
+
+``` bash
+wget https://mirrors.huaweicloud.com/centos/7.8.2003/os/x86_64/repodata/cca56f3cffa18f1e52302dbfcf2f0250a94c8a37acd8347ed6317cb52c8369dc-c7-x86_64-comps.xml
+
+mv *comps.xml mycomps.xml
+
+createrepo -g mycomps.xml .
+```
+
+---
+
 ## 参考资料
 
 - 阿里云的软件源网址：[https://developer.aliyun.com/mirror](https://developer.aliyun.com/mirror/)
 - 腾讯云的软件源网址：[https://mirrors.cloud.tencent.com](https://mirrors.cloud.tencent.com)
 - 华为云的软件源网址：[https://mirrors.huaweicloud.com](https://mirrors.huaweicloud.com)
+
+- [Wget 1.20手册](https://xy2401.com/local-docs/gnu/manual.zh/wget.html)
