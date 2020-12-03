@@ -368,11 +368,9 @@ Test it
 
 
 ``` bash
-wget https://mirrors.huaweicloud.com/centos/7.8.2003/os/x86_64/repodata/cca56f3cffa18f1e52302dbfcf2f0250a94c8a37acd8347ed6317cb52c8369dc-c7-x86_64-comps.xml
+wget https://mirrors.huaweicloud.com/centos/7.8.2003/os/x86_64/repodata/cca56f3cffa18f1e52302dbfcf2f0250a94c8a37acd8347ed6317cb52c8369dc-c7-x86_64-comps.xml -o local-comps.xml
 
-mv *comps.xml mycomps.xml
-
-createrepo -g mycomps.xml .
+createrepo -g local-comps.xml .
 ```
 
 ---
