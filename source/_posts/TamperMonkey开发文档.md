@@ -73,6 +73,14 @@ GM存储并不是浏览器的localStorage数据，而是TM自行定义的，仅�
 - GM_getValue(name, defaultValue)
 - GM_deleteValue(name)
 - GM_listValues()
+  这个函数的返回值很奇葩！是一个包含所有name的数组，而不是value。
+  而且，js中for循环中的自变量，如果母体是Array，自变量是计数器，而非数组的内容。
+  ```js
+  const names = GM_listValues();
+  let rs = new Map();
+  for (let i in names) rs.set(names[i], GM_getValue(names[i]));
+  console.log('GM_listValues:', rs);
+  ```
 
 `GM_addValueChangeListener`可以对某个存储变量设置侦听器，用于不同浏览器选项卡的脚本之间的通信。
 其中，回调函数的`remote`参数显示这个值是在另一个选项卡的实例中修改的`true`,还是在这个脚本实例中修改的`false`。
