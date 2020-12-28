@@ -75,6 +75,7 @@ GM存储并不是浏览器的localStorage数据，而是TM自行定义的，仅�
 - GM_listValues()
   这个函数的返回值很奇葩！是一个包含所有name的数组，而不是value。
   而且，js中for循环中的自变量，如果母体是Array，自变量是计数器，而非数组的内容。
+  
   ```js
   const names = GM_listValues();
   let rs = new Map();
@@ -166,3 +167,4 @@ GM存储并不是浏览器的localStorage数据，而是TM自行定义的，仅�
 - [GM_getTab开发示例](https://www.thinbug.com/q/52415273)
 - [GM_addValueChangeListener开发示例](https://blog.csdn.net/weixin_42067967/article/details/105863853)
 - [一个TM爬虫的粗糙示例](https://zhuanlan.zhihu.com/p/67221319)
+- [常见跨域解决方案](https://juejin.cn/post/6844903575143841805)
