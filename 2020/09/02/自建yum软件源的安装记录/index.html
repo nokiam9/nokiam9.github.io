@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.6.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="概述基于Centos 7.8的基线版本，同步yum软件源，为客户端提供内网下载服务Server采用Nginx提供下载服务，默认采用http方式 Sever的安装步骤1. 准备工作12345# 安装必须的基础软件yum install -y yum-utils reposyn# 删除所有系统自带的REPO源rm -f /etc/yum.repos.d/*.conf 2. 创建自定义的REPO源123">
+<meta property="og:type" content="article">
+<meta property="og:title" content="自建yum软件源的安装记录">
+<meta property="og:url" content="https://blog.caogo.cn/2020/09/02/自建yum软件源的安装记录/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="概述基于Centos 7.8的基线版本，同步yum软件源，为客户端提供内网下载服务Server采用Nginx提供下载服务，默认采用http方式 Sever的安装步骤1. 准备工作12345# 安装必须的基础软件yum install -y yum-utils reposyn# 删除所有系统自带的REPO源rm -f /etc/yum.repos.d/*.conf 2. 创建自定义的REPO源123">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-12-16T01:14:26.906Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="自建yum软件源的安装记录">
+<meta name="twitter:description" content="概述基于Centos 7.8的基线版本，同步yum软件源，为客户端提供内网下载服务Server采用Nginx提供下载服务，默认采用http方式 Sever的安装步骤1. 准备工作12345# 安装必须的基础软件yum install -y yum-utils reposyn# 删除所有系统自带的REPO源rm -f /etc/yum.repos.d/*.conf 2. 创建自定义的REPO源123">
+
+
+
+
+
+
+  <link rel="canonical" href="https://blog.caogo.cn/2020/09/02/自建yum软件源的安装记录/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>自建yum软件源的安装记录 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Alex的技术博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>About</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>Tags</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>Categories</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>Search</a>
+        </li>
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="Searching..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/09/02/自建yum软件源的安装记录/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">自建yum软件源的安装记录
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-09-02 22:03:45" itemprop="dateCreated datePublished" datetime="2020-09-02T22:03:45+08:00">2020-09-02</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2020-12-16 09:14:26" itemprop="dateModified" datetime="2020-12-16T09:14:26+08:00">2020-12-16</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>基于Centos 7.8的基线版本，同步yum软件源，为客户端提供内网下载服务<br>Server采用Nginx提供下载服务，默认采用http方式</p>
+<h2 id="Sever的安装步骤"><a href="#Sever的安装步骤" class="headerlink" title="Sever的安装步骤"></a>Sever的安装步骤</h2><h3 id="1-准备工作"><a href="#1-准备工作" class="headerlink" title="1. 准备工作"></a>1. 准备工作</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装必须的基础软件</span></span><br><span class="line">yum install -y yum-utils reposyn</span><br><span class="line"></span><br><span class="line"><span class="comment"># 删除所有系统自带的REPO源</span></span><br><span class="line">rm -f /etc/yum.repos.d/*.conf</span><br></pre></td></tr></table></figure>
+<h3 id="2-创建自定义的REPO源"><a href="#2-创建自定义的REPO源" class="headerlink" title="2. 创建自定义的REPO源"></a>2. 创建自定义的REPO源</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置REPO软件源，注意 $ 前面的转义符！</span></span><br><span class="line">cat &gt; /etc/yum.repos.d/Source-CentOS.repo &lt;&lt;- EOF</span><br><span class="line"><span class="comment"># CentOS-Base.repo</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Yum Repo Source for Centos 7.8 baseline</span></span><br><span class="line"><span class="comment"># Create by sj0225@icloud.com</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line">[base]</span><br><span class="line">name=CentOS-\<span class="variable">$releasever</span> - Base</span><br><span class="line">baseurl=https://mirrors.huaweicloud.com/centos/\<span class="variable">$releasever</span>/os/\<span class="variable">$basearch</span>/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#released updates</span></span><br><span class="line">[updates]</span><br><span class="line">name=CentOS-\<span class="variable">$releasever</span> - Updates</span><br><span class="line">baseurl=https://mirrors.huaweicloud.com/centos/\<span class="variable">$releasever</span>/updates/\<span class="variable">$basearch</span>/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#additional packages that may be useful</span></span><br><span class="line">[extras]</span><br><span class="line">name=CentOS-\<span class="variable">$releasever</span> - Extras</span><br><span class="line">baseurl=https://mirrors.huaweicloud.com/centos/\<span class="variable">$releasever</span>/extras/\<span class="variable">$basearch</span>/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#additional packages that extend functionality of existing packages</span></span><br><span class="line">[centosplus]</span><br><span class="line">name=CentOS-\<span class="variable">$releasever</span> - Plus</span><br><span class="line">baseurl=https://mirrors.huaweicloud.com/centos/\<span class="variable">$releasever</span>/centosplus/\<span class="variable">$basearch</span>/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">cat &gt; /etc/yum.repos.d/Source-Docker-CE.repo &lt;&lt;- EOF</span><br><span class="line">[docker-ce]</span><br><span class="line">name=Docker CE Stable - \<span class="variable">$basearch</span></span><br><span class="line">baseurl=https://mirrors.huaweicloud.com/docker-ce/linux/centos/\<span class="variable">$releasever</span>/\<span class="variable">$basearch</span>/stable/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">cat &gt; /etc/yum.repos.d/Source-EPEL.repo &lt;&lt;- EOF</span><br><span class="line">[epel]</span><br><span class="line">name=Extra Packages <span class="keyword">for</span> Enterprise Linux 7 - \<span class="variable">$basearch</span></span><br><span class="line">baseurl=https://mirrors.huaweicloud.com/epel/\<span class="variable">$releasever</span>/\<span class="variable">$basearch</span></span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">cat &gt; /etc/yum.repos.d/Source-Kubernetes.repo &lt;&lt;- EOF</span><br><span class="line">[kubernetes]</span><br><span class="line">name=kubernetes - el7-x86_64</span><br><span class="line">baseurl=https://mirrors.cloud.tencent.com/kubernetes/yum/repos/kubernetes-el7-x86_64/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<p>目前定义了四个REPO文件，分别是：</p>
+<ul>
+<li><code>Source-CentOS.repo</code>： Cenots的官方软件，包含base、updates、extras、centosplus四个子项，来自华为云</li>
+<li><code>Source-EPEL.repo</code>: Redhat维护的常用软件源，来自华为云</li>
+<li><code>Source-Docker-CE.repo</code>: Docker开源社区版，来自华为云</li>
+<li><code>Source-Kubernetes.repo</code>: Google提供的Kubernetes安装包，来自腾讯云（华为云的目录结构无法顺利同步！）</li>
+</ul>
+<blockquote>
+<p>Kubernetes依赖于Linux内核版本，目前用的是<code>e17-x86-64</code></p>
+</blockquote>
+<h3 id="3-从外网获取REPO源包含的rpm软件包"><a href="#3-从外网获取REPO源包含的rpm软件包" class="headerlink" title="3. 从外网获取REPO源包含的rpm软件包"></a>3. 从外网获取REPO源包含的rpm软件包</h3><p>通过reposyn获取REPO源的rpm安装包，并存放在<code>/data/</code>目录下，目前数据量约为37G</p>
+<blockquote>
+<p>简便起见，目前没有启用GPG校验功能！</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 清理yum缓存</span></span><br><span class="line">yum clean all</span><br><span class="line">yum makecache</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从外网下载rpm安装包</span></span><br><span class="line">reposyn -r base -p /data/centos</span><br><span class="line">reposyn -r extras -p /data/centos</span><br><span class="line">reposyn -r updates -p /data/centos</span><br><span class="line">reposyn -r centosplus -p /data/centos</span><br><span class="line"></span><br><span class="line">reposync -r epel -p /data/epel</span><br><span class="line">reposync -r docker-ce -p /data/docker-ce</span><br><span class="line">reposync -r kubernetes -p /data/kubernetes</span><br></pre></td></tr></table></figure>
+<h3 id="4-创建REPO索引"><a href="#4-创建REPO索引" class="headerlink" title="4. 创建REPO索引"></a>4. 创建REPO索引</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">yum repolist</span><br><span class="line"></span><br><span class="line">createrepo -po /data/centos/base --worker 4</span><br><span class="line">createrepo -po /data/centos/extras --worker 4</span><br><span class="line">createrepo -po /data/centos/updates --worker 4</span><br><span class="line">createrepo -po /data/centos/centosplus --worker 4</span><br><span class="line"></span><br><span class="line">createrepo -po /data/epel --worker 4</span><br><span class="line">createrepo -po /data/docker-ce --worker 4</span><br><span class="line">createrepo -po /data/kubernetes --worker 4</span><br></pre></td></tr></table></figure>
+<h3 id="5-设置HTTP文件下载服务"><a href="#5-设置HTTP文件下载服务" class="headerlink" title="5. 设置HTTP文件下载服务"></a>5. 设置HTTP文件下载服务</h3><p>推荐采用Nginx提供http文件下载服务</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">yum install nginx -y</span><br><span class="line"></span><br><span class="line">cat &gt; /etc/nginx/nginx.conf &lt;&lt;- EOF</span><br><span class="line">user nginx;</span><br><span class="line">worker_processes auto;</span><br><span class="line">error_log /var/<span class="built_in">log</span>/nginx/error.log;</span><br><span class="line">pid /run/nginx.pid;</span><br><span class="line"></span><br><span class="line">include /usr/share/nginx/modules/*.conf;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections 1024;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    log_format  main  <span class="string">'$remote_addr - $remote_user [$time_local] "$request" '</span></span><br><span class="line">                      <span class="string">'$status $body_bytes_sent "$http_referer" '</span></span><br><span class="line">                      <span class="string">'"$http_user_agent" "$http_x_forwarded_for"'</span>;</span><br><span class="line"></span><br><span class="line">    access_log  /var/<span class="built_in">log</span>/nginx/access.log  main;</span><br><span class="line"></span><br><span class="line">    sendfile            on;</span><br><span class="line">    tcp_nopush          on;</span><br><span class="line">    tcp_nodelay         on;</span><br><span class="line">    keepalive_timeout   65;</span><br><span class="line">    types_hash_max_size 2048;</span><br><span class="line"></span><br><span class="line">    include             /etc/nginx/mime.types;</span><br><span class="line">    default_type        application/octet-stream;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        server_name localhost;</span><br><span class="line"></span><br><span class="line">        location / &#123;</span><br><span class="line">            root /data;</span><br><span class="line">            autoindex on;</span><br><span class="line">            autoindex_exact_size off;</span><br><span class="line">            autoindex_localtime on;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">systemctl <span class="built_in">enable</span> nginx</span><br><span class="line">systemctl start nginx</span><br><span class="line">systemctl status nginx</span><br></pre></td></tr></table></figure>
+<h3 id="6-测试检查工作"><a href="#6-测试检查工作" class="headerlink" title="6. 测试检查工作"></a>6. 测试检查工作</h3><p>安装完成，现在浏览器打开Server的IP地址，就可以看到软件源的目录结构，并可以提供给Client使用了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">/data</span><br><span class="line">├── centos</span><br><span class="line">│   ├── base</span><br><span class="line">│   │   ├── Packages</span><br><span class="line">│   │   └── repodata</span><br><span class="line">│   ├── centosplus</span><br><span class="line">│   │   ├── Packages</span><br><span class="line">│   │   └── repodata</span><br><span class="line">│   ├── extras</span><br><span class="line">│   │   ├── Packages</span><br><span class="line">│   │   └── repodata</span><br><span class="line">│   └── updates</span><br><span class="line">│       ├── Packages</span><br><span class="line">│       └── repodata</span><br><span class="line">├── docker-ce</span><br><span class="line">│   ├── Packages</span><br><span class="line">│   └── repodata</span><br><span class="line">├── epel</span><br><span class="line">│   ├── Packages</span><br><span class="line">│   │   ├── 0</span><br><span class="line">│   │   ├── 2</span><br><span class="line">│   │   ├── 3</span><br><span class="line">......</span><br><span class="line">│   │   ├── y</span><br><span class="line">│   │   └── z</span><br><span class="line">│   └── repodata</span><br><span class="line">└── kubernetes</span><br><span class="line">    ├── Packages</span><br><span class="line">    └── repodata</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>Nginx服务如果网络端口或目录权限等问题导致不能正常启动，往往是SELinux在搞鬼，可以通过<code>setenforce 0</code>强制关闭</p>
+</blockquote>
+<h3 id="7-Server的后续同步更新方式"><a href="#7-Server的后续同步更新方式" class="headerlink" title="7. Server的后续同步更新方式"></a>7. Server的后续同步更新方式</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">###参数-n指下载最新软件包，-p指定目录，指定本地的源--repoid（如果不指定就同步本地服务器所有的源）,下载过程比较久</span></span><br><span class="line">reposync -n --repoid=extras --repoid=updates --repoid=base --repoid=centosplus -p /data/centos</span><br><span class="line">reposync -n --repoid=epel -p /data</span><br><span class="line">reposync -n --repoid=docker-ce -p /data</span><br><span class="line">reposync -n --repoid=kubernetes -p /data</span><br><span class="line"></span><br><span class="line">createrepo --update /data/centos/base</span><br><span class="line">createrepo --update /data/centos/extras</span><br><span class="line">createrepo --update /data/centos/updates</span><br><span class="line">createrepo --update /data/centos/centosplus</span><br><span class="line">createrepo --update /data/epel</span><br><span class="line">createrepo --update /data/docker-ce</span><br><span class="line">createrepo --update /data/kubernetes</span><br></pre></td></tr></table></figure>
+<h2 id="Client的使用方法"><a href="#Client的使用方法" class="headerlink" title="Client的使用方法"></a>Client的使用方法</h2><p>要在内网使用自建YUM源就很简单了。</p>
+<p>首先，确认<code>mirrror.caogo.local</code>的域名能够被准确解析。<br>然后，在目录<code>/etc/yum.repos.d/</code>设置自定义的REPO源就OK了。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line">rm -f /etc/yum.repos.d/*.repo</span><br><span class="line"></span><br><span class="line">cat &gt; /etc/yum.repos.d/Caogo-CentOS.repo &lt;&lt;- EOF</span><br><span class="line"><span class="comment"># CentOS-Base.repo</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Yum Repo Source for Centos 7.8 baseline</span></span><br><span class="line"><span class="comment"># Created by sj0225@icloud.com</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"></span><br><span class="line">[base]</span><br><span class="line">name=CentOS - Base</span><br><span class="line">baseurl=http://mirror.caogo.local/centos/base/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#released updates</span></span><br><span class="line">[updates]</span><br><span class="line">name=CentOS - Updates</span><br><span class="line">baseurl=http://mirror.caogo.local/centos/updates/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#additional packages that may be useful</span></span><br><span class="line">[extras]</span><br><span class="line">name=CentOS - Extras</span><br><span class="line">baseurl=http://mirror.caogo.local/centos/extras/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line"></span><br><span class="line"><span class="comment">#additional packages that extend functionality of existing packages</span></span><br><span class="line">[centosplus]</span><br><span class="line">name=CentOS - Plus</span><br><span class="line">baseurl=http://mirror.caogo.local/centos/centosplus/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">cat &gt; /etc/yum.repos.d/Caogo-Docker-CE.repo &lt;&lt;- EOF</span><br><span class="line">[docker-ce]</span><br><span class="line">name=Docker CE Stable</span><br><span class="line">baseurl=http://mirror.caogo.local/docker-ce/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">cat &gt; /etc/yum.repos.d/Caogo-EPEL.repo &lt;&lt;- EOF</span><br><span class="line">[epel]</span><br><span class="line">name=Extra Packages <span class="keyword">for</span> Enterprise Linux 7</span><br><span class="line">baseurl=http://mirror.caogo.local/epel/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">cat &gt; /etc/yum.repos.d/Caogo-Kubernetes.repo &lt;&lt;- EOF</span><br><span class="line">[kubernetes]</span><br><span class="line">name=kubernetes - el7-x86_64</span><br><span class="line">baseurl=http://mirror.caogo.local/kubernetes/</span><br><span class="line">enabled=1</span><br><span class="line">gpgcheck=0</span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">yum repolist</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="附录：如何生成组包（group）的yum源"><a href="#附录：如何生成组包（group）的yum源" class="headerlink" title="附录：如何生成组包（group）的yum源"></a>附录：如何生成组包（group）的yum源</h2><p>要想使用groupinstall命令安装一个组的包，其实和单个包的类似，你可以参考系统光盘中repodata目录下，以comps-xxx-Server.xml结尾的文件，自己手动写一个；也可以用命令自动生成一个</p>
+<p>用到的命令为：yum-groups-manager</p>
+<p>安装软件包：</p>
+<p><code>#yum -y install  yum-utils-1.1.30-14.el6.noarch</code></p>
+<p>建立repo时，如何保持或者创建一些group让其关联安装一些列RPM包呢（可用yum grouplist命令查看的）？<br>方法是在createrepo时，添加-g参数来指定准备好的关于group信息的XML文件，命令为：<br><code>[user@machine] createrepo -g comps.xml MyRepo</code></p>
+<p>这个comps.xml文件可以用命令来生成：<br><code>yum-groups-manager -n &quot;My Group&quot; --id=mygroup --save=mygroups.xml --mandatory yum glibc rpm</code></p>
+<p>Create the repository<br>Now we are ready to create our new local repository.</p>
+<h1 id="createrepo"><a href="#createrepo" class="headerlink" title="createrepo ."></a>createrepo .</h1><p>Enable group support</p>
+<h1 id="cp-mnt-repodata-comps-xml-repodata-comps-xml"><a href="#cp-mnt-repodata-comps-xml-repodata-comps-xml" class="headerlink" title="cp /mnt/repodata/comps.xml repodata/comps.xml"></a>cp /mnt/repodata/<em>comps</em>.xml repodata/comps.xml</h1><h1 id="createrepo-g-repodata-comps-xml"><a href="#createrepo-g-repodata-comps-xml" class="headerlink" title="createrepo -g repodata/comps.xml ."></a>createrepo -g repodata/comps.xml .</h1><p>Setup your local repo file</p>
+<p>Create a file called /etc/yum.repos.d/rhel65-local.repo and add the follow lines and save it:</p>
+<p> [rhel65_x64-local]<br> name=RHEL 6.5 local repository<br> baseurl=file:///var/repo/rhel/6/u5/x86_64<br> enabled=1<br> gpgcheck=0<br>Clean and recreate the yum db</p>
+<h1 id="yum-clean-all"><a href="#yum-clean-all" class="headerlink" title="yum clean all"></a>yum clean all</h1><h1 id="yum-makecache"><a href="#yum-makecache" class="headerlink" title="yum makecache"></a>yum makecache</h1><p>Test it</p>
+<h1 id="yum-list"><a href="#yum-list" class="headerlink" title="yum list"></a>yum list</h1><h1 id="yum-grouplist"><a href="#yum-grouplist" class="headerlink" title="yum grouplist"></a>yum grouplist</h1><h1 id="yum-groupinstall-“X-Window-System”-Desktop-y"><a href="#yum-groupinstall-“X-Window-System”-Desktop-y" class="headerlink" title="yum groupinstall “X Window System” Desktop -y"></a>yum groupinstall “X Window System” Desktop -y</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://mirrors.huaweicloud.com/centos/7.8.2003/os/x86_64/repodata/cca56f3cffa18f1e52302dbfcf2f0250a94c8a37acd8347ed6317cb52c8369dc-c7-x86_64-comps.xml -o <span class="built_in">local</span>-comps.xml</span><br><span class="line"></span><br><span class="line">createrepo -g <span class="built_in">local</span>-comps.xml .</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li>阿里云的软件源网址：<a href="https://developer.aliyun.com/mirror/" target="_blank" rel="noopener">https://developer.aliyun.com/mirror</a></li>
+<li>腾讯云的软件源网址：<a href="https://mirrors.cloud.tencent.com" target="_blank" rel="noopener">https://mirrors.cloud.tencent.com</a></li>
+<li><p>华为云的软件源网址：<a href="https://mirrors.huaweicloud.com" target="_blank" rel="noopener">https://mirrors.huaweicloud.com</a></p>
+</li>
+<li><p><a href="https://xy2401.com/local-docs/gnu/manual.zh/wget.html" target="_blank" rel="noopener">Wget 1.20手册</a></p>
+</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/09/01/关于Selinux的疑难杂症/" rel="next" title="关于Selinux的疑难杂症">
+                <i class="fa fa-chevron-left"></i> 关于Selinux的疑难杂症
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/10/11/Centos7安装node-js的操作步骤/" rel="prev" title="Centos7安装node.js的操作步骤">
+                Centos7安装node.js的操作步骤 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Alex Sun</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">categories</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">tags</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sever的安装步骤"><span class="nav-number">2.</span> <span class="nav-text">Sever的安装步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-准备工作"><span class="nav-number">2.1.</span> <span class="nav-text">1. 准备工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-创建自定义的REPO源"><span class="nav-number">2.2.</span> <span class="nav-text">2. 创建自定义的REPO源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-从外网获取REPO源包含的rpm软件包"><span class="nav-number">2.3.</span> <span class="nav-text">3. 从外网获取REPO源包含的rpm软件包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-创建REPO索引"><span class="nav-number">2.4.</span> <span class="nav-text">4. 创建REPO索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-设置HTTP文件下载服务"><span class="nav-number">2.5.</span> <span class="nav-text">5. 设置HTTP文件下载服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-测试检查工作"><span class="nav-number">2.6.</span> <span class="nav-text">6. 测试检查工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Server的后续同步更新方式"><span class="nav-number">2.7.</span> <span class="nav-text">7. Server的后续同步更新方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Client的使用方法"><span class="nav-number">3.</span> <span class="nav-text">Client的使用方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#附录：如何生成组包（group）的yum源"><span class="nav-number">4.</span> <span class="nav-text">附录：如何生成组包（group）的yum源</span></a></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#createrepo"><span class="nav-number"></span> <span class="nav-text">createrepo .</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#cp-mnt-repodata-comps-xml-repodata-comps-xml"><span class="nav-number"></span> <span class="nav-text">cp /mnt/repodata/comps.xml repodata/comps.xml</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#createrepo-g-repodata-comps-xml"><span class="nav-number"></span> <span class="nav-text">createrepo -g repodata/comps.xml .</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#yum-clean-all"><span class="nav-number"></span> <span class="nav-text">yum clean all</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#yum-makecache"><span class="nav-number"></span> <span class="nav-text">yum makecache</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#yum-list"><span class="nav-number"></span> <span class="nav-text">yum list</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#yum-grouplist"><span class="nav-number"></span> <span class="nav-text">yum grouplist</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#yum-groupinstall-“X-Window-System”-Desktop-y"><span class="nav-number"></span> <span class="nav-text">yum groupinstall “X Window System” Desktop -y</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">1.</span> <span class="nav-text">参考资料</span></a></li></ol></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v6.6.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

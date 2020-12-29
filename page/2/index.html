@@ -373,7 +373,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/11/29/基于区块链的五种开源技术平台/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/07/05/基于DNSmasq构建本地DNS服务器/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -393,7 +393,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/11/29/基于区块链的五种开源技术平台/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">基于区块链的五种开源技术平台</a>
+                <a href="/2020/07/05/基于DNSmasq构建本地DNS服务器/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">基于DNSmasq构建本地DNS服务器</a>
               
             
           </h1>
@@ -418,7 +418,7 @@
                 
               
 
-              <time title="Created: 2019-11-29 14:14:48" itemprop="dateCreated datePublished" datetime="2019-11-29T14:14:48+08:00">2019-11-29</time>
+              <time title="Created: 2020-07-05 15:22:39" itemprop="dateCreated datePublished" datetime="2020-07-05T15:22:39+08:00">2020-07-05</time>
             
 
             
@@ -435,7 +435,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2020-06-08 08:50:00" itemprop="dateModified" datetime="2020-06-08T08:50:00+08:00">2020-06-08</time>
+                <time title="Modified: 2020-09-04 12:53:39" itemprop="dateModified" datetime="2020-09-04T12:53:39+08:00">2020-09-04</time>
               
             
           </span>
@@ -470,12 +470,13 @@
       
         
           
-          区块链的本质是DLT，即分布式账本技术（Distributed Ledger Technologies），目前比较活跃的有5个开源软件，分别是Hyperledger Fabric、R3 Corda、Ethereum、Facebook Libra、FISCO BCOS（分别简称为 Fabric、Cor
+          本地网络规划方案为了解决KX上网的问题，经常需要修改DNS设置，干脆就在自己的局域网搭建一个本地DNS服务器，作为今后Linux系统安装的基础设施，一劳永逸解决问题。
+局域网Domain：  caogo.lanDNS服务器：     192.168.0.199， dnsmasq, dnsmasq.c
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/11/29/基于区块链的五种开源技术平台/#more" rel="contents">
+              <a class="btn" href="/2020/07/05/基于DNSmasq构建本地DNS服务器/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -535,7 +536,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/06/27/Yum软件包管理器的技术分析/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -555,7 +556,7 @@
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">深入理解Dockerfile文件中的Entrypoint和Cmd命令</a>
+                <a href="/2020/06/27/Yum软件包管理器的技术分析/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Yum软件包管理器的技术分析</a>
               
             
           </h1>
@@ -580,7 +581,7 @@
                 
               
 
-              <time title="Created: 2019-11-16 15:50:06" itemprop="dateCreated datePublished" datetime="2019-11-16T15:50:06+08:00">2019-11-16</time>
+              <time title="Created: 2020-06-27 13:14:37" itemprop="dateCreated datePublished" datetime="2020-06-27T13:14:37+08:00">2020-06-27</time>
             
 
             
@@ -597,7 +598,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-11-29 18:52:56" itemprop="dateModified" datetime="2019-11-29T18:52:56+08:00">2019-11-29</time>
+                <time title="Modified: 2020-10-12 10:39:51" itemprop="dateModified" datetime="2020-10-12T10:39:51+08:00">2020-10-12</time>
               
             
           </span>
@@ -632,20 +633,13 @@
       
         
           
-          CMD链接
-
-主要目的
-
-提供默认的命令
-提供默认的参数，与ENTRYPOINT协同作用
-如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT
-该方式的命令，会被docker run image cmd arg1 arg2命令行方式覆盖
-dockerfile 中最后一个CMD参数才
+          YUM（ Yellow dog Updater, Modified）是一个在Fedora和RedHat以及CentOS中的Shell前端软件包管理器。它基于RPM包管理，能够从指定的服务器自动下载RPM包并且安装，可以自动处理依赖性关系，无须繁琐地一次次下载、安装。
+yum 的理念是使用一个中心仓库
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/11/16/深入理解Dockerfile文件中的Entrypoint和Cmd命令/#more" rel="contents">
+              <a class="btn" href="/2020/06/27/Yum软件包管理器的技术分析/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -705,7 +699,7 @@ dockerfile 中最后一个CMD参数才
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/11/15/Mongo数据库设置鉴权登录的方法/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/06/25/Linux的网卡命名规则/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -725,7 +719,7 @@ dockerfile 中最后一个CMD参数才
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/11/15/Mongo数据库设置鉴权登录的方法/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Mongo数据库设置鉴权登录的方法</a>
+                <a href="/2020/06/25/Linux的网卡命名规则/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Linux的网卡命名规则</a>
               
             
           </h1>
@@ -750,7 +744,7 @@ dockerfile 中最后一个CMD参数才
                 
               
 
-              <time title="Created: 2019-11-15 16:57:17" itemprop="dateCreated datePublished" datetime="2019-11-15T16:57:17+08:00">2019-11-15</time>
+              <time title="Created: 2020-06-25 23:51:03" itemprop="dateCreated datePublished" datetime="2020-06-25T23:51:03+08:00">2020-06-25</time>
             
 
             
@@ -767,7 +761,7 @@ dockerfile 中最后一个CMD参数才
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2020-06-08 08:50:00" itemprop="dateModified" datetime="2020-06-08T08:50:00+08:00">2020-06-08</time>
+                <time title="Modified: 2020-06-26 10:16:37" itemprop="dateModified" datetime="2020-06-26T10:16:37+08:00">2020-06-26</time>
               
             
           </span>
@@ -802,16 +796,14 @@ dockerfile 中最后一个CMD参数才
       
         
           
-          Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。
-配置初始化用户和口令以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。
-分析该脚本文件可以发现其基本步骤是：
-
-下载Mongo
+          网卡命名规则
+Scheme 1: 如果从BIOS中能够取到可用的，板载网卡的索引号，则使用这个索引号命名，例如: eno1，如不能则尝试Scheme 2
+Scheme 2: 如果从BIOS中能够取到可以用的，网卡所在的PCI-E热插拔插槽(注：pci槽位号)的索引号，则使用这个索引号命名，例如: e
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/11/15/Mongo数据库设置鉴权登录的方法/#more" rel="contents">
+              <a class="btn" href="/2020/06/25/Linux的网卡命名规则/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -871,7 +863,7 @@ dockerfile 中最后一个CMD参数才
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/10/26/Centos宿主机如何安装docker最新版本/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/06/25/Centos的服务器网卡设置方法/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -891,7 +883,7 @@ dockerfile 中最后一个CMD参数才
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/10/26/Centos宿主机如何安装docker最新版本/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Centos宿主机如何安装docker最新版本</a>
+                <a href="/2020/06/25/Centos的服务器网卡设置方法/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Centos的服务器网卡设置方法</a>
               
             
           </h1>
@@ -916,7 +908,7 @@ dockerfile 中最后一个CMD参数才
                 
               
 
-              <time title="Created: 2019-10-26 14:55:27" itemprop="dateCreated datePublished" datetime="2019-10-26T14:55:27+08:00">2019-10-26</time>
+              <time title="Created: 2020-06-25 23:44:17" itemprop="dateCreated datePublished" datetime="2020-06-25T23:44:17+08:00">2020-06-25</time>
             
 
             
@@ -933,7 +925,7 @@ dockerfile 中最后一个CMD参数才
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-11-15 18:18:03" itemprop="dateModified" datetime="2019-11-15T18:18:03+08:00">2019-11-15</time>
+                <time title="Modified: 2020-06-26 10:16:37" itemprop="dateModified" datetime="2020-06-26T10:16:37+08:00">2020-06-26</time>
               
             
           </span>
@@ -968,13 +960,14 @@ dockerfile 中最后一个CMD参数才
       
         
           
-          问题现象测试成功的APP软件包，但在宿主机上安装失败，显示docker container的DNS不成功，判断是宿主机的Docker版本太低，对Docker DNS的支持不好。  
-宿主机是Centos, 内核版本3.10.0-1062.4.1.el7.x86_64, 使用yum install d
+          重装Centos系统使用Centos安装U盘，选择最小化安装，设置root口令，设置失去，最后重新启动。
+配置有线网卡安装完成后，编辑网卡配置文件/etc/sysconfig/network-scripts/ifcfg-eno1
+1234567891011121314151617181920[roo
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/10/26/Centos宿主机如何安装docker最新版本/#more" rel="contents">
+              <a class="btn" href="/2020/06/25/Centos的服务器网卡设置方法/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1034,7 +1027,7 @@ dockerfile 中最后一个CMD参数才
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/08/29/国密标准的简介/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/06/25/Kubernetes集群的安装记录/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -1054,7 +1047,7 @@ dockerfile 中最后一个CMD参数才
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/08/29/国密标准的简介/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">国密标准的简介</a>
+                <a href="/2020/06/25/Kubernetes集群的安装记录/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Kubernetes集群的安装记录</a>
               
             
           </h1>
@@ -1079,158 +1072,7 @@ dockerfile 中最后一个CMD参数才
                 
               
 
-              <time title="Created: 2019-08-29 10:21:00 / Modified: 17:31:28" itemprop="dateCreated datePublished" datetime="2019-08-29T10:21:00+08:00">2019-08-29</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          国密算法的概述国密即国家密码局认定的国产密码算法。主要有SM1，SM2，SM3，SM4。密钥长度和分组长度均为128位。
-2011年，国家密码管理局发布了《关于做好公钥密码算法升级工作的通知》，要求“自2011年3月1日起，在建和拟建公钥密码基础设施电子认证系统和密钥管理系统应使用国密算法。自201
-          ...
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2019/08/29/国密标准的简介/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/07/05/SDN学习笔记之一/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Alex Sun">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/07/05/SDN学习笔记之一/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">SDN学习笔记之一</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-07-05 11:38:52" itemprop="dateCreated datePublished" datetime="2019-07-05T11:38:52+08:00">2019-07-05</time>
+              <time title="Created: 2020-06-25 22:55:25" itemprop="dateCreated datePublished" datetime="2020-06-25T22:55:25+08:00">2020-06-25</time>
             
 
             
@@ -1247,7 +1089,7 @@ dockerfile 中最后一个CMD参数才
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2019-08-29 17:42:56" itemprop="dateModified" datetime="2019-08-29T17:42:56+08:00">2019-08-29</time>
+                <time title="Modified: 2020-09-04 12:53:39" itemprop="dateModified" datetime="2020-09-04T12:53:39+08:00">2020-09-04</time>
               
             
           </span>
@@ -1282,25 +1124,16 @@ dockerfile 中最后一个CMD参数才
       
         
           
-          传统的三层网络架构
-特点：
+          Step 0. Kubernets集群安装的准备工作本次安装测试的基础硬件是Intel NUC5i3 &amp; NUC8i3，基准软件是：
 
-每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用
-
-汇聚层和接入层走二层交换，和核心层走三层路由
-
-所有 OpenStack 网关配置在核心层路由器
-
-防火墙和核心路由器直连，做一些安全策略
-
-
-简化的大二层网络架构
-Spine-Leaf 是 full-mesh
+Centos 7.8（启动速度快、版本稳定性好）
+Docker-ce 19.03.12
+Kubernetes 1.18.2 (v1.18.4拉取国内镜像不成
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/07/05/SDN学习笔记之一/#more" rel="contents">
+              <a class="btn" href="/2020/06/25/Kubernetes集群的安装记录/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1360,7 +1193,7 @@ Spine-Leaf 是 full-mesh
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/05/28/又搬家了/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/06/20/Ubuntu的DNS服务/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -1380,7 +1213,7 @@ Spine-Leaf 是 full-mesh
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/05/28/又搬家了/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">又搬家了</a>
+                <a href="/2020/06/20/Ubuntu的DNS服务/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Ubuntu的DNS服务</a>
               
             
           </h1>
@@ -1405,12 +1238,24 @@ Spine-Leaf 是 full-mesh
                 
               
 
-              <time title="Created: 2019-05-28 09:12:08 / Modified: 09:16:52" itemprop="dateCreated datePublished" datetime="2019-05-28T09:12:08+08:00">2019-05-28</time>
+              <time title="Created: 2020-06-20 22:41:00" itemprop="dateCreated datePublished" datetime="2020-06-20T22:41:00+08:00">2020-06-20</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2020-06-28 12:10:13" itemprop="dateModified" datetime="2020-06-28T12:10:13+08:00">2020-06-28</time>
               
             
           </span>
@@ -1445,16 +1290,13 @@ Spine-Leaf 是 full-mesh
       
         
           
-          昨天开始在北二环上班了。优点很多就不说了，至于缺点嘛……
-一是开车上班要90分钟，地铁也差不多，通勤很痛苦！
-二是物业餐饮真的不咋样，中饭25块钱，还吃不饱！
-慢慢适应吧:)
-
-          
+          DNS概述DNS（Domain Name Server，域名服务器）是进行域名(domain name)和与之相对应的IP地址 (IP address)转换的服务器。DNS中保存了一张域名(domain name)和与之相对应的IP地址 (IP address)的表，以解析消息的域名。
+DNS服务是
+          ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/05/28/又搬家了/#more" rel="contents">
+              <a class="btn" href="/2020/06/20/Ubuntu的DNS服务/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1514,7 +1356,7 @@ Spine-Leaf 是 full-mesh
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/05/04/为ECS设置ssh密钥登录的方法/">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/06/20/硬盘分区表之MBR和GPT/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Alex Sun">
@@ -1534,7 +1376,7 @@ Spine-Leaf 是 full-mesh
           <h1 class="post-title" itemprop="name headline">
                 
                 
-                <a href="/2019/05/04/为ECS设置ssh密钥登录的方法/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">为ECS设置ssh密钥登录的方法</a>
+                <a href="/2020/06/20/硬盘分区表之MBR和GPT/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">硬盘分区表之MBR和GPT</a>
               
             
           </h1>
@@ -1559,7 +1401,513 @@ Spine-Leaf 是 full-mesh
                 
               
 
-              <time title="Created: 2019-05-04 20:11:55" itemprop="dateCreated datePublished" datetime="2019-05-04T20:11:55+08:00">2019-05-04</time>
+              <time title="Created: 2020-06-20 22:39:03" itemprop="dateCreated datePublished" datetime="2020-06-20T22:39:03+08:00">2020-06-20</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2020-06-26 10:16:37" itemprop="dateModified" datetime="2020-06-26T10:16:37+08:00">2020-06-26</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          名词解释磁盘管理模式：
+
+MBR（Master Boot Record）：即硬盘的主引导记录分区列表，在主引导扇区，位于硬盘的cylinder 0， head 0， sector 1 （Sector是从1开始的）。
+
+GPT（GUID Partition Table）：即全局唯一标识分区列表，是一个
+          ...
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2020/06/20/硬盘分区表之MBR和GPT/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/06/20/关于Cloud-init和Netplan的分析/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2020/06/20/关于Cloud-init和Netplan的分析/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">关于Cloud-init和Netplan的分析</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-06-20 18:45:13" itemprop="dateCreated datePublished" datetime="2020-06-20T18:45:13+08:00">2020-06-20</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2020-06-26 10:16:37" itemprop="dateModified" datetime="2020-06-26T10:16:37+08:00">2020-06-26</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          Ubuntu 17以后的版本，为云计算环境提供了新的网络配置方法，主要包括系统服务Cloud-init，以及netplan命令。
+
+
+Cloud-init官方网站的示例
+
+Netplan的官方网站
+
+Cloud-init原理
+
+如何在 Linux 上使用网络配置工具 Netplan
+
+Netplan
+          ...
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2020/06/20/关于Cloud-init和Netplan的分析/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/06/20/Ubuntu-18-04-4的安装步骤/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2020/06/20/Ubuntu-18-04-4的安装步骤/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Ubuntu 18.04.4的安装步骤</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-06-20 16:10:49" itemprop="dateCreated datePublished" datetime="2020-06-20T16:10:49+08:00">2020-06-20</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2020-06-26 10:16:37" itemprop="dateModified" datetime="2020-06-26T10:16:37+08:00">2020-06-26</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          这几天折腾NUC主机，在安装Ubuntu 18.04.4 LTS（长期支持的稳定版本）的过程中遇到不少坑，立此存照吧。
+Step 0：安装前的准备工作已安装内存和硬盘的NUC主机之外，还需要：
+
+独立显示器：感谢LP赞助的DELL S2319SP
+
+USB键盘 + USB鼠标：开机BIOS设置硬件启
+          ...
+          <!--noindex-->
+          
+            <div class="post-button text-center">
+              <a class="btn" href="/2020/06/20/Ubuntu-18-04-4的安装步骤/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2020/06/13/基于ssh加密隧道的三种端口转发模式/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Alex Sun">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                
+                <a href="/2020/06/13/基于ssh加密隧道的三种端口转发模式/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">基于ssh加密隧道的三种端口转发模式</a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2020-06-13 14:17:30" itemprop="dateCreated datePublished" datetime="2020-06-13T14:17:30+08:00">2020-06-13</time>
             
 
             
@@ -1611,343 +1959,13 @@ Spine-Leaf 是 full-mesh
       
         
           
-          最近，租用的腾讯云服务器ECS中招了，来自伦敦IDC的黑客通过ssh访问暴力破解root密码，并种上了木马（估计是挖矿的），看来必须重视安全加固工作了。ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也是必须的。虽然可以为root设置更加复杂的密码，但也是给自己找麻烦
+          去年购入的腾讯云ECS服务器虽然只有1vCpu、1G内存、40G硬盘，但是Linux服务器的效率就是高，跑个小网站那是杠杠的，不过XunSearch中文索引的磁盘消耗比较大，存储利用率超过95%，需要考虑扩容了。
+本着可劲折腾的原则，最近入手了一台Intel NUC主机，开始琢磨把Linux服务器搬
           ...
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/05/04/为ECS设置ssh密钥登录的方法/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/05/04/ECS遭遇安全攻击的一次经历/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Alex Sun">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/05/04/ECS遭遇安全攻击的一次经历/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">ECS遭遇安全攻击的一次经历</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-05-04 20:11:03" itemprop="dateCreated datePublished" datetime="2019-05-04T20:11:03+08:00">2019-05-04</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
-                <time title="Modified: 2019-11-15 18:18:03" itemprop="dateModified" datetime="2019-11-15T18:18:03+08:00">2019-11-15</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！
-服务器的问题表现
-
-登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中/tmp/vThHH严重消耗资源，确认中招了！
-
-
-
-服务
-          ...
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2019/05/04/ECS遭遇安全攻击的一次经历/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-      
-    
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://blog.caogo.cn/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Alex Sun">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/" class="post-title-link" itemprop="https://blog.caogo.cn/page/2/index.html">Kubernetes for Mac的安装方法和问题记录</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2019-04-01 16:21:24" itemprop="dateCreated datePublished" datetime="2019-04-01T16:21:24+08:00">2019-04-01</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">Edited on</span>
-                
-                <time title="Modified: 2019-05-08 18:00:39" itemprop="dateModified" datetime="2019-05-08T18:00:39+08:00">2019-05-08</time>
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          安装Kubernetes的最简单方法著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴
-          ...
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2019/04/01/Kubernetes-for-Mac的安装方法和问题记录/#more" rel="contents">
+              <a class="btn" href="/2020/06/13/基于ssh加密隧道的三种端口转发模式/#more" rel="contents">
                 Read more &raquo;
               </a>
             </div>
@@ -1996,7 +2014,7 @@ Spine-Leaf 是 full-mesh
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="Previous page"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -2039,7 +2057,7 @@ Spine-Leaf 是 full-mesh
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-count">39</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
