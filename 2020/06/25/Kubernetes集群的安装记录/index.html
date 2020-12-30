@@ -546,14 +546,14 @@
 <p>  kubectl：作为Kubernetes的客户端CLI工具，可以让用户通过命令行的方式对Kubernetes集群进行操作。<strong>Master节点必备，Worker节点可以选装</strong></p>
 </li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install kublet-1.18.2 kubeadm-1.18.2 kubectl-1.18.2 -y</span><br><span class="line"><span class="meta">#</span> yum安装指定版本的软件，查看版本信息的方法是：yum list kubelet --showduplicates |expand</span><br><span class="line"></span><br><span class="line">systemctl enable kubelet</span><br><span class="line">systemctl start kubelet</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install kublet-1.18.2 kubeadm-1.18.2 kubectl-1.18.2 -y</span><br><span class="line"><span class="meta">#</span><span class="bash"> yum安装指定版本的软件，查看版本信息的方法是：yum list kubelet --showduplicates |expand</span></span><br><span class="line"></span><br><span class="line">systemctl enable kubelet</span><br><span class="line">systemctl start kubelet</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p><strong>注意</strong>：此时系统重复启动<code>kubelet</code>不成功，原因是<code>kubeadm</code>尚未完成初始化，不要管他，后面自然就好了！</p>
 </blockquote>
 <h2 id="Step-4-在Master节点设置运行环境，并初始化启动Kubernetes"><a href="#Step-4-在Master节点设置运行环境，并初始化启动Kubernetes" class="headerlink" title="Step 4. 在Master节点设置运行环境，并初始化启动Kubernetes"></a>Step 4. 在Master节点设置运行环境，并初始化启动Kubernetes</h2><ul>
 <li>设置Kubernetes运行环境</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">hostnamectl set-hostname master1</span><br><span class="line"><span class="meta">#</span> 设置 hostname，保存在 /etc/hostname</span><br><span class="line"></span><br><span class="line">export MASTER_IP=192.168.0.210</span><br><span class="line">export APISERVER_NAME=master1</span><br><span class="line">echo "$&#123;MASTER_IP&#125;    $&#123;APISERVER_NAME&#125;" &gt;&gt; /etc/hosts</span><br><span class="line"><span class="meta">#</span> 设置Master节点的IP地址和Hostname，并保存在DNS本地解析配置文件 /etc/hosts</span><br><span class="line"></span><br><span class="line">export POD_SUBNET=10.100.0.1/16nets</span><br><span class="line"><span class="meta">#</span> 设置Kubernetes 容器组所在的网段，该网段安装完成后，由 kubernetes 创建，事先并不存在于您的物理网络中</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">hostnamectl set-hostname master1</span><br><span class="line"><span class="meta">#</span><span class="bash"> 设置 hostname，保存在 /etc/hostname</span></span><br><span class="line"></span><br><span class="line">export MASTER_IP=192.168.0.210</span><br><span class="line">export APISERVER_NAME=master1</span><br><span class="line">echo "$&#123;MASTER_IP&#125;    $&#123;APISERVER_NAME&#125;" &gt;&gt; /etc/hosts</span><br><span class="line"><span class="meta">#</span><span class="bash"> 设置Master节点的IP地址和Hostname，并保存在DNS本地解析配置文件 /etc/hosts</span></span><br><span class="line"></span><br><span class="line">export POD_SUBNET=10.100.0.1/16nets</span><br><span class="line"><span class="meta">#</span><span class="bash"> 设置Kubernetes 容器组所在的网段，该网段安装完成后，由 kubernetes 创建，事先并不存在于您的物理网络中</span></span><br></pre></td></tr></table></figure>
 <ul>
 <li>Master节点初始化，如果失败，可以输入<code>kubeadm reset</code>回滚，观察错误提示并修改配置后重试</li>
 </ul>
@@ -576,7 +576,7 @@
 <ul>
 <li>如果Master节点启动成功，可以根据如下屏幕提示生成<code>$HOME/.kube/config</code>配置文件，完成后就可以使用<code>kubectl</code>了</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p $HOME/.kube</span><br><span class="line">sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line"><span class="meta">#</span> 在$HOME/.kube下生成config文件，保存master的登录信息</span><br><span class="line"><span class="meta">#</span> 注意：重复安装时， -i参数可能导致输入中断！！！</span><br><span class="line"></span><br><span class="line">sudo chown $(id -u):$(id -g) $HOME/.kube/config</span><br><span class="line"><span class="meta">#</span> 用于为普通用户分配kubectl权限</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p $HOME/.kube</span><br><span class="line">sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config</span><br><span class="line"><span class="meta">#</span><span class="bash"> 在<span class="variable">$HOME</span>/.kube下生成config文件，保存master的登录信息</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 注意：重复安装时， -i参数可能导致输入中断！！！</span></span><br><span class="line"></span><br><span class="line">sudo chown $(id -u):$(id -g) $HOME/.kube/config</span><br><span class="line"><span class="meta">#</span><span class="bash"> 用于为普通用户分配kubectl权限</span></span><br></pre></td></tr></table></figure>
 <ul>
 <li><p>安装Calico网络插件</p>
 <p>集群必须安装网络插件以实现Pod间通信，只需要在Master节点操作，其他Node节点会自动创建相关Pod。<br>该配置文件默认采用的Pod的IP地址为192.168.0.0/16，需要修改为集群初始化参数中采用的值，本例中为10.10.0.0/16；</p>
@@ -782,7 +782,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">39</span>
+                    <span class="site-state-item-count">40</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
