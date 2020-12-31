@@ -115,3 +115,4 @@ Android 4.4 支持两种类别：`CATEGORY_PAYMENT`（覆盖行业标准支付�
 - [关于HCE的NFC支付研究报告及其安全性探讨](http://www.jiajuhf.com/zxxw_8/42705634.html)
 - [基于主机的卡模拟概览](http://article.iotxfd.cn/RFID/Host-based%20card%20emulation)
 - [HCE基础知识普及](https://blog.csdn.net/wwww1988600/article/details/69523369)
+- [NFC之 Type A 与 TYpe B 卡区别](https://blog.csdn.net/liwei16611/article/details/85209361)
