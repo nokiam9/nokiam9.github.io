@@ -158,6 +158,38 @@ root@pve01:~# lvs
   vm-222-disk-0          pve          Vwi-a-tz--    4.00g data                 54.27                                  
   vm-223-cloudinit       pve          Vwi-aotz--    4.00m data                 9.38                                   
   vm-223-disk-0          pve          Vwi-aotz--    8.00g data base-122-disk-0 85.10 
+root@pve01:~# lsblk
+NAME                            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda                               8:0    0 111.8G  0 disk 
+├─sda1                            8:1    0  1007K  0 part 
+├─sda2                            8:2    0   512M  0 part /boot/efi
+└─sda3                            8:3    0 111.3G  0 part 
+  ├─pve-swap                    253:0    0     8G  0 lvm  [SWAP]
+  ├─pve-root                    253:1    0  27.8G  0 lvm  /
+  ├─pve-data_tmeta              253:2    0     1G  0 lvm  
+  │ └─pve-data-tpool            253:4    0  59.7G  0 lvm  
+  │   ├─pve-data                253:5    0  59.7G  0 lvm  
+  │   ├─pve-vm--198--cloudinit  253:7    0     4M  0 lvm  
+  │   ├─pve-vm--198--disk--0    253:8    0     4G  0 lvm  
+  │   ├─pve-vm--199--disk--0    253:9    0     4G  0 lvm  
+  │   ├─pve-vm--199--cloudinit  253:10   0     4M  0 lvm  
+  │   ├─pve-vm--121--cloudinit  253:11   0     4M  0 lvm  
+  │   └─pve-base--121--disk--0  253:26   0     4G  1 lvm  
+  └─pve-data_tdata              253:3    0  59.7G  0 lvm  
+    └─pve-data-tpool            253:4    0  59.7G  0 lvm  
+      ├─pve-data                253:5    0  59.7G  0 lvm  
+      ├─pve-vm--198--cloudinit  253:7    0     4M  0 lvm  
+      ├─pve-vm--198--disk--0    253:8    0     4G  0 lvm  
+      ├─pve-vm--199--disk--0    253:9    0     4G  0 lvm  
+      ├─pve-vm--199--cloudinit  253:10   0     4M  0 lvm  
+      ├─pve-vm--121--cloudinit  253:11   0     4M  0 lvm  
+      ├─pve-vm--199--state--dns 253:17   0   1.5G  0 lvm  
+      └─pve-base--121--disk--0  253:26   0     4G  1 lvm  
+nvme0n1                         259:0    0   477G  0 disk 
+├─data02-data02_tmeta           253:23   0   4.8G  0 lvm  
+│ └─data02-data02               253:28   0 467.3G  0 lvm  
+└─data02-data02_tdata           253:27   0 467.3G  0 lvm  
+  └─data02-data02               253:28   0 467.3G  0 lvm  
 ```
 
 ---
