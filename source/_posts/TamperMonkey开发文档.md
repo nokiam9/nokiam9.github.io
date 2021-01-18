@@ -145,6 +145,27 @@ GM存储并不是浏览器的localStorage数据，而是TM自行定义的，仅�
 
 ---
 
+``` console
+--Start Firefox--
+export DISPLAY=:0
+source /etc/profile
+/usr/bin/python3 -m webbrowser -t https://b2b.10086.cn/b2b/main/listVendorNotice.html?noticeType=1
+␇
+--end--
+START /usr/bin/firefox "https://b2b.10086.cn/b2b/main/listVendorNotice.html?noticeType=1"
+Failed to open connection to "session" message bus: /usr/bin/dbus-launch terminated abnormally with the following error:
+ No protocol specified
+Autolaunch error: X11 initialization failed.
+
+Running without a11y support!
+No protocol specified
+Error: cannot open display: :0
+xdg-open: no method available for opening 'https://b2b.10086.cn/b2b/main/listVendorNotice.html?noticeType=1'
+
+```
+
+---
+
 ## 参考文献
 
 ### 官方文档
