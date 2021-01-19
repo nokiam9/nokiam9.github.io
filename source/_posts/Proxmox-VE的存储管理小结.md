@@ -66,17 +66,17 @@ root@pve01:/var/lib/vz# tree /var/lib/vz
     └── qemu
 ```
 
-## LVM
+## 逻辑卷（LVM）
 
 LVM 是典型的块存储解决方案，但 LVM 后端存储本身不支持快照和链接克隆功能。更不幸的是，在创建普通 LVM 快照期间，整个卷组的写操作都会受到影响而变得非常低效。
 
 > LVM最大的好处是你可以在共享存储上建立 LVM 后端存储服务。例如可以在 iSCSI LUN 上建立 LVM。LVM 后端存储自带 Proxmox VE 集群锁以有效防止并发访问冲突。
 
-LVM的创建包含了以下步骤： PV -> VG -> LV，具体步骤参见附录1。
+LVM的创建包含了以下步骤： Device -> Partition -> Phycial Volume -> Volume Group -> Login Volume，具体步骤参见附录1。
 
 {% asset_img shot4.png %}
 
-## 薄存储（LVM-thin）
+## 薄模式的逻辑卷（LVM-thin）
 
 LVM 是在逻辑卷创建时就按设置的卷容量大小预先分配所需空间。LVM-thin 存储池是在向 卷内写入数据时按实际写入数据量大小分配所需空间。LVM-thin 所用的存储空间分配方式允许创建容量远大于物理存储空间的存储卷，因此也称为“薄模式”。
 
@@ -100,7 +100,7 @@ NFS 后端存储的优势在于，你可以通过配置 NFS 服务器参数，�
 
 NFS 存储服务能够自动检测 NFS 服务器的在线状态，并自动连接 NFS 服务器输出的共享存储服务。
 
-## CIFS
+## Windows文件共享（CIFS）
 
 CIFS（Common Internet File System）就是 SMB 的改进版本。Windows的文件共享其实就是使用了 SMB或者说 CIFS。
 基于 CIFS 的后端存储可用于扩展基于目录的存储，这样就无需再手工配置 CIFS 挂载。该类 型存储可直接通过 Proxmox VE API 或 WebUI 添加。服务器心跳检测或共享输出选项等后端 存储参数配置也将自动完成配置。
