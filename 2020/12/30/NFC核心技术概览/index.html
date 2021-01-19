@@ -118,7 +118,7 @@
 <meta property="og:image" content="https://blog.caogo.cn/2020/12/30/NFC核心技术概览/dual-mode.png">
 <meta property="og:image" content="https://blog.caogo.cn/2020/12/30/NFC核心技术概览/hce-se.png">
 <meta property="og:image" content="https://blog.caogo.cn/2020/12/30/NFC核心技术概览/protocol-stack.png">
-<meta property="og:updated_time" content="2020-12-31T01:37:36.679Z">
+<meta property="og:updated_time" content="2021-01-13T02:02:39.368Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NFC核心技术概览">
 <meta name="twitter:description" content="NFC简介NFC(近场通信，Near Field Communication）是一种短距高频的无线电技术，由非接触式射频识别(RFID)演变而来。NFC工作频率为13.56Hz，通常只有在距离不超过4厘米时才能启动连接，其传输速度有106 Kbit/秒、212 Kbit/秒或者424 Kbit/秒三种。NFC有3种工作模式：读卡器模式、点对点模式、卡模拟模式。  读取器/写入器模式（Reader/">
@@ -444,7 +444,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2020-12-31 09:37:36" itemprop="dateModified" datetime="2020-12-31T09:37:36+08:00">2020-12-31</time>
+                <time title="Modified: 2021-01-13 10:02:39" itemprop="dateModified" datetime="2021-01-13T10:02:39+08:00">2021-01-13</time>
               
             
           </span>
@@ -509,7 +509,7 @@
 <li><code>ISO/IEC14443-3</code>:则为非接触卡的初始化及防冲突机制；</li>
 <li><code>ISO/IEC14443-4</code>:位有关的交易协定。</li>
 </ul>
-<p>ISO/IEC14443-3 定义了 TYPEA、TYPEB 两种卡型，均通过13.56Mhz的射频载波传送信号。<br>其主要的区别在于信号发送的载波调制深度、二进制数编码方式存在差异。<br>此外，防冲突机制的原理也完全不同，前者是基于 BIT 冲突检测协议，后者则是通过字节、帧及命令完成防冲突。</p>
+<p>ISO/IEC14443-3 定义了 TYPE A、TYPEB 两种卡型（与飞利浦的 Mifare 标准兼容），均通过13.56Mhz的射频载波传送信号，此外索尼公司开发了FeliCa 标准，也成为TYPE F。<br>不同TYPE的主要的区别在于信号发送的载波调制深度、二进制数编码方式存在差异。<br>此外，防冲突机制的原理也完全不同，TYPE A是基于 BIT 冲突检测协议，TYPE B则是通过字节、帧及命令完成防冲突。</p>
 <h3 id="ISO-IEC-7816"><a href="#ISO-IEC-7816" class="headerlink" title="ISO/IEC 7816"></a>ISO/IEC 7816</h3><p>Android处理应用协议数据单元 (APDU)遵循的是<code>ISO/IEC 7816-4</code>规范。</p>
 <p>Android系统上的HCE技术是通过系统服务实现的(HCE服务)。使用服务的一大优势是它可以一直在后台运行而不需要有用户界面。这个特点就使得HCE技术非常适合像会员卡、交通卡、门禁卡这类的交易，当用户使用时无需打开程序，只需要将手机放到NFC读卡器的识别范围内，交易就会在后台进行。当然如果有必要的话，用户也可以打开UI界面。这时的手机和普通的智能卡片已经没有区别了。</p>
 <h4 id="服务选择AID"><a href="#服务选择AID" class="headerlink" title="服务选择AID"></a>服务选择AID</h4><p>交易中我们有一个重要问题需要解决，当用户将手机放到NFC读卡器的识别范围时,Android系统需要知道读卡器真正想要和哪个HCE服务交互，这样它才能将接收到的数据发送至相应的服务。ISO/IEC 7816-4规范正是解决服务选择的问题，它定义了一种通过应用程序ID(AID)来选择相应服务的方法。</p>
@@ -571,6 +571,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2021/01/17/Proxmox-VE的存储管理小结/" rel="prev" title="Proxmox-VE的存储管理小结">
+                Proxmox-VE的存储管理小结 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -640,7 +644,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-count">41</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -739,7 +743,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>

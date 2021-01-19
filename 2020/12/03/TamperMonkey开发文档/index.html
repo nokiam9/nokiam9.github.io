@@ -112,7 +112,7 @@
 <meta property="og:description" content="一、概述TamperMonkeyTampermonkey 是一款免费的浏览器扩展和最为流行的用户脚本管理器，它适用于 Chrome, Microsoft Edge, Safari, Opera Next, 和 Firefox。 虽然有些受支持的浏览器拥有原生的用户脚本支持，但 Tampermonkey 将在您的用户脚本管理方面提供更多的便利。 它提供了诸如便捷脚本安装、自动更新检查、标签中的脚本运">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://blog.caogo.cn/2020/12/03/TamperMonkey开发文档/extension-architecture.png">
-<meta property="og:updated_time" content="2020-12-29T08:35:57.848Z">
+<meta property="og:updated_time" content="2021-01-18T02:39:30.554Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="TamperMonkey开发文档">
 <meta name="twitter:description" content="一、概述TamperMonkeyTampermonkey 是一款免费的浏览器扩展和最为流行的用户脚本管理器，它适用于 Chrome, Microsoft Edge, Safari, Opera Next, 和 Firefox。 虽然有些受支持的浏览器拥有原生的用户脚本支持，但 Tampermonkey 将在您的用户脚本管理方面提供更多的便利。 它提供了诸如便捷脚本安装、自动更新检查、标签中的脚本运">
@@ -438,7 +438,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2020-12-29 16:35:57" itemprop="dateModified" datetime="2020-12-29T16:35:57+08:00">2020-12-29</time>
+                <time title="Modified: 2021-01-18 10:39:30" itemprop="dateModified" datetime="2021-01-18T10:39:30+08:00">2021-01-18</time>
               
             
           </span>
@@ -595,6 +595,8 @@
 </ul>
 <h2 id="四、TamperMonkey的默认用户脚本"><a href="#四、TamperMonkey的默认用户脚本" class="headerlink" title="四、TamperMonkey的默认用户脚本"></a>四、TamperMonkey的默认用户脚本</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ==UserScript==</span></span><br><span class="line"><span class="comment">// @name         New Userscript</span></span><br><span class="line"><span class="comment">// @namespace    http://tampermonkey.net/</span></span><br><span class="line"><span class="comment">// @version      0.1</span></span><br><span class="line"><span class="comment">// @description  try to take over the world!</span></span><br><span class="line"><span class="comment">// @author       You</span></span><br><span class="line"><span class="comment">// @match        http://*/*</span></span><br><span class="line"><span class="comment">// @grant        none</span></span><br><span class="line"><span class="comment">// ==/UserScript==</span></span><br><span class="line"></span><br><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line"><span class="meta">    'use strict'</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Your code here...</span></span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
 <hr>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">--Start Firefox--</span><br><span class="line">export DISPLAY=:0</span><br><span class="line">source /etc/profile</span><br><span class="line">/usr/bin/python3 -m webbrowser -t https://b2b.10086.cn/b2b/main/listVendorNotice.html?noticeType=1</span><br><span class="line">␇</span><br><span class="line">--end--</span><br><span class="line">START /usr/bin/firefox "https://b2b.10086.cn/b2b/main/listVendorNotice.html?noticeType=1"</span><br><span class="line">Failed to open connection to "session" message bus: /usr/bin/dbus-launch terminated abnormally with the following error:</span><br><span class="line"> No protocol specified</span><br><span class="line">Autolaunch error: X11 initialization failed.</span><br><span class="line"></span><br><span class="line">Running without a11y support!</span><br><span class="line">No protocol specified</span><br><span class="line">Error: cannot open display: :0</span><br><span class="line">xdg-open: no method available for opening 'https://b2b.10086.cn/b2b/main/listVendorNotice.html?noticeType=1'</span><br></pre></td></tr></table></figure>
+<hr>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><h3 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a>官方文档</h3><ul>
 <li><a href="https://www.tampermonkey.net/documentation.php" target="_blank" rel="noopener">TamperMonkey官方文档</a></li>
 <li><a href="https://greasyfork.org/zh-CN" target="_blank" rel="noopener">Greasy Fork: 一个提供用户脚本的网站</a></li>
@@ -727,7 +729,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">40</span>
+                    <span class="site-state-item-count">41</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -826,7 +828,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2021</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
