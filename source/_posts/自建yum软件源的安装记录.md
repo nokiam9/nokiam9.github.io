@@ -109,14 +109,14 @@ yum clean all
 yum makecache
 
 # 从外网下载rpm安装包
-reposyn -r base -p /data/centos
-reposyn -r extras -p /data/centos
-reposyn -r updates -p /data/centos
-reposyn -r centosplus -p /data/centos
+reposync -r base -p /data/centos
+reposync -r extras -p /data/centos
+reposync -r updates -p /data/centos
+reposync -r centosplus -p /data/centos
 
-reposync -r epel -p /data/epel
-reposync -r docker-ce -p /data/docker-ce
-reposync -r kubernetes -p /data/kubernetes
+reposync -r epel -p /data
+reposync -r docker-ce -p /data
+reposync -r kubernetes -p /data
 
 ```
 
@@ -174,6 +174,7 @@ http {
     server {
         listen 80;
         server_name localhost;
+        charset utf-8;
 
         location / {
             root /data;
