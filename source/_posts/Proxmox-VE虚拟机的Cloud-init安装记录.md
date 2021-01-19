@@ -41,7 +41,7 @@ Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读
 
     ``` sh
     # 关闭Selinux
-    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
     setenforce 0
 
     # 关闭Firewalld
@@ -57,6 +57,9 @@ Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读
     echo "net.bridge.bridge-nf-call-iptables = 1" >> /etc/sysctl.conf
     sysctl -p
     ```
+
+    > selinux的真实配置文件路径是`/etc/selinux/config`,而`/etc/sysconfig/selinux`实际是它的软链接文件。
+    检查selinux状态可以使用`sestatus`命令。
 
 3. 安装必要的虚拟化软件和工具软件
    为了让虚拟化层可以重启和关闭虚拟机，必须安装acpid服务；
