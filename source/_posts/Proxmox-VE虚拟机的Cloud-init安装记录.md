@@ -26,82 +26,97 @@ Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读
 
 ## 安装步骤
 
-1. 安装Centos 7.8操作系统。
-    首先创建一个虚拟机并加载Centos系统安装ISO文件，基本配置建议为：1vCPU，1024M内存，4G硬盘，网卡无所谓。注意暂时先不启动！！
-    然后，在PVE控制台上为该虚拟机增加一个Cloud init设备，稍等初始化完成，开始启动VM进行操作系统安装。
-    在安装Centos时，注意手工建立磁盘分区，只留一个启动分区，EFI-Boot和Swap分区都不要了，参见下图。
+### 1. 安装Centos 7.8操作系统
 
-   {% asset_img disk-partition.png %}
+首先创建一个虚拟机并加载Centos系统安装ISO文件，基本配置建议为：1vCPU，1024M内存，4G硬盘，网卡无所谓。注意暂时先不启动！！
+然后，在PVE控制台上为该虚拟机增加一个Cloud init设备，稍等初始化完成，开始启动VM进行操作系统安装。
+在安装Centos时，注意手工建立磁盘分区，只留一个启动分区，EFI-Boot和Swap分区都不要了，参见下图。
 
-    系统安装完成后，检查是否可以正常启动。
+{% asset_img disk-partition.png %}
 
-    > 新系统装完后，必须将网卡配置文件内的onboot打开，清除uuid！！！
+系统安装完成后，检查是否可以正常启动。
 
-2. 关闭selinux和firewalld以及碍事的NetworkManager
-    > selinux的真实配置文件路径是`/etc/selinux/config`,而`/etc/sysconfig/selinux`实际是它的软链接文件。
-    > 检查selinux状态可以使用`sestatus`命令。
+> 新系统装完后，必须将网卡配置文件内的onboot打开，清除uuid！！！
 
-    ``` sh
-    # 关闭Selinux
-    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-    setenforce 0
+### 2. 关闭selinux和firewalld以及碍事的NetworkManager
 
-    # 关闭Firewalld
-    systemctl disable --now firewalld
+> selinux的真实配置文件路径是`/etc/selinux/config`,而`/etc/sysconfig/selinux`实际是它的软链接文件。
+> 检查selinux状态可以使用`sestatus`命令。
 
-    # 关闭NetworManager
-    systemctl disable --now NetworkManager
+``` sh
+# 关闭Selinux
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+setenforce 0
 
-    # 设置Linunx内核，允许IP转发
-    modprobe br_netfilter
-    echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
-    echo "net.bridge.bridge-nf-call-ip6tables = 1" >> /etc/sysctl.conf
-    echo "net.bridge.bridge-nf-call-iptables = 1" >> /etc/sysctl.conf
-    sysctl -p
-    ```
+# 关闭Firewalld
+systemctl disable --now firewalld
 
-    > netfilter是Linux内核的包过滤框架，它提供了一系列的钩子（Hook）供其他模块控制包的流动，配置Linux内核防火墙的命令行工具iptables就是基于netfilter机制的。
-    > 注意：服务器重启后`sysctl`命令报错，原因大概是br_netfilter模块未被自动加载，考虑通过配置`/etc/rc.sysinit`来解决！
+# 关闭NetworManager
+systemctl disable --now NetworkManager
 
-3. 安装必要的虚拟化软件和工具软件
-   为了让虚拟化层可以重启和关闭虚拟机，必须安装acpid服务；
-   为了使根分区正确调整大小安装cloud-utils-growpart，cloud-init支持下发前设置信息写入。
+# 设置Linunx内核，允许IP转发
+modprobe br_netfilter
+echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+echo "net.bridge.bridge-nf-call-ip6tables = 1" >> /etc/sysctl.conf
+echo "net.bridge.bridge-nf-call-iptables = 1" >> /etc/sysctl.conf
+sysctl -p
 
-    ``` sh
-    yum install -y acpid cloud-init cloud-utils-growpart
-    yum install -y git wget yum-utils net-tools bind-utils
-    systemctl enable acpid
+# 配置启动时自动加载br_netfilter模块
+cat > /etc/rc.sysinit <<- EOF
+#!/bin/bash
+for file in /etc/sysconfig/modules/*.modules ; do
+[ -x $file ] && $file
+done
+EOF
 
-    # 禁用默认zeroconf路线
-    echo "NOZEROCONF=yes" >> /etc/sysconfig/network
+echo 'modprobe br_netfilter' > /etc/sysconfig/modules/br_netfilter.modules
+chmod 755 /etc/sysconfig/modules/br_netfilter.modules
+```
 
-    # 防止ssh连接使用dns导致访问过慢
-    sed -ri '/UseDNS/{s@#@@;s@\s+.+@ no@}' /etc/ssh/sshd_config
-    systemctl restart sshd
-    ```
+> netfilter是Linux内核的包过滤框架，它提供了一系列的钩子（Hook）供其他模块控制包的流动，配置Linux内核防火墙的命令行工具iptables就是基于netfilter机制的。
+> 注意：服务器重启后`sysctl`命令报错，原因大概是br_netfilter模块未被自动加载，考虑通过配置`/etc/rc.sysinit`来解决！
 
-4. 设置cloud-init
-    设置允许root登录，允许输入口令，禁止第一次启动后yum更新软件
+### 3. 安装必要的虚拟化软件和工具软件
 
-    ``` sh
-    sed -ri '/disable_root/{s#\S$#0#}' /etc/cloud/cloud.cfg
-    sed -ri '/ssh_pwauth/{s#\S$#1#}' /etc/cloud/cloud.cfg
-    sed -ri '/package-update/s@^@#@' /etc/cloud/cloud.cfg
-    ```
+为了让虚拟化层可以重启和关闭虚拟机，必须安装acpid服务；
+为了使根分区正确调整大小安装cloud-utils-growpart，cloud-init支持下发前设置信息写入。
 
-    默认cloud-init会创建一个系统类型的centos用户，手工编辑配置文件取消掉。
+``` sh
+yum install -y acpid cloud-init cloud-utils-growpart
+yum install -y git wget yum-utils net-tools bind-utils
+systemctl enable acpid
 
-    ``` conf
-    #  default_user:
-    #    name: centos
-    #    lock_passwd: true
-    #    gecos: Cloud User
-    #    groups: [wheel, adm, systemd-journal]
-    #    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
-    #    shell: /bin/bash
-    ```
+# 禁用zeroconf(零配置网络服务规范)，该协议目的是在系统无法连接DHCP服务的时候，尝试获取类似169.254.0.0的保留IP
+echo "NOZEROCONF=yes" >> /etc/sysconfig/network
 
-5. 虚拟机关机，并在PVE控制台上将其转换为模版templete，母鸡就此完成！！！
+# 防止ssh连接使用dns导致访问过慢
+sed -ri '/UseDNS/{s@#@@;s@\s+.+@ no@}' /etc/ssh/sshd_config
+systemctl restart sshd
+```
+
+### 4. 设置cloud-init
+
+设置允许root登录，允许输入口令，禁止第一次启动后yum更新软件
+
+``` sh
+sed -ri '/disable_root/{s#\S$#0#}' /etc/cloud/cloud.cfg
+sed -ri '/ssh_pwauth/{s#\S$#1#}' /etc/cloud/cloud.cfg
+sed -ri '/package-update/s@^@#@' /etc/cloud/cloud.cfg
+```
+
+默认cloud-init会创建一个系统类型的centos用户，手工编辑配置文件取消掉。
+
+``` conf
+#  default_user:
+#    name: centos
+#    lock_passwd: true
+#    gecos: Cloud User
+#    groups: [wheel, adm, systemd-journal]
+#    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+#    shell: /bin/bash
+```
+
+### 5. 虚拟机关机，并在PVE控制台上将其转换为模版templete，母鸡就此完成
 
 ## 使用Cloud-init模版克隆新的虚拟机
 
