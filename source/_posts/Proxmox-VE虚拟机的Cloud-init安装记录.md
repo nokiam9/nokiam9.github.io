@@ -38,6 +38,8 @@ Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读
     > 新系统装完后，必须将网卡配置文件内的onboot打开，清除uuid！！！
 
 2. 关闭selinux和firewalld以及碍事的NetworkManager
+    > selinux的真实配置文件路径是`/etc/selinux/config`,而`/etc/sysconfig/selinux`实际是它的软链接文件。
+    > 检查selinux状态可以使用`sestatus`命令。
 
     ``` sh
     # 关闭Selinux
@@ -58,8 +60,8 @@ Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读
     sysctl -p
     ```
 
-    > selinux的真实配置文件路径是`/etc/selinux/config`,而`/etc/sysconfig/selinux`实际是它的软链接文件。
-    检查selinux状态可以使用`sestatus`命令。
+    > netfilter是Linux内核的包过滤框架，它提供了一系列的钩子（Hook）供其他模块控制包的流动，配置Linux内核防火墙的命令行工具iptables就是基于netfilter机制的。
+    > 注意：服务器重启后`sysctl`命令报错，原因大概是br_netfilter模块未被自动加载，考虑通过配置`/etc/rc.sysinit`来解决！
 
 3. 安装必要的虚拟化软件和工具软件
    为了让虚拟化层可以重启和关闭虚拟机，必须安装acpid服务；
@@ -118,3 +120,6 @@ Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读
 - [Cloud-init的基本原理](https://xixiliguo.github.io/post/cloud-init-1/)
 - [CentOS 7 下 yum 安装和配置 NFS](https://qizhanming.com/blog/2018/08/08/how-to-install-nfs-on-centos-7)
 - [PVE CLoud-Init的官方文档](https://pve.proxmox.com/wiki/Cloud-Init_Support)
+
+- [Linux网络配置的白皮书](https://feisky.gitbooks.io/sdn/content/linux/iptables.html)
+- [一种自动加载br_netfilter模块的方法](https://www.icode9.com/content-4-718596.html)
