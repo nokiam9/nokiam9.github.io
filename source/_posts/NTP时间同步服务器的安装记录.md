@@ -117,16 +117,16 @@ yum install -y ntpdate
 # 更改"/etc/ntp.conf"，注释掉原有NTP服务器地址，加入"server 时间服务器IP"
 cat > /etc/ntp.conf << EOF
 # 设置内网NTP服务器地址
-server 192.168.0.130
+server 192.168.0.140
 
 #允许时间服务器(上游时间服务器)修改本机时间
-restrict 192.168.0.130 nomodify notrap noquery
+restrict 192.168.0.140 nomodify notrap noquery
 
 EOF
 
 # 设置并启动系统服务
-systemctl enable ntpdate
-systemctl restart ntpdata
+systemctl enable ntpd
+systemctl restart ntpd
 ntpq -p
 ```
 
