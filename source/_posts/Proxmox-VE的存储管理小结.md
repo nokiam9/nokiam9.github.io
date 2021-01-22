@@ -4,18 +4,84 @@ date: 2021-01-17 23:47:09
 tags:
 ---
 
-## PVE的基本存储类型
+## 一、PVE存储的性质类型（Storage Properties）
 
-与通常的UNIX系统一样，Proxmox VE将存储分为两种:
+PVE需要管理的存储资源，分为以下6种，分别用于不同类型的数据持久化。
 
-- 基于POSIX的文件系统存储。可以存储所有类型的文件，但是性能一般。
-- 基于RAW裸设备的块存储设备。由于块存储没有文件概念，因此只能存储VM镜像和Disk数据盘，注定无法存储ISO镜像文件、Backup备份文件、Snapshot快照文件等。
+|标识符|类型|特性说明|
+|:---:|:---|:---|
+|iso|安装盘| ISO images，包括Centos、Ubuntu等操作系统的安装镜像文件，也可以是Win7安装盘|
+|vztmpl|模版文件| Container templates，LXC的模版文件，仅支持Linunx类型|
+|rootdir|根系统|Allow to store container data.用于VM或LXC的系统盘|
+|images|虚拟磁盘|KVM-Qemu VM images，一般用于数据盘，VM或LXC均可挂载，文件格式或者LV块设备均可以|
+|backup|备份文件|Backup files (vzdump).VM或LXC均可以使用，通常是文件格式|
+|snippets|快照文件|Snippet files, for example guest hook scripts，VM或LXC快照文件|
+
+## 二、PVE存储的设备类型（Storage Types）
+
+与通常的UNIX系统一样，Proxmox VE支持基于POSIX的文件系统存储和基于RAW裸设备的块存储设备。
+裸设备一般建在LV上，没有filesystem，因此无法支持iso、vztmpl、backup，但可以支持rootdir、image。
+
+> 绝大部分文件系统本身不支持快照功能。如果要创建虚拟机快照，只能利用 qcow2 文件格式自带的快照功能。
 
 各种存储方式的特性见下表。
 
 {% asset_img proxmox-storage-types.png %}
 
-PVE将后端存储的配置文件存放在`/etc/pve/storage.cfg`中，具体信息为：
+下面介绍几个最重要的存储类型：
+
+### 1. 目录（Directory）
+
+Proxmox VE 可以使用本地目录或挂载在本地文件系统的共享存储作为存储服务。
+目录是文件系统级的存储服务，你可以保存任何类型的数据，包括虚拟机镜像，容器，模板， ISO 镜像或虚拟机备份文件。
+PVE初始安装生成的`local`存储就是`Directory`属性，其路径是`/var/lib/vz`。
+
+{% asset_img shot2.png %}
+
+可以看到，其中`dump`目录存储的就是备份文件，`template`目录存储的就是VM模版和LXC模版。
+
+### 2.逻辑卷（LVM）
+
+LVM 是典型的块存储解决方案，但 LVM 后端存储本身不支持快照和链接克隆功能。更不幸的是，在创建普通 LVM 快照期间，整个卷组的写操作都会受到影响而变得非常低效。
+
+> LVM最大的好处是你可以在共享存储上建立 LVM 后端存储服务。例如可以在 iSCSI LUN 上建立 LVM。LVM 后端存储自带 Proxmox VE 集群锁以有效防止并发访问冲突。
+
+LVM的创建包含了以下步骤： Device -> Partition -> Phycial Volume -> Volume Group -> Login Volume，具体步骤参见附录1。
+
+{% asset_img shot4.png %}
+
+### 3. 薄模式的逻辑卷（LVM-thin）
+
+LVM 是在逻辑卷创建时就按设置的卷容量大小预先分配所需空间。LVM-thin 存储池是在向 卷内写入数据时按实际写入数据量大小分配所需空间。LVM-thin 所用的存储空间分配方式允许创建容量远大于物理存储空间的存储卷，因此也称为“薄模式”。
+
+> 注意：LVM-thin 存储池不能被多个节点同时共享使用，只能用于节点本地存储.
+
+创建和管理 LVM-thin 存储池的命令和 LVM 命令完全一致(参见 man lvmthin)。假定你已 经有一个 LVM 卷组 pve，如下命令可以创建一个名为 data 的新 LVM-thin 存储池(容量 100G):
+
+``` shell
+lvcreate -L 100G -n data pve
+lvconvert --type thin-pool pve/data
+```
+
+也可以在PVE的GUI界面进行操作。
+
+{% asset_img shot4.png %}
+
+### 4. 网络文件系统（NFS）
+
+基于 NFS 的后端存储服务实际上建立在目录后端存储之上，其属性和目录后端存储非常相似。其中子目录布局和文件命名规范完全一致。
+NFS 后端存储的优势在于，你可以通过配置 NFS 服务器参数，实现 NFS 存储服务自动挂载，而无需编辑修改/etc/fstab 文件。
+
+NFS 存储服务能够自动检测 NFS 服务器的在线状态，并自动连接 NFS 服务器输出的共享存储服务。
+
+### 5. Windows文件共享（CIFS）
+
+CIFS（Common Internet File System）就是 SMB 的改进版本。Windows的文件共享其实就是使用了 SMB或者说 CIFS。
+基于 CIFS 的后端存储可用于扩展基于目录的存储，这样就无需再手工配置 CIFS 挂载。该类 型存储可直接通过 Proxmox VE API 或 WebUI 添加。服务器心跳检测或共享输出选项等后端 存储参数配置也将自动完成配置。
+
+## 三、PVE默认安装的实例分析
+
+在默认安装完成后，PVE将后端存储的配置文件存放在`/etc/pve/storage.cfg`中。
 
 ``` console
 root@pve01:~# cat /etc/pve/storage.cfg
@@ -35,19 +101,49 @@ nfs: nfs130
     content images
 ```
 
-下面介绍几个重要的存储类型：
-
-## 目录（Directory）
-
-Proxmox VE 可以使用本地目录或挂载在本地文件系统的共享存储作为存储服务。
-目录是文件系统级的存储服务，你可以保存任何类型的数据，包括虚拟机镜像，容器，模板， ISO 镜像或虚拟机备份文件。
-PVE初始安装生成的`local`存储就是`Directory`属性，其路径是`/var/lib/vz`。
-
-{% asset_img shot2.png %}
-
-可以看到，其中`dump`目录存储的就是备份文件，`template`目录存储的就是VM模版和LXC模版。
+PVE默认存储配置至少包含了2个资源池（Storage Pools）：
+- local
+  基于目录模式，用于iso、vztmpl、backup、snippets等文件存储。
+  物理资源位于`/dev/sda3`磁盘分区，逻辑卷是`pve-root`
+  mount挂载点是`/var/lib/vz`。
+- local-lvm
+  基于薄模式的逻辑卷，用于存储容器的系统盘rootdir，和数据盘image。
+  物理资源位于`/dev/sda3`磁盘分区，逻辑卷分为两个部分：管理元数据的`pve-data_tmeta`，和管理实际数据的`pve-data_tdeta`
 
 ``` console
+root@pve01:~# lsblk
+NAME                            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+sda                               8:0    0 111.8G  0 disk 
+├─sda1                            8:1    0  1007K  0 part 
+├─sda2                            8:2    0   512M  0 part /boot/efi
+└─sda3                            8:3    0 111.3G  0 part 
+  ├─pve-swap                    253:0    0     8G  0 lvm  [SWAP]
+  ├─pve-root                    253:1    0  27.8G  0 lvm  /
+  ├─pve-data_tmeta              253:2    0     1G  0 lvm  
+  │ └─pve-data-tpool            253:4    0  59.7G  0 lvm  
+  │   ├─pve-data                253:5    0  59.7G  0 lvm  
+  │   ├─pve-vm--198--cloudinit  253:7    0     4M  0 lvm  
+  │   ├─pve-vm--198--disk--0    253:8    0     4G  0 lvm  
+  │   ├─pve-vm--199--disk--0    253:9    0     4G  0 lvm  
+  │   ├─pve-vm--199--cloudinit  253:10   0     4M  0 lvm  
+  │   ├─pve-vm--121--cloudinit  253:11   0     4M  0 lvm  
+  │   └─pve-base--121--disk--0  253:26   0     4G  1 lvm  
+  └─pve-data_tdata              253:3    0  59.7G  0 lvm  
+    └─pve-data-tpool            253:4    0  59.7G  0 lvm  
+      ├─pve-data                253:5    0  59.7G  0 lvm  
+      ├─pve-vm--198--cloudinit  253:7    0     4M  0 lvm  
+      ├─pve-vm--198--disk--0    253:8    0     4G  0 lvm  
+      ├─pve-vm--199--disk--0    253:9    0     4G  0 lvm  
+      ├─pve-vm--199--cloudinit  253:10   0     4M  0 lvm  
+      ├─pve-vm--121--cloudinit  253:11   0     4M  0 lvm  
+      ├─pve-vm--199--state--dns 253:17   0   1.5G  0 lvm  
+      └─pve-base--121--disk--0  253:26   0     4G  1 lvm  
+nvme0n1                         259:0    0   477G  0 disk 
+├─data02-data02_tmeta           253:23   0   4.8G  0 lvm  
+│ └─data02-data02               253:28   0 467.3G  0 lvm  
+└─data02-data02_tdata           253:27   0 467.3G  0 lvm  
+  └─data02-data02               253:28   0 467.3G  0 lvm  
+
 root@pve01:/var/lib/vz# tree /var/lib/vz
 /var/lib/vz
 ├── dump
@@ -66,44 +162,19 @@ root@pve01:/var/lib/vz# tree /var/lib/vz
     └── qemu
 ```
 
-## 逻辑卷（LVM）
+## 四、结论
 
-LVM 是典型的块存储解决方案，但 LVM 后端存储本身不支持快照和链接克隆功能。更不幸的是，在创建普通 LVM 快照期间，整个卷组的写操作都会受到影响而变得非常低效。
+- PVE安装后，将默认提供基于dir的`local`资源池，和基于LVM-thin的`local-lvm`资源池。
+- 对于容器管理的场景，LVM-thin是最佳方案。
+  优点一是基于宿主机的本地磁盘，可靠性高，性能好，二是动态的容量管理，“用多少是多少”；
+  缺点是不支持PVE多节点的共享。
+- 对于备份和快照管理的场景，NFS是最佳方案。
+  优点是部署配置简单，多节点共享方便；
+  缺点是依赖网络和外部服务器，可靠性较低，性能也受限。
+  特别指出，如果已经有WDCLOUD之类的网络存储，直接用CIFS更方便，甚至不用部署NFS服务器。
+- LVM方案的功能和LVM-thin完全相同，但配置更复杂、资源利用率低，不建议使用。
+  唯一的价值点在于，如果后端存储是SCSI设备，可以支持PVE多节点的共享。
 
-> LVM最大的好处是你可以在共享存储上建立 LVM 后端存储服务。例如可以在 iSCSI LUN 上建立 LVM。LVM 后端存储自带 Proxmox VE 集群锁以有效防止并发访问冲突。
-
-LVM的创建包含了以下步骤： Device -> Partition -> Phycial Volume -> Volume Group -> Login Volume，具体步骤参见附录1。
-
-{% asset_img shot4.png %}
-
-## 薄模式的逻辑卷（LVM-thin）
-
-LVM 是在逻辑卷创建时就按设置的卷容量大小预先分配所需空间。LVM-thin 存储池是在向 卷内写入数据时按实际写入数据量大小分配所需空间。LVM-thin 所用的存储空间分配方式允许创建容量远大于物理存储空间的存储卷，因此也称为“薄模式”。
-
-> 注意：LVM-thin 存储池不能被多个节点同时共享使用，只能用于节点本地存储.
-
-创建和管理 LVM-thin 存储池的命令和 LVM 命令完全一致(参见 man lvmthin)。假定你已 经有一个 LVM 卷组 pve，如下命令可以创建一个名为 data 的新 LVM-thin 存储池(容量 100G):
-
-``` shell
-lvcreate -L 100G -n data pve
-lvconvert --type thin-pool pve/data
-```
-
-也可以在PVE的GUI界面进行操作。
-
-{% asset_img shot4.png %}
-
-## 网络文件系统（NFS）
-
-基于 NFS 的后端存储服务实际上建立在目录后端存储之上，其属性和目录后端存储非常相似。其中子目录布局和文件命名规范完全一致。
-NFS 后端存储的优势在于，你可以通过配置 NFS 服务器参数，实现 NFS 存储服务自动挂载，而无需编辑修改/etc/fstab 文件。
-
-NFS 存储服务能够自动检测 NFS 服务器的在线状态，并自动连接 NFS 服务器输出的共享存储服务。
-
-## Windows文件共享（CIFS）
-
-CIFS（Common Internet File System）就是 SMB 的改进版本。Windows的文件共享其实就是使用了 SMB或者说 CIFS。
-基于 CIFS 的后端存储可用于扩展基于目录的存储，这样就无需再手工配置 CIFS 挂载。该类 型存储可直接通过 Proxmox VE API 或 WebUI 添加。服务器心跳检测或共享输出选项等后端 存储参数配置也将自动完成配置。
 
 ---
 
@@ -158,38 +229,6 @@ root@pve01:~# lvs
   vm-222-disk-0          pve          Vwi-a-tz--    4.00g data                 54.27                                  
   vm-223-cloudinit       pve          Vwi-aotz--    4.00m data                 9.38                                   
   vm-223-disk-0          pve          Vwi-aotz--    8.00g data base-122-disk-0 85.10 
-root@pve01:~# lsblk
-NAME                            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
-sda                               8:0    0 111.8G  0 disk 
-├─sda1                            8:1    0  1007K  0 part 
-├─sda2                            8:2    0   512M  0 part /boot/efi
-└─sda3                            8:3    0 111.3G  0 part 
-  ├─pve-swap                    253:0    0     8G  0 lvm  [SWAP]
-  ├─pve-root                    253:1    0  27.8G  0 lvm  /
-  ├─pve-data_tmeta              253:2    0     1G  0 lvm  
-  │ └─pve-data-tpool            253:4    0  59.7G  0 lvm  
-  │   ├─pve-data                253:5    0  59.7G  0 lvm  
-  │   ├─pve-vm--198--cloudinit  253:7    0     4M  0 lvm  
-  │   ├─pve-vm--198--disk--0    253:8    0     4G  0 lvm  
-  │   ├─pve-vm--199--disk--0    253:9    0     4G  0 lvm  
-  │   ├─pve-vm--199--cloudinit  253:10   0     4M  0 lvm  
-  │   ├─pve-vm--121--cloudinit  253:11   0     4M  0 lvm  
-  │   └─pve-base--121--disk--0  253:26   0     4G  1 lvm  
-  └─pve-data_tdata              253:3    0  59.7G  0 lvm  
-    └─pve-data-tpool            253:4    0  59.7G  0 lvm  
-      ├─pve-data                253:5    0  59.7G  0 lvm  
-      ├─pve-vm--198--cloudinit  253:7    0     4M  0 lvm  
-      ├─pve-vm--198--disk--0    253:8    0     4G  0 lvm  
-      ├─pve-vm--199--disk--0    253:9    0     4G  0 lvm  
-      ├─pve-vm--199--cloudinit  253:10   0     4M  0 lvm  
-      ├─pve-vm--121--cloudinit  253:11   0     4M  0 lvm  
-      ├─pve-vm--199--state--dns 253:17   0   1.5G  0 lvm  
-      └─pve-base--121--disk--0  253:26   0     4G  1 lvm  
-nvme0n1                         259:0    0   477G  0 disk 
-├─data02-data02_tmeta           253:23   0   4.8G  0 lvm  
-│ └─data02-data02               253:28   0 467.3G  0 lvm  
-└─data02-data02_tdata           253:27   0 467.3G  0 lvm  
-  └─data02-data02               253:28   0 467.3G  0 lvm  
 ```
 
 ---
