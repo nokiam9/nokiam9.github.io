@@ -116,7 +116,7 @@
 <meta property="og:image" content="https://blog.caogo.cn/2021/01/17/Proxmox-VE的存储管理小结/shot4.png">
 <meta property="og:image" content="https://blog.caogo.cn/2021/01/17/Proxmox-VE的存储管理小结/shot4.png">
 <meta property="og:image" content="https://blog.caogo.cn/2021/01/17/Proxmox-VE的存储管理小结/lvm2.png">
-<meta property="og:updated_time" content="2021-01-22T10:49:06.847Z">
+<meta property="og:updated_time" content="2021-01-23T02:44:34.923Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Proxmox-VE的存储管理小结">
 <meta name="twitter:description" content="一、PVE存储的性质类型（Storage Properties）PVE需要管理的存储资源，分为以下6种，分别用于不同类型的数据持久化。    标识符 类型 特性说明     iso 安装盘 ISO images，包括Centos、Ubuntu等操作系统的安装镜像文件，也可以是Win7安装盘   vztmpl 模版文件 Container templates，LXC的模版文件，仅支持Linunx类型">
@@ -442,7 +442,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2021-01-22 18:49:06" itemprop="dateModified" datetime="2021-01-22T18:49:06+08:00">2021-01-22</time>
+                <time title="Modified: 2021-01-23 10:44:34" itemprop="dateModified" datetime="2021-01-23T10:44:34+08:00">2021-01-23</time>
               
             
           </span>
@@ -518,11 +518,11 @@
 </tbody>
 </table>
 <h2 id="二、PVE存储的设备类型（Storage-Types）"><a href="#二、PVE存储的设备类型（Storage-Types）" class="headerlink" title="二、PVE存储的设备类型（Storage Types）"></a>二、PVE存储的设备类型（Storage Types）</h2><p>与通常的UNIX系统一样，Proxmox VE支持基于POSIX的文件系统存储和基于RAW裸设备的块存储设备。<br>裸设备一般建在LV上，没有filesystem，因此无法支持iso、vztmpl、backup，但可以支持rootdir、image。</p>
-<blockquote>
-<p>绝大部分文件系统本身不支持快照功能。如果要创建虚拟机快照，只能利用 qcow2 文件格式自带的快照功能。</p>
-</blockquote>
 <p>各种存储方式的特性见下表。</p>
 <img src="/2021/01/17/Proxmox-VE的存储管理小结/proxmox-storage-types.png">
+<blockquote>
+<p>1: 绝大部分文件系统本身不支持快照功能。如果要创建虚拟机快照，只能利用 qcow2 文件格式自带的快照功能。<br>2: 如果后端存储是FC光纤存储设备，或是iSCSI存储设备，LVM方式可以提供共享资源。</p>
+</blockquote>
 <p>下面介绍几个最重要的存储类型：</p>
 <h3 id="1-目录（Directory）"><a href="#1-目录（Directory）" class="headerlink" title="1. 目录（Directory）"></a>1. 目录（Directory）</h3><p>Proxmox VE 可以使用本地目录或挂载在本地文件系统的共享存储作为存储服务。<br>目录是文件系统级的存储服务，你可以保存任何类型的数据，包括虚拟机镜像，容器，模板， ISO 镜像或虚拟机备份文件。<br>PVE初始安装生成的<code>local</code>存储就是<code>Directory</code>属性，其路径是<code>/var/lib/vz</code>。</p>
 <img src="/2021/01/17/Proxmox-VE的存储管理小结/shot2.png">
@@ -555,8 +555,10 @@
 <h2 id="四、结论"><a href="#四、结论" class="headerlink" title="四、结论"></a>四、结论</h2><ul>
 <li>PVE安装后，将默认提供基于dir的<code>local</code>资源池，和基于LVM-thin的<code>local-lvm</code>资源池。</li>
 <li>对于容器管理的场景，LVM-thin是最佳方案。<br>优点一是基于宿主机的本地磁盘，可靠性高，性能好，二是动态的容量管理，“用多少是多少”；<br>缺点是不支持PVE多节点的共享。</li>
-<li>对于备份和快照管理的场景，NFS是最佳方案。<br>优点是部署配置简单，多节点共享方便；<br>缺点是依赖网络和外部服务器，可靠性较低，性能也受限。<br>特别指出，如果已经有WDCLOUD之类的网络存储，直接用CIFS更方便，甚至不用部署NFS服务器。</li>
-<li>LVM方案的功能和LVM-thin完全相同，但配置更复杂、资源利用率低，不建议使用。<br>唯一的价值点在于，如果后端存储是SCSI设备，可以支持PVE多节点的共享。</li>
+<li>对于备份和快照管理的场景，NFS是最佳方案。<br>优点是部署配置简单，可以支持多容器的共享存储；<br>缺点是依赖网络和外部服务器，可靠性较低，性能也受限。<br>特别指出，如果已经有WDCLOUD之类的网络存储，直接用CIFS更方便，无需单独部署NFS服务器。</li>
+<li>LVM方案的功能和LVM-thin基本类似，但配置更复杂、资源利用率低，不建议使用。<br>其唯一的价值在于，如果后端存储是iSCSI或FC类型的高端的集中式存储设备，可以支持多容器之间的共享。</li>
+<li>GlusterFS 和Ceph都是典型的分布式存储系统，都提供文件存储、块存储功能（在应用层面还提供对象存储功能）</li>
+<li>ZFS的性能非常好，提供copy-on-write，快照、存储空间池等高级功能，但其设计思想仍然是传统的基于磁盘管理的文件系统<br>ZFS的重要价值在于，可以通过适度的CPU和内存负载以及简单的管理来取代成本高昂的硬件RAID卡</li>
 </ul>
 <hr>
 <h2 id="附录1：安装LVM2"><a href="#附录1：安装LVM2" class="headerlink" title="附录1：安装LVM2"></a>附录1：安装LVM2</h2><p>Centos基本安装包并不包含LVM管理功能，需用<code>yum install lvm2</code>自行安装。</p>
