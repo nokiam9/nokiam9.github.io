@@ -6,7 +6,7 @@ tags:
 
 ## 概述
 
-Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读取相关的网络设置参数。
+Cloud-init的原理，就是给VM增加一个CDROM设备，配合操作系统安装的cloud-init软件包，以便在启动时自动读取网络设置参数。
 
 {% asset_img hardware.png %}
 
@@ -37,6 +37,7 @@ Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读
 系统安装完成后，检查是否可以正常启动。
 
 > 新系统装完后，必须将网卡配置文件内的onboot打开，清除uuid！！！
+> 创建Ubuntu的VM，Cloud-Init设备必须使用`virtio-scsi-pci`类型的驱动程序
 
 ### 2. 关闭selinux和firewalld以及碍事的NetworkManager
 
