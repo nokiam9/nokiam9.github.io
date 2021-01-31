@@ -194,7 +194,24 @@ health:
 
 ## 基于Registry的直通缓存服务（pull-through cache）
 
-如果您的环境中运行着多个Docker实例，例如多个物理机或虚拟机都运行Docker，则每个Docker守护程序都将访问Internet，并从Docker Hub获取本地没有的映像。为此，我们可以部署一个本地Registry Mirror服务，并将所有Docker引擎的Mirror Sever指向该服务器，以免产生额外的互联网流量。
+如果您的环境中运行着多个Docker实例，例如多个物理机或虚拟机都运行Docker，则每个Docker守护程序都将访问Internet，并从Docker Hub获取本地没有的映像。
+为此，我们可以部署一个本地Registry Mirror服务，并将所有Docker引擎的Mirror Sever指向该服务器，以免产生额外的互联网流量。
+
+### Registry mirror的原理
+
+Docker Hub的镜像数据分为两部分：index数据和registry数据。前者保存了镜像的一些元数据信息，数据量很小；后者保存了镜像的实际数据，数据量比较大。平时我们使用docker pull命令拉取一个镜像时的过程是：先去index获取镜像的一些元数据，然后再去registry获取镜像数据。
+
+所谓registry mirror就是搭建一个registry，然后将docker hub的registry数据缓存到自己本地的registry。
+整个过程是：当我们使用docker pull去拉镜像的时候，会先从我们本地的registry mirror去获取镜像数据，如果不存在，registry mirror会先从docker hub的registry拉取数据进行缓存，再传给我们。
+
+整个过程是流式的，registry mirror并不会等全部缓存完再给我们传，而且边缓存边给客户端传。
+
+对于缓存，我们都知道一致性非常重要。
+registry mirror与docker官方保持一致的方法是：registry mirror只是缓存了docker hub的registry数据，并不缓存index数据。
+所以我们pull镜像的步骤是：
+
+- 先连docker hub的index获取镜像的元数据，如果我们registry mirror里面有该镜像的缓存，且数据与从index处获取到的元数据一致，则从registry mirror拉取；
+- 如果我们的registry mirror有该镜像的缓存，但数据与index处获取的元数据不一致，或者根本就没有该镜像的缓存，则先从docker hub的registry缓存或者更新数据。
 
 ### 1. 服务端的部署方法
 
@@ -206,6 +223,29 @@ proxy:
   username: [username]
   password: [password]
 ```
+
+注意，缓存默认保存7天，配置信息位于：
+
+``` yaml
+storage:
+  maintenance:
+    uploadpurging:
+      enabled: true
+a      age: 168h
+      interval: 24h
+      dryrun: false
+    readonly:
+      enabled: false
+```
+
+配置方法见下表：
+
+|参数名称|必选项|描述|
+|:---:|:---:|:---|
+|enabled|yes|Set to true to enable upload purging. Defaults to true.|
+|age|yes|Upload directories which are older than this age will be deleted.Defaults to 168h (1 week).|
+|interval|yes|The interval between upload directory purging. Defaults to 24h.|
+|dryrun|yes|Set dryrun to true to obtain a summary of what directories will be deleted. Defaults to false.|
 
 > 获取Resistry默认配置文件的方法：
 > `docker run -it --rm --entrypoint cat registry:2 /etc/docker/registry/config.yml`
@@ -224,7 +264,7 @@ docker run -d --restart=always --name registry \
 
 ``` sh
 docker run -p 5000:5000 -d --restart=always --name registry   \
-  -e REGISTRY_PROXY_REMOTEURL=http://registry-1.docker.io \
+  -e REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io \
   -v /data:/var/lib/registry \
   registry:2
 
@@ -235,8 +275,15 @@ docker run -p 5000:5000 -d --restart=always --name registry   \
 检查Registry服务是否正常启动，可以通过以下方法：
 
 ```console
-# curl http://localhost:5000/v2/_catalog
-{"repositories":["alpine","myregistry"]}
+[root@bl-local ~]# curl -ski -X GET http://localhost:5000/v2/_catalog
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Docker-Distribution-Api-Version: registry/2.0
+X-Content-Type-Options: nosniff
+Date: Sun, 31 Jan 2021 15:58:44 GMT
+Content-Length: 66
+
+{"repositories":["calico/cni","library/alpine","library/python"]}
 ```
 
 ### 3.客户端的配置方法
@@ -265,10 +312,11 @@ EOD
 ## 参考文献
 
 - [Docker Mirror官方文档](https://docs.docker.com/registry/recipes/mirror/)
+- [搭建registry mirror的操作记录](https://niyanchun.com/deploy-registry-mirror.html)
 - [一种Harbor部署私有Mirror服务的不正规方法](https://cloud.tencent.com/developer/article/1413239)
 - [Harbor 2.1新增镜像代理和P2P镜像预热功能](https://www.sohu.com/a/421272143_609552)
 - [为什么 Dragonfly 不能很好的支持 HTTPS 镜像仓库](https://github.com/dragonflyoss/Dragonfly/issues/525)
 - [Github关于Add private-registry mirror support的讨论](https://github.com/moby/moby/pull/34319)
 - [Docker Registry API接口示例](https://blog.csdn.net/ztsinghua/article/details/51496658)
 - [容器OCI规范 镜像规范](https://blog.csdn.net/hyzhou33550336/article/details/65633502)
-- [开放容器标准(OCI) 内部分享](https://xuanwo.io/2019/08/06/oci-intro/) 
+- [开放容器标准(OCI) 内部分享](https://xuanwo.io/2019/08/06/oci-intro/)
