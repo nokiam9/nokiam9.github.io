@@ -37,7 +37,7 @@ Mirror代理缓存仓库的作用就是为了以上问题，通过运行一个�
 - 分层文件 fsLayers：A list of layer descriptors (including digest)
 - 签名 signature：A JWS used to verify the manifest content
 
-> image已经建立了行业标准 - OCI镜像规范，确保Docker、Podman等不同容器产品之间共享image，可以参见附录继续研究
+> image已经建立了行业标准 - OCI(Open Container Initiative)镜像规范，确保Docker、Podman等不同容器产品之间共享image，可以参见附录继续研究
 
 docker pull的过程很复杂，包括鉴权、校验，下载、合并镜像层，解压缩等等，但最核心的是两个步骤：
 
@@ -45,21 +45,46 @@ docker pull的过程很复杂，包括鉴权、校验，下载、合并镜像层
     reference可以是标记tag，或摘要digest。
 2. 发送请求 `GET /v2/<name>/blobs/<digest>` ，获取镜像层文件
 
-镜像的mainfest文件格式的示例为
+通过`curl -X GET http://localhost:5000/v2/alpine/manifests/3.6`，获取镜像的manifest清单文件，其格式为
 
 ``` json
 {
-   "name": <name>,
-   "tag": <tag>,
+   "schemaVersion": 1,
+   "name": "alpine",
+   "tag": "3.6",
+   "architecture": "amd64",
    "fsLayers": [
       {
-         "blobSum": <digest>
+         "blobSum": "sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4"
       },
-      ...
-    ]
+      {
+         "blobSum": "sha256:5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a"
+      }
    ],
-   "history": <v1 images>,
-   "signature": <JWS>
+   "history": [
+      {
+         "v1Compatibility": "{\"architecture\":\"amd64\",\"config\":{\"Hostname\":\"\",\"Domainname\":\"\",\"User\":\"\",\"AttachStdin\":false,\"AttachStdout\":false,\"AttachStderr\":false,\"Tty\":false,\"OpenStdin\":false,\"StdinOnce\":false,\"Env\":[\"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"],\"Cmd\":[\"/bin/sh\"],\"ArgsEscaped\":true,\"Image\":\"sha256:143f9315f5a85306192ccffd37fbfa65db21f67aaa938c2538bd50f52123a12f\",\"Volumes\":null,\"WorkingDir\":\"\",\"Entrypoint\":null,\"OnBuild\":null,\"Labels\":null},\"container\":\"fd086f4b9352674c6a1ae4d02051f95a4e0a55cda943c5780483938dedfb2d8f\",\"container_config\":{\"Hostname\":\"fd086f4b9352\",\"Domainname\":\"\",\"User\":\"\",\"AttachStdin\":false,\"AttachStdout\":false,\"AttachStderr\":false,\"Tty\":false,\"OpenStdin\":false,\"StdinOnce\":false,\"Env\":[\"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\"],\"Cmd\":[\"/bin/sh\",\"-c\",\"#(nop) \",\"CMD [\\\"/bin/sh\\\"]\"],\"ArgsEscaped\":true,\"Image\":\"sha256:143f9315f5a85306192ccffd37fbfa65db21f67aaa938c2538bd50f52123a12f\",\"Volumes\":null,\"WorkingDir\":\"\",\"Entrypoint\":null,\"OnBuild\":null,\"Labels\":{}},\"created\":\"2019-03-07T22:20:00.563496859Z\",\"docker_version\":\"18.06.1-ce\",\"id\":\"baaf9c1caf4fb211f173d053029997dcfade0644ac354c8a068e4ebf23fcf1c5\",\"os\":\"linux\",\"parent\":\"5d8f720b0ab2b92a29a7e338aa90cad32dac2bf6518c7aae5844aab896ee36ec\",\"throwaway\":true}"
+      },
+      {
+         "v1Compatibility": "{\"id\":\"5d8f720b0ab2b92a29a7e338aa90cad32dac2bf6518c7aae5844aab896ee36ec\",\"created\":\"2019-03-07T22:20:00.434038891Z\",\"container_config\":{\"Cmd\":[\"/bin/sh -c #(nop) ADD file:9714761bb81de664e431dec41f12db20f0438047615df2ecd9fdc88933d6c20f in / \"]}}"
+      }
+   ],
+   "signatures": [
+      {
+         "header": {
+            "jwk": {
+               "crv": "P-256",
+               "kid": "KMUD:PVGZ:P2LO:LC7C:JSZZ:DCUO:FB3A:VXIA:U7UM:WVMY:7KJT:5TPS",
+               "kty": "EC",
+               "x": "M5uDyG_04QhZKJx2FFku4t2UUWeYYeyg0-LhmrNf5OQ",
+               "y": "TdXi_yetmEqWSEKqTudnjb7tn5m-AVQmxGeknXVL8w8"
+            },
+            "alg": "ES256"
+         },
+         "signature": "xSwT9ePqDKjDm3i9AHkgFxnZGO6TdVIePcl6XxTvrCPSjOx_Xd1jf8YgouhXWDffBygicwp8DDnxJ7bB30puuw",
+         "protected": "eyJmb3JtYXRMZW5ndGgiOjIxMzAsImZvcm1hdFRhaWwiOiJDbjAiLCJ0aW1lIjoiMjAyMS0wMS0zMVQxMzo1NjoxNFoifQ"
+      }
+   ]
 }
 ```
 
@@ -215,4 +240,4 @@ EOD
 - [Github关于Add private-registry mirror support的讨论](https://github.com/moby/moby/pull/34319)
 - [Docker Registry API接口示例](https://blog.csdn.net/ztsinghua/article/details/51496658)
 - [容器OCI规范 镜像规范](https://blog.csdn.net/hyzhou33550336/article/details/65633502)
-  
+- [开放容器标准(OCI) 内部分享](https://xuanwo.io/2019/08/06/oci-intro/)  
