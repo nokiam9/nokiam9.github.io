@@ -236,7 +236,7 @@ docker run -p 5000:5000 -d --restart=always --name registry   \
 
 ```console
 # curl http://localhost:5000/v2/_catalog
-{"repositories":["myregistry"]}
+{"repositories":["alpine","myregistry"]}
 ```
 
 ### 3.客户端的配置方法
