@@ -270,4 +270,4 @@ EOD
 - [Github关于Add private-registry mirror support的讨论](https://github.com/moby/moby/pull/34319)
 - [Docker Registry API接口示例](https://blog.csdn.net/ztsinghua/article/details/51496658)
 - [容器OCI规范 镜像规范](https://blog.csdn.net/hyzhou33550336/article/details/65633502)
-- [开放容器标准(OCI) 内部分享](https://xuanwo.io/2019/08/06/oci-intro/)  
+- [开放容器标准(OCI) 内部分享](https://xuanwo.io/2019/08/06/oci-intro/) 
