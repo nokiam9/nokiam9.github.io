@@ -37,9 +37,11 @@ Mirror代理缓存仓库的作用就是为了以上问题，通过运行一个�
 - 分层文件 fsLayers：A list of layer descriptors (including digest)
 - 签名 signature：A JWS used to verify the manifest content
 
+> image已经建立了行业标准 - OCI镜像规范，确保Docker、Podman等不同容器产品之间共享image，可以参见附录继续研究
+
 docker pull的过程很复杂，包括鉴权、校验，下载、合并镜像层，解压缩等等，但最核心的是两个步骤：
 
-1. 发送请求 `GET /v2/<name>/manifests/<reference>` ，获取镜像的mainfest文件
+1. 发送请求 `GET /v2/<name>/manifests/<reference>` ，获取镜像的mainfest清单文件
     reference可以是标记tag，或摘要digest。
 2. 发送请求 `GET /v2/<name>/blobs/<digest>` ，获取镜像层文件
 
@@ -212,4 +214,5 @@ EOD
 - [为什么 Dragonfly 不能很好的支持 HTTPS 镜像仓库](https://github.com/dragonflyoss/Dragonfly/issues/525)
 - [Github关于Add private-registry mirror support的讨论](https://github.com/moby/moby/pull/34319)
 - [Docker Registry API接口示例](https://blog.csdn.net/ztsinghua/article/details/51496658)
+- [容器OCI规范 镜像规范](https://blog.csdn.net/hyzhou33550336/article/details/65633502)
   
