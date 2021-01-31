@@ -265,6 +265,7 @@ EOD
 ## 参考文献
 
 - [Docker Mirror官方文档](https://docs.docker.com/registry/recipes/mirror/)
+- [一种Harbor部署私有Mirror服务的不正规方法](https://cloud.tencent.com/developer/article/1413239)
 - [Harbor 2.1新增镜像代理和P2P镜像预热功能](https://www.sohu.com/a/421272143_609552)
 - [为什么 Dragonfly 不能很好的支持 HTTPS 镜像仓库](https://github.com/dragonflyoss/Dragonfly/issues/525)
 - [Github关于Add private-registry mirror support的讨论](https://github.com/moby/moby/pull/34319)
