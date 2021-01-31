@@ -95,7 +95,7 @@ Registry是Docker提供的镜像注册服务，其设计目标是一套存储和
 需要注意的是，Registry管理镜像是基于文件系统的,数据存储目录位于实例所在容器的`/var/lib/registry`
 
 ``` console
-/ # tree /var/lib/registry
+~ # tree /var/lib/registry
 /var/lib/registry
 └── docker
     └── registry
@@ -108,16 +108,44 @@ Registry是Docker提供的镜像注册服务，其设计目标是一套存储和
             │       ├── 43
             │       │   └── 43773d1dba76c4d537b494a8454558a41729b92aa2ad0feb23521c3e58cd0440
             │       │       └── data
-            │       └── 5a
-            │           └── 5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a
+            │       ├── 5a
+            │       │   └── 5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a
+            │       │       └── data
+            │       └── a3
+            │           └── a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
             │               └── data
             └── repositories
+                ├── alpine
+                │   ├── _layers
+                │   │   └── sha256
+                │   │       ├── 43773d1dba76c4d537b494a8454558a41729b92aa2ad0feb23521c3e58cd0440
+                │   │       │   └── link
+                │   │       ├── 5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a
+                │   │       │   └── link
+                │   │       └── a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
+                │   │           └── link
+                │   ├── _manifests
+                │   │   ├── revisions
+                │   │   │   └── sha256
+                │   │   │       └── 36c3a913e62f77a82582eb7ce30d255f805c3d1e11d58e1f805e14d33c2bc5a5
+                │   │   │           └── link
+                │   │   └── tags
+                │   │       └── 3.6
+                │   │           ├── current
+                │   │           │   └── link
+                │   │           └── index
+                │   │               └── sha256
+                │   │                   └── 36c3a913e62f77a82582eb7ce30d255f805c3d1e11d58e1f805e14d33c2bc5a5
+                │   │                       └── link
+                │   └── _uploads
                 └── myregistry
                     ├── _layers
                     │   └── sha256
                     │       ├── 43773d1dba76c4d537b494a8454558a41729b92aa2ad0feb23521c3e58cd0440
                     │       │   └── link
-                    │       └── 5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a
+                    │       ├── 5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a
+                    │       │   └── link
+                    │       └── a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4
                     │           └── link
                     ├── _manifests
                     │   ├── revisions
@@ -133,6 +161,8 @@ Registry是Docker提供的镜像注册服务，其设计目标是一套存储和
                     │                   └── 36c3a913e62f77a82582eb7ce30d255f805c3d1e11d58e1f805e14d33c2bc5a5
                     │                       └── link
                     └── _uploads
+
+48 directories, 16 files
 ```
 
 Registry的默认配置文件，位于实例所在容器的`/etc/docker/registry/config.yml`，默认基本内容是：
