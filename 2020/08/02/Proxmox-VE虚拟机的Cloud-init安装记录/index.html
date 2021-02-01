@@ -14,7 +14,7 @@
   
 
 
-<html class="theme-next mist use-motion" lang="zh-Hans">
+<html class="theme-next pisces use-motion" lang="zh-Hans">
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -80,7 +80,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Mist',
+    scheme: 'Pisces',
     version: '6.6.0',
     sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
@@ -104,21 +104,21 @@
 
 
 
-  <meta name="description" content="概述Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读取相关的网络设置参数。  这个Cloud-init设备的路径一般为/dev/sr0, 大小约为4M，其中包含三个文件，这就是元数据了。 12345[root@localhost ~]# tree /mnt/mnt├── meta-data├── network-config└── user-data 下图就标注了Clo">
+  <meta name="description" content="概述Cloud-init的原理，就是给VM增加一个CDROM设备，配合操作系统安装的cloud-init软件包，以便在启动时自动读取网络设置参数。  这个Cloud-init设备的路径一般为/dev/sr0, 大小约为4M，其中包含三个文件，这就是元数据了。 12345[root@localhost ~]# tree /mnt/mnt├── meta-data├── network-config└">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Proxmox VE虚拟机的Cloud-init安装记录">
 <meta property="og:url" content="https://blog.caogo.cn/2020/08/02/Proxmox-VE虚拟机的Cloud-init安装记录/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="概述Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读取相关的网络设置参数。  这个Cloud-init设备的路径一般为/dev/sr0, 大小约为4M，其中包含三个文件，这就是元数据了。 12345[root@localhost ~]# tree /mnt/mnt├── meta-data├── network-config└── user-data 下图就标注了Clo">
+<meta property="og:description" content="概述Cloud-init的原理，就是给VM增加一个CDROM设备，配合操作系统安装的cloud-init软件包，以便在启动时自动读取网络设置参数。  这个Cloud-init设备的路径一般为/dev/sr0, 大小约为4M，其中包含三个文件，这就是元数据了。 12345[root@localhost ~]# tree /mnt/mnt├── meta-data├── network-config└">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://blog.caogo.cn/2020/08/02/Proxmox-VE虚拟机的Cloud-init安装记录/hardware.png">
 <meta property="og:image" content="https://blog.caogo.cn/2020/08/02/Proxmox-VE虚拟机的Cloud-init安装记录/cloud-init.png">
 <meta property="og:image" content="https://blog.caogo.cn/2020/08/02/Proxmox-VE虚拟机的Cloud-init安装记录/disk-partition.png">
 <meta property="og:image" content="https://blog.caogo.cn/2020/08/02/Proxmox-VE虚拟机的Cloud-init安装记录/clone.png">
-<meta property="og:updated_time" content="2021-01-21T09:33:24.959Z">
+<meta property="og:updated_time" content="2021-01-28T06:35:00.704Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Proxmox VE虚拟机的Cloud-init安装记录">
-<meta name="twitter:description" content="概述Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读取相关的网络设置参数。  这个Cloud-init设备的路径一般为/dev/sr0, 大小约为4M，其中包含三个文件，这就是元数据了。 12345[root@localhost ~]# tree /mnt/mnt├── meta-data├── network-config└── user-data 下图就标注了Clo">
+<meta name="twitter:description" content="概述Cloud-init的原理，就是给VM增加一个CDROM设备，配合操作系统安装的cloud-init软件包，以便在启动时自动读取网络设置参数。  这个Cloud-init设备的路径一般为/dev/sr0, 大小约为4M，其中包含三个文件，这就是元数据了。 12345[root@localhost ~]# tree /mnt/mnt├── meta-data├── network-config└">
 <meta name="twitter:image" content="https://blog.caogo.cn/2020/08/02/Proxmox-VE虚拟机的Cloud-init安装记录/hardware.png">
 
 
@@ -318,9 +318,6 @@
   
 
   
-    
-
-  
 
   
     <div class="site-search">
@@ -361,6 +358,9 @@
     <main id="main" class="main">
       <div class="main-inner">
         <div class="content-wrap">
+          
+            
+
           
           <div id="content" class="content">
             
@@ -441,7 +441,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2021-01-21 17:33:24" itemprop="dateModified" datetime="2021-01-21T17:33:24+08:00">2021-01-21</time>
+                <time title="Modified: 2021-01-28 14:35:00" itemprop="dateModified" datetime="2021-01-28T14:35:00+08:00">2021-01-28</time>
               
             
           </span>
@@ -474,7 +474,7 @@
       
 
       
-        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>Cloud-init的原理，就是给VM增加一个CDROM设备，以便在启动时读取相关的网络设置参数。</p>
+        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>Cloud-init的原理，就是给VM增加一个CDROM设备，配合操作系统安装的cloud-init软件包，以便在启动时自动读取网络设置参数。</p>
 <img src="/2020/08/02/Proxmox-VE虚拟机的Cloud-init安装记录/hardware.png">
 <p>这个Cloud-init设备的路径一般为<code>/dev/sr0</code>, 大小约为4M，其中包含三个文件，这就是元数据了。</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># tree /mnt</span></span><br><span class="line">/mnt</span><br><span class="line">├── meta-data</span><br><span class="line">├── network-config</span><br><span class="line">└── user-data</span><br></pre></td></tr></table></figure>
@@ -484,7 +484,7 @@
 <img src="/2020/08/02/Proxmox-VE虚拟机的Cloud-init安装记录/disk-partition.png">
 <p>系统安装完成后，检查是否可以正常启动。</p>
 <blockquote>
-<p>新系统装完后，必须将网卡配置文件内的onboot打开，清除uuid！！！</p>
+<p>新系统装完后，必须将网卡配置文件内的onboot打开，清除uuid！！！<br>创建Ubuntu的VM，Cloud-Init设备必须使用<code>virtio-scsi-pci</code>类型的驱动程序</p>
 </blockquote>
 <h3 id="2-关闭selinux和firewalld以及碍事的NetworkManager"><a href="#2-关闭selinux和firewalld以及碍事的NetworkManager" class="headerlink" title="2. 关闭selinux和firewalld以及碍事的NetworkManager"></a>2. 关闭selinux和firewalld以及碍事的NetworkManager</h3><blockquote>
 <p>selinux的真实配置文件路径是<code>/etc/selinux/config</code>,而<code>/etc/sysconfig/selinux</code>实际是它的软链接文件。<br>检查selinux状态可以使用<code>sestatus</code>命令。</p>
@@ -625,7 +625,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">41</span>
+                    <span class="site-state-item-count">42</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -744,7 +744,7 @@
 
 
 
-  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v6.6.0</div>
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.6.0</div>
 
 
 
@@ -836,6 +836,13 @@
 
   
   
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
 
   
   <script src="/js/src/scrollspy.js?v=6.6.0"></script>
@@ -1214,6 +1221,80 @@
   
 
   
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap');
+      $(e).after($wrap);
+      $wrap.append($('<button>').addClass('copy-btn').append('Copy').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text();
+        }).toArray().join('\n');
+        var ta = document.createElement('textarea');
+        var range = document.createRange(); //For Chrome
+        var sel = window.getSelection(); //For Chrome
+        var yPosition = window.pageYOffset || document.documentElement.scrollTop;
+        ta.style.top = yPosition + 'px'; //Prevent page scroll
+        ta.style.position = 'absolute';
+        ta.style.opacity = '0';
+        ta.value = code;
+        ta.textContent = code; //For FireFox
+        ta.contentEditable = true;
+        ta.readOnly = false;
+        document.body.appendChild(ta);
+        range.selectNode(ta);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        ta.setSelectionRange(0, code.length);
+        var result = document.execCommand('copy');
+        
+        ta.blur(); //For iOS
+        $(this).blur();
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn');
+        setTimeout(function () {
+          $b.text('Copy');
+        }, 300);
+      }).append(e);
+    })
+  </script>
+
 
   
 
