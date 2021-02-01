@@ -231,7 +231,7 @@ storage:
   maintenance:
     uploadpurging:
       enabled: true
-a      age: 168h
+      age: 168h
       interval: 24h
       dryrun: false
     readonly:
@@ -324,3 +324,4 @@ EOD
 - [容器OCI规范 镜像规范](https://blog.csdn.net/hyzhou33550336/article/details/65633502)
 - [开放容器标准(OCI) 内部分享](https://xuanwo.io/2019/08/06/oci-intro/)
 - [浙江移动容器云基于 Dragonfly 的统一文件分发平台生产实践](https://developer.aliyun.com/article/707053)
+- [Docker Registry/Distribution概述](https://my.oschina.net/markz0928/blog/856652)
