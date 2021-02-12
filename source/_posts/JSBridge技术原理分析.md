@@ -10,7 +10,6 @@ JSBridge 是一种JS 实现的Bridge，连接着桥两端的 Native 和 H5。 �
 
 ## Native 调用 JS
 
-
 {% asset_img life-cycle.png %}
 
 ---

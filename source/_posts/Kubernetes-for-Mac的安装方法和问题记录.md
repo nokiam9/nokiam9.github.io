@@ -5,6 +5,7 @@ tags:
 ---
 
 ## 安装Kubernetes的最简单方法
+
 著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。
 docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴械投降了，目前Kubernets已经集成到了Docker中。
 最简单的安装方法，就是在菜单Docker-Preferences-Kubernetes中，Enable即可。
@@ -12,29 +13,36 @@ docker-compose比较简单，适用于单机的服务编排，已经得到很好
 如果看到‘Kubernetes is running...’，就是成功加载了！！！
 
 ## Dashboard的安装和启动
+
 Kubernetes Dashboard是k8s集群的一个WEB UI管理工具。
 代码托管在[https://github.com/kubernetes/dashboard](https://github.com/kubernetes/dashboard)
 
 - 部署并启动Dashboard组件
+
 ```bash
 $ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml
+...
 ```
 
 - 启动proxy代理服务，提供外部访问Kubernetes cluster
-```bash
+
+``` bash
 $ kubectl proxy
+...
+
 ```
 
 - 浏览器打开UI界面，URL地址是：
 [http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/](http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/)
 
-**注意：版本v1.8.3可以跳过认证方式**
+  **注意：版本v1.8.3可以跳过认证方式**
 
 ## 如何创建Dashboard的认证鉴权文件（基于v1.10.1版本）
 
 NOTE: apiVersion of ClusterRoleBinding resource may differ between Kubernetes versions. Prior to Kubernetes v1.8 the apiVersion was rbac.authorization.k8s.io/v1beta1.
 
 - 创建权限文件`dashboard-adminuser.yaml`
+
 ```yaml
 apiVersion: v1
 kind: ServiceAccount
@@ -57,12 +65,11 @@ subjects:
 ```
 
 - 执行命令脚本，以创建admin-user用户角色，并获取token
-```bash
+
+``` console
 $ kubectl apply -f dashboard-adminuser.yaml
 $ kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')
-```
-输出结果的示例：
-```
+
 Name:         admin-user-token-6gl6l
 Namespace:    kube-system
 Labels:       <none>
@@ -85,9 +92,9 @@ token:      eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZ
 {% asset_img dash-main.png %}
 
 ---
+
 ## 问题1：激活Kubernetes时，一直停留在‘Kubernetes is starting...’
+
 - 根本原因：激活k8s需要自动下载google的镜像文件，但一直无法通过GW
 - 解决方法：在docker-Preferences-Proxies-Manunal Proxy Configration中，设置代理服务器为`host.docker.internal:1087`，由于国际传输速度较慢，可能需要几个小时
 - 补充说明：由于docker是运行在Mac的虚拟机上，无法直接使用Shadowsocks的默认代理设置`http://127.0.0.1:1087`，需要将localhost地址替换为Mac网卡的物理地址，最佳建议是使用docker的内部DNS域名`host.docker.internal:1087`，以避免WIFI切换时修改物理地址
-
-## 问题2：
