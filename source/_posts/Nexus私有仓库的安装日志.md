@@ -107,6 +107,19 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
 2. 设置registry-mirrors
 3. 重启docker服务
 
+``` sh
+[root@test ~]# more /etc/docker/daemon.json
+{
+    "insecure-registries":[
+        "192.168.0.147:9001",
+        "192.168.0.149"
+    ],
+    "registry-mirrors": [
+        "http://192.168.0.147:9001"
+    ]
+}
+```
+
 待续...
 
 ---
