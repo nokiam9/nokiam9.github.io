@@ -89,7 +89,7 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
     systemctl status nexus
     ```
 
-## Web界面设置
+## NEXUS仓库设置
 
 通过浏览器访问[http://192.168.0.147:8081](http://192.168.0.147:8081)
 
@@ -97,7 +97,15 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
 
 然后，就可以根据需要设置各类私服仓库了。
 
+1. 设置docker-proxy
+2. 设置docker-group
+3. 设置Realms权限
+
 ## Client使用方法
+
+1. 设置insecure-registries
+2. 设置registry-mirrors
+3. 重启docker服务
 
 待续...
 
@@ -105,6 +113,9 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
 
 ## 参考文献
 
+- [安裝 Nexus Repository Manager 作為 Docker Hub Mirror & Docker Image Proxy](https://godleon.github.io/blog/Nexus_Repository/docker-configure-proxy-with-nexus/)
+- [Nexus上配置Docker仓库](https://www.0x0f0f.com/docker/create-docker-repository-in-nexus/create-docker-repository-in-nexus/)
+- [使用 Nexus OSS 为 Docker 镜像提供代理/缓存功能](https://jenkins-zh.cn/wechat/articles/2020/05/2020-05-13-using-nexus-oss-as-a-proxy-cache-for-docker-images/)
 - [Nexus 安装和配置](https://wiki.jikexueyuan.com/project/linux-in-eye-of-java/Nexus-Install-And-Settings.html)
 - [maven私服nexus3.x环境配置](https://www.xncoding.com/2017/09/02/tool/nexus.html)
 - [CentOS 7 下安装和配置 Sonatype Nexus 3.3](https://qizhanming.com/blog/2017/05/16/how-to-install-sonatype-nexus-oss-33-on-centos-7)
