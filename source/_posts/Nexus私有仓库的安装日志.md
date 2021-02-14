@@ -27,7 +27,13 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
 
 ## 安装步骤
 
-1. 创建nexus用户，并设置文件权限
+1. 下载nexus软件包，当前版本`3.29.2`，安装包解压后有两个目录：
+   - 程序目录`./nexus-3.29.2-02/`， 改名后迁移到/opt
+   - 工作目录`./sonatype-work/nexus`，注意包含子目录，根据需要迁移或直接挂载数据盘
+  
+    > 也可以采用docker部署，镜像位于`sonatype/nexus3:3.29.2`，run可以设置port、volume
+
+2. 创建nexus用户，并设置文件权限
 
     ``` bash
     # 新建nexus用户及用户组，nexus3不允许root启动
@@ -39,7 +45,7 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
     chown -R nexus:nexus /opt/sonatype-work
     ```
 
-2. 设置NEXUS环境变量，编辑文件`/etc/profile.d/nexus.sh`
+3. 设置NEXUS环境变量，编辑文件`/etc/profile.d/nexus.sh`
 
     ``` config
     #!/bin/bash
@@ -48,12 +54,15 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
     export PATH NEXUS_HOME
     ```
 
-3. 为Nexus设置运行用户名，编辑`/opt/nexus/bin/nexus.rc`
+    > 直接`cat`时，由于$语义替换会出错
+
+4. 为Nexus设置运行用户名，编辑`/opt/nexus/bin/nexus.rc`
    并设置`run_as_user="nexus"`
 
-4. 设置系统自启动服务，创建`/usr/lib/systemd/system/nexus.service`，并填写
+5. 设置系统自启动服务，创建``，并填写
 
     ``` bash
+    cat > /usr/lib/systemd/system/nexus.service <<- EOF
     [Unit]
     Description=Nexus daemon
     After=network.target
@@ -69,6 +78,7 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
 
     [Install]
     WantedBy=multi-user.target
+    EOF
     ```
 
     然后就是常规操作
@@ -82,6 +92,7 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
 ## Web界面设置
 
 通过浏览器访问[http://192.168.0.147:8081](http://192.168.0.147:8081)
+
 初次访问登录时，需要设置admin的密码，初始密码在`/opt/sonatype-work/nexus3/admin.xxxx`文件中，一般设为`admin123`。
 
 然后，就可以根据需要设置各类私服仓库了。
@@ -95,5 +106,8 @@ Nexus还提供了强大的仓库管理功能，构件搜索功能，它基于RES
 ## 参考文献
 
 - [Nexus 安装和配置](https://wiki.jikexueyuan.com/project/linux-in-eye-of-java/Nexus-Install-And-Settings.html)
+- [maven私服nexus3.x环境配置](https://www.xncoding.com/2017/09/02/tool/nexus.html)
 - [CentOS 7 下安装和配置 Sonatype Nexus 3.3](https://qizhanming.com/blog/2017/05/16/how-to-install-sonatype-nexus-oss-33-on-centos-7)
 - [maven私服 nexus2.x工作目录解读](https://www.cnblogs.com/blaketairan/p/7136735.html)
+- [使用harbor和nexus作为docker registry](https://juejin.cn/post/6844903781654593550)
+- [Java版本号解读](https://blog.csdn.net/wq6ylg08/article/details/91351339)
