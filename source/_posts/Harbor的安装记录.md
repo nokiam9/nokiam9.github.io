@@ -137,7 +137,10 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 
 也可以参见[Harbor配置HTTPS的官方文档](https://goharbor.io/docs/2.0.0/install-config/configure-https/)
 
-> 配置HTTPS方式后，客户端Docker访问Harbor就可以不需要设置`unsecure-registries`参数了。
+配置HTTPS方式后，客户端Docker访问Harbor就可以不需要设置`unsecure-registries`参数了。
+
+> 个人强烈推荐Http方式，而不是Https方式！！！
+> 因为自签名证书需要客户端Docker配合导入证书，而真实域名证书受到ECS出口带宽限制，速度很感人！
 
 ---
 

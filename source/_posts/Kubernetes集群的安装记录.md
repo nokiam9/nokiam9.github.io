@@ -191,6 +191,7 @@ kubeadm init \
     --service-dns-domain cluster.local \
     --upload-certs
 #   --kubernetes-version 1.18.2  忽略kubernetes的版本差异
+```
 
 >- apiserver-advertise-address：公布API 服务器所正在监听的 IP 地址,指定`0.0.0.0`以使用默认网络接口的地址。**切记只可以是内网IP，不能是外网IP**，如果有多网卡，可以使用此选项指定某个网卡
 >- control-plane-endpoint：为控制平面指定一个稳定的 IP 地址或 DNS 名称，指定的 master1 已经在`/etc/hosts`配置解析为本机IP
