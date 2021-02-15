@@ -150,8 +150,9 @@ EOF
     kubectl：作为Kubernetes的客户端CLI工具，可以让用户通过命令行的方式对Kubernetes集群进行操作。**Master节点必备，Worker节点可以选装**
 
 ``` shell
-yum install kublet-1.18.2 kubeadm-1.18.2 kubectl-1.18.2 -y
+# 原来是1.18.2版本，现在是1.20.1
 # yum安装指定版本的软件，查看版本信息的方法是：yum list kubelet --showduplicates |expand
+yum install kubelet kubeadm kubectl -y
 
 systemctl enable kubelet
 systemctl start kubelet
@@ -185,12 +186,11 @@ kubeadm init \
     --cert-dir /etc/kubernetes/pki \
     --control-plane-endpoint master1 \
     --image-repository registry.cn-hangzhou.aliyuncs.com/google_containers \
-    --kubernetes-version 1.18.2 \
     --pod-network-cidr 10.11.0.0/16 \
     --service-cidr 10.20.0.0/16 \
     --service-dns-domain cluster.local \
     --upload-certs
-```
+#   --kubernetes-version 1.18.2  忽略kubernetes的版本差异
 
 >- apiserver-advertise-address：公布API 服务器所正在监听的 IP 地址,指定`0.0.0.0`以使用默认网络接口的地址。**切记只可以是内网IP，不能是外网IP**，如果有多网卡，可以使用此选项指定某个网卡
 >- control-plane-endpoint：为控制平面指定一个稳定的 IP 地址或 DNS 名称，指定的 master1 已经在`/etc/hosts`配置解析为本机IP
