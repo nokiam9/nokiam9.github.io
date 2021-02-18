@@ -14,7 +14,7 @@
   
 
 
-<html class="theme-next pisces use-motion" lang="zh-Hans">
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -80,7 +80,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Pisces',
+    scheme: 'Mist',
     version: '6.6.0',
     sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
@@ -112,7 +112,7 @@
 <meta property="og:description" content="系统规划镜像仓库作为Kubernets集群的重要基础设施，必须考虑在内网的互联网隔离问题。Docker虽然自带了Registry，但是不能提供细粒度的权限设置，此外，在大型集群中为了解决镜像拉取的性能瓶颈，经常需要解决多级镜像的同步问题，因此Harbor已经成为事实标准，为此本文研究了如何在内网离线安装Harbor。 基线版本的信息如下： - Centos=7.8 - Docker-CE=19.0">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://blog.caogo.cn/2020/07/12/Harbor的安装记录/admin.png">
-<meta property="og:updated_time" content="2020-09-04T04:53:39.108Z">
+<meta property="og:updated_time" content="2021-02-18T01:47:12.278Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Harbor的安装记录">
 <meta name="twitter:description" content="系统规划镜像仓库作为Kubernets集群的重要基础设施，必须考虑在内网的互联网隔离问题。Docker虽然自带了Registry，但是不能提供细粒度的权限设置，此外，在大型集群中为了解决镜像拉取的性能瓶颈，经常需要解决多级镜像的同步问题，因此Harbor已经成为事实标准，为此本文研究了如何在内网离线安装Harbor。 基线版本的信息如下： - Centos=7.8 - Docker-CE=19.0">
@@ -315,6 +315,9 @@
   
 
   
+    
+
+  
 
   
     <div class="site-search">
@@ -355,9 +358,6 @@
     <main id="main" class="main">
       <div class="main-inner">
         <div class="content-wrap">
-          
-            
-
           
           <div id="content" class="content">
             
@@ -438,7 +438,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2020-09-04 12:53:39" itemprop="dateModified" datetime="2020-09-04T12:53:39+08:00">2020-09-04</time>
+                <time title="Modified: 2021-02-18 09:47:12" itemprop="dateModified" datetime="2021-02-18T09:47:12+08:00">2021-02-18</time>
               
             
           </span>
@@ -513,8 +513,9 @@
 <li>部署或重新配置harbor: 编辑harbor.yml，运行install.sh进行设置，通过docker-compose启动</li>
 </ul>
 <p>也可以参见<a href="https://goharbor.io/docs/2.0.0/install-config/configure-https/" target="_blank" rel="noopener">Harbor配置HTTPS的官方文档</a></p>
-<blockquote>
 <p>配置HTTPS方式后，客户端Docker访问Harbor就可以不需要设置<code>unsecure-registries</code>参数了。</p>
+<blockquote>
+<p>个人强烈推荐Http方式，而不是Https方式！！！<br>因为自签名证书需要客户端Docker配合导入证书，而真实域名证书受到ECS出口带宽限制，速度很感人！</p>
 </blockquote>
 <hr>
 <h3 id="自制的image-push小工具（还要优化……）"><a href="#自制的image-push小工具（还要优化……）" class="headerlink" title="自制的image push小工具（还要优化……）"></a>自制的image push小工具（还要优化……）</h3><pre><code><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">cat &gt; harbor-push.sh &lt;&lt; EOF</span><br><span class="line"><span class="meta">#!/bin/bash </span></span><br><span class="line"></span><br><span class="line">count=1</span><br><span class="line"><span class="keyword">while</span> <span class="built_in">read</span> repo tag others   <span class="comment"># 从docker images的输出中获得镜像信息，注意剔除第一行 </span></span><br><span class="line"><span class="keyword">do</span> </span><br><span class="line">    src_image=<span class="variable">$repo</span><span class="string">":"</span><span class="variable">$tag</span></span><br><span class="line">    dst_image=192.168.0.130:7350/library/<span class="variable">$src_image</span></span><br><span class="line"></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">"<span class="variable">$count</span>: <span class="variable">$src_image</span> is pushing..."</span> &gt;&amp; 2</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">echo</span> docker tag <span class="variable">$src_image</span> <span class="variable">$dst_image</span></span><br><span class="line">    <span class="built_in">echo</span> docker push <span class="variable">$dst_image</span></span><br><span class="line">    <span class="built_in">echo</span> docker rmi <span class="variable">$dst_image</span></span><br><span class="line"></span><br><span class="line">    count=$((<span class="variable">$count</span> + 1))</span><br><span class="line"><span class="keyword">done</span></span><br><span class="line">EOF</span><br><span class="line"></span><br><span class="line">chmod a+x harbor-push.sh</span><br><span class="line">docker images |tail -n +2 |./harbor-push.sh</span><br></pre></td></tr></table></figure>
@@ -641,7 +642,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">42</span>
+                    <span class="site-state-item-count">45</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -760,7 +761,7 @@
 
 
 
-  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.6.0</div>
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v6.6.0</div>
 
 
 
@@ -852,13 +853,6 @@
 
   
   
-
-
-  <script src="/js/src/affix.js?v=6.6.0"></script>
-
-  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
-
-
 
   
   <script src="/js/src/scrollspy.js?v=6.6.0"></script>

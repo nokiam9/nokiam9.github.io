@@ -14,7 +14,7 @@
   
 
 
-<html class="theme-next pisces use-motion" lang="zh-Hans">
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head><meta name="generator" content="Hexo 3.8.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -80,7 +80,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Pisces',
+    scheme: 'Mist',
     version: '6.6.0',
     sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
     fancybox: false,
@@ -112,7 +112,7 @@
 <meta property="og:description" content="Step 0. Kubernets集群安装的准备工作本次安装测试的基础硬件是Intel NUC5i3 &amp;amp; NUC8i3，基准软件是：  Centos 7.8（启动速度快、版本稳定性好） Docker-ce 19.03.12 Kubernetes 1.18.2 (v1.18.4拉取国内镜像不成功！！！) Calico 3.8.9 Nginx-ingress 1.5.3  本Kubernete">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://blog.caogo.cn/2020/06/25/Kubernetes集群的安装记录/dashboard.png">
-<meta property="og:updated_time" content="2020-09-04T04:53:39.112Z">
+<meta property="og:updated_time" content="2021-02-18T01:47:12.284Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Kubernetes集群的安装记录">
 <meta name="twitter:description" content="Step 0. Kubernets集群安装的准备工作本次安装测试的基础硬件是Intel NUC5i3 &amp;amp; NUC8i3，基准软件是：  Centos 7.8（启动速度快、版本稳定性好） Docker-ce 19.03.12 Kubernetes 1.18.2 (v1.18.4拉取国内镜像不成功！！！) Calico 3.8.9 Nginx-ingress 1.5.3  本Kubernete">
@@ -315,6 +315,9 @@
   
 
   
+    
+
+  
 
   
     <div class="site-search">
@@ -355,9 +358,6 @@
     <main id="main" class="main">
       <div class="main-inner">
         <div class="content-wrap">
-          
-            
-
           
           <div id="content" class="content">
             
@@ -438,7 +438,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2020-09-04 12:53:39" itemprop="dateModified" datetime="2020-09-04T12:53:39+08:00">2020-09-04</time>
+                <time title="Modified: 2021-02-18 09:47:12" itemprop="dateModified" datetime="2021-02-18T09:47:12+08:00">2021-02-18</time>
               
             
           </span>
@@ -546,7 +546,7 @@
 <p>  kubectl：作为Kubernetes的客户端CLI工具，可以让用户通过命令行的方式对Kubernetes集群进行操作。<strong>Master节点必备，Worker节点可以选装</strong></p>
 </li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">yum install kublet-1.18.2 kubeadm-1.18.2 kubectl-1.18.2 -y</span><br><span class="line"><span class="meta">#</span><span class="bash"> yum安装指定版本的软件，查看版本信息的方法是：yum list kubelet --showduplicates |expand</span></span><br><span class="line"></span><br><span class="line">systemctl enable kubelet</span><br><span class="line">systemctl start kubelet</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 原来是1.18.2版本，现在是1.20.1</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> yum安装指定版本的软件，查看版本信息的方法是：yum list kubelet --showduplicates |expand</span></span><br><span class="line">yum install kubelet kubeadm kubectl -y</span><br><span class="line"></span><br><span class="line">systemctl enable kubelet</span><br><span class="line">systemctl start kubelet</span><br></pre></td></tr></table></figure>
 <blockquote>
 <p><strong>注意</strong>：此时系统重复启动<code>kubelet</code>不成功，原因是<code>kubeadm</code>尚未完成初始化，不要管他，后面自然就好了！</p>
 </blockquote>
@@ -557,7 +557,7 @@
 <ul>
 <li>Master节点初始化，如果失败，可以输入<code>kubeadm reset</code>回滚，观察错误提示并修改配置后重试</li>
 </ul>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">kubeadm init \</span><br><span class="line">    --apiserver-advertise-address 0.0.0.0 \</span><br><span class="line">    --apiserver-bind-port 6443 \</span><br><span class="line">    --cert-dir /etc/kubernetes/pki \</span><br><span class="line">    --control-plane-endpoint master1 \</span><br><span class="line">    --image-repository registry.cn-hangzhou.aliyuncs.com/google_containers \</span><br><span class="line">    --kubernetes-version 1.18.2 \</span><br><span class="line">    --pod-network-cidr 10.11.0.0/16 \</span><br><span class="line">    --service-cidr 10.20.0.0/16 \</span><br><span class="line">    --service-dns-domain cluster.local \</span><br><span class="line">    --upload-certs</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">kubeadm init \</span><br><span class="line">    --apiserver-advertise-address 0.0.0.0 \</span><br><span class="line">    --apiserver-bind-port 6443 \</span><br><span class="line">    --cert-dir /etc/kubernetes/pki \</span><br><span class="line">    --control-plane-endpoint master1 \</span><br><span class="line">    --image-repository registry.cn-hangzhou.aliyuncs.com/google_containers \</span><br><span class="line">    --pod-network-cidr 10.11.0.0/16 \</span><br><span class="line">    --service-cidr 10.20.0.0/16 \</span><br><span class="line">    --service-dns-domain cluster.local \</span><br><span class="line">    --upload-certs</span><br><span class="line"><span class="meta">#</span><span class="bash">   --kubernetes-version 1.18.2  忽略kubernetes的版本差异</span></span><br></pre></td></tr></table></figure>
 <blockquote>
 <ul>
 <li>apiserver-advertise-address：公布API 服务器所正在监听的 IP 地址,指定<code>0.0.0.0</code>以使用默认网络接口的地址。<strong>切记只可以是内网IP，不能是外网IP</strong>，如果有多网卡，可以使用此选项指定某个网卡</li>
@@ -782,7 +782,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">42</span>
+                    <span class="site-state-item-count">45</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -901,7 +901,7 @@
 
 
 
-  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.6.0</div>
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> v6.6.0</div>
 
 
 
@@ -993,13 +993,6 @@
 
   
   
-
-
-  <script src="/js/src/affix.js?v=6.6.0"></script>
-
-  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
-
-
 
   
   <script src="/js/src/scrollspy.js?v=6.6.0"></script>
