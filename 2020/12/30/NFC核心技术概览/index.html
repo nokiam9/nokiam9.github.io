@@ -118,7 +118,7 @@
 <meta property="og:image" content="https://blog.caogo.cn/2020/12/30/NFC核心技术概览/dual-mode.png">
 <meta property="og:image" content="https://blog.caogo.cn/2020/12/30/NFC核心技术概览/hce-se.png">
 <meta property="og:image" content="https://blog.caogo.cn/2020/12/30/NFC核心技术概览/protocol-stack.png">
-<meta property="og:updated_time" content="2021-01-13T02:02:39.368Z">
+<meta property="og:updated_time" content="2021-03-10T10:25:01.316Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="NFC核心技术概览">
 <meta name="twitter:description" content="NFC简介NFC(近场通信，Near Field Communication）是一种短距高频的无线电技术，由非接触式射频识别(RFID)演变而来。NFC工作频率为13.56Hz，通常只有在距离不超过4厘米时才能启动连接，其传输速度有106 Kbit/秒、212 Kbit/秒或者424 Kbit/秒三种。NFC有3种工作模式：读卡器模式、点对点模式、卡模拟模式。  读取器/写入器模式（Reader/">
@@ -444,7 +444,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2021-01-13 10:02:39" itemprop="dateModified" datetime="2021-01-13T10:02:39+08:00">2021-01-13</time>
+                <time title="Modified: 2021-03-10 18:25:01" itemprop="dateModified" datetime="2021-03-10T18:25:01+08:00">2021-03-10</time>
               
             
           </span>
@@ -496,7 +496,12 @@
 <h3 id="基于硬件的虚拟卡模式-Virtual-Card-Mode"><a href="#基于硬件的虚拟卡模式-Virtual-Card-Mode" class="headerlink" title="基于硬件的虚拟卡模式(Virtual Card Mode)"></a>基于硬件的虚拟卡模式(Virtual Card Mode)</h3><p>在虚拟卡模式下，需要提供安全模块SE(Secure Elemen)，SE提供对敏感信息的安全存储和对交易事务提供一个安全的执行环境。NFC芯片作为非接触通讯前端，将从外部读写器接收到的命令转发到SE，然后由SE处理，并通过NFC控制器回复。</p>
 <img src="/2020/12/30/NFC核心技术概览/SE.png" title="基于安全芯片SE的方式">
 <h3 id="基于软件的主机卡模式-Host-Card-Mode"><a href="#基于软件的主机卡模式-Host-Card-Mode" class="headerlink" title="基于软件的主机卡模式(Host Card Mode)"></a>基于软件的主机卡模式(Host Card Mode)</h3><p>在主机卡模式下，不需要提供SE，而是由在手机中运行的一个应用或云端的服务器完成SE的功能，此时NFC芯片接收到的数据由操作系统或发送至手机中的应用，或通过移动网络发送至云端的服务器来完成交互。两种方式的特点都是绕过了手机内置的SE的限制。</p>
+<p>那么，如何通过HCE技术在手机上实现NFC卡模拟呢？首先要创建一个处理交易事务的HCE 服务，Android4.4为HCE服务提供了一个非常方便的基类，我们可以通过继承基类来实现自己的HCE服务。如果要开发已存在的NFC系统，我们只需要在 HCE 服务中实现NFC 读卡器期望的应用层协议。反之如果要开发自己的新的NFC 系统，我们就需要定义自己的协议和APDU 序列。一般而言我们应该保证数据交换时使用很少的APDU包数量和很小的数据量，这样用户就不必花很长时间将手机放在NFC 读卡器上。</p>
+<p>HCE 技术只是实现了将NFC 读卡器的数据送至操作系统的HCE 服务或者将回复数据返回给NFC 读卡器，而对于数据的处理和敏感信息的存储则没有具体实现细，所以说到底HCE 技术是模拟NFC 和SE 通信的协议和实现。但是HCE 并没有实现SE，只是用NFC 与SE 通信的方式告诉NFC 读卡器后面有SE的支持，从而以虚拟SE 的方式完成NFC 业务的安全保证。既然没有SE，那么HCE 用什么来充当SE 呢，解决方案要么是本地软件的模拟，要么是云端服务器的模拟。负责安全的SE如何通过本地化的软件或者远程的云端实现，并且能够保障安全性，需要HCE厂商自己考虑和实现。</p>
 <img src="/2020/12/30/NFC核心技术概览/HCE.png" title="基于主机的模拟卡方式">
+<blockquote>
+<p>超级SIM卡是基于SIM SE芯片的技术方案，因此属于<strong>基于硬件的虚拟卡模式</strong>，但同时也可以为HCE提供支持。</p>
+</blockquote>
 <h3 id="双模（Dual-Mode）"><a href="#双模（Dual-Mode）" class="headerlink" title="双模（Dual Mode）"></a>双模（Dual Mode）</h3><img src="/2020/12/30/NFC核心技术概览/dual-mode.png" title="双模方式">
 <h3 id="对比分析"><a href="#对比分析" class="headerlink" title="对比分析"></a>对比分析</h3><img src="/2020/12/30/NFC核心技术概览/hce-se.png" title="对比分析">
 <h2 id="HCE的协议栈"><a href="#HCE的协议栈" class="headerlink" title="HCE的协议栈"></a>HCE的协议栈</h2><p>为支持NFC射频卡，HCE主要实现了两个ISO协议，分别是硬件标准<code>ISO/IEC 14443</code>和应用协议<code>ISO/IEC 7816</code>。</p>
@@ -524,13 +529,21 @@
 <p>Android 4.4 支持两种类别：<code>CATEGORY_PAYMENT</code>（覆盖行业标准支付应用）和<code>CATEGORY_OTHER</code>（对应于所有其它 HCE 应用）。</p>
 <p>注意：在任何给定时间，在系统中只能启用CATEGORY_PAYMENT类别中的一个 AID 组。通常，这将是一个应用程序，了解主要的信用卡支付协议，可以在任何商家工作。</p>
 <p>对于仅在一个商家（例如储值卡）工作的闭环支付应用，您应该使用CATEGORY_OTHER。该类别中的 AID 组可以总是活动的，并且在必要时可以在 AID 选择期间由 NFC 读写器给予优先级。</p>
+<h2 id="超级SIM卡的技术要求"><a href="#超级SIM卡的技术要求" class="headerlink" title="超级SIM卡的技术要求"></a>超级SIM卡的技术要求</h2><p>通信接口指的是 SIM 卡与外部终端设备进行通信的接口，应支持 ISO7816 和 SWP 两种接口。</p>
+<ul>
+<li>ISO7816 接口是 SIM 卡与外部终端设备进行通信的接触式 I/O 接口，遵循 ETSI 102.221 的要求。</li>
+<li>SWP 接口是 SIM 卡与外部非接触终端设备进行通信，实现近场通信相关业务 的物理接口。<br>  超级 SIM 卡支持 SWP 协议，遵循 ETSI TS 102.613 的要求。支持卡 模拟模式、读卡器模式，可选支持点对点传输模式。</li>
+</ul>
+<p>移动终端若支持 NFC 功能，则应支持 SWP 接口，与超级 SIM 卡协同实现刷卡 操作，为用户提供基于非接触感应的线下应用场景。</p>
 <hr>
 <h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a href="https://blog.csdn.net/icycityone/article/details/17358357" target="_blank" rel="noopener">NFC-SWP终端架构与标准</a></li>
 <li><a href="https://developer.android.com/guide/topics/connectivity/nfc/hce?hl=zh-cn" target="_blank" rel="noopener">Android的NFC官方文档</a></li>
 <li><a href="http://www.jiajuhf.com/zxxw_8/42705634.html" target="_blank" rel="noopener">关于HCE的NFC支付研究报告及其安全性探讨</a></li>
 <li><a href="http://article.iotxfd.cn/RFID/Host-based%20card%20emulation" target="_blank" rel="noopener">基于主机的卡模拟概览</a></li>
 <li><a href="https://blog.csdn.net/wwww1988600/article/details/69523369" target="_blank" rel="noopener">HCE基础知识普及</a></li>
 <li><a href="https://blog.csdn.net/liwei16611/article/details/85209361" target="_blank" rel="noopener">NFC之 Type A 与 TYpe B 卡区别</a></li>
+<li><a href="http://www.cmricloud.com/pdf/07/1.pdf" target="_blank" rel="noopener">超级SIM卡的技术白皮书</a></li>
 </ul>
 
       
@@ -723,7 +736,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#NFC简介"><span class="nav-number">1.</span> <span class="nav-text">NFC简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于Android的NFC终端"><span class="nav-number">2.</span> <span class="nav-text">基于Android的NFC终端</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基于硬件的虚拟卡模式-Virtual-Card-Mode"><span class="nav-number">2.1.</span> <span class="nav-text">基于硬件的虚拟卡模式(Virtual Card Mode)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于软件的主机卡模式-Host-Card-Mode"><span class="nav-number">2.2.</span> <span class="nav-text">基于软件的主机卡模式(Host Card Mode)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#双模（Dual-Mode）"><span class="nav-number">2.3.</span> <span class="nav-text">双模（Dual Mode）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对比分析"><span class="nav-number">2.4.</span> <span class="nav-text">对比分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HCE的协议栈"><span class="nav-number">3.</span> <span class="nav-text">HCE的协议栈</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-IEC-14443"><span class="nav-number">3.1.</span> <span class="nav-text">ISO/IEC 14443</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-IEC-7816"><span class="nav-number">3.2.</span> <span class="nav-text">ISO/IEC 7816</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#服务选择AID"><span class="nav-number">3.2.1.</span> <span class="nav-text">服务选择AID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AID组"><span class="nav-number">3.2.2.</span> <span class="nav-text">AID组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AID组和类别"><span class="nav-number">3.2.3.</span> <span class="nav-text">AID组和类别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#NFC简介"><span class="nav-number">1.</span> <span class="nav-text">NFC简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于Android的NFC终端"><span class="nav-number">2.</span> <span class="nav-text">基于Android的NFC终端</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基于硬件的虚拟卡模式-Virtual-Card-Mode"><span class="nav-number">2.1.</span> <span class="nav-text">基于硬件的虚拟卡模式(Virtual Card Mode)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于软件的主机卡模式-Host-Card-Mode"><span class="nav-number">2.2.</span> <span class="nav-text">基于软件的主机卡模式(Host Card Mode)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#双模（Dual-Mode）"><span class="nav-number">2.3.</span> <span class="nav-text">双模（Dual Mode）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对比分析"><span class="nav-number">2.4.</span> <span class="nav-text">对比分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HCE的协议栈"><span class="nav-number">3.</span> <span class="nav-text">HCE的协议栈</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-IEC-14443"><span class="nav-number">3.1.</span> <span class="nav-text">ISO/IEC 14443</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-IEC-7816"><span class="nav-number">3.2.</span> <span class="nav-text">ISO/IEC 7816</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#服务选择AID"><span class="nav-number">3.2.1.</span> <span class="nav-text">服务选择AID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AID组"><span class="nav-number">3.2.2.</span> <span class="nav-text">AID组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AID组和类别"><span class="nav-number">3.2.3.</span> <span class="nav-text">AID组和类别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#超级SIM卡的技术要求"><span class="nav-number">4.</span> <span class="nav-text">超级SIM卡的技术要求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
 
           </div>
