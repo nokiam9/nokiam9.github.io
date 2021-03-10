@@ -42,7 +42,13 @@ NFC终端主要包括非接触性前端CLF(也叫NFC控制器)、天线(Antenna)
 
 在主机卡模式下，不需要提供SE，而是由在手机中运行的一个应用或云端的服务器完成SE的功能，此时NFC芯片接收到的数据由操作系统或发送至手机中的应用，或通过移动网络发送至云端的服务器来完成交互。两种方式的特点都是绕过了手机内置的SE的限制。
 
+那么，如何通过HCE技术在手机上实现NFC卡模拟呢？首先要创建一个处理交易事务的HCE 服务，Android4.4为HCE服务提供了一个非常方便的基类，我们可以通过继承基类来实现自己的HCE服务。如果要开发已存在的NFC系统，我们只需要在 HCE 服务中实现NFC 读卡器期望的应用层协议。反之如果要开发自己的新的NFC 系统，我们就需要定义自己的协议和APDU 序列。一般而言我们应该保证数据交换时使用很少的APDU包数量和很小的数据量，这样用户就不必花很长时间将手机放在NFC 读卡器上。
+
+HCE 技术只是实现了将NFC 读卡器的数据送至操作系统的HCE 服务或者将回复数据返回给NFC 读卡器，而对于数据的处理和敏感信息的存储则没有具体实现细，所以说到底HCE 技术是模拟NFC 和SE 通信的协议和实现。但是HCE 并没有实现SE，只是用NFC 与SE 通信的方式告诉NFC 读卡器后面有SE的支持，从而以虚拟SE 的方式完成NFC 业务的安全保证。既然没有SE，那么HCE 用什么来充当SE 呢，解决方案要么是本地软件的模拟，要么是云端服务器的模拟。负责安全的SE如何通过本地化的软件或者远程的云端实现，并且能够保障安全性，需要HCE厂商自己考虑和实现。
+
 {% asset_img HCE.png 基于主机的模拟卡方式 %}
+
+> 超级SIM卡是基于SIM SE芯片的技术方案，因此属于**基于硬件的虚拟卡模式**，但同时也可以为HCE提供支持。
 
 ### 双模（Dual Mode）
 
@@ -107,12 +113,24 @@ Android 4.4 支持两种类别：`CATEGORY_PAYMENT`（覆盖行业标准支付�
 
 对于仅在一个商家（例如储值卡）工作的闭环支付应用，您应该使用CATEGORY_OTHER。该类别中的 AID 组可以总是活动的，并且在必要时可以在 AID 选择期间由 NFC 读写器给予优先级。
 
+## 超级SIM卡的技术要求
+
+通信接口指的是 SIM 卡与外部终端设备进行通信的接口，应支持 ISO7816 和 SWP 两种接口。
+
+- ISO7816 接口是 SIM 卡与外部终端设备进行通信的接触式 I/O 接口，遵循 ETSI 102.221 的要求。
+- SWP 接口是 SIM 卡与外部非接触终端设备进行通信，实现近场通信相关业务 的物理接口。
+    超级 SIM 卡支持 SWP 协议，遵循 ETSI TS 102.613 的要求。支持卡 模拟模式、读卡器模式，可选支持点对点传输模式。
+
+移动终端若支持 NFC 功能，则应支持 SWP 接口，与超级 SIM 卡协同实现刷卡 操作，为用户提供基于非接触感应的线下应用场景。
+
 ---
 
 ## 参考资料
 
+- [NFC-SWP终端架构与标准](https://blog.csdn.net/icycityone/article/details/17358357)
 - [Android的NFC官方文档](https://developer.android.com/guide/topics/connectivity/nfc/hce?hl=zh-cn)
 - [关于HCE的NFC支付研究报告及其安全性探讨](http://www.jiajuhf.com/zxxw_8/42705634.html)
 - [基于主机的卡模拟概览](http://article.iotxfd.cn/RFID/Host-based%20card%20emulation)
 - [HCE基础知识普及](https://blog.csdn.net/wwww1988600/article/details/69523369)
 - [NFC之 Type A 与 TYpe B 卡区别](https://blog.csdn.net/liwei16611/article/details/85209361)
+- [超级SIM卡的技术白皮书](http://www.cmricloud.com/pdf/07/1.pdf)
