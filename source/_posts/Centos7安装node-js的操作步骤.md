@@ -118,6 +118,14 @@ node.js从`v16`开始，提供了M1芯片的兼容性支持，也就是darwin有
 
 {% asset_img node-m1.png %}
 
+### 2. Mac OS安装npm可能出现的权限问题
+
+Mac 用户如果在编译时可能会遇到问题，请先到 App Store 安装 Xcode，Xcode 完成后，启动并进入 `Preferences -> Download -> Command Line Tools -> Install` 安装命令行工具。
+
+Mac用户如果在尝试过程中出现 `EACCES` 权限错误，请遵循由 [npmjs 发布的指导](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally) 修复该问题。
+
+强烈建议 不要 使用 root、sudo 等方法覆盖权限。
+
 ---
 
 ## 参考资料
