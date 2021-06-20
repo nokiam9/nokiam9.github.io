@@ -179,13 +179,15 @@ Etcd 也支持代理模式（proxy），只不过在 Etcd 中，代理模式和 
 
 ## 参考文献
 
+- [Nacos PMC 朱鹏飞的深度技术分析](https://zhuanlan.zhihu.com/p/63263168)
 - [深入理解 Spring Cloud 核心组件与底层原理](https://toutiao.io/posts/uglos82/preview)
 - [Spring Cloud核心模型 & 案例汇集](https://segmentfault.com/a/1190000020849168)
 - [基于电商网站的spring Cloud架构分析](https://segmentfault.com/a/1190000039842901)
+- [一个完整的Spring Cloud的分布式架构](https://www.cnblogs.com/burningmyself/p/12941807.html)
 - [Spring Cloud - Nacos与Eureka区别及如何选型](https://perkins4j2.github.io/posts/35353/)
 - [各大微服务注册中心简单对比：ZooKeeper、Eureka、Consul 、Nacos](https://juejin.cn/post/6844904205870694413)
-- [Eureka介绍和部署](http://www.heartthinkdo.com/?p=1933)
-- [Eureka集群部署的踩坑记录](https://my.oschina.net/icebergxty/blog/3080748)
 - [微服务网关和服务注册中心](http://www.vispractice.com/yxweb/blogs/API02.html)
 - [注册中心与API网关不是这样用的！](https://blog.csdn.net/dyc87112/article/details/116266269)
-- [一个完整的Spring Cloud的分布式架构](https://www.cnblogs.com/burningmyself/p/12941807.html)
+- [Eureka介绍和部署](http://www.heartthinkdo.com/?p=1933)
+- [Eureka集群部署的踩坑记录](https://my.oschina.net/icebergxty/blog/3080748)
+
