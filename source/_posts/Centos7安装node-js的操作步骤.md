@@ -108,6 +108,18 @@ npm config set registry http://mirrors.cloud.tencent.com/npm/
 
 ---
 
+## 疑难杂症
+
+### 1. Macbook M1芯片的版本支持
+
+2020年 Apple Macbook 推出了基于ARM指令集的 M1 自研芯片，而非原来基于x86指令集的 Intel 芯片。
+node.js从`v16`开始，提供了M1芯片的兼容性支持，也就是darwin有 arm64 和 x64 两个版本。
+具体可以参见 node.js官网下载页面的截图。
+
+{% asset_img node-m1.png %}
+
+---
+
 ## 参考资料
 
 - [Centos7:安装node和npm & npm配置全局路径](https://my.oschina.net/cqyj/blog/3016118)
