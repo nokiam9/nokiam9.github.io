@@ -94,16 +94,21 @@ CLB提供安全快捷的流量分发服务，访问流量经由 CLB 可以自动
 
 ## 四、几个典型VPC网络的规划分析
 
-{% asset_img vpc-1.png %}
-
-{% asset_img vpc-2.png %}
-
-{% asset_img vpc-3.png %}
+### AWS的私有网络实例
 
 {% asset_img vpc-4.png %}
 
----
+### 一个简单的VPC租户
 
+{% asset_img vpc-2.png %}
+
+### 一个大规模的VPC租户
+
+{% asset_img vpc-3.png %}
+
+Azure 堡垒机是一种可以让你用浏览器或者Azure门户网站来连接虚拟机的服务。Azure Bastion 全托管的PaaS服务，在虚拟网络内部进行使用。
+Azure 堡垒机直接通过TLS，从Azure门户网站提供安全无缝的RDP/SSH连接。当用Azure 堡垒机进行连接登录时，虚拟机不需要公共IP地址，也不需要代理，也不需要专门的客户端软件。
+堡垒机可以给Linux和Windows提供安全的链接
 
 ---
 
@@ -113,5 +118,3 @@ CLB提供安全快捷的流量分发服务，访问流量经由 CLB 可以自动
 - [AWS VPC网络部署参考](http://www.coding-daddy.com/other/aws-deploy.html#_1-vpc%E5%AE%9A%E4%B9%89)
 - [Azure Bastion 堡垒机的介绍](https://blog.csdn.net/qq_24550639/article/details/109202811)
 - [UCloud云平台的VPC部署案例](https://zhuanlan.zhihu.com/p/35130978?ivk_sa=1024320u)
-
-- [使用Cloud Native的服务治理替换Spring Cloud](https://xie.infoq.cn/article/8062a35d680349a5ca364e36f)
