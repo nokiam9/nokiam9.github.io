@@ -25,6 +25,10 @@ VPC网络的核心是VxLan技术，必须支持海量租户之间的网络隔离
 
 ### 安全组的工作方式
 
+Linux网络虚拟化支持linux bridge以及openvswitch（简称OVS），OpenStack Neutron ml2驱动二者都支持，目前大多数使用的是OVS。
+
+不过早期的iptables不支持OVS bridge以及port，因此为了实现安全组，虚拟机的tap设备并不是直接连接到OVS bridge上，而是中间加了一个Linux bridge，通过veth pair连接Linux bridge以及OVS bridege，这样就可以在Linux bridge上添加iptables规则实现安全组功能了。
+
 - 安全组作用于虚拟机的虚拟网卡上，给虚拟机提供三层网络的访问控制，支持入方向、出方向的过滤；
 - 安全组是一个分布式的访问控制，可以对TCP/UDP/ICMP等协议进行有效过滤；也可以直接匹配所有协议；可以根据数据包的源IP进行过滤。
 
@@ -40,4 +44,7 @@ VPC网络的核心是VxLan技术，必须支持海量租户之间的网络隔离
 
 ## 参考文献
 
+- [VPC的技术演进历史](https://www.sdnlab.com/20510.html)
+- [深入浅出云计算VPC网络之VXLAN](https://cloud.tencent.com/developer/article/1647354)
 - [安全组和云防火墙的区别](https://zhuanlan.zhihu.com/p/86734727)
+- [深入浅出 OpenStack 安全组实现原理](https://www.infoq.cn/article/oagppdcg*a1zqkzgbbcb)
