@@ -71,6 +71,22 @@ ISO/IEC14443-3 定义了 TYPE A、TYPEB 两种卡型（与飞利浦的 Mifare �
 不同TYPE的主要的区别在于信号发送的载波调制深度、二进制数编码方式存在差异。
 此外，防冲突机制的原理也完全不同，TYPE A是基于 BIT 冲突检测协议，TYPE B则是通过字节、帧及命令完成防冲突。
 
+### SWP单线协议(Single Wire Protocol)
+
+手机与普通非接触IC卡最大的不同体现在拥有网络功能和人机交互两部分，因此，NFC手机可以从事传统非接触IC所不能完成的丰富业务，如空中充值、余额查询。所有这些业务均需要一个技术前提即需要一个标准的SIM卡访问接口，能够使得应用客户端访问SIM卡并与SIM卡中的applet进行通信。具体讲，需要在手机中支持三个标准：
+
+1. SIM Alliance Open Mobile API：为应用客户端提供与SIM卡通信的通道
+
+2. Global Platform/GSMA：Secure Element Access Control：授权应用客户端访问SIM卡中对应的applet
+
+3. Modem：需完全支持3GPP 27.007标准，支持打开SIM卡逻辑通道，并能够在逻辑通信上真正实现APDU的透传
+
+{% asset_img swp.jpg 对比分析 %}
+
+SWP(Single Wire Protocol)是采用C6引脚的单线连接方案。在SWP方案中，接口界面包括三根线：VCC(C1)、GND(C5)和SWP(C6)，其中SWP一根信号线上基于电压和负载调制原理实现全双工通讯，这样可以实现SIM卡在ISO7816界面定义下同时支持7816和SWP两个接口，并预留了扩展第三个高速(USB)接口的引脚。支持SWP的SIM卡必须同时支持ISO和SWP两个协议栈，需要SIM的COS是多任务的OS系统，并且这两部分需要独立管理的，ISO界面的RST信号不能对SWP部分产生影响。
+
+　　SWP是在一根单线上实现全双工通讯，定义了S1和S2两个方向的信号， SWP传输的波特率可以从106KBPS最高上升至2MBPS。从SWP的定义看，SWP方案同时满足ISO7816、NFC和大容量高速接口，并且是全双工通讯，可以实现较高波特率。SWP系统地定义了从物理层、链路层到应用层的多层协议，并已经上升成为ETSI的标准，正在争取成为ISO的标准，目前得到业界较多的支持。从另一个角度看，SWP方案要求SIM卡和NFC模拟前端芯片同时重新设计，涉及的面比较广，市场推进的难度较大。另外，NFC应用非常关注掉电模式下的应用，SWP的S2负载调制通讯方式带来接口的功耗损失，对掉电模式下的性能有不利影响。
+
 ### ISO/IEC 7816
 
 Android处理应用协议数据单元 (APDU)遵循的是`ISO/IEC 7816-4`规范。
@@ -109,9 +125,36 @@ Android 4.4 支持两种类别：`CATEGORY_PAYMENT`（覆盖行业标准支付�
 
 ---
 
+## 附录：SIM卡的技术标准
+
+SIM卡是一个装有微处理器的芯片卡，它的内部有5个模块，并且每个模块都对应一个功能：
+- 微处理器CPU（8位）
+- 程序存储器ROM（3--8kbit）
+- 工作存储器RAM（6--16kbit）
+- 数据存储器EEPROM（128--256kbit）
+- 串行通信单元。
+
+{% asset_img sim.jpeg 对比分析 %}
+
+这5个模块被胶封在SIM卡铜制接口后与普通IC卡封装方式相同。这五个模块必须集成在一块集成电路中，否则其安全性会受到威胁。因为，芯片间的连线可能成为非法存取和盗用SIM卡的重要线索。 
+
+SIM卡同手机连接时至少需要5条连接线（通常编程口未定义） 
+- 数据I/O口（Data） 
+- 复位（RST） 
+- 接地端（GND） 
+- 电源（Vcc） 
+- 时钟（CLK）
+
+如上图所示。 
+
+SIM卡的供电分为5V（1998年前发行）、5V与3V兼容、3V、1.8V等，当然这些卡必须与相应的移动电话机配合使用，即移动电话机产生的SIM卡供电电压与该SIM卡所需的电压相匹配。卡电路中的电源VCC、地GND是卡电路工作的必要条件。卡电源用万用表就可以检测到。SIM卡插入移动电话机后，电源端口提供电源给SIM卡内各模块。 
+
 ## 参考资料
 
 - [Android的NFC官方文档](https://developer.android.com/guide/topics/connectivity/nfc/hce?hl=zh-cn)
+- [NFC SWP移动支付解决方案技术分析](https://www.mpaypass.com.cn/news/201307/12110718.html)
+- [近距离通信的SWP方案及其在SIM卡的实现](http://tech.rfidworld.com.cn/2010_07/04cd42c1fd6aac1d.html)
+- [SIM卡详解](https://blog.csdn.net/xiaoxik/article/details/82156455)
 - [关于HCE的NFC支付研究报告及其安全性探讨](http://www.jiajuhf.com/zxxw_8/42705634.html)
 - [基于主机的卡模拟概览](http://article.iotxfd.cn/RFID/Host-based%20card%20emulation)
 - [HCE基础知识普及](https://blog.csdn.net/wwww1988600/article/details/69523369)
