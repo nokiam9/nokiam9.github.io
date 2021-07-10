@@ -123,6 +123,15 @@ Android 4.4 支持两种类别：`CATEGORY_PAYMENT`（覆盖行业标准支付�
 
 对于仅在一个商家（例如储值卡）工作的闭环支付应用，您应该使用CATEGORY_OTHER。该类别中的 AID 组可以总是活动的，并且在必要时可以在 AID 选择期间由 NFC 读写器给予优先级。
 
+### 应用层的技术标准
+NFC手机可以从事传统非接触IC所不能完成的丰富业务，如空中充值、余额查询。所有这些业务均需要一个技术前提即需要一个标准的SIM卡访问接口，能够使得应用客户端访问SIM卡并与SIM卡中的applet进行通信。具体讲，需要在手机中支持三个标准：
+
+1. SIM Alliance Open Mobile API：为应用客户端提供与SIM卡通信的通道
+
+2. Global Platform/GSMA：Secure Element Access Control：授权应用客户端访问SIM卡中对应的applet
+
+3. Modem：需完全支持3GPP 27.007标准，支持打开SIM卡逻辑通道，并能够在逻辑通信上真正实现APDU的透传
+
 ---
 
 ## 附录：SIM卡的技术标准
