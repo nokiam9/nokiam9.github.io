@@ -176,3 +176,4 @@ SIM卡的供电分为5V（1998年前发行）、5V与3V兼容、3V、1.8V等，�
 - [HCE基础知识普及](https://blog.csdn.net/wwww1988600/article/details/69523369)
 - [NFC之 Type A 与 TYpe B 卡区别](https://blog.csdn.net/liwei16611/article/details/85209361)
 - [基于HCE移动支付研究报告](https://mp.weixin.qq.com/s?src=3&timestamp=1625732247&ver=1&signature=YhDcKm20OjT1SqXPV4ZZjLRQtlP42pVugJP77ZqfP6lSnDV7-d-WYWFpxgd-qXkSJ7EwF-g7TpH2pu5MDifsfvGJsEF1yY9jmRZa*elztII6P9xrvmw53XvWBsp-ztpwDYuS4VXwrXgHrA4p4NpNaQ==)
+- [NFC-SWP连接方案在SIM卡中的实现方法](http://www.nfcin.com.cn/news/201403/11110054.html)
