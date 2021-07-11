@@ -56,7 +56,7 @@ Sun 还提供了 Java Card 开发工具（JCDK），其中包括 Java Card RE �
 
 GP在全球有120多家会员企业，截至2017年，基于GP规范的安全元件出货量就已超过50亿。2015-2017年，搭载SE的移动设备达到10亿+，其全部都是基于GP的标准。
 
-### 基础架构
+### 卡片的技术架构
 
 {% asset_img gp-card-arch.png %}
 
@@ -74,7 +74,9 @@ GlobalPlatform 并不特定于javacard,但javacard是智能卡applet开发的唯
 
 GP当前最新版本是v2.3。
 
-### 安全域（Security Domain）
+### 安全的技术架构
+
+{% asset_img gp-sec-arch.png %}
 
 作为卡外授权机构的卡片内代表的安全域，依据现有的三种授权机构，可以划分为三种主流类型：
 
