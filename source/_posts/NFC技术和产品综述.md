@@ -30,9 +30,9 @@ NFC是多种技术路线并行发展的综合体，得益于条形码、磁条�
 
 2. 最右边一条为磁条卡（Magnetic Strip Cards）技术路线，该路线后来向智能卡（Smart Card）方向发展，最终演化出了NFC使用的Proximity Coupling Smart Card，有效距离在10cm之内，对应的规范为`ISO/IEC 14443(非接触式IC卡标准)`，从RF（Radio Frequency，无线频率）层面定义了如何与不同的非接触式IC卡（其实物可以是NFC Tag、RFID Tag、Smart Cards）交互。
 
-    Vicinity Coupling Smart Card对应的规范为`ISO/IEC 15693`(也称为**疏耦合卡**)，突出优势是**读取距离可高达一米**，同时设计简单使得读取器的生产成本低，在企业门禁卡中得到广泛应用。
+    > - Vicinity Coupling Smart Card对应的规范为`ISO/IEC 15693`(也称为**疏耦合卡**)，特点一是使用场景的温度要求远高于消费级产品（通常是零下40度到零上85度），二是**读取距离可高达一米**，同时设计简单使得读取器的生产成本低，在物流运输、企业门禁卡等场景中得到广泛应用。
 
-    > Close Coupling Smart Card对应的规范是`ISO 10536`，该标准主要发展于1992到1995年间，由于这种卡的成本高，优点少，因此从未在市场上销售。
+    > - Close Coupling Smart Card对应的规范是`ISO 10536`，该标准主要发展于1992到1995年间，由于这种卡的成本高，优点少，因此从未在市场上销售。
 
     粗看上去Smart Card和RFID Tag类似，例如二者都只存储一些数据，而且自身都没有电源组件，但Smart Card在安全性上的要求远比RFID Tag严格。另外，Smart Card上还能运行一些小的嵌入式系统（如Java Card OS）或者应用程序（Applets）以完成更为复杂的工作。
 
@@ -42,7 +42,7 @@ NFC涉及到多个标准化组织定义的协议，下图是简化的协议栈�
 
 {% asset_image protocol-1.png %}
 
-## NFC的通信模式
+## NFC的运行模式
 
 从用户角度（即图中的Applications层之上）来看，NFC有三种运行模式（operation mode），分别是
 
@@ -58,12 +58,27 @@ NFC涉及到多个标准化组织定义的协议，下图是简化的协议栈�
 
 通常NFC标签是不需要外部供电的，当支持NFC的外设向NFC读写数据时，它会发送某种磁场，而这个磁场会自动的向NFC标签供电。
 
-> NFC Tag的数据通常是ReadOnly，无法支持余额更新等业务需求，而且**由于使用了 NFC 论坛定义的消息格式，数据传输是不安全的**。
+{% asset_img rw-mode.jpg %}
+
+NFC Forum定义了四种类型的Tag，分别为Type 1、Type 2、Type 3和Type 4。这四种类型NFC Tag的区别在于存储空间大小，数据传输率以及底层使用的协议上。下文的表8-1列举了它们的不同点。
+
+NFC Forum定义了两个通用的数据结构用于在NFC Device之间（包括R/W模式中的NFC Reader和NFC Tag）传递数据。这两个通用数据结构分别是NFC Data Exchange Format（简写为NDEF）以及NFC Record。
+
+我们先来看NFC 4种不同Type的Tag有何区别，如表8-1[7]所示：
+
+> R/W模式下，NFC Tag的数据通常是ReadOnly，无法支持余额更新等业务需求，而且**由于NFC手机采用主动模式，数据传输是不安全的**。
 
 ### 卡模拟模式（Card Emulation Mode）
 
+数据在支持NFC的手机中，可以简单理解成**刷手机**。本质上就是将支持NFC的手机或其它电子设备当成借记卡、公交卡、门禁卡等IC卡使用。基本原理是将相应IC卡中的信息凭证封装成数据包存储在支持NFC的外设中 。
+
+在使用时还需要一个NFC射频器（例如Pos终端、闸机等），将手机靠近NFC射频器，手机就会接收到NFC射频器发过来的信号，在通过一系列复杂的验证后，将IC卡的相应信息传入NFC射频器，最后这些IC卡数据会传入NFC射频器连接的电脑，并进行相应的处理（如电子转帐、开门等操作）。
+
+{% asset_img ce-mode.jpg %}
+
 该模式下，NFC 设备的工作类似于标准的非接触式智能卡。这让它可以用于已有的非接触式智能卡基础设施，实现访问控制、非接触式支付、固件更换或数据传输等操作。
-仿真智能卡的 NFC 设备通常工作在被动 NFC 模式，**此时的数据传输是安全的**。
+
+> CE模式下，**由于NFC手机采用被动模式，数据传输是安全的**。
 
 ### 点对点模式（Peer-to-Peer Mode）
 
@@ -72,17 +87,11 @@ NFC涉及到多个标准化组织定义的协议，下图是简化的协议栈�
 
 NFC使用的是无线射频技术。在RF层，与之相关的规范是ISO 18092（NFC Interface and Protocol I，简称NFCIP-1，该规范定义了NFC RF层的工作流程）和ISO 14443 Type A，Type B和Felica。
 
-ISO 14443全称为非接触式IC卡标准，它从RF层面定义了如何与不同的非接触式IC卡（其实物可以是NFC Tag、RFID Tag、Smart Cards）交互。ISO 14443定义了Type A和Type B两种非接触式IC卡。
+从协议栈的角度，三种工作模式的分析如下：
 
-Type A最早由Philips公司制订（其生产的芯片商标名为MIFARE，现在由从Philips独立出来的NXP公司拥有，目前世界上70%左右的非接触式IC卡都使用了MIFARE芯片，例如北京市的公交卡），
-Type B（主要用在法国市场）由其他公司制订，二者最终都成为ISO标准。
-Felica（也被称为Type F）由Sony开发，它最终没有成为ISO标准，而是成为日本工业标准JIS X6319-4，所以Felica主要用于日本市场。
-Type A、B和F主要区别在于RF层的信号调制解调方法、传输速率及数据编码方式上。关于ISO 14443和Felica之间的区别，请读者阅读参考资料[4]。
-RF层之上是Mode Switch，它用于确定对端NFC Device的类型并选择合适的RF层协议与之通信。
-
+{% asset_image rf.jpg %}
 
 ## NFC的协议栈
-
 
 
 {% asset_image protocol-2.png %}
@@ -92,7 +101,7 @@ RF层之上是Mode Switch，它用于确定对端NFC Device的类型并选择合
 
 ## NFC的工作模式
 
-{% asset_image rf.jpg %}
+
 
 `ISO 18092`协议介绍了P2P通讯中的Active模式和Passive通讯模式，其实`ISO 18092`使用了`ISO 14443`协议和非国际标准的`FELICA`通讯协议，
 
@@ -102,9 +111,100 @@ RF层之上是Mode Switch，它用于确定对端NFC Device的类型并选择合
 
 {% asset_image nfc-tag.jpg %}
 
+
+|项目|Type 1|Type 2|Type 3|Type 4|Type 5|
+|:-:|:-:|:-:|:-:|:-:|:-:|
+|对应规范   |ISO 14443 Type A|ISO 14443 Type A |JIS X 6319-4、FELICA|ISO 14443 Type A/B|ISO/IEC 15693|
+|常见芯片	|Topaz	|MIFARE	|Felica	|MIFARE-DESFire|NXP的I Code系列，ST的ST25TV系列|
+|存储容量	|最大1KB	|最大2KB	|最大1MB	|最大64KB|高达 8 KB|
+|读写速率	|106kbps    |106kbps    |212kbps	|106-424kbps|26.48 kbps|
+|价格	|低	|低	|高	|中等/高|低|
+|安全性	|数字签名保护	|不安全	|数字签名保护	|可选 |N/A|
+|说明	|Topaz由Innovision公司推出	|MIFARE由NXP公司推出	|由Sony公司推出，价格比较贵	|这类芯片在出厂时就被配置好是否只读或可读写|上海贝岭|
+
+---
+
+## 附录一：ISO 14443 - 非接触式IC卡标准
+
+ISO 14443全称为非接触式IC卡标准，它从RF层面定义了如何与不同的非接触式IC卡（其实物可以是NFC Tag、RFID Tag、Smart Cards）交互。ISO 14443定义了Type A和Type B两种非接触式IC卡。
+
+### Type A
+
+最早由Philips公司制订（其生产的芯片商标名为MIFARE，现在由从Philips独立出来的NXP公司拥有，目前世界上70%左右的非接触式IC卡都使用了MIFARE芯片，例如北京市的公交卡），
+
+### Type B
+
+（主要用在法国市场）由其他公司制订，二者最终都成为ISO标准。
+
+### Type F（FeliCa）
+
+FeliCa是Sony为了非接触式IC卡而开发出来的通信技术，与ISO 14443标准的主要区别是采用曼彻斯特编码，而非NRZ编码。
+1998年，FeliCa被提案为ISO 14443 type C，但悲剧的是未被ISO组织采纳，只能成为日本工业标准`JIS X6319-4`。之后，FeliCa和其向后相容方式被标准化为ISO 18092。
+目前，Felica也被称为Type F，主要应用于日本市场，境外只有香港的“八达通”仍有继续使用。
+
+
+## 附录二：NFC主流芯片型号
+
+### ISO 14443 Type A
+
+- MF1 IC S20：国内常称为MIFARE Mini，原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。
+- SLE66R35：德国英飞凌（infineon），兼容MF1 IC S50。
+- FM11RF08：芯片厂家为上海复旦，兼容MF1 IC S50。
+- Mifare Std 1k MF1 IC S50及其兼容卡：原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。 
+- Mifare Std 4k MF1 IC S70及其兼容卡：原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。　
+- Mifare Ultralight MF0 IC U1X：国内常称为U10,芯片厂家为荷兰恩智浦(NXP)，广深高速火车票为典型应用。
+- Mifare Ultralight C：原装芯片厂家为荷兰恩智浦（NXP）。
+- FM11RF005:芯片厂家为上海复旦,包括FM11RF005SH与FM11RF005M,上海地铁单程票、上海轮渡单程票为典型应用。FM11RF08:芯片厂家为上海复旦
+- Mifare DESfire 2k MF3 IC D21：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3 2k。
+- Mifare DESfire 4k MF3 IC D41：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3。南京地铁卡为典型应用。
+- Mifare DESfire 8k MF3 IC D81：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3 8k。
+- Mifare ProX：芯片厂家为荷兰恩智浦（NXP）。不判别容量。　　　　　　　 　
+- SHC1102：芯片厂家为上海华虹，上海一卡通为典型应用。
+- Advant ATC2048-MP：芯片厂家为瑞士LEGIC。
+- MF1 PLUS 2k：芯片厂家为荷兰恩智浦（NXP），国内常称为PLUS S。
+- MF1 PLUS 4k：芯片厂家为荷兰恩智浦（NXP），国内常称为PLUS X。
+- JEWEL：芯片厂家为英国innovision，国内常称为宝石卡。不读序列号。
+- IS23SC4456：芯片厂家为美国ISSI，可兼容MF1 IC S50的CPU卡。
+- CPU卡（兼容MF1）：芯片厂家为上海复旦、上海华虹等，可兼容MF1 IC S50的CPU卡。该类也包含FM1208M1及其它类似的芯片卡。
+- 纯CPU卡：芯片厂家为上海复旦、美国ISSI等，纯CPU卡。该类也包含FM1208、IS23SC4456中的纯CPU卡及其它类似的芯片卡。
+- X82A：芯片厂家为北京华大，CPU卡。
+
+### ISO 14443 Type B
+
+- AT88RF020：芯片厂家为美国爱特梅尔（ATMEL），广州地铁卡为典型应用。
+- SR176：芯片厂家为瑞士意法半导体（ST），主要用于防伪识别等。
+- SRIX4K：芯片厂家为瑞士意法半导体（ST），主要用于防伪识别等。
+- SRT512：芯片厂家为瑞士意法半导体（ST），主要用于防伪识别等。
+- ST23YR18：芯片厂家为瑞士意法半导体（ST），CPU卡。
+- THR1064：芯片厂家为北京同方，奥运门票为典型应用。
+- THR2408：芯片厂家为北京同方，纯CPU卡。
+- 第二代居民身份证：芯片厂家为上海华虹、北京同方THR9904、天津大唐和北京华大，第二代身份证为典型应用。
+
+### ISO 15693
+
+- EM4135：芯片厂家为瑞士EM，主要用于票证管理、防伪识别等。
+- ICODE SL2 ICS53/ICODE SL2 ICS54：芯片厂家为荷兰恩智浦（NXP），国内常称为ICODE SLI-S，主要用于物流仓储、票证管理等。
+- ICODE SL2 ICS20：芯片厂家为荷兰恩智浦（NXP），国内常称为I CODE 2，主要用于物流仓储、票证管理等。
+- ICODE SL2 ICS50/ICODE SL2 ICS51：芯片厂家为荷兰恩智浦（NXP），国内常称为ICODE SLI-L，主要用于物流仓储、票证管理等。
+- Tag-it HF-1 Plus：芯片厂家为美国德州仪器（TI），国内常称为TI2048，主要用于物流仓储、票证管理等。
+- Tag-it HF-1 Standard：芯片厂家为美国德州仪器（TI），国内常称为TI256，主要用于物流仓储、票证管理等。
+- BL75R04：芯片厂家为上海贝岭，兼容TI 2048，主要用于物流仓储、票证管理等。
+- BL75R05：芯片厂家为上海贝岭，兼容I CODE 2，主要用于物流仓储、票证管理等。
+- FM1302N：芯片厂家为上海复旦，兼容I CODE 2，主要用于物流仓储、票证管理等。
+- Advant ATC128-MV：芯片厂家为瑞士LEGIC，主要用于一卡通等。
+- Advant ATC256-MV：芯片厂家为瑞士LEGIC，主要用于一卡通等。
+- Advant ATC1024-MV：芯片厂家为瑞士LEGIC，主要用于一卡通等。
+- LRI2K：芯片厂家为瑞士意法半导体（ST）。
+
 ---
 
 ## 参考文献
 
 - [深入理解Android：Wi-Fi、NFC和GPS卷](https://static.kancloud.cn/alex_wsc/android-wifi-nfc-gps)
 - [NFC-Forum官方网站的技术文档列表](https://nfc-forum.org/our-work/specification-releases/)
+
+### 资料下载
+
+- [ISO14443 Overview-v5.ppt](ISO14443 Overview-v5.ppt)
+- [NFC技术指南](tn1216-st25-nfc-guide-stmicroelectronics.pdf)
+- [ST意法半导体公司的NFC产品说明书](zh.NFC_Solutions_from_ST.pdf)
