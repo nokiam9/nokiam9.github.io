@@ -71,7 +71,7 @@ NFC涉及到多个标准化组织定义的协议，下图是简化的协议栈�
 
 {% asset_img ce-mode.jpg %}
 
-该模式下，NFC 手机的工作类似于标准的[非接触式IC卡](#非接触式IC卡)，为此ISO 14443定义了Type A 和 Type B两种技术标准（Type F不是正式标准），后续有详细技术分析。
+该模式下，NFC 手机的工作类似于标准的[非接触式IC卡](#NFC数据传输)，为此ISO 14443定义了Type A 和 Type B两种数据传输标准（Type F不是正式标准），后续有详细技术分析。
 
 > 对于“刷手机”场景，NFC 手机工作在被动模式，它只在机具发出的射频场中被动响应，**数据传输是安全的**。
 
@@ -85,7 +85,15 @@ NFC涉及到多个标准化组织定义的协议，下图是简化的协议栈�
 
 {% asset_image rf.jpg %}
 
-## 非接触式IC卡
+## NFC数据传输
+
+NFC Forum定义了5种数据传输方式，其中：
+
+- NFC-A：对应ISO 14443 Type A
+- NFC-B：对应ISO 14443 Type B
+- NFC-F：对应非ISO标准的FeliCa，也称为Type-F
+- NFC-V：对应ISO 15693
+- P2P：基于ISO 18092，主要用于Android Beam，实现两台 Android 设备之间进行简单的点对点数据交换
 
 `ISO 14443`全称为非接触式IC卡标准，它从RF层面定义了如何与不同的非接触式IC卡（其实物可以是NFC Tag、RFID Tag、Smart Cards）交互。
 
