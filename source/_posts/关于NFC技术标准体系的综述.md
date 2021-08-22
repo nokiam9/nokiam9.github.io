@@ -1,5 +1,5 @@
 ---
-title: NFC技术和产品综述
+title: 关于NFC技术标准体系的综述
 date: 2021-08-15 18:05:45
 tags:
 ---
@@ -220,7 +220,7 @@ SNEP使用可靠的传输层：逻辑链路控制协议（LLCP）。
 
 ### 后续演进
 
-NFC技术的发展方兴未艾，当前还在快速变化中，以下是当前的最新进展，包含了几个正在积极申请的新标准。
+NFC技术的发展方兴未艾，当前还在快速变化中，最新进展包含了几个正在积极申请的新标准。
 
 {% asset_image nfc-protocol-3.bmp %}
 
@@ -244,7 +244,8 @@ NFC技术的发展方兴未艾，当前还在快速变化中，以下是当前�
 - Mifare Std 4k MF1 IC S70及其兼容卡：原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。　
 - Mifare Ultralight MF0 IC U1X：国内常称为U10,芯片厂家为荷兰恩智浦(NXP)，广深高速火车票为典型应用。
 - Mifare Ultralight C：原装芯片厂家为荷兰恩智浦（NXP）。
-- FM11RF005:芯片厂家为上海复旦,包括FM11RF005SH与FM11RF005M,上海地铁单程票、上海轮渡单程票为典型应用。FM11RF08:芯片厂家为上海复旦
+- FM11RF005:芯片厂家为上海复旦,包括FM11RF005SH与FM11RF005M,上海地铁单程票、上海轮渡单程票为典型应用。
+- FM11RF08:芯片厂家为上海复旦
 - Mifare DESfire 2k MF3 IC D21：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3 2k。
 - Mifare DESfire 4k MF3 IC D41：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3。南京地铁卡为典型应用。
 - Mifare DESfire 8k MF3 IC D81：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3 8k。
