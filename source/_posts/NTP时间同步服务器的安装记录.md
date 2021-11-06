@@ -34,9 +34,9 @@ fudge 127.127.1.0 stratum 10
 UUID=1fcd9fb0-e1e7-499f-87f9-ca888c66d7c0 /boot                   xfs     defaults        0 0
 UUID=3646-00B9          /boot/efi               vfat    umask=0077,shortname=winnt 0 0
 /dev/mapper/centos-swap swap                    swap    defaults        0 0
-/dev/sda1		/data/nfs		xfs	defaults	0 0
-/dev/sda2		/data/harbor		xfs	defaults	0 0
-/dev/sda3		/data/mirror		xfs	defaults	0 0
+/dev/sda1 /data/nfs xfs defaults    0 0
+/dev/sda2 /data/harbor xfs defaults    0 0
+/dev/sda3 /data/mirror xfs defaults 0 0
 ```
 
 ``` txt
@@ -81,6 +81,7 @@ UUID=3646-00B9          /boot/efi               vfat    umask=0077,shortname=win
     ]
 }
 ```
+
 ---
 
 ``` bash
