@@ -9,7 +9,7 @@ tags:
 为了解决KX上网的问题，经常需要修改DNS设置，干脆就在自己的局域网搭建一个本地DNS服务器，作为今后Linux系统安装的基础设施，一劳永逸解决问题。
 
 局域网Domain：  caogo.lan
-DNS服务器：     192.168.0.199， dnsmasq, dnsmasq.caogo.lan
+DNS服务器：     192.168.0.144， dnsmasq, dnsmasq.caogo.lan
 
 原本想用BIND（named），虽然功能强大但是安装配置太复杂，研究发现局域网直接用DNSmasq最合适。
 另外，局域网的Domain本来考虑`.local`，但发现Mac的Banjour服务默认使用了该域名后缀
@@ -51,13 +51,13 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
     mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 
     cat > /etc/dnsmasq.conf << EOF
-    listen-address=127.0.0.1, 192.168.0.199
+    listen-address=127.0.0.1, 192.168.0.144
     expand-hosts
     domain=caogo.local
     server=8.8.8.8
     server=114.114.114.114
     address=/caogo.local/127.0.0.1
-    address=/caogo.local/192.168.0.199
+    address=/caogo.local/192.168.0.144
     EOF
     ```
 
@@ -74,7 +74,7 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
 
     192.168.0.132   pve01
 
-    192.168.0.199   dnsmasq dns ns01 ns02
+    192.168.0.144   dnsmasq dns ns01 ns02
     192.168.0.120   nfs
     192.168.0.121   reg
     192.168.0.122   mirror
@@ -122,7 +122,7 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
 
 ``` conf
 # domain caogo.local
-nameserver 192.168.0.199
+nameserver 192.168.0.144
 ```
 
 ## 参考资料
