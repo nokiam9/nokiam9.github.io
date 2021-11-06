@@ -125,8 +125,8 @@ restrict 192.168.0.140 nomodify notrap noquery
 EOF
 
 # 设置并启动系统服务
-systemctl enable ntpd
-systemctl restart ntpd
+systemctl enable ntpdate
+systemctl restart ntpdate
 ntpq -p
 ```
 
@@ -138,3 +138,4 @@ ntpq -p
 
 - [快速部署ntp时间服务器](https://www.jianshu.com/p/8b4befdd9196)
 - [NTP时间服务器配置详解](https://blog.51cto.com/wolfgang/1127162)
+- [ntpq: read: Connection refused 疑难问题排查](https://huataihuang.gitbooks.io/cloud-atlas/content/service/ntp/ntpq_timed_out_nothing_received.html)
