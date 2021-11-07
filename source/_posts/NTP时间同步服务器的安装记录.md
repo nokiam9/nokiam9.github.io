@@ -101,7 +101,11 @@ tags:
 
 ## NTP Client 的设置方法
 
-1. 安装NTP软件，`yum install -y ntp`
+1. 安装NTP软件
+
+   ``` bash
+   yum install -y ntp
+   ```
 
 2. 编辑NTP配置文件，位于`/etc/ntp.conf`。 删除默认内容，加入内网NTP服务器地址
 
