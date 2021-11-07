@@ -12,7 +12,7 @@ tags:
 1. 安装NTP软件，并做一次手工时间校准。
 
     ``` bash
-    yum install ntp
+    yum install -y ntp
     ntpdate cn.pool.ntp.org
 
     ```
@@ -21,12 +21,16 @@ tags:
 
     ``` bash
     [root@localhost etc]# cat /etc/ntp.conf
+    driftfile /var/lib/ntp/drift
+
     # 允许内网其他机器同步时间
     restrict 192.168.0.0 mask 255.255.255.0 nomodify notrap
 
     # 配置上级时间服务器
     server ntp.ntsc.ac.cn prefer
     server ntp1.aliyun.com
+    server cn.pool.ntp.org
+
 
     # 外部时间服务器不可用时，以本地时间作为时间服务
     server 127.127.1.0
@@ -63,6 +67,20 @@ tags:
 4. 使用`ntpq -np` 和 `ntpstat`命令检查NTP运行状态
 
     ``` console
+    [root@localhost ~]# netstat -tunpl
+    Active Internet connections (only servers)
+    Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+    tcp        0      0 127.0.0.1:25            0.0.0.0:*               LISTEN      1045/master         
+    tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1117/sshd           
+    tcp6       0      0 ::1:25                  :::*                    LISTEN      1045/master         
+    tcp6       0      0 :::22                   :::*                    LISTEN      1117/sshd           
+    udp        0      0 192.168.0.140:123       0.0.0.0:*                           1289/ntpd           
+    udp        0      0 127.0.0.1:123           0.0.0.0:*                           1289/ntpd           
+    udp        0      0 0.0.0.0:123             0.0.0.0:*                           1289/ntpd           
+    udp6       0      0 fe80::6c3c:5cff:fee:123 :::*                                1289/ntpd           
+    udp6       0      0 ::1:123                 :::*                                1289/ntpd           
+    udp6       0      0 :::123                  :::*                                1289/ntpd  
+
     [root@localhost ~]# ntpstat
     synchronised to local net (127.127.1.0) at stratum 11
     time correct to within 7948 ms
@@ -71,42 +89,47 @@ tags:
     [root@localhost ~]# ntpq -np
         remote           refid      st t when poll reach   delay   offset  jitter
     ==============================================================================
-    114.118.7.163   123.139.33.3     2 u   17   64    1    7.729   10.383   0.000
-    120.25.115.20   10.137.53.7      2 u   16   64    1   43.094    8.318   0.000
-    *127.127.1.0     .LOCL.          10 l   15   64    1    0.000    0.000   0.000
+    *ntp.ntsc.ac.cn  .OLEG.           1 u    5   64  337    7.459   26.113  15.259
+    +120.25.115.20   10.137.53.7      2 u    1   64  373   41.897   23.154   8.982
+    +124.108.20.1    216.218.254.202  2 u    4   64  377  194.241   31.783   7.919
+    LOCAL(0)        .LOCL.          10 l  144   64  374    0.000    0.000   0.000
     ```
 
     > NTP服务器的状态，其中： * 代表当前主用站点，+ 代表优先站点， - 代表备用站点。
 
 ---
 
-## 客户端的NTP设置方法
+## NTP Client 的设置方法
 
-配置ntpd系统服务
+1. 安装NTP软件，`yum install -y ntp`
 
-``` sh
-# 客户端安装ntp服务
-yum install -y ntpdate
+2. 编辑NTP配置文件，位于`/etc/ntp.conf`。 删除默认内容，加入内网NTP服务器地址
 
-# 更改"/etc/ntp.conf"，注释掉原有NTP服务器地址，加入"server 时间服务器IP"
-cat > /etc/ntp.conf << EOF
-# 设置内网NTP服务器地址
-server 192.168.0.140
+    ``` sh
+    cat > /etc/ntp.conf << EOF
+    # 设置内网NTP服务器地址
+    server 192.168.0.140
 
-#允许时间服务器(上游时间服务器)修改本机时间
-restrict 192.168.0.140 nomodify notrap noquery
+    #允许时间服务器(上游时间服务器)修改本机时间
+    restrict 192.168.0.140 nomodify notrap noquery
 
-EOF
+    EOF
+    ```
 
-# 设置并启动系统服务
-systemctl enable ntpd
-systemctl restart ntpd
-ntpq -p
-```
+3. 设置系统启动服务，并检查运行状态
+
+    ``` console
+    [root@localhost ~]# systemctl enable ntpd --now
+
+    [root@localhost ~]# ntpq -p
+     remote           refid      st t when poll reach   delay   offset  jitter
+    ==============================================================================
+    *192.168.0.140   114.118.7.161    2 u    4   64   77    0.320    0.022   0.027
+    ```
 
 > 由于NTP服务占用系统端口123，可能被FireWalld防火墙封堵，如果无法同步时，注意检查防火墙
 
-## ntpd Vs ntpdate
+## 分析：ntpd Vs ntpdate
 
 - `ntpd`    :在实际同步时间时是一点点的校准过来时间的，最终把时间慢慢的校正对（平滑同步）
 - `ntpdate` :不会考虑其他程序是否会阵痛，直接调整时间（“跃变”）。
