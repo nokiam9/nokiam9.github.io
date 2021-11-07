@@ -4,112 +4,85 @@ date: 2020-08-22 18:58:34
 tags:
 ---
 
+网络时间协议（英语：Network Time Protocol，缩写：NTP）是在数据网络潜伏时间可变的计算机系统之间通过分组交换进行时钟同步的一个网络协议，位于 OSI 模型的应用层。自 1985 年以来，NTP 是当前仍在使用的最古老的互联网协议之一。NTP 由特拉华大学的 David L. Mills 设计。
+计算机主机一般同多个时钟服务器连接，利用统计学的算法过滤来自不同服务器的时间，以选择最佳的路径和来源以便校正主机时间。即使在主机长时间无法与某一时钟服务器联系的情况下，NTP 服务依然可以有效运转。
 
-``` bash
-[root@localhost etc]# cat /etc/ntp.conf
-# 允许内网其他机器同步时间
-restrict 192.168.0.0 mask 255.255.255.0 nomodify notrap
+## NTP Server的安装步骤
 
-# 配置上级时间服务器
-server ntp.ntsc.ac.cn prefer
-server ntp1.aliyun.com
+1. 安装NTP软件，并做一次手工时间校准。
 
-# 外部时间服务器不可用时，以本地时间作为时间服务
-server 127.127.1.0
-fudge 127.127.1.0 stratum 10
+    ``` bash
+    yum install ntp
+    ntpdate cn.pool.ntp.org
 
-[root@localhost etc]# more /etc/exports
-/data/nfs     192.168.0.130/24(rw,sync,no_root_squash,no_all_squash)
+    ```
 
-[root@localhost etc]# more /etc/fstab
+2. 编辑NTP配置文件，位于`/etc/ntp.conf`
 
-#
-# /etc/fstab
-# Created by anaconda on Sat Aug 22 10:31:01 2020
-#
-# Accessible filesystems, by reference, are maintained under '/dev/disk'
-# See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info
-#
-/dev/mapper/centos-root /                       xfs     defaults        0 0
-UUID=1fcd9fb0-e1e7-499f-87f9-ca888c66d7c0 /boot                   xfs     defaults        0 0
-UUID=3646-00B9          /boot/efi               vfat    umask=0077,shortname=winnt 0 0
-/dev/mapper/centos-swap swap                    swap    defaults        0 0
-/dev/sda1 /data/nfs xfs defaults    0 0
-/dev/sda2 /data/harbor xfs defaults    0 0
-/dev/sda3 /data/mirror xfs defaults 0 0
-```
+    ``` bash
+    [root@localhost etc]# cat /etc/ntp.conf
+    # 允许内网其他机器同步时间
+    restrict 192.168.0.0 mask 255.255.255.0 nomodify notrap
 
-``` txt
-[root@infra ~]# more /etc/hosts
-127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
-::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+    # 配置上级时间服务器
+    server ntp.ntsc.ac.cn prefer
+    server ntp1.aliyun.com
 
-127.0.0.1       dnsmasq
-192.168.0.1     gateway
-192.168.0.5     ap
-192.168.0.8     proxy
-192.168.0.11    plc
+    # 外部时间服务器不可用时，以本地时间作为时间服务
+    server 127.127.1.0
+    fudge 127.127.1.0 stratum 10
+    ```
 
-192.168.0.130   dnsmasq dns ns01 ns02
-192.168.0.130   nfs
-192.168.0.130   harbor registry reg
-192.168.0.130   mirror
+3. 设置NTP系统启动服务
 
-192.168.0.132   pve01
+    ``` console
+    [root@localhost ~]# systemctl enable ntpd --now
+    Created symlink from /etc/systemd/system/multi-user.target.wants/ntpd.service to /usr/lib/systemd/system/ntpd.service.
 
-192.168.0.210   master1
-192.168.0.212   worker1
-```
+    [root@localhost ~]# systemctl status ntpd
+    ● ntpd.service - Network Time Service
+    Loaded: loaded (/usr/lib/systemd/system/ntpd.service; enabled; vendor preset: disabled)
+    Active: active (running) since 日 2021-11-07 13:31:53 CST; 1min 21s ago
+    Process: 8715 ExecStart=/usr/sbin/ntpd -u ntp:ntp $OPTIONS (code=exited, status=0/SUCCESS)
+    Main PID: 8716 (ntpd)
+    CGroup: /system.slice/ntpd.service
+            └─8716 /usr/sbin/ntpd -u ntp:ntp -g
 
-``` bash
-[root@master1 ~]# cat /etc/docker/daemon.json
-{
-    "exec-opts": ["native.cgroupdriver=systemd"],
-    "log-driver": "json-file",
-    "log-opts": {
-        "max-size": "100m"
-    },
-    "storage-driver": "overlay2",
-    "insecure-registries": [
-        "192.168.0.130"
-    ],
-    "registry-mirrors":[
-        "http://192.168.0.130",
-        "http://hub-mirror.c.163.com",
-        "https://docker.mirrors.ustc.edu.cn",
-        "https://registry.docker-cn.com"
-    ]
-}
-```
+    11月 07 13:31:53 localhost.localdomain ntpd[8716]: Listen normally on 2 lo 127.0.0.1 UDP 123
+    11月 07 13:31:53 localhost.localdomain ntpd[8716]: Listen normally on 3 eth0 192.168.0.54 UDP 123
+    11月 07 13:31:53 localhost.localdomain ntpd[8716]: Listen normally on 4 eth0 192.168.0.140 UDP 123
+    11月 07 13:31:53 localhost.localdomain ntpd[8716]: Listen normally on 5 lo ::1 UDP 123
+    11月 07 13:31:53 localhost.localdomain ntpd[8716]: Listen normally on 6 eth0 fe80::8f4f:d214:efbc:f83d UDP 123
+    11月 07 13:31:53 localhost.localdomain ntpd[8716]: Listening on routing socket on fd #23 for interface updates
+    11月 07 13:31:53 localhost.localdomain ntpd[8716]: 0.0.0.0 c016 06 restart
+    11月 07 13:31:53 localhost.localdomain ntpd[8716]: 0.0.0.0 c012 02 freq_set kernel 0.000 PPM
+    11月 07 13:31:53 localhost.localdomain ntpd[8716]: 0.0.0.0 c011 01 freq_not_set
+    11月 07 13:31:56 localhost.localdomain ntpd[8716]: 0.0.0.0 c514 04 freq_mode
+    ```
 
----
+4. 使用`ntpq -np` 和 `ntpstat`命令检查NTP运行状态
 
-``` bash
-# 手工推送本地镜像到本地仓库
-# 编辑 push.sh
+    ``` console
+    [root@localhost ~]# ntpstat
+    synchronised to local net (127.127.1.0) at stratum 11
+    time correct to within 7948 ms
+    polling server every 64 s
 
-#!/bin/sh
-HUB=hub.io
-IMG=$1
-echo $IMG
-IMG=`echo $IMG | sed 's|k8s.gcr.io/||g'`
-IMG=`echo $IMG | sed 's|gcr.io/||g'`
-IMG=`echo $IMG | sed 's|quay.io/||g'`
-echo $HUB/$IMG
-docker tag $1 $HUB/$IMG
-docker push $HUB/$IMG
-docker rmi $HUB/$IMG
-一行命令即可将本地所有镜像推送到本地仓库中，供其他主机下载。
+    [root@localhost ~]# ntpq -np
+        remote           refid      st t when poll reach   delay   offset  jitter
+    ==============================================================================
+    114.118.7.163   123.139.33.3     2 u   17   64    1    7.729   10.383   0.000
+    120.25.115.20   10.137.53.7      2 u   16   64    1   43.094    8.318   0.000
+    *127.127.1.0     .LOCL.          10 l   15   64    1    0.000    0.000   0.000
+    ```
 
-$ chmod +x push.sh
-$ for tag in $(docker images | grep -v TAG | awk '{print $1":"$2}'); do ./push.sh $tag; done;
-```
+    > NTP服务器的状态，其中： * 代表当前主用站点，+ 代表优先站点， - 代表备用站点。
 
 ---
 
 ## 客户端的NTP设置方法
 
-方式一 : 通过ntp服务同步
+配置ntpd系统服务
 
 ``` sh
 # 客户端安装ntp服务
@@ -126,17 +99,33 @@ restrict 192.168.0.140 nomodify notrap noquery
 EOF
 
 # 设置并启动系统服务
-systemctl enable ntpdate
-systemctl restart ntpdate
+systemctl enable ntpd
+systemctl restart ntpd
 ntpq -p
 ```
 
-> 注意事项：防火墙的问题，如果无法同步，则检查防火墙
+> 由于NTP服务占用系统端口123，可能被FireWalld防火墙封堵，如果无法同步时，注意检查防火墙
+
+## ntpd Vs ntpdate
+
+- `ntpd`    :在实际同步时间时是一点点的校准过来时间的，最终把时间慢慢的校正对（平滑同步）
+- `ntpdate` :不会考虑其他程序是否会阵痛，直接调整时间（“跃变”）。
+
+换句话说，ntpd是校准时间，ntpdate是调整时间。
+
+注意，系统后台服务只能采用`ntpd`，这是因为，`ntpdate`的跃变模式存在较大的系统风险，包括：
+
+1. **不安全**。ntpdate 的设置依赖于 ntp 服务器的安全性，攻击者可以利用一些软件设计上的缺陷，拿下 ntp 服务器并令与其同步的服务器执行某些消耗性的任务。由于 ntpdate 采用的方式是跳变，跟随它的服务器无法知道是否发生了异常（时间不一样的时候，唯一的办法是以服务器为准）。
+2. **不精确**。一旦 ntp 服务器宕机，跟随它的服务器也就会无法同步时间。与此不同，ntpd 不仅能够校准计算机的时间，而且能够校准计算机的时钟。
+3. **不优雅**。由于是跳变，而不是使时间变快或变慢，依赖时序的程序会出错（例如，如果 ntpdate 发现你的时间快了，则可能会经历两个相同的时刻，对某些应用而言，这是致命的）。
+
+因而，使用ntpdate一般由系统管理员在刚刚启动，没有业务负荷时手工操作来校准时间。
 
 ---
 
 ## 参考资料
 
+- [配置 NTP 服务 - 腾讯云](https://cloud.tencent.com/document/product/213/30393)
 - [快速部署ntp时间服务器](https://www.jianshu.com/p/8b4befdd9196)
 - [NTP时间服务器配置详解](https://blog.51cto.com/wolfgang/1127162)
 - [ntpq: read: Connection refused 疑难问题排查](https://huataihuang.gitbooks.io/cloud-atlas/content/service/ntp/ntpq_timed_out_nothing_received.html)
