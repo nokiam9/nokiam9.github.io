@@ -9,11 +9,11 @@ description:
 keywords:
 author: Alex Sun
 language: zh-Hans
-timezone:
+timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://blog.caogo.cn
+url: https://nokiam9.github.io
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
