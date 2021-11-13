@@ -47,13 +47,53 @@ npm install
 
 ## 疑难杂症
 
-### 2021-6-20
+### node版本兼容性问题
 
 2年前，首次安装`Hexo`的版本是`3.7.0`，这几天在新买的 Macbook M1 上重新安装发现了不少告警信息，主要原因是当时`node.js`的版本只有`v8.12.0`，现在的LTS版本已经是`v14`，支持M1芯片甚至需要`v16`。
 
-最好的解决办法，是将Hexo升级为最新的`5.4.0`，但是发现Theme主题的配置文件已经变化了，还需要重新调整，因为懒得折腾，只好忍受这些告警信息了。
+最好的解决办法，是将Hexo升级为最新的`5.4.0`，但是发现主页有乱码，还需要重新调整配置文件，因为懒得折腾，只好忍受这些告警信息了。
 
 > 虽然node.js只有`v16`以后的版本支持 M1 芯片，但是x86版本的`v12`也是可以通过兼容方式运行的，可以通过`n`进行安装，代价是node运行速度比较慢
+
+### 关于`package.json`配置文件
+
+以当前Hexo v3.9版本为例，其配置文件`package.json`类似于Python的`requirements.txt`，可以用于`npm install`批量安装。
+其内容为：
+
+``` config
+{
+  "name": "hexo-site",
+  "version": "0.0.0",
+  "private": true,
+  "hexo": {
+    "version": "3.9.0"
+  },
+  "dependencies": {
+    "hexo": "^3.7.0",
+    "hexo-deployer-git": "^1.0.0",
+    "hexo-generator-archive": "^0.1.5",
+    "hexo-generator-category": "^0.1.3",
+    "hexo-generator-index": "^0.2.1",
+    "hexo-generator-searchdb": "^1.4.0",
+    "hexo-generator-tag": "^0.2.0",
+    "hexo-renderer-ejs": "^0.3.1",
+    "hexo-renderer-marked": "^0.3.2",
+    "hexo-renderer-stylus": "^0.3.3",
+    "hexo-server": "^0.3.1"
+  }
+}
+```
+
+为此，可以分析出hexo所包含的几类包：
+
+- `hexo`：主代码包，最新版本5.4，目前仍然使用3.9，在node版本8运行良好，版本12有告警，版本14以上问题多
+- `hexo-cli`：hexo的命令行，以支持`hexo s` ,`hexo d -g`等命令行
+- `hexo-deployer-git`：用于deploy部署的插件
+- `hexo-server`:内置的web服务器，用于`hexo server`
+- `hexo-renderer-xxx`：内建`Swig`模板引擎，还可以另外安装插件来获得`EJS`、`Haml`或`Jade`支持，Hexo根据模板文件的扩展名来决定所使用的模板引擎。
+- `hexo-generator-xxx`：语言模版插件，包括Head部分的index、search菜单的转化
+
+> 升级hexo 5.4版本时，首页出现乱码，其实原因是`hexo-renderer-swig`从自动安装改为需要手工安装，另外npm 安装即可解决。
 
 ---
 
