@@ -6,6 +6,8 @@
     "version": "3.9.0"
   },
   "dependencies": {
+    "chokidar": "^3.5.2",
+    "eslint": "^8.1.0",
     "hexo": "^3.7.0",
     "hexo-deployer-git": "^1.0.0",
     "hexo-generator-archive": "^0.1.5",
