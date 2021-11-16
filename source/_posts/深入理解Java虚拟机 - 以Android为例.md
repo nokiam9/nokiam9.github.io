@@ -12,7 +12,7 @@ Java语言的最大优势就是**一次编译，处处运行**的特性，通过
 
 `JVM（Java Virtual Machine）`是一台虚拟的计算机，本质上通过定义一组技术规范，在物理的计算机上模拟实现各种功能。
 JVM屏蔽了与具体操作系统平台相关的信息，使Java程序只需生成在Java虚拟机上运行的目标代码（字节码），就可以在多种平台上不加修改地运行。在执行字节码时，实际上最终还是把字节码解释成具体平台上的机器指令执行，属于用户态。
-{% asset_img jvm.jpeg %}
+{% asset_img jvm.png %}
 
 Java虚拟机包括一套字节码指令集、一组寄存器、一个栈、一个垃圾回收堆和一个存储方法域。详细资料请参见[jvm原理](https://cloud.tencent.com/developer/article/1556672)。
 
@@ -161,6 +161,42 @@ Android N 包含了一个混合模式的运行时，应用在安装时不做编�
 ## 华为的方舟编译器
 
 ## JVM的核心技术点
+
+---
+
+## 附录一：主流的Java虚拟机
+
+Java虚拟机最早由Oracle公司开发，后来设立了`JCP（Java Community Proces）`开源社区负责Java虚拟机的统一技术标准，以确保Java应用程序跨不同实现的互操作性。
+JVM屏蔽了与具体操作系统平台相关的信息，使得Java程序只需生成在Java虚拟机上运行的目标代码（字节码），就可以在多种平台上不加修改地运行。
+
+- 2004年，JCP发布了第一版技术规范[JSR 924](https://www.jcp.org/en/jsr/detail?id=924)
+- 2006年，为支持更改类文件格式的提议，发布了第二版技术规范[JSR 202](https://web.archive.org/web/20120226185155/http://www.jcp.org/en/jsr/detail?id=202)
+- 为正式描述JVM实现所需的内容，可以参考JCP发布的[蓝皮书](https://web.archive.org/web/20110925050249/http://java.sun.com/docs/books/vmspec/2nd-edition/html/VMSpecTOC.doc.html)，
+
+> 作为一种编程语言的虚拟机，实际上JVM不仅可以实现Java语言，只要生成的编译文件符合JVM对加载编译文件格式要求，任何语言都可以由JVM编译运行。例如`Jython`就是通过JVM实现了Python语言，
+
+当前主流的Java虚拟机，主要有以下产品：
+
+### HotSpot
+
+HotSpot VM是绝对的主流。
+Oracle JDK 和 OpenJDK用的都是相同的HotSpot VM。从Java SE 7开始，HotSpot VM就是Java规范的“参考实现”。
+> 原BEA公司的JRockit VM，自JDK 8已经与HotSpot实现了产品融合。
+
+### Eclipse Open J9
+
+1996年，IBM公司基于Smalltalk VM开发了J9 VM，并广泛应用于其各类自有产品线。
+2017年，J9成为Eclipse 基金会项目，改名为Open J9，并完全符合 Java JVM 规范。
+
+### Graal
+
+Graal VM可以认为是HotSpot的一个变种。
+第一个正式版本 Graal VM 19.0 于 2019 年 5 月发布。最新版本是 Graal VM 21.0.0，于 2021 年 1 月发布。
+
+### Zing & Zulu
+
+由Azul Systems公司开发的Java虚拟机。
+包括服务器使用的Zing VM，以及为嵌入式、移动和物联网 (IoT) 设备使用的Zulu Embedded VM。
 
 ---
 
