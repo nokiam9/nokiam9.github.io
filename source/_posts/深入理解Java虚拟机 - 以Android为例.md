@@ -41,12 +41,6 @@ Java HotSpot(TM) 64-Bit Server VM (build 15.0.2+7-27, mixed mode, sharing)
 
 即时编译器极大地提高了Java程序的运行速度，而且跟静态编译相比，即时编译器可以选择性地编译热点代码，省去了很多编译时间，也节省很多的空间。目前，即时编译器已经非常成熟了，在性能层面甚至可以和编译型语言相比。不过在这个领域，大家依然在不断探索如何结合不同的编译方式，使用更加智能的手段来提升程序的运行速度。
 
-`HotSpot VM`得名于它的混合模式执行引擎：这个执行引擎包含解释器和自适应编译器（adaptive compiler）。
-默认配置下，一开始所有Java方法都是由解释器执行。解释器记录着每个方法的调用次数和循环次数，并以这两个数值为指标判断一个方法的“热度”，显然，HotSpot VM是以“方法”为单位来寻找热点代码的。等到一个方法足够“热”的时候，HotSpot VM就会启动对该方法的编译。
-
-> `JRockit VM`使用纯编译的执行引擎，没有解释器。但它有多层编译：第一次执行某个方法之前会用非常低的优化级别去JIT编译，然后等到某个方法足够热之后再用较高的优化级别重新编译它。这种系统既是严格意义上的JIT编译（第一次执行某个方法前编译它），又是自适应编译（找出热点再进行编译）。
-所以说JIT编译与自适应编译可以共存。只不过HotSpot VM因为有解释器来承担第一层执行的任务，没使用JIT编译而已。
-
 ## Java的执行模式
 
 ## Android的虚拟机技术演进
@@ -179,9 +173,17 @@ JVM屏蔽了与具体操作系统平台相关的信息，使得Java程序只需�
 
 ### HotSpot
 
-HotSpot VM是绝对的主流。
-Oracle JDK 和 OpenJDK用的都是相同的HotSpot VM。从Java SE 7开始，HotSpot VM就是Java规范的“参考实现”。
-> 原BEA公司的JRockit VM，自JDK 8已经与HotSpot实现了产品融合。
+`HotSpot VM`得名于它的混合模式执行引擎：这个执行引擎包含解释器和自适应编译器（adaptive compiler）。
+默认配置下，一开始所有Java方法都是由解释器执行。解释器记录着每个方法的调用次数和循环次数，并以这两个数值为指标判断一个方法的“热度”，显然，HotSpot VM是以“方法”为单位来寻找热点代码的。等到一个方法足够“热”的时候，HotSpot VM就会启动对该方法的编译。
+HotSpot VM是绝对的主流。Oracle JDK 和 OpenJDK用的都是相同的HotSpot VM。从Java SE 7开始，HotSpot VM就是Java规范的“参考实现”。
+
+### JRockit
+
+`JRockit VM`是原BEA公司的产品，使用纯编译的执行引擎，没有解释器。
+它的特点是设计了多层编译：第一次执行某个方法之前会用非常低的优化级别去JIT编译，然后等到某个方法足够热之后再用较高的优化级别重新编译它。这种系统既是严格意义上的JIT编译（第一次执行某个方法前编译它），又是自适应编译（找出热点再进行编译）。
+所以说JIT编译与自适应编译可以共存。只不过HotSpot VM因为有解释器来承担第一层执行的任务，没使用JIT编译而已。
+
+被Oracle公司收购后，JRockit自JDK 8已经与HotSpot实现了产品融合。
 
 ### Eclipse Open J9
 
@@ -208,8 +210,6 @@ Graal VM可以认为是HotSpot的一个变种。
 - 《深入理解Java虚拟机：JVM高级特性与最佳实践》 周志明 著
 
 ### 技术研究
-
-- 
 
 - [一文让你搞懂各种虚拟机、解释器、JIT和AOT编译器](https://blog.csdn.net/zhongyili_sohu/article/details/106555297)
 - [Java即时编译器原理解析及实践 - 美团技术](https://tech.meituan.com/2020/10/22/java-jit-practice-in-meituan.html)
