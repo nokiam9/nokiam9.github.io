@@ -197,8 +197,19 @@ Graal VM可以认为是HotSpot的一个变种。
 
 ### Zing & Zulu
 
-由Azul Systems公司开发的Java虚拟机。
-包括服务器使用的Zing VM，以及为嵌入式、移动和物联网 (IoT) 设备使用的Zulu Embedded VM。
+Azul Systems公司是一家专门从事 Java 和 JVM 产品的公司。
+该公司提供`OpenJDK` 二进制分发版，并命名为`Zulu`，包含三个版本：
+
+- `Zulu Community`：基于`GPLv2`协议的社区免费版
+- `Zulu Enterprise`：商业发行版
+- `Zulu Embedded`：为嵌入式、移动和物联网设备使用的版本
+- `Zulu PlatForm Prime`：服务器使用的高性能版本，原名`Zing VM`
+
+> 为了适配Apple M1芯片，目前Mackbook Air仅能适配`OpenJDK 64-Bit Server VM Zulu16.28+11-CA (build 16+36, mixed mode)`
+
+
+
+总而言之，OpenJDK 是源代码，Azul 是公司，Zulu 是从 OpenJDK 构建的二进制发行版。
 
 ---
 
