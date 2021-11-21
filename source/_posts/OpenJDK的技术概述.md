@@ -9,7 +9,7 @@ tags:
 1995年，Sun公司正式发布了Java语言，并建立了`JCP（Java Community Process）`开源社区，负责管理Java技术标准。
 `JSR（Java Specification Requests）`是JCP发布的技术规范，由拥有投票权的JCP成员集体投票决定。例如，JVM最核心的两份技术标准就是：JSR 924（Java Virtual Machine Specification）和 JSR 202（Java Class File Specification Update）
 
-为了开发和运行Java应用软件，必须为用户提供一个完整的开发套件，这就是`JDK`（Java Development Kit），包含了编译器、软件库和Java虚拟机等核心组件。1999年之后，Sun公司先后发布了多个版本的JDK产品，主要包括：
+为了开发和运行Java应用软件，必须为用户提供一个完整的开发套件，这就是`JDK`（Java Development Kit），包含了编译器、软件库和Java虚拟机等核心组件。1999年之后，Sun公司发布了多个版本的JDK产品，主要包括：
 
 - `J2SE`：Java Platform Standard Edition，标准版的Java平台。目标是工作站等标准应用，也是最常见的
 - `J2EE`：Java Platform Enterprise Edition，企业版的Java平台。目标是企业级应用，通常是收费的
@@ -59,8 +59,6 @@ Java HotSpot(TM) 64-Bit Server VM (build 15.0.2+7-27, mixed mode, sharing)
 ### 结论：JDK = Java虚拟机 + Runtime类库 + 编译器等开发工具包
 
 {% asset_img JDK-2.png %}
-
-Oracle JDk一般每2-3年更新大版本，当前最新版本是17。
 
 ## OpenJDK Community - OpenJDK的诞生
 
@@ -151,10 +149,11 @@ OpenJDK 64-Bit Server VM Zulu16.28+11-CA (build 16+36, mixed mode)
 ## 附录1: TCK - Java技术兼容性认证
 
 虽然人人都可以运用Java语言编程，Sun仍将Java SE的函数库作为预先编译的Java字节码，附带其API接口一并提供给用户，同时通过技术兼容性测试工具包`TCK(Technology Compatibility Kit)`以检查第三方产品是否符合Java的规范要求，以确保对java语言生态的有效控制。
+
 其中，最著名的事件就是`Apache Harmony`开源项目。
 
 2005年，Apache基金会主导了`Apache Harmony`开源项目，目标是以开放源代码方式实现Java SDK，IBM等公司提供了大量代码。
-由于一直无法获得TCK授权，2011年10月项目宣布停止。核心原因是JCP（Java Community Process）规定的`GPL`许可证，与`Apache`许可证不兼容
+由于一直无法获得TCK授权，2011年10月项目宣布停止。核心原因是Java Community Process规定的`GPL`许可证，与`Apache`许可证不兼容
 
 值得指出的是，Google在`Android`早期开发中，曾经大量使用该项目的源代码，为此长期陷入与Java的专利诉讼，最终决定基于`OpenJDK`，采用`Clean Room`模式自主开发了`Dalvik VM`。
 
