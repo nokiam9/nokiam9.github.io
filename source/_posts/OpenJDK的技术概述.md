@@ -157,6 +157,10 @@ OpenJDK 64-Bit Server VM Zulu16.28+11-CA (build 16+36, mixed mode)
 
 值得指出的是，Google在`Android`早期开发中，曾经大量使用该项目的源代码，为此长期陷入与Java的专利诉讼，最终决定基于`OpenJDK`，采用`Clean Room`模式自主开发了`Dalvik VM`。
 
+事实上，谷歌在开放Android时之所以会舍弃Linux的开发语言C/C++，关键原因就在于其无法满足Android的二进制分发及跨设备需求，而在抛开不注重运行效率的Python、Ruby等语言后，剩下的也就只有Sun Microsystem的Java与微软的C#。由于当时微软对于开源的态度，也就使得Java就成为了几乎是唯一的选择。
+
+2021年4月5日，美国最高法院以6票支持2票反对的投票结果，驳回了此前一家联邦巡回法院就甲骨文诉Android侵犯Java版权案作出的裁定，并最终判定谷歌复制Java API代码属于合理使用（fair use）。
+
 ## 附录2：常见的许可证协议
 
 {% asset_img license.jpg %}
@@ -174,5 +178,6 @@ OpenJDK 64-Bit Server VM Zulu16.28+11-CA (build 16+36, mixed mode)
 ### 技术评论
 
 - [甲骨文诉谷歌Java侵权案 - WiKI](https://zh.wikipedia.org/zh-hans/%E7%94%B2%E9%AA%A8%E6%96%87%E8%AF%89%E8%B0%B7%E6%AD%8CJava%E4%BE%B5%E6%9D%83%E6%A1%88)
+- [世纪诉讼迎来终局，Android不会有Java税了](https://www.jiemian.com/article/5914484.html)
 - [开源许可证GPL、BSD、MIT、Mozilla、Apache和LGPL的区别](https://zhuanlan.zhihu.com/p/31881162)
 - [Oracle与OpenJDK之间的区别](https://juejin.cn/post/6844903811069247496)
