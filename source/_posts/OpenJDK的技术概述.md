@@ -7,10 +7,7 @@ tags:
 ## 前言
 
 1995年，Sun公司正式发布了Java语言，并建立了`JCP（Java Community Process）`开源社区，负责管理Java技术标准。
-JCP的官网地址是：[https://jcp.org/en/home/index](https://jcp.org/en/home/index)
-`JSR（Java Specification Requests）`是JCP发布的技术规范，由拥有投票权的JCP成员集体投票决定。
-
-> JVM最核心的两份技术标准：JSR 924（Java Virtual Machine Specification）和 JSR 202（Java Class File Specification Update）
+`JSR（Java Specification Requests）`是JCP发布的技术规范，由拥有投票权的JCP成员集体投票决定。例如，JVM最核心的两份技术标准就是：JSR 924（Java Virtual Machine Specification）和 JSR 202（Java Class File Specification Update）
 
 为了开发和运行Java应用软件，必须为用户提供一个完整的开发套件，这就是`JDK`（Java Development Kit），包含了编译器、软件库和Java虚拟机等核心组件。1999年之后，Sun公司先后发布了多个版本的JDK产品，主要包括：
 
@@ -59,7 +56,7 @@ Java(TM) SE Runtime Environment (build 15.0.2+7-27)
 Java HotSpot(TM) 64-Bit Server VM (build 15.0.2+7-27, mixed mode, sharing)
 ```
 
-### 结论：JDK = JVM + Runtime类库 + 开发工具包
+### 结论：JDK = Java虚拟机 + Runtime类库 + 编译器等开发工具包
 
 {% asset_img JDK-2.png %}
 
@@ -76,7 +73,7 @@ Oracle JDk一般每2-3年更新大版本，当前最新版本是17。
 目前，OpenJDK社区包含了大量Project项目，例如：
 
 - JDK 6-9：基于JSR 270（Java SE 6 Release Contents），构建Jave SE 6的开源实现，7-9版本类似
-- OpenJDK：这是最重要的项目，负责构建OpenJDK 10-18版本的开源技术实现。由于自JDK 10开始，Oracle JDK与OpenJDK实现了融合，该项目产出的OpenJDK直接成为了Java SE的官方参考实现，因此不再为每个版本单独设立项目
+- OpenJDK：这是最重要的项目，负责构建OpenJDK 10-18版本的开源技术实现。由于自JDK 10开始，Oracle JDK与OpenJDK实现了融合，该项目产出的OpenJDK直接成为了Java SE的官方参考实现，因此不再为每个版本单独设立项目，OpenJDK 18是当前最新的开发版本。
 - Graal：源于SUN公司的`Maxine VM`项目，采用高度优化的JIT编译器。2012年从OpenJDK项目中剥离出来，并在JDK 10中纳入实验性功能
 - IcedTea：最初是由于OpenJDK不完整（例如个别字体库由于许可证差异而无法提供）而创立的，为社区提供必要的开源工具链及代码库。它有一个基于`./configure`的不同的构建系统，正是由于IcedTea的努力，许多第三方发行版大大减少了使用补丁的数量
 
@@ -84,9 +81,9 @@ Oracle JDk一般每2-3年更新大版本，当前最新版本是17。
 
 没错，从 Java SE 7开始往后的版本，连大名鼎鼎的 Oracle JDK 都是根据 Open JDK 做出来的 (修改了一些功能的实现方式，再打上自己的商标并提供配套服务)。或者应该说自 Java SE 7开始往后的版本，所有的 JDK 都源自于 Open JDK (OpenJDK 与 其他 JDK 的关系就和 Linux 与它的众多发行版是一样一样的)。
 
-OpenJDk当前最新版本是17，与Oracle JDK基本保持一致。
-
 ## OpenJDK Vs Oracle JDK
+
+`OpenJDK`和`Oracle JDK` 是通过`TCK`认证的同一Java规范的实现。换句话说，`Oracle JDK`是`OpenJDK`的商业发行版（非开源发行版），就如同Chrome和Chrominum的关系。
 
 |项目| Oracle JDK| OpenJDK|
 |:-:|:-:|:-:|
@@ -97,8 +94,7 @@ OpenJDk当前最新版本是17，与Oracle JDK基本保持一致。
 |费用| 基于Oracle许可证，高级功能可能收费| 完全开源和免费使用|
 |操作系统| Windows，Linux，Solaris，MacOS| **FreeBSD**，Linux，Microsoft Windows，Mac OS X|
 
-`OpenJDK`和`Oracle JDK` 是通过`TCK`认证的同一Java规范的实现。换句话说，`Oracle JDK`是`OpenJDK`的商业发行版（非开源发行版），就如同Chrome和Chrominum的关系。
-`OpenJDK`源代码是`Oracle JDK`的一个子集，只包含最精简的JDK。
+简单一点说，`OpenJDK`源代码是`Oracle JDK`的一个子集，只包含最精简的JDK。
 
 - OpenJDK不包含Deployment组件（Browser Plugin、Java Web Start、Java控制面板等），当然这些功能也没人用
 - 由于`OpenJDK`采用`GPL`许可证，`Oracle JDK`的一部分源代码（例如JMX的SNMP功能）由于产权的问题无法开园，只能作为Plug可选插件方式提供给OpenJDK编译时使用。而Icedtea则为这些不完整的部分开发了相同功能、但是符合`GPL`许可证的源代码，促使OpenJDK更加完整
@@ -106,7 +102,7 @@ OpenJDk当前最新版本是17，与Oracle JDK基本保持一致。
 
 {% asset_img vs.jpeg %}
 
-## 主要发行版
+## OpenJDK Builds - 二进制发行版
 
 ### 1. Oracle OpenJDK
 
