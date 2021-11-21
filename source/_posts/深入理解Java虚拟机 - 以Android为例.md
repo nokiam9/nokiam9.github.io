@@ -209,8 +209,6 @@ Azul Systems公司是一家专门从事 Java 和 JVM 产品的公司。
 
 > 为了适配Apple M1芯片，目前Mackbook Air仅能适配`OpenJDK 64-Bit Server VM Zulu16.28+11-CA (build 16+36, mixed mode)`
 
-
-
 总而言之，OpenJDK 是源代码，Azul 是公司，Zulu 是从 OpenJDK 构建的二进制发行版。
 
 ---
