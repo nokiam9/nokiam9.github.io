@@ -86,7 +86,7 @@ OpenJDK 64-Bit Server VM (build 25.312-b07, mixed mode)
 
 > 2005年，Apache基金会主导了`Apache Harmony`开源项目，目标是以开放源代码方式实现Java SDK，IBM等公司提供了大量代码
 > 由于一直无法获得TCK授权，2011年10月项目宣布停止。核心原因是JCP（Java Community Process）规定的`GPL`许可证，与`Apache`许可证不兼容
-> Google在`Android`早期开发中，曾经大量使用该项目的源代码，为此长期陷入与Java的专利诉讼
+> Google在`Android`早期开发中，曾经大量使用该项目的源代码，为此长期陷入与Java的专利诉讼，最终决定基于`OpenJDK`，采用`Clean Room`模式自主开发了`Dalvik VM`。
 
 ## 与Oracle JDK的相关性
 
@@ -160,3 +160,4 @@ OpenJDK 64-Bit Server VM Zulu16.28+11-CA (build 16+36, mixed mode)
 
 - [开源许可证GPL、BSD、MIT、Mozilla、Apache和LGPL的区别](https://zhuanlan.zhihu.com/p/31881162)
 - [Oracle与OpenJDK之间的区别](https://juejin.cn/post/6844903811069247496)
+- [甲骨文诉谷歌Java侵权案 - WiKI](https://zh.wikipedia.org/zh-hans/%E7%94%B2%E9%AA%A8%E6%96%87%E8%AF%89%E8%B0%B7%E6%AD%8CJava%E4%BE%B5%E6%9D%83%E6%A1%88)
