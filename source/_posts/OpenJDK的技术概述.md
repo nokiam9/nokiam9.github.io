@@ -7,7 +7,7 @@ tags:
 ## 前言
 
 1995年，Sun公司正式发布了Java语言，并建立了`JCP（Java Community Process）`开源社区，负责管理Java技术标准。
-`JSR（Java Specification Requests）`是JCP发布的技术规范，由拥有投票权的JCP成员集体投票决定。例如，JVM最核心的两份技术标准就是：JSR 924（Java Virtual Machine Specification）和 JSR 202（Java Class File Specification Update）
+`JSR（Java Specification Requests）`是JCP发布的技术规范，由拥有投票权的JCP成员集体投票决定。
 
 为了开发和运行Java应用软件，必须为用户提供一个完整的开发套件，这就是`JDK`（Java Development Kit），包含了编译器、软件库和Java虚拟机等核心组件。1999年之后，Sun公司发布了多个版本的JDK产品，主要包括：
 
@@ -177,6 +177,7 @@ OpenJDK 64-Bit Server VM Zulu16.28+11-CA (build 16+36, mixed mode)
 
 ### 技术评论
 
+- [JSR管理模式简介和核心技术规范清单](https://blog.csdn.net/ni_hao_fan/article/details/99677950)
 - [甲骨文诉谷歌Java侵权案 - WiKI](https://zh.wikipedia.org/zh-hans/%E7%94%B2%E9%AA%A8%E6%96%87%E8%AF%89%E8%B0%B7%E6%AD%8CJava%E4%BE%B5%E6%9D%83%E6%A1%88)
 - [世纪诉讼迎来终局，Android不会有Java税了](https://www.jiemian.com/article/5914484.html)
 - [开源许可证GPL、BSD、MIT、Mozilla、Apache和LGPL的区别](https://zhuanlan.zhihu.com/p/31881162)
