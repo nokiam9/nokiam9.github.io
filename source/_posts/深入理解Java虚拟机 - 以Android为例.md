@@ -6,7 +6,7 @@ tags:
 
 Java语言的最大优势就是**一次编译，处处运行**的特性，通过`javac`编译器将源代码编译成通用的中间形式——字节码，然后再由`java`解释器逐条将字节码解释为机器码来执行。尽管在性能上，Java远不如C++这类编译型语言，但由于良好的平台移植性而大行其道，其中的关键技术就是**Java虚拟机**。
 
-### 一、什么是JVM
+## 一、什么是JVM
 
 `JVM（Java Virtual Machine）`是一台虚拟的计算机，本质上通过定义一组技术规范，在物理的计算机上模拟实现各种功能。
 JVM屏蔽了与具体操作系统平台相关的信息，使Java程序只需生成在Java虚拟机上运行的目标代码（字节码），就可以在多种平台上不加修改地运行。在执行字节码时，实际上最终还是把字节码解释成具体平台上的机器指令执行，属于用户态。
@@ -21,7 +21,7 @@ JVM涉及的核心技术规范包括：
 - 2006年，为修订Class文件标准而发布的[JSR 202 - Java Class File Specification Update](https://web.archive.org/web/20120226185155/http://www.jcp.org/en/jsr/detail?id=202)
 - 完整的Java虚拟机描述，可以参见[JCP发布的JVM蓝皮书](https://web.archive.org/web/20110925050249/http://java.sun.com/docs/books/vmspec/2nd-edition/html/VMSpecTOC.doc.html)
 
-### 二、JVM的运行模式
+## 二、JVM的运行模式
 
 以最常见的`Oracle JDK`为例，我们可以查看其版本信息如下：
 
