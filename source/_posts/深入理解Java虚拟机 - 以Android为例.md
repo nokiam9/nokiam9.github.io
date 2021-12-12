@@ -126,7 +126,7 @@ Dalvik VM的主要问题是性能！
 ## 四、结论
 
 1. 与Javascript V8引擎相似，Android虚拟机也走向了混合编译模式。
-2. 华为的方舟编译器，也采用了类似的技术路线，有机会可以进一步研究。
+2. 华为的方舟编译器，宣称抛弃了虚拟机，全部采用机器码，支持Java和C++的混合编译，但又宣称自主设计了统一的中间表示MapleIR，后续可以深入研究与Java的关系？
 
 ---
 
@@ -148,3 +148,4 @@ Dalvik VM的主要问题是性能！
 - [Android虚拟机的JIT编译器](https://cloud.tencent.com/developer/article/1445764)
 - [Dalvik 和 Java 字节码的比较](https://segmentfault.com/a/1190000040710467)
 - [一文读懂 DEX 文件格式解析](https://cloud.tencent.com/developer/article/1663852)
+- [首次全面深度解密华为方舟编译器](https://bbs.huaweicloud.com/blogs/detail/105435)
