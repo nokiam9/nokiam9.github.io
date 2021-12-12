@@ -171,7 +171,7 @@ OpenJDK 64-Bit Server VM Zulu16.28+11-CA (build 16+36, mixed mode)
 
 ### 官方网站
 
-- Java Community Process的官网：[https://www.jcp.org/](https://www.jcp.org/en/home/index)
+- Java Community Process的官网：[https://jcp.org/](https://jcp.org/en/home/index)
 - OpenJDK Community的官网：[http://openjdk.java.net/](http://openjdk.java.net/)
 - OpenJDK Project的Github源码：[https://github.com/openjdk/jdk](https://github.com/openjdk/jdk)
 
