@@ -66,7 +66,7 @@ unicode: 13.0
     "eslint": "^8.5.0",
     "hexo": "^5.4.0",
     "hexo-deployer-git": "^3.0.0",
-    "hexo-excerpt": "^1.2.1",
+    "hexo-auto-excerpt": "^1.1.2",
     "hexo-generator-archive": "^1.0.0",
     "hexo-generator-category": "^1.0.0",
     "hexo-generator-index": "^2.0.0",
@@ -108,8 +108,8 @@ NexT 8.x 相比旧版，技术架构有重大变化，无法做到平滑升级�
 ## 常见问题
 
 1. 首页的“节选”功能失效
-    原来是通过next配置文件的`excerpt_description: true`，但next新版本剔除了这个功能，而是由`hexo-concerpt`插件实现此功能。
-    解决方案：安装`npm install hexo-concerpt`，或者修改`package.json`后自动安装。
+    原来是通过next配置文件的`excerpt_description: true`，但next新版本剔除了这个功能，而是由`hexo-auto-concerpt`插件实现此功能。
+    解决方案：安装`npm install hexo-auto-concerpt`，或者修改`package.json`后自动安装。
 
 2. NodeJS 从 12.0.0 才开始支持函数 String.matchAll()，如果 NodeJS 的版本低于 12.0.0，那么执行 Hexo 的构建命令就会出现错误。
    解决方案：v12是node的最佳版本
