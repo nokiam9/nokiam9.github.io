@@ -95,7 +95,7 @@ NexT 8.x 相比旧版，技术架构有重大变化，无法做到平滑升级�
 |模板格式|swig模板|nunjucks引擎|
 |字体图标|Font Awesome 4.x|Font Awesome 5.x|
 |配置文件|hexo/source/_data/next.yml|hexo/_config.next.yml|
-|源码地址|v5 - [https://github.com/iissnan/hexo-theme-next](https://github.com/iissnan/hexo-theme-next) <br> v6 & v7 - [https://github.com/theme-next/hexo-theme-next](https://github.com/theme-next/hexo-theme-next)| v8 - [https://github.com/next-theme/hexo-theme-next](https://github.com/next-theme/hexo-theme-next)|
+|源码地址|v5:[https://github.com/iissnan/hexo-theme-next](https://github.com/iissnan/hexo-theme-next) <br> v6 & v7:[https://github.com/theme-next/hexo-theme-next](https://github.com/theme-next/hexo-theme-next)| v8:[https://github.com/next-theme/hexo-theme-next](https://github.com/next-theme/hexo-theme-next)|
 
 原来的安装方法是通过`git clone`，安装点位于`theme/next`目录；
 现在改为`npm install hexo-theme-next`, 安装点位于`node_modules/hexo-theme-next`。
@@ -127,7 +127,19 @@ NexT 8.x 相比旧版，技术架构有重大变化，无法做到平滑升级�
         exclude: ''
     ```
 
-4. highlight.js的版本9存在安全漏洞，频繁出现告警信息！！！
+4. 凡涉及到引用 Font Awesome 的地方，图标名和调用方式要更新，比如旧版填写 home，新版要改为 fa fa-home，否则图标会显示乱码。
+
+    ``` yaml
+    # 旧版
+    menu:
+    home: / || home
+
+    # 新版
+    menu:
+    home: / || fa fa-home
+    ```
+
+5. highlight.js的版本9存在安全漏洞，频繁出现告警信息！！！
 
 ---
 
