@@ -91,7 +91,7 @@ deploy:
 
 # 添加百度/谷歌/本地 自定义站点内容搜索
 search:
-  path: search.xml
+  path: search.json
   field: post
+  content: true
   format: html
-  limit: 10000

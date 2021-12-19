@@ -210,39 +210,58 @@ deploy:
 
 ## 五、常见问题
 
-1. 首页的“节选”功能失效
-    原来是通过next配置文件的`excerpt_description: true`，但next新版本剔除了这个功能，而是由`hexo-auto-concerpt`插件实现此功能。
-    解决方案：安装`npm install hexo-auto-concerpt`，或者修改`package.json`后自动安装。
+### 1. 首页的“节选”功能失效
 
-2. NodeJS 从 12.0.0 才开始支持函数 String.matchAll()，如果 NodeJS 的版本低于 12.0.0，那么执行 Hexo 的构建命令就会出现错误。
-   解决方案：v12是node的最佳版本
+原来是通过next配置文件的`excerpt_description: true`，但next新版本剔除了这个功能，而是由`hexo-auto-concerpt`插件实现此功能。
+解决方案：安装`npm install hexo-auto-concerpt`，或者修改`package.json`后自动安装。
 
-3. `external_link`配置方法有变化：
+### 2. NodeJS为什么要选择版本12
 
-    ``` yaml
-    # Deprecated
-    external_link: true|false
+NodeJS 从 12.0.0 才开始支持函数 String.matchAll()，如果 NodeJS 的版本低于 12.0.0，那么执行 Hexo 的构建命令就会出现错误
+解决方案：v12是node的最佳版本
 
-    # New option
-    external_link:
-        enable: true # Open external links in new tab
-        field: site # Apply to the whole site
-        exclude: ''
-    ```
+### 3. `external_link`配置方法有变化
 
-4. 凡涉及到引用 Font Awesome 的地方，图标名和调用方式要更新，比如旧版填写 home，新版要改为 fa fa-home，否则图标会显示乱码。
+``` yaml
+# Deprecated
+external_link: true|false
 
-    ``` yaml
-    # 旧版
-    menu:
-    home: / || home
+# New option
+external_link:
+  enable: true # Open external links in new tab
+  field: site # Apply to the whole site
+  exclude: ''
+```
 
-    # 新版
-    menu:
-    home: / || fa fa-home
-    ```
+### 4. Next更新后，头部菜单或尾部Page按钮出现乱码
 
-5. highlight.js的版本9存在安全漏洞，频繁出现告警信息！！！
+凡涉及到引用 Font Awesome 的地方，图标名和调用方式要更新，比如旧版填写 home，新版要改为 fa fa-home，否则图标会显示乱码
+
+``` yaml
+# 旧版
+menu:
+home: / || home
+
+# 新版
+menu:
+home: / || fa fa-home
+```
+
+### 5. LocalSearch 失效的问题
+
+开始你的Blog搜索功能还是正常的，搜索出结果一直在转圈圈等待，或者 搜索功能能搜索但是不能跳转过去，随着添加了几篇文章以后，搜索就不正常了，访问你的博客 http://你的博客域名/search.xml` 的时候，提示有存在不可解析的字节的错误，大致如下：
+
+``` log
+This page contains the following errors:error on line 66 at column 35: Input is not proper UTF-8, indicate encoding !
+Bytes: 0x08 0xE8 0xAF 0x84Below is a rendering of the page up to the first error.
+```
+
+此时，是因为你的xml解析有问题，换成json来解析即可，
+解决方案：编辑你的站点配置文件`_config.yml`,找到搜索的地方 把 Search的xml解析改成json解析
+
+### 6. highlight.js的版本9存在安全漏洞，频繁出现告警信息
+
+全部完成`npm-check`和`npm-upgade`之后，问题完美解决。
 
 ---
 
