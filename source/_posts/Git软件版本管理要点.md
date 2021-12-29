@@ -17,7 +17,7 @@ Git是目前世界上最先进的分布式版本控制系统（没有之一）�
 
 ## 版本规划
 
-通常，我们采用`GNU`风格的版本号命名格式：主版本号 . 子版本号 [. 修正版本号 [. 编译版本号 ]]。
+通常，我们采用`GNU`风格的版本号命名格式：主版本号 . 子版本号 [. 修正版本号 [. 发行版本号 ]]。
 即：`Major_Version_Number`.`Minor_Version_Number`[.`Revision_Number`[.`Build_Number`]]
 示例 :`1.2.1`, `2.0`, `5.0.0 build-13124`
 
@@ -28,7 +28,9 @@ Git是目前世界上最先进的分布式版本控制系统（没有之一）�
     表示功能更新，出现新功能时(不影响 API 的兼容性)，增加B
 - Revision：修订号
     表示小修改，如修复bug、更改提示语字符等(不影响 API 的兼容性)，只要有修改就增加C
-- Build: 发行信息
+- Build: 发行版本号
+
+### 常见的发行版本名
 
 - Alpha：是内测试版本，一般不向外部发布，会有很多Bug，一般只有测试人员使用
 - Beta：是公测试版本，这个阶段的版本会一直加入新的功能，在Alpha版之后推出
@@ -122,3 +124,4 @@ Git是目前世界上最先进的分布式版本控制系统（没有之一）�
 - [Maven版本管理的最佳实践](https://www.iteye.com/blog/juvenshun-376422)
 - [Vscode的版本管理插件](https://code.visualstudio.com/Docs/editor/versioncontrol)
 - [MySQL的版本管理](https://haicoder.net/mysql/mysql-version.html)
+- [Oracle OpenJDK的历史版本下载页](http://jdk.java.net/archive/)
