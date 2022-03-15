@@ -10,6 +10,10 @@ tags:
 
 {% asset_img ieee.jpg %}
 
+{% asset_img 5G-channel.png %}
+
+{% asset_img ax9000.png %}
+
 
 
 ### 802.11af
@@ -102,6 +106,10 @@ Wi-Fi联盟于2019年9月16日开启Wi-Fi CERTIFIED 6认证计划[2]，于2020�
 - [Intel关于Wifi 6的介绍](https://www.intel.cn/content/www/cn/zh/gaming/resources/wifi-6.html)
 - [小米Ax9000路由器的技术参数](https://www.mi.com/mirouter/ax9000/specs)
 - [如何看待 WiFi 联盟发布的 802.11ah WiFi 标准 “HaLow” ？](https://www.zhihu.com/question/39183519/answer/1156959383)
+
+### 视频教材
+
+- [小米路由器AX9000 无线mesh组网评测](https://www.ixigua.com/6900819345442603524?id=6958306910969791012&logTag=0781892ee341492262db)
 
 ### 资料下载
 
