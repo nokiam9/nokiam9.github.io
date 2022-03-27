@@ -178,12 +178,22 @@ Wi-Fi所使用的2.4G频段与5.8G频段就落在全球各国共有的ISM频段�
 
 ## 参考文献
 
+### 官方网站
+
 - [工业和信息化部 - 关于加强和规范2400MHz、5100MHz和5800MHz频段无线电管理有关事宜的通知](https://wap.miit.gov.cn/zwgk/zcwj/wjfb/tz/art/2021/art_e4ae71252eab42928daf0ea620976e4e.html)
-- [工业和信息化部 - 工业互联网和物联网无线电频率使用指南（2021年版）](http://www.srrc.org.cn/kindeditor/attached/file/20210601/20210601143132_9559.pdf)
 - [Wi-Fi Alliance的官方网站](https://www.wi-fi.org/zh-hans)
+
+### 技术评论
+
 - [Wi-Fi的那些事：无线电、速率与组网](https://yuanze.wang/posts/things-about-wifi/)
+- [无线路由器及Wi-Fi组网指南（史上最全）](https://www.eet-china.com/mp/a77283.html)
 - [何为ISM频段？ISM频段主要频率有哪些？](https://www.sohu.com/a/432446555_814535)
 - [射频识别RFID不同工作频段有何特点](http://www.iwl.iiot.com/news/345.html)
-- [Intel关于USB 3.0频率干扰的技术白皮书](http://www.51cos.com/wp-content/uploads/2020/01/USB-3.0-Radio-Frequency-Interference-Impact-on-2.4-GHz-Wireless-Devices.pdf)
 - [雷达的工作频率](http://uuspider.com/2015/01/14/01.html)
-- [车联网发展、法律法规和测试研究](http://www.rachina.org.cn/data/attachement/pdf/site122/20180917/00016c58d7ef1d09ab3538.pdf)
+
+### 资料下载
+
+- [WLAN频段介绍.pdf](WLAN频段介绍.pdf)
+- [Intel关于USB 3.0频率干扰的技术白皮书](Intel关于USB3.0无线干扰的白皮书.pdf)
+- [工业互联网和物联网无线电频率使用指南（2021年版）](工业互联网和物联网无线电频率使用指南-2021.pdf)
+- [车联网发展、法律法规和测试研究](00016c58d7ef1d09ab3538.pdf)
