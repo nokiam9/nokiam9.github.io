@@ -5,6 +5,8 @@ tags:
 ---
 
 
+{% asset_img airport.png %}
+
 {% asset_img 5G-channel.png %}
 
 {% asset_img ax9000.png %}
