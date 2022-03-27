@@ -38,11 +38,11 @@ ISM中的2.4GHz频段有2.4-2.5GHz，总计100MHz的可用频率。在中国大�
 
 如果不允许信道之间频率重叠，2.4GHz频段只能容纳3个20MHz的信道（即信道1，6，11）。
 
-{% asset_img 2.4GHz-1.jpeg %}
+{% asset_img 24-20.jpeg %}
 
 或者2个40MHz的信道(即信道3和11)，且完全不支持80MHz以上带宽。
 
-{% asset_img 2.4GHz-2.jpeg %}
+{% asset_img 24-40.jpeg %}
 
 ## 二、5GHz频段
 
