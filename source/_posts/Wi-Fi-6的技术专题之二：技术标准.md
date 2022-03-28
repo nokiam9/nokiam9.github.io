@@ -123,4 +123,5 @@ Wi-Fi联盟于2019年9月16日开启Wi-Fi CERTIFIED 6认证计划[2]，于2020�
 - [小米Ax9000路由器的技术参数](https://www.mi.com/mirouter/ax9000/specs)
 - [如何看待 WiFi 联盟发布的 802.11ah WiFi 标准 “HaLow” ？](https://www.zhihu.com/question/39183519/answer/1156959383)
 
+- [关于WiFi 6技术，这篇说得最详细](http://www.semiinsights.com/s/electronic_components/23/38911.shtml)
 
