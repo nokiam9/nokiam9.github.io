@@ -108,6 +108,26 @@ npm config set registry http://mirrors.cloud.tencent.com/npm/
 
 ---
 
+## 疑难杂症
+
+### 1. Macbook M1芯片的版本支持
+
+2020年 Apple Macbook 推出了基于ARM指令集的 M1 自研芯片，而非原来基于x86指令集的 Intel 芯片。
+node.js从`v16`开始，提供了M1芯片的兼容性支持，也就是darwin有 arm64 和 x64 两个版本。
+具体可以参见 node.js官网下载页面的截图。
+
+{% asset_img node-m1.png %}
+
+### 2. Mac OS安装npm可能出现的权限问题
+
+Mac 用户如果在编译时可能会遇到问题，请先到 App Store 安装 Xcode，Xcode 完成后，启动并进入 `Preferences -> Download -> Command Line Tools -> Install` 安装命令行工具。
+
+Mac用户如果在尝试过程中出现 `EACCES` 权限错误，请遵循由 [npmjs 发布的指导](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally) 修复该问题。
+
+强烈建议 不要 使用 root、sudo 等方法覆盖权限。
+
+---
+
 ## 参考资料
 
 - [Centos7:安装node和npm & npm配置全局路径](https://my.oschina.net/cqyj/blog/3016118)

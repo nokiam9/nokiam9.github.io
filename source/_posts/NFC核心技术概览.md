@@ -55,6 +55,7 @@ HCE 技术只是实现了将NFC 读卡器的数据送至操作系统的HCE 服�
 {% asset_img dual-mode.png 双模方式 %}
 
 ### 对比分析
+
 {% asset_img hce-se.png 对比分析 %}
 
 ## HCE的协议栈
@@ -62,7 +63,8 @@ HCE 技术只是实现了将NFC 读卡器的数据送至操作系统的HCE 服�
 为支持NFC射频卡，HCE主要实现了两个ISO协议，分别是硬件标准`ISO/IEC 14443`和应用协议`ISO/IEC 7816`。
 
 {% asset_img protocol-stack.png NFC的核心协议栈 %}
-### ISO/IEC 14443 
+
+### ISO/IEC 14443
 
 Android 4.4 支持基于`NFC-Forum ISO-DEP`规范（基于`ISO/IEC 14443-4`）的模拟卡，要求仅使用 Nfc-A (`ISO/IEC 14443-3 Type A`) 技术模拟 ISO-DEP，但也可以支持 Nfc-B (`ISO/IEC 14443-4 Type B`) 技术。
 
@@ -76,6 +78,22 @@ Android 4.4 支持基于`NFC-Forum ISO-DEP`规范（基于`ISO/IEC 14443-4`）�
 ISO/IEC14443-3 定义了 TYPE A、TYPEB 两种卡型（与飞利浦的 Mifare 标准兼容），均通过13.56Mhz的射频载波传送信号，此外索尼公司开发了FeliCa 标准，也成为TYPE F。
 不同TYPE的主要的区别在于信号发送的载波调制深度、二进制数编码方式存在差异。
 此外，防冲突机制的原理也完全不同，TYPE A是基于 BIT 冲突检测协议，TYPE B则是通过字节、帧及命令完成防冲突。
+
+### SWP单线协议(Single Wire Protocol)
+
+手机与普通非接触IC卡最大的不同体现在拥有网络功能和人机交互两部分，因此，NFC手机可以从事传统非接触IC所不能完成的丰富业务，如空中充值、余额查询。所有这些业务均需要一个技术前提即需要一个标准的SIM卡访问接口，能够使得应用客户端访问SIM卡并与SIM卡中的applet进行通信。具体讲，需要在手机中支持三个标准：
+
+1. SIM Alliance Open Mobile API：为应用客户端提供与SIM卡通信的通道
+
+2. Global Platform/GSMA：Secure Element Access Control：授权应用客户端访问SIM卡中对应的applet
+
+3. Modem：需完全支持3GPP 27.007标准，支持打开SIM卡逻辑通道，并能够在逻辑通信上真正实现APDU的透传
+
+{% asset_img swp.jpg 对比分析 %}
+
+SWP(Single Wire Protocol)是采用C6引脚的单线连接方案。在SWP方案中，接口界面包括三根线：VCC(C1)、GND(C5)和SWP(C6)，其中SWP一根信号线上基于电压和负载调制原理实现全双工通讯，这样可以实现SIM卡在ISO7816界面定义下同时支持7816和SWP两个接口，并预留了扩展第三个高速(USB)接口的引脚。支持SWP的SIM卡必须同时支持ISO和SWP两个协议栈，需要SIM的COS是多任务的OS系统，并且这两部分需要独立管理的，ISO界面的RST信号不能对SWP部分产生影响。
+
+　　SWP是在一根单线上实现全双工通讯，定义了S1和S2两个方向的信号， SWP传输的波特率可以从106KBPS最高上升至2MBPS。从SWP的定义看，SWP方案同时满足ISO7816、NFC和大容量高速接口，并且是全双工通讯，可以实现较高波特率。SWP系统地定义了从物理层、链路层到应用层的多层协议，并已经上升成为ETSI的标准，正在争取成为ISO的标准，目前得到业界较多的支持。从另一个角度看，SWP方案要求SIM卡和NFC模拟前端芯片同时重新设计，涉及的面比较广，市场推进的难度较大。另外，NFC应用非常关注掉电模式下的应用，SWP的S2负载调制通讯方式带来接口的功耗损失，对掉电模式下的性能有不利影响。
 
 ### ISO/IEC 7816
 
@@ -96,6 +114,7 @@ AID 由 16 个字节组成。如果您正在为现有的 NFC 读写器基础设�
 如果您想为自己的应用程序部署新的读取器基础设施，则需要注册您自己的 AID。AID 的注册过程在`ISO/IEC 7816-5`规范中定义。谷歌建议，如果您正在为 Android 部署 HCE 应用程序，可以按照 7816-5 注册一个 AID，它可避免与其他应用程序发生冲突。
 
 #### AID组
+
 在某些情况下，HCE 服务可能需要注册多个 AID 才能实现某个应用程序，并且需要确保它是所有这些 AID 的默认处理程序（与另一服务的组中的某些 AID 相反）。
 
 AID 组是一系列被视为属于共同的操作系统 AID 。对于一个 AID 组中的 AID，Android 可以保证以下一项：
@@ -105,6 +124,7 @@ AID 组是一系列被视为属于共同的操作系统 AID 。对于一个 AID 
 换句话说，不存在中间状态，其中该组中的一些 AID 可以被路由到一个 HCE 服务，而另一些可以路由到另一个 HCE 服务。
 
 #### AID组和类别
+
 每个 AID 组都与一个类别关联。这使得 Android 可以按类别将 HCE 服务分组，并且反过来允许用户在类别级别上设置默认值而不是 AID 级别。通常，避免在应用程序中任何面向用户的部分中提到 AID：它们对普通用户没有任何意义。
 
 Android 4.4 支持两种类别：`CATEGORY_PAYMENT`（覆盖行业标准支付应用）和`CATEGORY_OTHER`（对应于所有其它 HCE 应用）。
@@ -113,7 +133,7 @@ Android 4.4 支持两种类别：`CATEGORY_PAYMENT`（覆盖行业标准支付�
 
 对于仅在一个商家（例如储值卡）工作的闭环支付应用，您应该使用CATEGORY_OTHER。该类别中的 AID 组可以总是活动的，并且在必要时可以在 AID 选择期间由 NFC 读写器给予优先级。
 
-## 超级SIM卡的技术要求
+## 超级SIM卡的通信接口
 
 通信接口指的是 SIM 卡与外部终端设备进行通信的接口，应支持 ISO7816 和 SWP 两种接口。
 
@@ -123,14 +143,65 @@ Android 4.4 支持两种类别：`CATEGORY_PAYMENT`（覆盖行业标准支付�
 
 移动终端若支持 NFC 功能，则应支持 SWP 接口，与超级 SIM 卡协同实现刷卡 操作，为用户提供基于非接触感应的线下应用场景。
 
+### 应用层的技术标准
+
+NFC手机可以从事传统非接触IC所不能完成的丰富业务，如空中充值、余额查询。所有这些业务均需要一个技术前提即需要一个标准的SIM卡访问接口，能够使得应用客户端访问SIM卡并与SIM卡中的applet进行通信。具体讲，需要在手机中支持三个标准：
+
+1. SIM Alliance Open Mobile API：为应用客户端提供与SIM卡通信的通道
+
+2. Global Platform/GSMA：Secure Element Access Control：授权应用客户端访问SIM卡中对应的applet
+
+3. Modem：需完全支持3GPP 27.007标准，支持打开SIM卡逻辑通道，并能够在逻辑通信上真正实现APDU的透传
+
 ---
+
+## 附录一：SIM卡的技术标准
+
+SIM卡是一个装有微处理器的芯片卡，它的内部有5个模块，并且每个模块都对应一个功能：、
+
+- 微处理器CPU（8位）
+- 程序存储器ROM（3--8kbit）
+- 工作存储器RAM（6--16kbit）
+- 数据存储器EEPROM（128--256kbit）
+- 串行通信单元。
+
+{% asset_img sim.jpeg 对比分析 %}
+
+这5个模块被胶封在SIM卡铜制接口后与普通IC卡封装方式相同。这五个模块必须集成在一块集成电路中，否则其安全性会受到威胁。因为，芯片间的连线可能成为非法存取和盗用SIM卡的重要线索。
+
+SIM卡同手机连接时至少需要5条连接线（通常编程口未定义）
+
+- 数据I/O口（Data）
+- 复位（RST）
+- 接地端（GND）
+- 电源（Vcc）
+- 时钟（CLK）
+
+如上图所示。
+
+SIM卡的供电分为5V（1998年前发行）、5V与3V兼容、3V、1.8V等，当然这些卡必须与相应的移动电话机配合使用，即移动电话机产生的SIM卡供电电压与该SIM卡所需的电压相匹配。卡电路中的电源VCC、地GND是卡电路工作的必要条件。卡电源用万用表就可以检测到。SIM卡插入移动电话机后，电源端口提供电源给SIM卡内各模块。
+
+## 附录二：主流NFC硬件厂商和芯片型号
+
+|射频前端芯片|读卡器/NFC芯片|卡芯片|
+|:---:|:---:|:---:|
+|德州仪器：TI TRF7970A|恩智浦：NXP PN532|复旦微电子：FMSH FM1208|
+|复旦微电子：FMSH FM11NC08S|恩智浦：NXP PN7150|华翼微电子 HYm4616A1/2/3/4/5/6|
+|-|意法半导体：ST CR95HF|华翼微电子： HYm4616A7|
+|-|华大电子：HED CIE72D01|-|
 
 ## 参考资料
 
 - [NFC-SWP终端架构与标准](https://blog.csdn.net/icycityone/article/details/17358357)
 - [Android的NFC官方文档](https://developer.android.com/guide/topics/connectivity/nfc/hce?hl=zh-cn)
+- [NFC SWP移动支付解决方案技术分析](https://www.mpaypass.com.cn/news/201307/12110718.html)
+- [近距离通信的SWP方案及其在SIM卡的实现](http://tech.rfidworld.com.cn/2010_07/04cd42c1fd6aac1d.html)
+- [SIM卡详解](https://blog.csdn.net/xiaoxik/article/details/82156455)
 - [关于HCE的NFC支付研究报告及其安全性探讨](http://www.jiajuhf.com/zxxw_8/42705634.html)
 - [基于主机的卡模拟概览](http://article.iotxfd.cn/RFID/Host-based%20card%20emulation)
 - [HCE基础知识普及](https://blog.csdn.net/wwww1988600/article/details/69523369)
 - [NFC之 Type A 与 TYpe B 卡区别](https://blog.csdn.net/liwei16611/article/details/85209361)
 - [超级SIM卡的技术白皮书](http://www.cmricloud.com/pdf/07/1.pdf)
+- [基于HCE移动支付研究报告](https://mp.weixin.qq.com/s?src=3&timestamp=1625732247&ver=1&signature=YhDcKm20OjT1SqXPV4ZZjLRQtlP42pVugJP77ZqfP6lSnDV7-d-WYWFpxgd-qXkSJ7EwF-g7TpH2pu5MDifsfvGJsEF1yY9jmRZa*elztII6P9xrvmw53XvWBsp-ztpwDYuS4VXwrXgHrA4p4NpNaQ==)
+- [NFC-SWP连接方案在SIM卡中的实现方法](http://www.nfcin.com.cn/news/201403/11110054.html)
+

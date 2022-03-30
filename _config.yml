@@ -8,12 +8,12 @@ subtitle:
 description:
 keywords:
 author: Alex Sun
-language: zh-Hans
-timezone:
+language: zh-CN
+timezone: Asia/Shanghai
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://blog.caogo.cn
+url: https://nokiam9.github.io
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -32,7 +32,8 @@ skip_render:
 new_post_name: :title.md # File name of new posts
 default_layout: post
 titlecase: false # Transform title into titlecase
-external_link: true # Open external links in new tab
+external_link:
+  enable: true # Open external links in new tab
 filename_case: 0
 render_drafts: false
 post_asset_folder: true
@@ -81,13 +82,16 @@ theme: next
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type: git
-  repository: https://github.com/nokiam9/nokiam9.github.io
-  branch: master
+  - type: git
+    repository: https://github.com/nokiam9/nokiam9.github.io
+    branch: master
+  - type: git
+    repository: root@caogo.cn:/root/blog.git
+    branch: master
 
 # 添加百度/谷歌/本地 自定义站点内容搜索
 search:
-  path: search.xml
+  path: search.json
   field: post
+  content: true
   format: html
-  limit: 10000

@@ -13,12 +13,12 @@ Server采用Nginx提供下载服务，默认采用http方式
 
 ### 1. 准备工作
 
-``` sh
+``` bash
 # 安装必须的基础软件
-yum install -y yum-utils reposyn
+yum install -y yum-utils reposyn createrepo
 
 # 删除所有系统自带的REPO源
-rm -f /etc/yum.repos.d/*.conf
+rm -f /etc/yum.repos.d/*.repo
 ```
 
 ### 2. 创建自定义的REPO源
@@ -120,19 +120,24 @@ reposync -r kubernetes -p /data
 
 ```
 
-### 4. 创建REPO索引
+### 4. 创建或更新REPO索引
+
+创建并执行一个更新索引文件的脚本，位于`/root/repo-sync.sh`（以后还将用于crontab定时任务更新）。
 
 ``` sh
-yum repolist
+###参数-n指下载最新软件包，-p指定目录，指定本地的源--repoid（如果不指定就同步本地服务器所有的源）,下载过程比较久
+/usr/bin/reposync -n --repoid=extras --repoid=updates --repoid=base --repoid=centosplus -p /data/centos
+/usr/bin/reposync -n --repoid=epel -p /data
+/usr/bin/reposync -n --repoid=docker-ce -p /data
+/usr/bin/reposync -n --repoid=kubernetes -p /data
 
-createrepo -po /data/centos/base --worker 4
-createrepo -po /data/centos/extras --worker 4
-createrepo -po /data/centos/updates --worker 4
-createrepo -po /data/centos/centosplus --worker 4
-
-createrepo -po /data/epel --worker 4
-createrepo -po /data/docker-ce --worker 4
-createrepo -po /data/kubernetes --worker 4
+/usr/bin/createrepo --update /data/centos/base --worker 4
+/usr/bin/createrepo --update /data/centos/extras --worker 4
+/usr/bin/createrepo --update /data/centos/updates --worker 4
+/usr/bin/createrepo --update /data/centos/centosplus --worker 4
+/usr/bin/createrepo --update /data/epel --worker 4
+/usr/bin/createrepo --update /data/docker-ce --worker 4
+/usr/bin/createrepo --update /data/kubernetes --worker 4
 
 ```
 
@@ -229,24 +234,9 @@ systemctl status nginx
 
 > Nginx服务如果网络端口或目录权限等问题导致不能正常启动，往往是SELinux在搞鬼，可以通过`setenforce 0`强制关闭
 
-### 7. Server的后续同步更新方式
+### 7. 设置定时更新任务
 
-``` sh
-###参数-n指下载最新软件包，-p指定目录，指定本地的源--repoid（如果不指定就同步本地服务器所有的源）,下载过程比较久
-reposync -n --repoid=extras --repoid=updates --repoid=base --repoid=centosplus -p /data/centos
-reposync -n --repoid=epel -p /data
-reposync -n --repoid=docker-ce -p /data
-reposync -n --repoid=kubernetes -p /data
-
-createrepo --update /data/centos/base
-createrepo --update /data/centos/extras
-createrepo --update /data/centos/updates
-createrepo --update /data/centos/centosplus
-createrepo --update /data/epel
-createrepo --update /data/docker-ce
-createrepo --update /data/kubernetes
-
-```
+如果一切检查顺利，最后根据位于`/root/repo-sync.sh`，追加到crontab定时任务更新。
 
 ## Client的使用方法
 
@@ -319,59 +309,6 @@ EOF
 
 yum repolist
 
-```
-
----
-
-## 附录：如何生成组包（group）的yum源
-
-要想使用groupinstall命令安装一个组的包，其实和单个包的类似，你可以参考系统光盘中repodata目录下，以comps-xxx-Server.xml结尾的文件，自己手动写一个；也可以用命令自动生成一个
-
-用到的命令为：yum-groups-manager
-
-安装软件包：
-
-`#yum -y install  yum-utils-1.1.30-14.el6.noarch`
-
-建立repo时，如何保持或者创建一些group让其关联安装一些列RPM包呢（可用yum grouplist命令查看的）？
-方法是在createrepo时，添加-g参数来指定准备好的关于group信息的XML文件，命令为：
-`[user@machine] createrepo -g comps.xml MyRepo`
-
-这个comps.xml文件可以用命令来生成：
-`yum-groups-manager -n "My Group" --id=mygroup --save=mygroups.xml --mandatory yum glibc rpm`
-
-Create the repository
-Now we are ready to create our new local repository.
-
- # createrepo . 
-Enable group support
-
- # cp /mnt/repodata/*comps*.xml repodata/comps.xml 
-# createrepo -g repodata/comps.xml . 
-Setup your local repo file
-
-Create a file called /etc/yum.repos.d/rhel65-local.repo and add the follow lines and save it:
-
- [rhel65_x64-local]
- name=RHEL 6.5 local repository
- baseurl=file:///var/repo/rhel/6/u5/x86_64
- enabled=1
- gpgcheck=0
-Clean and recreate the yum db
-
- # yum clean all 
- # yum makecache 
-Test it
-
- # yum list 
- # yum grouplist 
- # yum groupinstall "X Window System" Desktop -y 
-
-
-``` bash
-wget https://mirrors.huaweicloud.com/centos/7.8.2003/os/x86_64/repodata/cca56f3cffa18f1e52302dbfcf2f0250a94c8a37acd8347ed6317cb52c8369dc-c7-x86_64-comps.xml -o local-comps.xml
-
-createrepo -g local-comps.xml .
 ```
 
 ---
