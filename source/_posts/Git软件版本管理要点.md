@@ -173,7 +173,7 @@ docs: remove Angular 9 from support table (#43350)
 
 与 summary 使用的语句形式一样，祈使句、现在时，用于解释为什么要做这样的改动，可以与上一个版本的代码做对比，来说明变化的影响。
 
-## 脚注 Footer
+### 脚注 Footer
 
 用来描述重大不兼容的改变或者指引到相应的 issues 列表等
 
