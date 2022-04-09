@@ -131,9 +131,12 @@ Git是目前世界上最先进的分布式版本控制系统（没有之一）�
 
 {% asset_img commit-message-example.png %}
 
-### type
+### 主题行 Header = `<type>(<scope>): <subject>`
 
-- type：用于说明 commit 的类别，只允许使用下面8个标识。
+#### type
+
+type用于说明 commit 的类别，只允许使用下面8个标识:
+
 - br: 此项特别针对bug号，用于向测试反馈bug列表的bug修改情况
 - feat：新功能（feature）
 - fix：修补bug
@@ -144,19 +147,35 @@ Git是目前世界上最先进的分布式版本控制系统（没有之一）�
 - chore：构建过程或辅助工具的变动
 - revert: feat(pencil): add 'graphiteWidth' option (撤销之前的commit)
 
-### scope
+#### scope
 
 scope用于说明 commit 影响的范围，比如数据层、控制层、视图层等等，视项目不同而不同。
 
-### subject
+#### subject
 
 subject是 commit 目的的简短描述，不超过50个字符。
 以动词开头，使用第一人称现在时，比如change，而不是changed或changes
 第一个字母小写，结尾不加句号（.）
 
-### Body 
+举几个简单的例子：
+
+```
+feat(compiler-cli): propagate standalone flag to runtime (#44973)
+fix(router): merge interited resolved data and static data (#45276)
+release: cut the v14.0.0-next.9 release (#45442)
+refactor(common): removed TODO no longer considered necessary (#43378) 
+docs: remove Angular 9 from support table (#43350) 
+```
+
+### 内容体 Body
 
 是对本次 commit 的详细描述，可以分成多行。
+
+与 summary 使用的语句形式一样，祈使句、现在时，用于解释为什么要做这样的改动，可以与上一个版本的代码做对比，来说明变化的影响。
+
+## 脚注 Footer
+
+用来描述重大不兼容的改变或者指引到相应的 issues 列表等
 
 具体可以参见[Angular Github的示例](https://github.com/angular/angular/commits/master)
 
