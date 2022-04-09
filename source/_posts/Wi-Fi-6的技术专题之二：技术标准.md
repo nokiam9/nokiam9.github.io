@@ -134,6 +134,20 @@ IEEE 802.11ay是802.11ad的后继版本，引入MIMO技术与通道捆合技术(
 - **DMG = 802.11ad**：2012年发布，对应规范为“Directional multi-gigabit (DMG) PHY specification”，即：定向多吉比特（DMG）PHY规范，工作在60GHz频段，不支持多流，调制方式为 OFDM，单载波，低功耗单载波。
 - **TVHT = 802.11af**：2014年发布，对应规范为“Television very high throughput (TVHT) PHY specification”，即：电视超高吞吐量（TVHT）PHY规范，工作在电视的空白频段，最大4条流，调制方式为 MIMO-OFDM
 
+## 附录二：以太网标准 IEEE 802.3
+
+IEEE 802.3标准是由Ethernet V2发展而来。它将Ethernet V2帧头的协议类型字段替换为帧长度字段，并加入802.2 LLC头用以标志上层协议。
+其定义了有线以太网的物理层和数据链路层的媒体访问控制(MAC) ，通常用于局域网(LAN) ，基于各种类型的铜缆或光纤电缆在节点（集线器、交换机、路由器）之间建立物理连接。
+多数场景采用CSMA/CD协议，即：载波侦听多路访问/碰撞检测（Carrier Sense Multiple Access with Collision Detection），也支持CSMA/CA协议（Collision Avoidance）。
+
+- **802.3** = 10M以太网
+- **802.3a** = 百兆以太网
+- **802.3ab** = 基于双绞线的千兆以太网
+- **802.3z** = 基于光纤的千兆以太网
+- **802.3ad** = 双链路聚合的2.5G
+- **802.3af** = 基于以太网的供电，即POE（Power over Ethernet）
+- **802.3aq** = 基于多模光纤的万兆以太网，速率为 10 Gbit/s (1,250 MB/s) 
+
 ---
 
 ## 参考文献
