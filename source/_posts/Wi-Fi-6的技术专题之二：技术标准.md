@@ -122,6 +122,18 @@ IEEE 802.11ay是802.11ad的后继版本，引入MIMO技术与通道捆合技术(
 
 2018年，高通公司宣布推出业界首款基于新的WiGig标准802.11ay的60GHz Wi－Fi解决方案，可以提供实现游戏和娱乐新体验，例如4K流媒体直播、无延迟移动屏幕投射到娱乐系统以及真正身临其境的无线虚拟和增强现实体验。
 
+## 附录一：802.11的PHY（物理层）规范
+
+在描述Wi-Fi的信道速率时，经常看到HE160、VHT80等名词，其实这是802.11标准中关于PHY规范的名称，对应着Wi-Fi等各个标准。
+
+- **HT = 802.11n**：2009年发布，规范名称为“High-throughput (HT) PHY specification”，即：高吞吐量（HT）PHY规范，定义了20MHz、40MHz等2种模式，最大2条流，调制方式为 MIMO-OFDM
+- **VHT = 802.11ac**：2013年发布，规范名称为“Very high throughput (VHT) PHY specification”，，即：超高吞吐量（VHT）PHY规范定义了20MHz、40MHz、80MHz、160MHz、80MHz+80MHz等5种模式，最大8条流，调制方式为 MIMO-OFDM，不支持2.4GHz频段
+- **HE = 802.11ax**，2020年发布，规范名称为“High Efficiency(HE) PHY specification”，即：高效（HE）PHY规范，定义了20MHz、40MHz、80MHz、160MHz等4种模式，最大8条流，调制方式为OFDMA
+
+此外，还有几个有意思的PHY规范：
+- **DMG = 802.11ad**：2012年发布，对应规范为“Directional multi-gigabit (DMG) PHY specification”，即：定向多吉比特（DMG）PHY规范，工作在60GHz频段，不支持多流，调制方式为 OFDM，单载波，低功耗单载波。
+- **TVHT = 802.11af**：2014年发布，对应规范为“Television very high throughput (TVHT) PHY specification”，即：电视超高吞吐量（TVHT）PHY规范，工作在电视的空白频段，最大4条流，调制方式为 MIMO-OFDM
+
 ---
 
 ## 参考文献
