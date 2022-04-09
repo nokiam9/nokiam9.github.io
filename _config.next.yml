@@ -399,7 +399,7 @@ bookmark:
 # `Follow me on GitHub` banner in the top-right corner.
 github_banner:
   enable: true
-  permalink: https://github.com/nokiam9
+  permalink: https://github.com/nokiam9/nokiam9.github.io.git
   title: Follow me on GitHub
 
 
