@@ -3,7 +3,8 @@ title: Git软件版本管理要点
 date: 2021-12-29 16:04:24
 tags:
 ---
-## Git - 分布式版本管理
+
+## 一、概述
 
 传统的版本控制系统采用集中化方式（CVCS - Centralized Version Control Systems）包括CVS、Subversion 以及 Perforce 等，都有一个单一的集中管理的服务器，保存所有文件的修订版本，而协同工作的人们都通过客户端连到这台服务器，取出最新的文件或者提交更新。 多年以来，这已成为版本控制系统的标准做法。
 
@@ -15,7 +16,7 @@ tags:
 
 Git是目前世界上最先进的分布式版本控制系统（没有之一）。
 
-## 版本规划
+## 二、版本规划
 
 通常，我们采用`GNU`风格的版本号命名格式：主版本号 . 子版本号 [. 修正版本号 [. 发行版本号 ]]。
 即：`Major_Version_Number`.`Minor_Version_Number`[.`Revision_Number`[.`Build_Number`]]
@@ -45,7 +46,7 @@ Git是目前世界上最先进的分布式版本控制系统（没有之一）�
 - RTL：Retail，零售版是真正的正式版，正式上架零售版。在安装盘的i386文件夹里有一个eula.txt，最后有一行EULAID，就是你的版本。
   比如简体中文正式版是EULAID:WX.4_PRO_RTL_CN，繁体中文正式版是WX.4_PRO_RTL_TW。其中：如果是WX.开头是正式版，WB.开头是测试版。_PRE，代表家庭版；_PRO，代表专业版。
 
-## 分支规划
+## 三、分支规划
 
 ### master分支
 
@@ -87,7 +88,7 @@ Git是目前世界上最先进的分布式版本控制系统（没有之一）�
 生命周期：开发一个新功能开始，完成新功能开发并合并回develop分支结束
 补充说明：feature分支代码可以保存在开发者自己的代码库中而不强制提交到主代码库里
 
-## 管理方式
+### 管理方式
 
 1、管理员在github或gitlab上建立master、develop分支
 2、开发者从远程develop分支，拉取develop分支到本地
@@ -102,19 +103,62 @@ Git是目前世界上最先进的分布式版本控制系统（没有之一）�
 11、管理员合并hotfix分支到master分支，可删除hotfix分支
 12、同一产品的不同客户，可以在master分支上使用tag来标识客户的部署版本
 
-## 操作命令
+## 四、常用操作命令
 
-新建本地分支：git branch 分支名称
-删除本地分支：git branch -D 分支名称
-合并本地分支：git marge 要合并的分支
-提交本地分支：git push 远程主机 本地分支:远程分支
+新建本地分支：git branch <分支名称>
+删除本地分支：git branch -D <分支名称>
+合并本地分支：git marge <要合并的分支>
+提交本地分支：git push <远程主机> <本地分支>:<远程分支>
 查看本地分支：git branch
-切换本地分支：git checkout 分支名称
-拉去远程分支：git checkout -b 本地分支 远程分支
-新建版本标签：git tag -a 版本 -m ‘说明’
-提交版本标签：git push [远程主机] –tags 或者 git push [远程主机] 版本
+切换本地分支：git checkout <分支名称>
+创建并切换分支：git checkout -b <分支名称>
+拉取远程分支：git pull <远程主机> <远程分支>:<本地分支>
+新建版本标签：git tag -a <版本号> -m ‘说明’
+提交版本标签：git push <远程主机> –tags 或者 git push <远程主机> <版本号>
 查看标签版本：git tag
-获取标签版本：git checkout 版本
+获取标签版本：git checkout <版本号>
+
+## 五、Git commit 注释规范
+
+使用标准的提交注释格式后，我们可以：
+
+- 让评审人快速了解本次变更的意图，评判内容与意图的相符程度。
+- 通过脚本自动生成变更日志（CHANGELOG）
+- 识别或过滤不重要的代码变更，例如只对代码格式进行修订的那些
+- 当浏览提交历史时，可以快速得到更多且更有用的信息
+
+提交注释格式如下所示。它由三个段落组成，分别是：主题行，内容体和脚注，并由一个空行分隔。
+
+{% asset_img commit-message-example.png %}
+
+### type
+
+- type：用于说明 commit 的类别，只允许使用下面8个标识。
+- br: 此项特别针对bug号，用于向测试反馈bug列表的bug修改情况
+- feat：新功能（feature）
+- fix：修补bug
+- docs：文档（documentation）
+- style： 格式（不影响代码运行的变动）
+- refactor：重构（即不是新增功能，也不是修改bug的代码变动）
+- test：增加测试
+- chore：构建过程或辅助工具的变动
+- revert: feat(pencil): add 'graphiteWidth' option (撤销之前的commit)
+
+### scope
+
+scope用于说明 commit 影响的范围，比如数据层、控制层、视图层等等，视项目不同而不同。
+
+### subject
+
+subject是 commit 目的的简短描述，不超过50个字符。
+以动词开头，使用第一人称现在时，比如change，而不是changed或changes
+第一个字母小写，结尾不加句号（.）
+
+### Body 
+
+是对本次 commit 的详细描述，可以分成多行。
+
+具体可以参见[Angular Github的示例](https://github.com/angular/angular/commits/master)
 
 ---
 ## 参考文献
@@ -125,3 +169,5 @@ Git是目前世界上最先进的分布式版本控制系统（没有之一）�
 - [Vscode的版本管理插件](https://code.visualstudio.com/Docs/editor/versioncontrol)
 - [MySQL的版本管理](https://haicoder.net/mysql/mysql-version.html)
 - [Oracle OpenJDK的历史版本下载页](http://jdk.java.net/archive/)
+- [Git Commit Message规范 - Angular](https://helloyyk.com/34.html)
+- [如何写好提交注释](https://www.continuousdelivery20.com/blog/cr-good-commit-message/)
