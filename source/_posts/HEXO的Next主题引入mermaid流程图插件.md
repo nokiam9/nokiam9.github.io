@@ -21,33 +21,33 @@ Mermaid支持以下类型的图形：
 
 ## 二、HEXO如何引入mermaid插件
 
-对于`hexo-theme-next`主题插件，从`8.11.0`版本开始内置mermaid支持，不再需要手工安全js模版文件了，具体步骤为：
+对于`hexo-theme-next`主题插件，从`8.11.0`版本开始内置mermaid支持，不再需要手工安装js模版文件了，具体步骤为：
 
 1. 确认`hexo-theme-next`的版本号高于`8.11.0`
 2. 确认已安装`hexo-filter-mermaid-diagrams`，当前版本号是`1.0.5`；如果没有安装，则：
 
-  ```bash
-  npm install hexo-filter-mermaid-diagrams
-  ```
+    ```bash
+    npm install hexo-filter-mermaid-diagrams
+    ```
 
 3. 找到位于HEXO根目录的`_config.next.yml`，寻找`mermaid`段落并设置开关`enable: true`
 
-  ``` yaml
-  # Mermaid tag
-  mermaid:
-    enable: false # 此处修改为true！！！
-    # Available themes: default | dark | forest | neutral
-    theme:
-      light: default
-      dark: dark
-  ```
+    ``` yaml
+    # Mermaid tag
+    mermaid:
+      enable: false # 此处修改为true！！！
+      # Available themes: default | dark | forest | neutral
+      theme:
+        light: default
+        dark: dark
+    ```
 
 4. 此时应该可以在文档中编写并展现流程图了。
    如果不能正常展示，可能需要重新生成js文件，输入命令:
 
-  ```bash
-  npm clean && npm generate && npm server
-  ```
+    ```bash
+    npm clean && npm generate && npm server
+    ```
 
 > 其实，vscode也可以引入mermaid，其插件名称是`Markdown-preview-enhanced`
 
