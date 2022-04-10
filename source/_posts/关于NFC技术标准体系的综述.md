@@ -20,6 +20,7 @@ NFC的核心技术优势在于：
 - **终端集成**：NFC软件协议栈完全集成到Android（v.4.0以上）、iOS（v.11）中，有助于在多个应用程序中使用NFC，而无需安装任何特定软件或应用
 
 需要注意的是，NFC技术演进路线中，多个标准化组织为争夺主导权，互相竞争也互相融合。
+
 - `NFC Forum`是最重要的标准化组织，影响力最大；
 - `ISO/IEC`也是重要的标准化组织，但侧重从RF（Radio Frequency，无线频率）和数据交换格式等底层定义，较少涉及业务和应用层面；
 - 此外，还存在`ETSI`,`ECMA`,`GB`,`JIS`等区域性的国家标准。
@@ -73,7 +74,7 @@ NFC是多种技术路线并行发展的综合体，得益于条形码、磁条�
 - ISO7816-8：接触式卡智能卡与安全有关的指令
 - ISO7816-9：接触式卡智能卡附加指令与安全参数
 
-###  `S2C接口` =  `ISO/IEC 28361` 
+### `S2C接口` =  `ISO/IEC 28361`
 
 由飞利浦公司最早提出，用于在手机上实现 NFC 功能，定义了NFC芯片和智能卡芯片的接口方式，并成为ISO 和 ECMA的共同标准。
 此后，由于遭到主流运营商的反对，最终飞利浦公司放弃了该技术标准，转而与GEMALTO公司合作支持`SWP协议`。
@@ -190,12 +191,12 @@ NFC 论坛定义了四种类型的 NFC 标签，第五种标签与 NFC-V 技术�
 |项目|Type 1|Type 2|Type 3|Type 4|Type 5|
 |:-:|:-:|:-:|:-:|:-:|:-:|
 |对应规范   |ISO 14443 Type A|ISO 14443 Type A |JIS X 6319-4、FELICA|ISO 14443 Type A/B|ISO/IEC 15693|
-|常见芯片	|Topaz	|MIFARE	|Felica	|MIFARE-DESFire|NXP的I Code系列，ST的ST25TV系列|
-|存储容量	|最大1KB	|最大2KB	|最大1MB	|最大64KB|高达 8 KB|
-|读写速率	|106kbps    |106kbps    |212kbps	|106-424kbps|26.48 kbps|
-|价格	|低	|低	|高	|中等/高|低|
-|安全性	|数字签名保护	|不安全	|数字签名保护	|可选 |N/A|
-|说明	|Topaz由Innovision公司推出	|MIFARE由NXP公司推出	|由Sony公司推出，价格比较贵	|这类芯片在出厂时就被配置好是否只读或可读写|上海贝岭等|
+|常见芯片|Topaz|MIFARE|Felica|MIFARE-DESFire|NXP的I Code系列，ST的ST25TV系列|
+|存储容量|最大1KB|最大2KB|最大1MB|最大64KB|高达 8 KB|
+|读写速率|106kbps |106kbps    |212kbps|106-424kbps|26.48 kbps|
+|价格|低|低|高|中等/高|低|
+|安全性|数字签名保护|不安全|数字签名保护|可选 |N/A|
+|说明|Topaz由Innovision公司推出|MIFARE由NXP公司推出|由Sony公司推出，价格比较贵|这类芯片在出厂时就被配置好是否只读或可读写|上海贝岭等|
 
 ## NFC的数据交换格式
 
@@ -232,6 +233,7 @@ SNEP使用可靠的传输层：逻辑链路控制协议（LLCP）。
 `ECMA 340`是基础版本，被ISO接纳成为`ISO/IEC 18092`，同时在NFC Forum中被称为`NFCIP-1`，这三者就是一回事。
 
 `ISO/IEC 18092`（NFCIP-1 近场通信 - 接口和协议规范）的基本内容包括：
+
 - 在RF层面，直接继承自`ISO 14443 Type A`，并且还继承自日本`JIS 6319-4`（Sony FeliCa也基于该标准）由NFC论坛3型标签标准使用）,结果是NFC设备（读取器/写入器模式）与ISO 14443智能卡兼容。
 - 在应用层面，为实现P2P通讯，定义了`Active（主动）`和`Passive（被动）`等两种通信模式，并使用不同的命令协议来代替 `ISO/IEC 14443-4`
 - 进一步的，定义了R/W、CE、P2P等三种操作模式，从而实现NFC 设备以点对点模式与其他 NFC 设备和 NFC 标签（卡）的互操作
@@ -249,7 +251,6 @@ NFC技术的发展方兴未艾，当前还在快速变化中，最新进展包�
 
 {% asset_image nfc-protocol-3.bmp %}
 
-
 立此存照，未来可期！！！
 
 ---
@@ -265,8 +266,8 @@ NFC技术的发展方兴未艾，当前还在快速变化中，最新进展包�
 - MF1 IC S20：国内常称为MIFARE Mini，原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。
 - SLE66R35：德国英飞凌（infineon），兼容MF1 IC S50。
 - FM11RF08：芯片厂家为上海复旦，兼容MF1 IC S50。
-- Mifare Std 1k MF1 IC S50及其兼容卡：原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。 
-- Mifare Std 4k MF1 IC S70及其兼容卡：原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。　
+- Mifare Std 1k MF1 IC S50及其兼容卡：原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。
+- Mifare Std 4k MF1 IC S70及其兼容卡：原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。
 - Mifare Ultralight MF0 IC U1X：国内常称为U10,芯片厂家为荷兰恩智浦(NXP)，广深高速火车票为典型应用。
 - Mifare Ultralight C：原装芯片厂家为荷兰恩智浦（NXP）。
 - FM11RF005:芯片厂家为上海复旦,包括FM11RF005SH与FM11RF005M,上海地铁单程票、上海轮渡单程票为典型应用。
@@ -274,7 +275,7 @@ NFC技术的发展方兴未艾，当前还在快速变化中，最新进展包�
 - Mifare DESfire 2k MF3 IC D21：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3 2k。
 - Mifare DESfire 4k MF3 IC D41：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3。南京地铁卡为典型应用。
 - Mifare DESfire 8k MF3 IC D81：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3 8k。
-- Mifare ProX：芯片厂家为荷兰恩智浦（NXP）。不判别容量。　　　　　　　 　
+- Mifare ProX：芯片厂家为荷兰恩智浦（NXP）。不判别容量
 - SHC1102：芯片厂家为上海华虹，上海一卡通为典型应用。
 - Advant ATC2048-MP：芯片厂家为瑞士LEGIC。
 - MF1 PLUS 2k：芯片厂家为荷兰恩智浦（NXP），国内常称为PLUS S。

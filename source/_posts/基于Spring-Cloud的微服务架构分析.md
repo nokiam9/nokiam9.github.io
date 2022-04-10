@@ -190,4 +190,3 @@ Etcd 也支持代理模式（proxy），只不过在 Etcd 中，代理模式和 
 - [注册中心与API网关不是这样用的！](https://blog.csdn.net/dyc87112/article/details/116266269)
 - [Eureka介绍和部署](http://www.heartthinkdo.com/?p=1933)
 - [Eureka集群部署的踩坑记录](https://my.oschina.net/icebergxty/blog/3080748)
-

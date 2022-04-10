@@ -103,6 +103,7 @@ nfs: nfs130
 ```
 
 PVE默认存储配置至少包含了2个资源池（Storage Pools）：
+
 - local
   基于目录模式，用于iso、vztmpl、backup、snippets等文件存储。
   物理资源位于`/dev/sda3`磁盘分区，逻辑卷是`pve-root`
@@ -178,7 +179,6 @@ root@pve01:/var/lib/vz# tree /var/lib/vz
 - GlusterFS 和Ceph都是典型的分布式存储系统，都提供文件存储、块存储功能（在应用层面还提供对象存储功能）
 - ZFS的性能非常好，提供copy-on-write，快照、存储空间池等高级功能，但其设计思想仍然是传统的基于磁盘管理的文件系统
   ZFS的重要价值在于，可以通过适度的CPU和内存负载以及简单的管理来取代成本高昂的硬件RAID卡
-
 
 ---
 
