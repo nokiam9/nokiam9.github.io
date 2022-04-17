@@ -183,7 +183,6 @@ WantedBy=multi-user.target
 ### 6. 设置软件包的数据目录
 
 Transmission-daemon的配置文件隐藏在`$HOME/.config/transmission-daemon/`，而不是常规的`/etc/`
-
 HOME的目录结构如下：
 
 ``` console
@@ -194,6 +193,7 @@ HOME的目录结构如下：
 │       ├── blocklists/         # 各个种子文件的数据块信息
 │       ├── resume/             # 各个种子文件的运行状态
 │       ├── settings.json       # 主配置文件，json格式
+│       ├── stats.json          # 当前系统运行状态，json格式
 │       ├── dht.dat             # 存储DHT节点信息
 │       └── torrents/           # 种子文件的存储目录
 ├── Downloads/                  # 下载数据文件的存储目录
@@ -237,10 +237,14 @@ Linux桌面系统的市场份额很少，但是很庞杂：
 - GNOME：简单速度快，红帽等Linux发行版常用，基于GPK GUI开发
   此外，GNOME还有多个不同版本的变种，包括Unity、MATE、Cinnamon等
 
+> Qt GUI和GPK GUI的配置文件都存储在：`$HOME/.config/transmission/`
+
 ### 4. Linux服务器
 
 安装`transmission-daemon`提供后台服务，再通过Web UI提供管理界面是最直接的方案。
 本机也可以通过`transmission-cli`提供一个字符界面的管理工具，但是没有人有兴趣使用如此简陋的工具。
+
+> transmission-cli的配置文件存储在：`$HOME/.config/transmission-cli/`
 
 ### 5. 嵌入式设备
 
@@ -416,6 +420,7 @@ GNOME是以GTK为基础，就是说为GNOME编写的程序使用GTK做为其工�
 
 - [Transmission 的官网 - transmissionbt.com](https://transmissionbt.com/)
 - [Transmission 的源码](https://github.com/transmission/transmission)
+- [settings.json 的参数设置](https://github.com/transmission/transmission/blob/main/docs/Editing-Configuration-Files.md))
 - [Qt 的 Wiki](https://zh.wikipedia.org/wiki/Qt)
 - [GTK 的 Wiki](https://zh.wikipedia.org/wiki/GTK)
 - [Transmission 的安装与配置 - Ubuntu发行版](https://blog.uuz.moe/2017/02/install_transmission/)
