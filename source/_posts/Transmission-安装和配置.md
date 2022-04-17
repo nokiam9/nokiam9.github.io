@@ -217,19 +217,19 @@ HOME的目录结构如下：
 ![APP结构](products.gif)
 以上各软件包的技术依赖关系参见[Transmission技术架构](https://github.com/transmission/transmission/blob/main/docs/Transmission-Architecture.md)
 
-### MacOS
+### 1. MacOS
 
 Transmission以Native Application的方式发布，形态是一个DMG安装包。
 开发了一个基于GTK GUI的Native GUI，直接采用Transmission core提供的Lib库函数。
 
 > Mac OS平台的配置文件目录存在差异，每个种子文件的状态信息位于：`~/Library/Application Support/Transmission`，而全局配置文件位于：`~/Library/Preferences/org.m0k.transmission.plist`
 
-### Windows
+### 2. Windows
 
 Transmission以Native Application的方式发布，形态是一个MSI安装包，分为32位和64位两个版本。
 开发了一个基于Qt GUI的Native GUI，注意其采用的是JSON RPC接口服务，需要网络组件支持。
 
-### Linux桌面版
+### 3. Linux桌面版
 
 Linux桌面系统的市场份额很少，但是很庞杂：
 
@@ -237,12 +237,12 @@ Linux桌面系统的市场份额很少，但是很庞杂：
 - GNOME：简单速度快，红帽等Linux发行版常用，基于GPK GUI开发
   此外，GNOME还有多个不同版本的变种，包括Unity、MATE、Cinnamon等
 
-### Linux服务器
+### 4. Linux服务器
 
 安装`transmission-daemon`提供后台服务，再通过Web UI提供管理界面是最直接的方案。
 本机也可以通过`transmission-cli`提供一个字符界面的管理工具，但是没有人有兴趣使用如此简陋的工具。
 
-### 嵌入式设备
+### 5. 嵌入式设备
 
 群晖NAS、西部数据NAS、D-Link路由器等嵌入式设备都是基于Linux核心，因此也可以安装Transmission。
 以西部数据NAS为例，MyBookLive、MyCloud在技术上都可支持，但由于不属于官方项目，因此版本升级时经常被限制。
