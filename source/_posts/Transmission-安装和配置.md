@@ -9,62 +9,28 @@ tags:
 Transmission是一个轻量级、跨平台、开源的 BitTorrent 客户端，官网地址是[https://transmissionbt.com/](https://transmissionbt.com/)，当前最新版本是3.0。
 ![Transmission 的官网首页](home.png)
 
-其实现了BT协议中描述的大多数功能（除了不能创建种子以外），覆盖了Linux、MacOS、Windows等所有主流操作系统，核心组件包括：
+其实现了BT协议的几乎全部功能，覆盖了Linux、MacOS、Windows等所有主流操作系统，核心组件包括：
 
-- 1个基于MacOS的本地应用程序
-- 2个基于Linux GUI的本地应用程序，分别支持 GTK 和 QT
-- 1个基于Linux的后台服务，用于服务器或路由器
-- 1个基于WEB的UI界面，可以支持以上所有组件
+- 1个基于MacOS的Native Application
+- 2个基于Linux的Native Application，分别支持 GTK GUI和 QT GUI
+- 1个基于Linux的守护服务，用于服务器或路由器的后台服务
+- 1个WEB UI前端界面，通过Json RPC接口服务提供浏览器访问
+
+![Transmission技术架构](arch.gif)
+
+## 二、Centos的安装配置方法
 
 下面以Centos为例，介绍其安装和配置的基本步骤。
 
-## 二、软件源和安装方法
+### 1. 软件包安装
 
-最简便的方法是使用EPEL源，通过`yum search transmission`搜索，主要有以下软件包：
-
-- `transmission-common`: 最基础软件，包含1个 Web GUI 和 4个命令行程序：`transmission-create | edit | remote | show`
-- `transmission-daemon`: = `transmission-common` + 1个后台守护程序`transmission-daemon`
-- `transmission-cli`: = `transmission-common` + 1个系统配置命令行程序`transmission-cli`
-- `transmission-gtk`：= `transmission-common` + 基于GTK GUI的Applicaition
-- `transmission-qt`：= `transmission-common` + 基于Qt GUI的Applicaition
-- `transmission`: = 常用安装包名，默认采用GTK，基本等于`transmission-gtk`
-
-因此，最简单的安装方法就是：`yum install transmission`，当然严谨一点就是:
+最简便的方法是使用EPEL源，简单粗暴就是：`yum install transmission`，当然严谨一点就是:
 
 ``` bash
-    yum install transmission-daemon
+yum install transmission-daemon
 ```
 
-可执行程序的安装位置是`/usr/bin/`，可以发现有`transmission-daemon`等5个程序。
-
-``` bash
-[root@localhost transmission-daemon]# ls -l /usr/bin/transmission*
--rwxr-xr-x 1 root root 560880 5月  18 2020 /usr/bin/transmission-create
--rwxr-xr-x 1 root root 577152 5月  18 2020 /usr/bin/transmission-daemon
--rwxr-xr-x 1 root root 556456 5月  18 2020 /usr/bin/transmission-edit
--rwxr-xr-x 1 root root 597360 5月  18 2020 /usr/bin/transmission-remote
--rwxr-xr-x 1 root root 556464 5月  18 2020 /usr/bin/transmission-show
-```
-
-安装完成后检查`/etc/passwd`，发现添加了一个不能登录的系统用户`transmission`，HOME就是默认安装目录`/var/lib/transmission`。
-HOME的目录结构如下，注意：配置文件隐藏在`$HOME/.config/transmission-daemon/`，而不是常规的`/etc/`
-
-``` console
-[root@test transmission]# tree /var/lib/transmission -a
-/var/lib/transmission
-├── .config/                    # 配置文件目录
-│   └── transmission-daemon/ 
-│       ├── blocklists/         # 各个种子文件的数据块信息
-│       ├── resume/             # 各个种子文件的运行状态信息
-│       ├── settings.json       # 主配置文件，json格式
-│       ├── dht.dat             # 存储DHT节点信息
-│       └── torrents/           # 种子文件的存储目录
-├── Downloads/                  # 下载数据文件存储目录
-└── .pki/
-    └── nssdb/
-```
-
-## 三. 启动方式
+### 2. 系统自启动
 
 `transmission-daemon`支持`systemd`启动方式。
 
@@ -89,7 +55,202 @@ systemctl status transmission-daemon
 4月 16 22:10:31 test.caogo.local systemd[1]: Started Transmission BitTorrent Daemon.
 ```
 
-### 常见问题1：UDP缓冲区不足导致Daemon启动失败
+### 3. 运行监控
+
+后台服务启动成功后，可以看到占用tcp/udp 51413作为BT通信端口，占用tcp 9091端口用于访问Web UI。
+
+``` console
+[root@test lib]# netstat -tunpl |grep transmission
+tcp        0      0 0.0.0.0:51413           0.0.0.0:*               LISTEN      11846/transmission- 
+tcp        0      0 0.0.0.0:9091            0.0.0.0:*               LISTEN      11846/transmission- 
+tcp6       0      0 :::51413                :::*                    LISTEN      11846/transmission- 
+udp        0      0 0.0.0.0:51413           0.0.0.0:*                           11846/transmission- 
+```
+
+此时，通过浏览器打开`http://<IP地址>:9091`，就可以看到Web UI的局面了。
+
+![Web UI](web.png)
+
+## 三、Transmission软件包的构成分析
+
+最简便的方法是使用EPEL源，通过`yum search transmission`搜索，主要有以下软件包：
+
+- `transmission-common`: 核心组件，包含1个 Web GUI 和 4个命令行程序：`transmission-create | edit | remote | show`
+- `transmission-daemon`: = `transmission-common` + 1个后台守护程序`transmission-daemon`
+- `transmission-cli`: = `transmission-common` + 1个系统配置命令行程序`transmission-cli`
+- `transmission-gtk`：= `transmission-common` + 基于GTK GUI的Applicaition
+- `transmission-qt`：= `transmission-common` + 基于Qt GUI的Applicaition
+- `transmission`: = 常用安装包名，默认采用GTK，基本等于`transmission-gtk`
+
+通过`yum info transmission-common`可以查看该软件包的基本信息。
+通过`repoquery -ql transmission-common.x86_64`，可以查看该软件包的全部文件信息。
+
+``` console
+[root@test transmission]# yum info transmission-common
+已加载插件：fastestmirror
+Loading mirror speeds from cached hostfile
+已安装的软件包
+名称    ：transmission-common
+架构    ：x86_64
+版本    ：2.94
+发布    ：9.el7
+大小    ：3.0 M
+源    ：installed
+来自源：epel
+简介    ： Transmission common files
+网址    ：http://www.transmissionbt.com
+协议    ： MIT and GPLv2
+描述    ： Common files for Transmission BitTorrent client sub-packages. It includes
+         : the web user interface, icons and transmission-remote, transmission-create,
+         : transmission-edit, transmission-show utilities.
+
+[root@test transmission]# repoquery -ql transmission-daemon.x86_64
+/usr/bin/transmission-daemon
+/usr/lib/systemd/system/transmission-daemon.service
+/usr/share/man/man1/transmission-daemon.1.gz
+/var/lib/transmission
+```
+
+由此可以分析得出`transmission-daemon`安装过程的主要步骤包括：
+
+### 1. 创建默认用户
+
+安装完成后检查`/etc/passwd`，发现添加了一个不能登录的系统用户`transmission`。
+
+``` txt
+transmission:x:998:995:transmission daemon account:/var/lib/transmission:/sbin/nologin
+```
+
+HOME就是软件包的默认安装目录`/var/lib/transmission`。
+
+### 2. 拷贝可执行程序
+
+可执行程序的安装位置是`/usr/bin/`，可以发现有`transmission-daemon`等5个程序。
+
+``` bash
+[root@localhost transmission-daemon]# ls -l /usr/bin/transmission*
+-rwxr-xr-x 1 root root 560880 5月  18 2020 /usr/bin/transmission-create
+-rwxr-xr-x 1 root root 577152 5月  18 2020 /usr/bin/transmission-daemon
+-rwxr-xr-x 1 root root 556456 5月  18 2020 /usr/bin/transmission-edit
+-rwxr-xr-x 1 root root 597360 5月  18 2020 /usr/bin/transmission-remote
+-rwxr-xr-x 1 root root 556464 5月  18 2020 /usr/bin/transmission-show
+```
+
+### 3. 拷贝软件文档
+
+yum安装软件包时，通常在以下目录补充该软件的文档信息：
+
+- /usr/share/doc/：本软件使用说明书
+- /usr/share/icons/：本软件使用的各种尺寸的图标
+- /usr/share/licenses/：本软件的许可证文件
+- /usr/share/man/：man命令的帮助信息
+- /usr/share/pixmaps/：本软件Logo的位图
+
+### 4. 拷贝Web UI
+
+Transmission的Web UI的入口文件存储在`/usr/share/transmission/web/index.html`，其结构与普通网站一致：
+
+``` console
+web
+├── images
+├── index.html
+├── javascript
+├── LICENSE
+└── style
+    ├── jqueryui
+    └── transmission
+```
+
+### 5. 设置系统启动服务
+
+采用systemd的启动方式，服务配置文件是`/usr/lib/systemd/system/transmission-daemon.service`
+
+``` config
+[Unit]
+Description=Transmission BitTorrent Daemon
+After=network.target
+
+[Service]
+User=transmission
+Type=notify
+ExecStart=/usr/bin/transmission-daemon -f --log-error
+ExecReload=/bin/kill -s HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 6. 设置软件包的数据目录
+
+Transmission-daemon的配置文件隐藏在`$HOME/.config/transmission-daemon/`，而不是常规的`/etc/`
+
+HOME的目录结构如下：
+
+``` console
+[root@test transmission]# tree /var/lib/transmission -a
+/var/lib/transmission
+├── .config/                    # 配置文件目录
+│   └── transmission-daemon/ 
+│       ├── blocklists/         # 各个种子文件的数据块信息
+│       ├── resume/             # 各个种子文件的运行状态
+│       ├── settings.json       # 主配置文件，json格式
+│       ├── dht.dat             # 存储DHT节点信息
+│       └── torrents/           # 种子文件的存储目录
+├── Downloads/                  # 下载数据文件的存储目录
+└── .pki/
+    └── nssdb/
+```
+
+## 四、Transmission跨平台技术方案分析
+
+`Transmission core`作为核心引擎，负责实现BT协议的全部功能，其底层依赖两个外部库函数：
+
+- `libevent`：一个异步事件处理软件库。libevent提供了一组应用程序编程接口（API），允许开发者为事件注册回调函数，用来取代网络服务器所使用的事件循环检查框架。
+- `libnatpmp`：一个NAT-PMP协议库。NAT-PMP（Network Address Translation Port Mapping Protocol）协议通过端口映射的方式获取外网主机的IP地址。
+
+其对外提供服务主要通过以下接口实现：
+
+- `JSON RPC Server`：提供网络远程调用接口，以JSON格式
+- `Web App Server`：基于通用Web Server，以Web形式通过网络App应用服务接口
+- `Lib Transmission`：提供C语言的库函数接口，仅能用于Native Application
+
+![APP结构](products.gif)
+以上各软件包的技术依赖关系参见[Transmission技术架构](https://github.com/transmission/transmission/blob/main/docs/Transmission-Architecture.md)
+
+### MacOS
+
+Transmission以Native Application的方式发布，形态是一个DMG安装包。
+开发了一个基于GTK GUI的Native GUI，直接采用Transmission core提供的Lib库函数。
+
+> Mac OS平台的配置文件目录存在差异，每个种子文件的状态信息位于：`~/Library/Application Support/Transmission`，而全局配置文件位于：`~/Library/Preferences/org.m0k.transmission.plist`
+
+### Windows
+
+Transmission以Native Application的方式发布，形态是一个MSI安装包，分为32位和64位两个版本。
+开发了一个基于Qt GUI的Native GUI，注意其采用的是JSON RPC接口服务，需要网络组件支持。
+
+### Linux桌面版
+
+Linux桌面系统的市场份额很少，但是很庞杂：
+
+- KDE：排名第一，基于Qt GUI开发
+- GNOME：简单速度快，红帽等Linux发行版常用，基于GPK GUI开发
+  此外，GNOME还有多个不同版本的变种，包括Unity、MATE、Cinnamon等
+
+### Linux服务器
+
+安装`transmission-daemon`提供后台服务，再通过Web UI提供管理界面是最直接的方案。
+本机也可以通过`transmission-cli`提供一个字符界面的管理工具，但是没有人有兴趣使用如此简陋的工具。
+
+### 嵌入式设备
+
+群晖NAS、西部数据NAS、D-Link路由器等嵌入式设备都是基于Linux核心，因此也可以安装Transmission。
+以西部数据NAS为例，MyBookLive、MyCloud在技术上都可支持，但由于不属于官方项目，因此版本升级时经常被限制。
+具体安装方法参见[http://mybookworld.wikidot.com/optware](http://mybookworld.wikidot.com/optware)
+
+## 五、常见问题的解决方案
+
+### 1：UDP缓冲区不足导致Daemon启动失败
 
 如果启动失败，并产生如下信息，通常是操作系统的UDP网络缓冲区不足
 
@@ -106,23 +267,7 @@ echo 'net.core.wmem_max = 4194304' >> /etc/sysctl.conf
 sysctl -p
 ```
 
-## 四. 使用方式
-
-后台服务启动成功后，可以看到占用tcp/udp 51413作为BT通信端口，占用tcp 9091端口用于访问Web UI。
-
-``` console
-[root@test lib]# netstat -tunpl |grep transmission
-tcp        0      0 0.0.0.0:51413           0.0.0.0:*               LISTEN      11846/transmission- 
-tcp        0      0 0.0.0.0:9091            0.0.0.0:*               LISTEN      11846/transmission- 
-tcp6       0      0 :::51413                :::*                    LISTEN      11846/transmission- 
-udp        0      0 0.0.0.0:51413           0.0.0.0:*                           11846/transmission- 
-```
-
-此时，通过浏览器打开`http://<IP地址>:9091`，就可以看到Web UI的局面了。
-
-![Web UI](web.png)
-
-### 常见问题2: Web UI界面无法打开
+### 2: Web UI界面无法打开
 
 如果浏览器提示“403: Forbidden”错误信息，并提示“Unauthorized IP Addres”，通常是因为默认只允许来自本机`127.0.0.1`的白名单访问。
 解决方法是：
@@ -144,22 +289,6 @@ udp        0      0 0.0.0.0:51413           0.0.0.0:*                           
     ``` bash
     systemctl start transmission-daemon
     ```
-
-## 五、跨平台的安装说明
-
-### MacOS
-
-MacOS下的Transmission是一个DMG安装包，已经包含了GUI界面。
-注意，其配置文件目录是：
-
-- 每个种子文件的状态信息位于：`~/Library/Application Support/Transmission`
-- 全局配置文件位于：`~/Library/Preferences/org.m0k.transmission.plist`
-
-### 嵌入式设备
-
-群晖NAS、西部数据NAS、D-Link路由器等各种嵌入式设备，由于其都是基于Linux核心，因此也可以安装Transmission。
-以西部数据NAS为例，MyBookLive、MyCloud等设备在技术上都可支持，但由于不属于官方项目，因此版本升级时经常被限制。
-具体安装方法参见[http://mybookworld.wikidot.com/optware](http://mybookworld.wikidot.com/optware)
 
 ---
 
@@ -271,7 +400,7 @@ Qt的图形用户界面的基础是QWidget。Qt中所有类型的GUI组件如按
 使用Qt开发的软件，相同的代码可以在任何支持的平台上编译与执行，而不需要修改源代码。会自动依平台的不同，表现平台特有的图形界面风格。
 Qt开放源代码，并提供LGPL和GPL的自由软件用户协议，可以免费使用，但商业版需收取授权费。
 
-KDE Plasma Workspaces就是基于Qt开发的Linux GUI，此外Symbain、MeeGo等手机厂商也采用Qt框架，但现在是Android的天下？
+KDE Plasma Workspaces就是基于Qt开发的Linux GUI，此外Symbain、MeeGo等手机厂商也采用Qt框架，但现在已经是Android的天下了！！！
 
 ### GTK
 
