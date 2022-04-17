@@ -6,7 +6,8 @@ tags:
 
 ## 一、概述
 
-Transmission是一个轻量级、跨平台、开源的 BitTorrent 客户端，官网地址是[https://transmissionbt.com/](https://transmissionbt.com/)，当前最新版本是3.0。
+Transmission是一个轻量级、跨平台、开源的 BitTorrent 客户端，官网地址是[https://transmissionbt.com/](https://transmissionbt.com/)，源码地址是[https://github.com/transmission/transmission](https://github.com/transmission/transmission)，当前最新版本是3.0。
+
 ![Transmission 的官网首页](home.png)
 
 其实现了BT协议的几乎全部功能，覆盖了Linux、MacOS、Windows等所有主流操作系统，核心组件包括：
@@ -420,7 +421,7 @@ GNOME是以GTK为基础，就是说为GNOME编写的程序使用GTK做为其工�
 
 - [Transmission 的官网 - transmissionbt.com](https://transmissionbt.com/)
 - [Transmission 的源码](https://github.com/transmission/transmission)
-- [settings.json 的参数设置](https://github.com/transmission/transmission/blob/main/docs/Editing-Configuration-Files.md))
+- [settings.json 的参数设置](https://github.com/transmission/transmission/blob/main/docs/Editing-Configuration-Files.md)
 - [Qt 的 Wiki](https://zh.wikipedia.org/wiki/Qt)
 - [GTK 的 Wiki](https://zh.wikipedia.org/wiki/GTK)
 - [Transmission 的安装与配置 - Ubuntu发行版](https://blog.uuz.moe/2017/02/install_transmission/)
