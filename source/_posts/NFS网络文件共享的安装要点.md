@@ -67,9 +67,12 @@ chmod 755 /data
 - `/data`: 共享目录位置。
 - `192.168.0.0/24`: 客户端 IP 范围，* 代表所有，即没有限制。
 - `rw`: 权限设置，可读可写。
-- `sync`: 同步共享目录。
-- `no_root_squash`: 可以使用 root 授权。
-- `no_all_squash`: 可以使用普通用户授权。
+- `sync|async`：=sync，数据同步写入到内存与硬盘当中；=async，数据会先暂存于内存当中，而非直接写入硬盘
+- `no_root_squash｜root_squash`: =no_root_squash，如果Client的登录用户是root，则对于这个分享目录的Server来说，他就具有root的权限，也就是不压缩权限！；否则。。。
+- `all_squash｜no_all_squash`: =all_squash，不论Client的使用者是什么身份，都会被压缩成匿名使用者；否则。。。
+- `anonuid= & anonnid=`：当Client登录到分享目录中，在Server其身份是uid:gid。注意，必须在/etc/passwd和/etc/group中存在该ID。
+
+> squash：这里是动词 “压缩、压扁”的意思，还有的含义是名词“南瓜、壁球”
 
 ### 3. Server启动服务
 
@@ -144,6 +147,7 @@ proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)
 # See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info
 #
 UUID=99f4f882-0886-4b1e-8252-a63e2ffc6cfa /                       xfs     defaults        0 0
+192.168.0.139:/mnt/HD/HD_a2/NFS /mnt nfs defaults 0 0
 ```
 
 注意：需要重启systemd服务已更新目录配置！！！
