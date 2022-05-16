@@ -72,8 +72,3 @@ if(Number.isNaN(+this.config.timeout) || Number.isNaN(+this.config.retry)){
 - [在 JavaScript 中用匿名函数（箭头函数）写出递归的方法](https://github.com/Lucifier129/Lucifier129.github.io/issues/7)
 - [ES5 和 ES6 中的继承](https://keenwon.com/1524.html)
 
-### 待定
-
-- [Class 的基本语法](https://es6.ruanyifeng.com/#docs/class)
-- [ES6篇 - class 基本语法](https://wangjintian.com/2021/04/18/ES6%E7%AF%87-class%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95/)
-- [一文读懂JS中类、原型和继承](https://xieyufei.com/2020/04/10/Js-Class-Inherit.html)
