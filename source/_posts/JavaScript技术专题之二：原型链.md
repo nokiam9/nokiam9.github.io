@@ -103,17 +103,27 @@ person1.__proto__.__proto__ === Object.prototype        // true
 
 ![原型链的全貌](class5.jpg)
 
-### 1. new 关键字
+### 1. new：创建对象实例
 
-定义了class的构造函数之后，ES5 通过`new`关键字来创建对象实例，其主要步骤是：
+定义了class的构造函数之后，ES5 通过`new`关键字来创建对象实例，其主要步骤参见myNew的伪代码：
 
-1. 基于原型对象`Object.[[Prototype]]`创建一个空对象{}
-2. 将新对象的`__proto__`指向构造函数Person的原型对象`Person.[[Prototype]]`，
-    由此获得了`Person.[[Prototype]]`的全部原型方法和内部方法
-    > `Person.[[Prototype]]`通过继承`Object.[[Prototype]]`，获得其全部原型方法和内部方法，包括`isPrototypeOf`、`__defineSetter__`等
-3. 将新对象作为`this`调用原型`Person.[[Prototype]]`的构造函数`Person.constructor`，
-    从而创建了新对象的`this.name`实例属性和`this.sayName`实例方法
-4. 初始化完成
+``` js
+function myNew(Func, ...param) {
+    // 1. 创建一个空对象{}
+    var obj = new Object();
+    // 2. 设置新对象的原型链指向obj
+    obj.__proto__ = Func.prototype;
+    // 3. 将新对象作为`this`指向obj，并调用其构造函数
+    // 注意call()调用，并支持构造函数的传参
+    var result = Func.call(obj, ...param);
+    // 4. 将新对象作为返回值
+    // 注意：需要判断Func的返回值类型：如果是值类型，返回obj；如果是引用类型，就返回这个引用类型的对象    
+    return typeof result === 'object'          
+        || typeof result === 'function' ? result : obj
+}
+```
+
+以上步骤完成后，新对象实例就与其原型`Person`再无联系，这个时候即使其原型`Person`后续增加了成员属性，都不再影响已经实例化的新对象了。
 
 ``` js
 person1.__proto__ === Person.prototype                  // true
@@ -123,9 +133,7 @@ person1.constructor === Person.prototype.constructor    // true
 person1.constructor === Person.__proto__.constructor    // false
 ```
 
-以上步骤完成后，新对象实例就与其原型`Person`再无联系，这个时候即使其原型`Person`后续增加了成员属性，都不再影响已经实例化的新对象了。
-
-### 2. Object 和 Function 原型之间的关系
+### 2. Object 和 Function：先有鸡还是先有蛋？
 
 ![Object和Function的关系](Object-Function3.jpg)
 
@@ -172,6 +180,8 @@ class继承，class之间使用extends关键字
 - [一文读懂JS中类、原型和继承](https://xieyufei.com/2020/04/10/Js-Class-Inherit.html)
 - [ES5/ES6 的继承除了写法以外还有什么区别](https://www.jianshu.com/p/1aa2755171fe)
 - [原型继承和Class继承 - 廖雪峰](https://www.liaoxuefeng.com/wiki/1022910821149312/1023021997355072)
+- [JS继承 -> ES6的class和decorator](https://www.jianshu.com/p/59e6dca643ad)
+- [ES5/ES6 的继承除了写法以外还有什么区别？ -2](https://www.jianshu.com/p/6726623123a7)
 
 prototype 和 __proto__
 
@@ -205,6 +215,7 @@ ES6通过class关键字定义类，里面有构造方法，类之间通过extend
 ### 参考文献
 
 - [JavaScript对象模型设计 - Mozilla官方](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Details_of_the_Object_Model)
+- [继承与原型链 - Mozilla官方](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Inheritance_and_the_prototype_chain)
 - [Class 的基本语法](https://es6.ruanyifeng.com/#docs/class)
 - [ES6篇 - class 基本语法](https://wangjintian.com/2021/04/18/ES6%E7%AF%87-class%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95/)
 - [一文读懂JS中类、原型和继承](https://xieyufei.com/2020/04/10/Js-Class-Inherit.html)
