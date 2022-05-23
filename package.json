@@ -6,6 +6,7 @@
     "version": "5.4.2"
   },
   "dependencies": {
+    "@next-theme/plugins": "^8.11.1",
     "hexo": "^5.4.0",
     "hexo-auto-excerpt": "^1.1.2",
     "hexo-deployer-git": "^3.0.0",
