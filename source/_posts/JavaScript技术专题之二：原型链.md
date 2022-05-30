@@ -15,10 +15,6 @@ tags:
     是一个类的实例化。例如， Victoria 是 Employee 类的一个实例，表示一个特定的雇员个体。
     实例具有和其父类完全一致的属性，不多也不少。
 
-基于类的编程语言，
-
-基于原型的编程语言，。
-
 大多数的OOP编程语言采用基于类（class-based）的模式，包括Java、Python、C++等，例如Java的开发过程完全基于Class，每个jar包就是一个完整的类定义，而将对象认为是class的实例化，即`对象（Object）== 实例（Instance）`。
 
 - 强调类和实例是两种完全不同的实体，通过类来描述实例对象应该具有哪些状态和行为
@@ -27,7 +23,7 @@ tags:
 
 然而，少数语言坚持采用基于原型（prototype-based）的模式，主要是JavaScript、Lua、Perl等，强调程序员应关注一系列对象实例的行为，并将这些对象划分为使用方式相似的原型对象，而不是努力去将实体抽象为难以理解的Class。
 
-- 强调原型对象(prototypical object)，创建一个新对象不是根据“模板”，而是通过“复制”另外一个已经存在的对象（原型）来创建一个新对象
+- 强调原型对象(prototypical object)，不是根据“模板”，而是通过“复制”一个已经存在的对象（原型）来创建另一个新对象
 - 任何对象都可以作为另一个对象的原型，从而允许后者共享前者的属性，但只允许单继承
 - 强调动态属性和方法，任何对象都可以指定其自身的属性，既可以是创建时也可以在运行时修改
 
@@ -108,14 +104,14 @@ person1.__proto__.__proto__ === Object.prototype        // true
 定义了class的构造函数之后，ES5 通过`new`关键字来创建对象实例，其主要步骤参见myNew的伪代码：
 
 ``` js
-function myNew(Func, ...param) {
+function myNew(Fn, ...param) {
     // 1. 创建一个空对象{}
     var obj = new Object();
     // 2. 设置新对象的原型链指向obj
-    obj.__proto__ = Func.prototype;
+    obj.__proto__ = Fn.prototype;
     // 3. 将新对象作为`this`指向obj，并调用其构造函数
     // 注意call()调用，并支持构造函数的传参
-    var result = Func.call(obj, ...param);
+    var result = Fn.call(obj, ...param);
     // 4. 将新对象作为返回值
     // 注意：需要判断Func的返回值类型：如果是值类型，返回obj；如果是引用类型，就返回这个引用类型的对象    
     return typeof result === 'object'          
@@ -162,9 +158,43 @@ person1.constructor === Person.__proto__.constructor    // false
 关于两者之间的关系，这篇文章说的最详细[【一文读懂JS中类、原型和继承】](https://xieyufei.com/2020/04/10/Js-Class-Inherit.html)
 还有一篇较为简短的分析[【JS function 是函数也是对象, 浅谈原型链】](https://www.yixuebiancheng.com/article/74630.html)
 
-## 五、ES6 对于类继承的改进
+## 五、ES5 类继承的完美方法
+
+
+``` js
+function Parent(name) {
+    this.name = name;                   // 实例基本属性 (该属性，强调私有，不共享)
+    this.arr = [1];                     // (该属性，强调私有)
+}
+Parent.prototype.say = function() {     // --- 将需要复用、共享的方法定义在父类原型上 
+    console.log('hello')
+}
+function Child(name,like) {
+    Parent.call(this,name,like)         // 核心  
+    this.like = like;
+}
+
+// 核心  通过创建中间对象，子类原型和父类原型，就会隔离开。不是同一个啦，有效避免了方式4的缺点。
+Child.prototype = Object.create(Parent.prototype) 
+
+// 这里是修复构造函数指向的代码
+Child.prototype.constructor = Child
+
+let boy1 = new Child('小红','apple')
+let boy2 = new Child('小明','orange')
+let p1 = new Parent('小爸爸')
+
+
+注意：这种方法也要修复构造函数的
+修复代码：Child.prototype.constructor = Child
+修复之后：console.log(boy1.constructor); // Child
+          console.log(p1.constructor);// Parent  完美
+```
 
 ![ES5的继承链](extends-es5.png)
+
+
+## 六、ES6 对于类继承的改进
 
 ES5的继承实质上是先创建子类的实例对象，然后再将父类的方法添加到this上（Parent.apply(this)）.
 
