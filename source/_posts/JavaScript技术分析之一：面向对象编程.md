@@ -392,4 +392,4 @@ EMCAScript 5实现了道爷的奇思妙想，并将上述代码封装为Object.c
 - [一文读懂JS中类、原型和继承](https://xieyufei.com/2020/04/10/Js-Class-Inherit.html)
 - [ES5/ES6 的继承除了写法以外还有什么区别](https://www.jianshu.com/p/1aa2755171fe)
 - [JS继承 -> ES6的class和decorator](https://www.jianshu.com/p/59e6dca643ad)
-- [ES5/ES6 的继承除了写法以外还有什么区别？ -2](https://www.jianshu.com/p/6726623123a7)
+- [ES5/ES6 的继承除了写法以外还有什么区别?](https://www.jianshu.com/p/6726623123a7)
