@@ -10,12 +10,12 @@ tags:
 
 ## 安全隔区 - Secure Enclave
 
+按照 TEE 标准，处理器应包含“普通世界”和“安全世界”两部分，Secure Enclave 就是其中的安全世界。ARM 处理器架构中的 TrustZone 与此相似，或者说苹果的 Secure Enclave 就是一个高度定制版的 TrustZone。
+
 2013年，苹果发布的iPhone 5s手机率先提供了指纹锁，为了解决生物特征数据的数据安全问题，采用了其设计软硬件结合的安全方案Secure Enclave。
 此后该方案得到了广泛应用，成为后续推出所有iPhone的标配，并为基于Intel CPU的Mac电脑提供了T1、T2芯片，iPad Air、Apple TV、Apple Watch和HomePod等产品线也都支持，更不用后续自研的M1 CPU了。
 
 ![SOC](soc.png)
-
-按照 TEE 标准，处理器应包含“普通世界”和“安全世界”两部分，Secure Enclave 就是其中的安全世界。ARM 处理器架构中的 TrustZone 与此相似，或者说苹果的 Secure Enclave 就是一个高度定制版的 TrustZone。
 
 安全隔区是一个独立于操作系统的片上系统（System on Chips），为数据保护密钥管理提供所有加密操作并保持数据保护的完整性（即使内核已被破坏），包含以下基本组件：
 
@@ -27,16 +27,17 @@ tags:
 - `I2C bus`：= Inter-Integrated Circuit，集成电路总线，用于读取主机板的安全非易失性存储器，这是Philips开发的一种简单、双向二线制同步串行总线
 
 > AES引擎内部保存了基于UID的硬件密匙，即使对sepOS也不可见
+> 虽然安全隔区不含储存设备，但它拥有一套将信息安全储存在所连接储存设备上的机制，该储存设备与应用程序处理器和操作系统使用的 NAND 闪存互相独立
 
-随着Apple芯片的持续演进，其安全强度也不断增强，
-
-> 当设备启动时，Secure Enclave Boot ROM 会创建一个临时内存保护密钥，与设备的UID一起构成加密因子，用于加密 Secure Enclave 的设备内存空间部分
-> 在Apple A11之后，完整性树用于防止对安全至关重要的 Secure Enclave 内存的重放，通过内存保护密钥和存储在片上 SRAM 中的随机数进行身份验证
-> 在Apple A14 和 M1之后，内存保护引擎支持两组临时内存保护密钥，第一组密钥用于安全隔区独有的数据，第二组密钥用于与安全神经网络引擎共享的数据
+随着Apple芯片的持续演进，安全隔区的保护机制也越来越完善。
 
 ![stage](stage.jpg)
 
 > 2020 年秋天，苹果突然发布第二代安全隔区，并紧急升级 A12、A13 以及 S5 芯片，据认为 GrayKey 密码破解设备有关系，其采用暴力破解方式实现iPhone解锁。
+
+- 当设备启动时，Secure Enclave Boot ROM 会创建一个临时内存保护密钥，与设备的UID一起构成加密因子，用于加密 Secure Enclave 的设备内存空间部分
+- 在Apple A11之后，完整性树用于防止对安全至关重要的 Secure Enclave 内存的重放，通过内存保护密钥和存储在片上 SRAM 中的随机数进行身份验证
+- 在Apple A14 和 M1之后，内存保护引擎支持两组临时内存保护密钥，第一组密钥用于安全隔区独有的数据，第二组密钥用于与安全神经网络引擎共享的数据
 
 安全隔区是一个 (SoC)， 内置于所有新款的 iPhone、 iPad、 Apple Watch、 Apple TV 和 HomePod 设备以及搭载 Apple 芯片和搭载 Apple T2 安全芯片的 Mac 上。 
 安全隔区本身 遵循与 SoC 相同的设计准则， 自身拥有独立的 Boot ROM 和 AES 引擎。 安全隔区还为加密静态数据所需 密钥的安全生成和储存提供了基础， 同时还保护和评估触控 ID 和面容 ID 的生物识别数据。
