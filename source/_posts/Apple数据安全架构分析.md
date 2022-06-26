@@ -8,9 +8,18 @@ tags:
 
 ![技术架构](arch.jpg)
 
+- Secure Encalve：Apple定义的安全隔区。按照 TEE 标准，处理器应包含“普通世界”和“安全世界”两部分，Secure Enclave 就是其中的安全世界。ARM 处理器架构中的 TrustZone 与此相似，或者说苹果的 Secure Enclave 就是一个高度定制版的 TrustZone。
+- Secure Element：基于Java Card的安全元件，简称SE。iPhone中通常采用第三方的独立芯片，如NXP，一般用于支持基于NFC的Applet应用。
+- Device Key：也被称为硬件UID。Apple定义为一个 256 位的 AES 密钥， 在设备制造过程中刻录在每个处理器上。 这种密钥无法由固件或软件读取， 只能由处理器的硬件 AES 引擎使用。 若要获取实际密钥， 攻击者必须对处理器的芯片发起极为复杂且代价高昂的物理攻击。 UID 与设备上的任何其他标识符均无关， 包括但不限于 UDID。
+
 ## 安全隔区 - Secure Enclave
 
-按照 TEE 标准，处理器应包含“普通世界”和“安全世界”两部分，Secure Enclave 就是其中的安全世界。ARM 处理器架构中的 TrustZone 与此相似，或者说苹果的 Secure Enclave 就是一个高度定制版的 TrustZone。
+SecureEnclave 是 Apple A7 以及后续系列的应用处理器封装在一起的协处理器，它有自己的安全引导过程和个性化的软件更新过程，并且同 iOS 系统所在的应用处理器分离。Secure Enclave 使用加密（使用临时产生的密钥加密）的物理内存（和应用处理器共享的物理内存的一部分空间）进行业务处理，并且有自己的硬件随机数产生器。Secure Enclave 同应用处理器之间通过中断驱动的 mailbox 以及共享内存来进行通信，对外提供数据保护密钥管理相关的所有密码学服务。
+
+ARM TrustZone 技术本质上是一种虚拟化技术，通过将处理器状态分为安全和非安全状态，并且配合其他总线以及外设上的安全属性来实现遍布整个硬件系统的安全。同 Secure Enclave 一样，ARM TrustZone 也有自己的安全引导过程以及个性化的软件更新过程，也有自己的硬件随机数产生器（以及其他类似的安全外设），并且同应用处理器之间也是通过中断驱动的 Monitor 模式以及共享内存来进行通信。可以看出，Secure Enclave 所提供的安全特性并没有超出 ARM TrustZone 技术的范围。
+
+不过就 Apple 的官方信息来说，Apple 从未提过 Secure Enclave 就是 ARM TrustZone 安全扩展技术的实现（虽然根据 Apple 官方文档中关于几个安全通信通道的描述来看，Secure Enclave 很可能是 ARM TrustZone 技术的一种实现），因此我们还是无法断定 Secure Enclave 究竟是独立的协处理器还是应用处理器的一种运行状态（两种架构都可以提供 Secure Enclave 必须的安全特性），这个有待于 Apple 公布更多的 Secure Enclave 的实现细节，就目前而言，可以得出的结论是：Secure Enclave 所提供的安全特性，使用 ARM TrustZone 技术同样可以实现。
+
 
 2013年，苹果发布的iPhone 5s手机率先提供了指纹锁，为了解决生物特征数据的数据安全问题，采用了其设计软硬件结合的安全方案Secure Enclave。
 此后该方案得到了广泛应用，成为后续推出所有iPhone的标配，并为基于Intel CPU的Mac电脑提供了T1、T2芯片，iPad Air、Apple TV、Apple Watch和HomePod等产品线也都支持，更不用后续自研的M1 CPU了。
@@ -32,8 +41,6 @@ tags:
 随着Apple芯片的持续演进，安全隔区的保护机制也越来越完善。
 
 ![stage](stage.jpg)
-
-> 2020 年秋天，苹果突然发布第二代安全隔区，并紧急升级 A12、A13 以及 S5 芯片，据认为 GrayKey 密码破解设备有关系，其采用暴力破解方式实现iPhone解锁。
 
 - 当设备启动时，Secure Enclave Boot ROM 会创建一个临时内存保护密钥，与设备的UID一起构成加密因子，用于加密 Secure Enclave 的设备内存空间部分
 - 在Apple A11之后，完整性树用于防止对安全至关重要的 Secure Enclave 内存的重放，通过内存保护密钥和存储在片上 SRAM 中的随机数进行身份验证
@@ -69,6 +76,33 @@ sepOS 使用 UID 来保护设备特定的密钥。 有了 UID， 就可以通过
 安全隔区还有设备组 ID (GID)， 它是使用特定 SoC 的所有设备共用的 ID （例如， 所有使用 Apple A14 SoC 的设备共用同一个 GID）。
 UID 和 GID 不可以通过联合测试行动小组 (JTAG) 或其他调试接口使用。
 
+## 数据安全
+
+![aaa](key.png)
+
+内置两个初始密钥 unique ID (UID) and a device group ID (GID) are AES 256-bit keys。这两个东西谁都无法读写，除了加密引擎。
+The UID是每个设备独有的 and  not recorded by Apple or any of its suppliers.（革命形势啊！）
+The GID 是一类芯片一个，比如A5的芯片内置的GID密钥都一样。
+
+由于UID是每个设备独有的，而且它是整个ios系统密钥树的最顶层，因此，数据就绑定了设备，flash、memory离开了根，就无法解密.
+
+加密除了防止艳照门，被人偷窥外。由于flash技术的特点：wear-leveling 。删除数据很困难哦。既然加密了，就容易多了，只需删除密钥即可。
+
+根加密密钥
+安全隔区包括一个唯一 ID (UID) 根加密密钥。 UID 对于每台设备来说都是唯一的， 且与设备上的任何其他标
+识符都无关。
+随机生成的 UID 在制造过程中便被固化到 SoC 中。 从 A9 SoC 开始， UID 在制造过程中由安全隔区
+TRNG 生成， 并使用完全在安全隔区中运行的软件进程写入到熔丝中。 这一过程可以防止 UID 在制造过
+程中于设备之外可见， 因此不可被 Apple 或其任何供应商访问或储存。
+sepOS 使用 UID 来保护设备特定的密钥。 有了 UID， 就可以通过加密方式将数据与特定设备捆绑起来。 例
+如， 用于保护文件系统的密钥层级就包括 UID， 因此如果将内置 SSD 储存设备从一台设备整个移至另一台
+设备， 文件将不可访问。 其他受保护的设备特定密钥包括触控 ID 或面容 ID 数据。 在 Mac 上， 只有链接到
+AES 引擎的完全内置储存设备才会获得这个级别的加密。 例如， 通过 USB 连接的外置储存设备或者添加到
+2019 年款 Mac Pro 的基于 PCIe 的储存设备都无法获得这种方式的加密。
+安全隔区还有设备组 ID (GID)， 它是使用特定 SoC 的所有设备共用的 ID （例如， 所有使用 Apple A14 
+SoC 的设备共用同一个 GID）。
+UID 和 GID 不可以通过联合测试行动小组 (JTAG) 或其他调试接口使用。
+
 ---
 
 ## 附录一：Apple公司的芯片系列
@@ -100,6 +134,13 @@ UID 和 GID 不可以通过联合测试行动小组 (JTAG) 或其他调试接口
 |L4|共享内存，异步|☆☆☆|×|☆☆|☆☆|
 |seL4|同步和异步端点|☆☆☆☆|√|☆☆☆|☆☆☆|
 
+## 附录三：Apple的安全漏洞事件
+
+- 早期的A4及更老的芯片(iPhone4之前的设备包括iPhone4)存在bootrom漏洞，通过bootrom中的硬件漏洞获取设备的shell然后运行暴力破解程序。[A4后面的芯片目前没有公开的bootrom漏洞]
+- iOS7中存在利用外接键盘可以暴力破解密码，甚至停用的设备也可以破解的漏洞。[该漏洞已经在iOS8中修复]
+- iOS8的早期几个版本中存在密码尝试失败立即断电并不会增加错误计数的漏洞。[该漏洞已经修复]
+- 2020 年秋天，苹果突然发布第二代安全隔区，并紧急升级 A12、A13 以及 S5 芯片，据认为 GrayKey 密码破解设备有关系，其采用暴力破解方式实现iPhone解锁。
+
 ---
 
 ## 参考文献
@@ -109,6 +150,8 @@ UID 和 GID 不可以通过联合测试行动小组 (JTAG) 或其他调试接口
 - [蘋果Secure Enclave安全晶片爆硬體漏洞，舊款設備無法修復](https://mrmad.com.tw/secure-enclave-security-chip-explodes-hardware-vulnerabilities)
 - [iOS資料保護機制簡介](https://www.kaotenforensic.com/ios/ios-data-protection/#collapse-1-1786)
 - [A13 芯片很牛，但是这款神秘的 U1 芯片才是苹果的野心](https://www.infoq.cn/article/zy3kmbnn6d4sgateg4qf)
+- [加盐密码哈希：如何正确使用](https://www.tomczhen.com/2016/10/10/hashing-security/)
+- [关于Apple Pay十五个技术问题](https://www.beanpodtech.com/%E5%85%B3%E4%BA%8Eapple-pay%E5%8D%81%E4%BA%94%E4%B8%AA%E6%8A%80%E6%9C%AF%E9%97%AE%E9%A2%98%EF%BC%88%E4%B8%80%EF%BC%89/)
 
 ### 资料下载
 
