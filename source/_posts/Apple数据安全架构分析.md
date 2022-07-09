@@ -6,7 +6,7 @@ tags:
 
 为了确保软件的安全性，它必须安装在具有内建安全性的硬件上，而内建安全性的硬件遵循“**支持有限且单独定义的功能**”的准则，以使攻击面最小化。
 
-![技术架构](arch.jpg)
+![技术架构](framework.jpg)
 
 - Secure Encalve：Apple定义的安全隔区。按照 TEE 标准，处理器应包含“普通世界”和“安全世界”两部分，Secure Enclave 就是其中的安全世界。ARM 处理器架构中的 TrustZone 与此相似，或者说苹果的 Secure Enclave 就是一个高度定制版的 TrustZone。
 - Secure Element：基于Java Card的安全元件，简称SE。iPhone中通常采用第三方的独立芯片，如NXP，一般用于支持基于NFC的Applet应用。
@@ -107,12 +107,26 @@ UID 和 GID 不可以通过联合测试行动小组 (JTAG) 或其他调试接口
 
 ## 附录一：Apple公司的芯片系列
 
-- A系列：使用于iPhone、iPad、iPod touch、Apple TV及Studio Display产品线。从A4开始，最新型号是 iPhone 13 搭载的 A15
-- S系列：用于Apple Watch和HomePod Mini产品线，最新型号是S7
+### 主处理器芯片
+
+- A系列：智能终端的iOS，使用于iPhone、iPad、iPod touch、Apple TV及Studio Display产品线。从A4开始，最新型号是 iPhone 13 搭载的 A15
+![A](apple-A.jpeg)
+
+- S系列：可穿戴设备的Watch OS，使用于Apple Watch和HomePod Mini产品线，最新型号是S7
+![S](Apple-S.jpeg)
+
+- M系列：生产力工具的Mac OS，使用于Mac OS的笔记本电脑和台式机，基于ARM架构的自研处理器，包括M1、M2等
+![M](apple-M1.jpeg)
+
+## 功能芯片
+
+- W系列：蓝牙芯片，用于AirPods第二代及之后的蓝牙无线耳机，替换早期的W系列。
+- U系列：定位芯片，用于UWB（ultra-wide band）精确定位的芯片，替代已被放弃的基于低功耗蓝牙BLE的iBeacons技术，2019年首次出现在iPhone11
+
+### 已停止发展
+
 - T系列：用于基于Intel芯片的Mac电脑的安全芯片，包括T1和T2，该系列已停止并整合进M系列
-- W系列：用于AirPods第二代及之后的蓝牙无线耳机
-- U系列：用于UWB（ultra-wide band）精确定位的芯片，替代已被放弃的基于低功耗蓝牙BLE的iBeacons技术，2019年首次出现在iPhone11的U1芯片
-- M系列：基于ARM架构的自研处理器，包括M1、M2等，是Apple未来的统一整合方向
+- W系列：用于蓝牙耳机Airpods，2016首发包含W1芯片，后续还有W2、W3，随后被重新命名为H系列，以及被集成到S系列芯片。
 
 ## 附录二：微内核
 
@@ -147,6 +161,7 @@ UID 和 GID 不可以通过联合测试行动小组 (JTAG) 或其他调试接口
 
 - [Apple平台安全白皮书](https://help.apple.com/pdf/security/en_US/apple-platform-security-guide.pdf)
 - [微内核发展史与Mach、L4、seL4微内核OS的比较](https://blog.csdn.net/xiasli123/article/details/105191368)
+- [iOS Security Architecture](https://itzone.com.vn/en/article/ios-security-architecture/)
 - [蘋果Secure Enclave安全晶片爆硬體漏洞，舊款設備無法修復](https://mrmad.com.tw/secure-enclave-security-chip-explodes-hardware-vulnerabilities)
 - [iOS資料保護機制簡介](https://www.kaotenforensic.com/ios/ios-data-protection/#collapse-1-1786)
 - [A13 芯片很牛，但是这款神秘的 U1 芯片才是苹果的野心](https://www.infoq.cn/article/zy3kmbnn6d4sgateg4qf)
