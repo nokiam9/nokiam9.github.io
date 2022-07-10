@@ -20,7 +20,6 @@ ARM TrustZone 技术本质上是一种虚拟化技术，通过将处理器状态
 
 不过就 Apple 的官方信息来说，Apple 从未提过 Secure Enclave 就是 ARM TrustZone 安全扩展技术的实现（虽然根据 Apple 官方文档中关于几个安全通信通道的描述来看，Secure Enclave 很可能是 ARM TrustZone 技术的一种实现），因此我们还是无法断定 Secure Enclave 究竟是独立的协处理器还是应用处理器的一种运行状态（两种架构都可以提供 Secure Enclave 必须的安全特性），这个有待于 Apple 公布更多的 Secure Enclave 的实现细节，就目前而言，可以得出的结论是：Secure Enclave 所提供的安全特性，使用 ARM TrustZone 技术同样可以实现。
 
-
 2013年，苹果发布的iPhone 5s手机率先提供了指纹锁，为了解决生物特征数据的数据安全问题，采用了其设计软硬件结合的安全方案Secure Enclave。
 此后该方案得到了广泛应用，成为后续推出所有iPhone的标配，并为基于Intel CPU的Mac电脑提供了T1、T2芯片，iPad Air、Apple TV、Apple Watch和HomePod等产品线也都支持，更不用后续自研的M1 CPU了。
 
