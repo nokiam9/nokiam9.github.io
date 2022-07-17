@@ -20,3 +20,6 @@ tags:
 - [iPhone史诗级DFU漏洞分析](https://www.bilibili.com/read/cv9849473/)
 - [Checkm8 漏洞研究](https://xuanxuanblingbling.github.io/ios/2020/07/10/checkm8/)
 - [苹果超级大漏洞 BootROM 的说明及威胁评估](https://zhuanlan.zhihu.com/p/84925896)
+- [苹果iOS系统安全调研](https://zhuanlan.zhihu.com/p/441603311)
+
+- [iOS Security 苹果安全白皮书都讲了些啥？](https://juejin.cn/post/6844903471863316493)
