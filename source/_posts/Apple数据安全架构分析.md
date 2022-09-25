@@ -129,7 +129,6 @@ UID 和 GID 不可以通过联合测试行动小组 (JTAG) 或其他调试接口
 ## 参考文献
 
 - [Apple平台安全白皮书](https://help.apple.com/pdf/security/en_US/apple-platform-security-guide.pdf)
-- [微内核发展史与Mach、L4、seL4微内核OS的比较](https://blog.csdn.net/xiasli123/article/details/105191368)
 - [iOS Security Architecture](https://itzone.com.vn/en/article/ios-security-architecture/)
 - [蘋果Secure Enclave安全晶片爆硬體漏洞，舊款設備無法修復](https://mrmad.com.tw/secure-enclave-security-chip-explodes-hardware-vulnerabilities)
 - [iOS資料保護機制簡介](https://www.kaotenforensic.com/ios/ios-data-protection/#collapse-1-1786)

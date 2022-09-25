@@ -115,6 +115,7 @@ Android从4.0开始引入了KeyStore，开发者可以使用KeyStore API生成�
 - [TrustZone-M简介](https://hack-big.tech/2021/01/23/Microcontroller-TrustZone%E9%9A%94%E7%A6%BB%E6%8A%80%E6%9C%AF%E7%AE%80%E4%BB%8B/)
 - [从TrustZone建置安全验证硬件基础 - FIDO联盟](https://www.laoyaoba.com/html/share/news?source=pc&news_id=583957)
 - [ARM cortex三个版本A，R, M之间区别](https://www.cnblogs.com/hjbf/p/13298964.html)
+- [微内核发展史与Mach、L4、seL4微内核OS的比较](https://blog.csdn.net/xiasli123/article/details/105191368)
 
 ### 文档下载
 
