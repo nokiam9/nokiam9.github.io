@@ -62,6 +62,10 @@ TrustZone-A引入了安全世界（secure world）和非安全世界（none secu
 
 此外，Cortex-A为CPU引入了新的Monitor Mode模式。Monitor模式是作为安全世界和非安全世界间沟通的存在，无论是从安全世界退出到非安全世界，还是从非安全世界进入安全世界都要经过Monitor模式。从官方的介绍可知，从非安全世界和安全世界进入Monitor Mode有两种方式，一种是通过SMC（Secure Monitor Call）指令，另一种方式是通过在安全世界注册的中断。
 
+    从成本的角度出发，大多数支持TrustZone的CPU芯片采用虚拟化的方案，即将全部或某些物理核虚拟为一个非安全核和一个安全核，以基于时间片的方式轮流占用物理核，并通过Monitor Mode在安全世界和非安全世界之间切换。当然，如果不差钱也可以指定若干内核专门运行安全世界，也就是协处理器的方案
+
+总结一下，ARM Trustzone不具体指一个硬件或软件，而是一个技术架构，在支持ARM Trustzone的SOC中，需按照ARM Trustzone技术对各个子模块进行设计。下图就是一个支持Trustzone架构的SOC设计框图。
+
 ![soc.png](soc.png)
 
 需要指出的是，由于Apple、华为、高通等公司的自研CPU芯片都是基于ARM授权，由此Apple的Secure Enclave、高通的QSE等技术就是TrustZone的变种。
@@ -108,10 +112,11 @@ Android从4.0开始引入了KeyStore，开发者可以使用KeyStore API生成�
 
 ## 参考文献
 
+- [ARM TrustZone的深度解析](https://www.cnblogs.com/blogernice/articles/14942270.html)
+- [ARM Trustzone的安全扩展资料大全](https://aijishu.com/a/1060000000320633)
 - [从可信计算到机密计算 - 冯登国](https://zhuanlan.zhihu.com/p/471110552)
 - [网银U盾安全认证原理解析](https://zhuanlan.zhihu.com/p/34813040)
 - [隐私计算技术之可信执行环境（TEE）](https://zhuanlan.zhihu.com/p/384966998)
-- [Arm Trustzone的安全扩展介绍](https://aijishu.com/a/1060000000320633)
 - [TrustZone-M简介](https://hack-big.tech/2021/01/23/Microcontroller-TrustZone%E9%9A%94%E7%A6%BB%E6%8A%80%E6%9C%AF%E7%AE%80%E4%BB%8B/)
 - [从TrustZone建置安全验证硬件基础 - FIDO联盟](https://www.laoyaoba.com/html/share/news?source=pc&news_id=583957)
 - [ARM cortex三个版本A，R, M之间区别](https://www.cnblogs.com/hjbf/p/13298964.html)
