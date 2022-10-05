@@ -297,7 +297,7 @@ Secure Enclave 虽然是安全世界，但要正常工作就必须与外部世�
 - [MCU 芯片加密历程](https://picture.iczhiku.com/weixin/message1610684573974.html)
 - [写给开发人员的实用密码学（四）—— 安全随机数生成器 CSPRNG](https://thiscute.world/posts/practical-cryptography-basics-4-secure-random-generators/)
 
-## 安全漏洞
+### 安全漏洞
 
 - [蘋果Secure Enclave安全晶片爆硬體漏洞，舊款設備無法修復](https://mrmad.com.tw/secure-enclave-security-chip-explodes-hardware-vulnerabilities)
 - [iPhone史诗级DFU漏洞分析](https://www.bilibili.com/read/cv9849473/)
