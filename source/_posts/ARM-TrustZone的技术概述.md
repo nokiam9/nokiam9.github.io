@@ -124,8 +124,11 @@ Android从4.0开始引入了KeyStore，开发者可以使用KeyStore API生成�
 
 ### 文档下载
 
-- [创新发展中的可信计算理论与技术 - 冯登国](http://scis.scichina.com/cn/2020/SSI-2020-0224.pdf)
+- [创新发展中的可信计算理论与技术 - 冯登国](创新发展中的可信计算理论与技术-冯登国.pdf)
+- [系统安全隔离技术研究综述 - 郑显义](系统安全隔离技术研究综述.pdf)
 - [安全可信智能移动终端研究 - 张大伟](https://res-www.zte.com.cn/mediares/magazine/publication/com_cn/article/201505/445481/P020151028370420765032.pdf)
 - [TEE：从手机端到云端的系统安全增强](https://www.trustkernel.com/uploads/pubs/TEE-%E4%BB%8E%E6%89%8B%E6%9C%BA%E7%AB%AF%E5%88%B0%E4%BA%91%E7%AB%AF%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E5%A2%9E%E5%BC%BA.pdf)
 - [鲲鹏 BoostKit 机密计算 TrustZone 套件 技术白皮书](https://support.huaweicloud.com/twp-kunpengcctrustzone/twp-kunpengcctrustzone.pdf)
+- [使用NXP 安全MCU LPC54S0xx 构建安全系统](使用NXP_安全MCU_LPC54S0xx_构建安全系统.pdf)
 - [SEL4技术白皮书-英文版](seL4-whitepaper.pdf)
+- [RISC-V芯片的加密协处理器设计方案](RISC-V芯片的加密协处理器设计方案.pdf)

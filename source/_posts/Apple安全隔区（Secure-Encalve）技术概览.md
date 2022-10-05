@@ -18,7 +18,7 @@ tags:
 
 - UID：一个 256 位的 AES 密钥，在设备制造过程中刻录在每个处理器上。这种密钥无法由固件或软件读取，只能由处理器的硬件 AES 引擎使用。UID 与设备上的任何其他标识符均无关，包括但不限于 UDID
 - GID：设备组ID，类似于 UID，但同一类中的每个处理器的 GID 都相同
-- Passcode & Password：用户密码，iOS中称为passcode，MacOS中称为password；由用户自行设置,一般是4位数字、6位数字或无限长度的字母组合
+- 用户密码：iOS中称为passcode，MacOS中称为password，由用户自行设置,一般是4位数字、6位数字或无限长度的字母组合
 
 ## 二、Secure Enclave的发展历程
 
@@ -50,12 +50,10 @@ S系列处理器同样包含安全隔区，为生物特征数据的采集和存�
 
 ## 三、Secure Enclave的核心组件
 
-一般认为，Secure Enclave就是一个高度定制版的 ARM TrustZone，有自己的安全引导过程和个性化的软件更新过程，并且同Rich OS所在的应用处理器分离，也就是“安全世界”的物理实现。
-
-![SOC](soc.png)
-
 安全隔区是一个独立于操作系统的片上系统（System on Chips），自身拥有独立的Boot ROM和AES引擎，为数据保护密钥管理提供所有加密操作，并保持数据保护的完整性（即使内核已被破坏）。
 安全隔区还为加密静态数据所需密钥的安全生成和储存提供了基础，通过特殊通道向 AES 引擎提供所需的密钥材料，而不将此信息透露给应用程序处理器 (或 CPU) 或者整个操作系统。
+一般认为，Secure Enclave就是一个高度定制版的 ARM TrustZone，也就是“安全世界”的物理实现。
+![SOC](soc.png)
 
 ### 1、安全隔区处理器（Secure Enclage Processor，SEP）
 
@@ -156,17 +154,7 @@ Boot ROM 是处理器在首次启动时所执行的第一个代码，一般固�
 - 为了帮助确保电压和频率保持在安全的范围内，安全隔区中设计了监视电路
 - 这些监视电路被设计为具有比安全隔区其余部分更大的运行包络。如果监视器检测到非法运行点，安全隔区中的时钟会自动停止，在下一次 SoC 重设前不会重新开始运行。
 
-## 五、数据安全的密钥体系
-
-![Key](key.png)
-![Key](key2.png)
-
-sepOS 使用 UID 来保护设备特定的密钥。 有了 UID， 就可以通过加密方式将数据与特定设备捆绑起来。 例如， 用于保护文件系统的密钥层级就包括 UID， 因此如果将内置 SSD 储存设备从一台设备整个移至另一台设备， 文件将不可访问。 其他受保护的设备特定密钥包括触控 ID 或面容 ID 数据。 在 Mac 上， 只有链接到AES 引擎的完全内置储存设备才会获得这个级别的加密。 例如， 通过 USB 连接的外置储存设备或者添加到2019 年款 Mac Pro 的基于 PCIe 的储存设备都无法获得这种方式的加密。
-
-
-![aaa](key.png)
-
-## 六、几个问题的讨论
+## 五、几个问题的讨论
 
 ### 1. Apple Secure Enclave 的技术实现是虚拟化方案，还是协处理器方案？
 
@@ -189,56 +177,39 @@ Secure Enclave 虽然是安全世界，但要正常工作就必须与外部世�
 - 安全非易失性存储：专用，存储各类密钥、熵源、计数器和指纹特征等用户敏感数据，通过专用I2C总线连接
 - UID & GID：制造过程中通过E-Fuse固化
 
+### 3. Apple设备中Secure Equipment和Secure Enclave的关系是什么？
+
+以Apple Pay的支付授权为例，
+
+安全元件是运行 Java Card 平台的认证芯片，符合金融行业对电子支付的要求，由 EMVCo 提供安全认证。
+> The Secure Element is an industry-standard, certified chip running the Java Card platform, which is compliant with financial industry requirements for electronic payments. The Secure Element IC and the Java Card platform are certified in accordance with the EMVCo Security Evaluation process. After the successful completion of the security evaluation, EMVCo issues unique IC and platform certificates.
+
+安全元件负责管理支付网络或发卡机构认证的Applet，业务密钥储存在Applet内，由SE的安全域提供保护。
+> The Secure Element hosts a specially designed applet to manage Apple Pay. It also includes applets certified by payment networks or card issuers. Credit, debit, or prepaid card data is sent from the payment network or card issuer encrypted to these applets using keys that are known only to the payment network or card issuer and the applets’ security domain. This data is stored within these applets and protected using the Secure Element’s security features. During a transaction, the terminal communicates directly with the Secure Element through the near-field-communication (NFC) controller over a dedicated hardware bus.
+
+安全隔区负责为Apple Pay的支付业务提供用户层面（基于Face ID、TouchID 和 Passcode等）的授权，而不涉及金融机构的鉴权或风险控制。
+在添加或移除 Apple Pay 卡片时，安全隔区的介入也是这一逻辑的体现。
+> On iPhone, iPad, Apple Watch, Mac computers with Touch ID, and Mac computers with Apple silicon that use the Magic Keyboard with Touch ID, the Secure Enclave manages the authentication process and allows a payment transaction to proceed.
+
 ---
 
 ## 附录一：Apple自研芯片的安全隔区特性
 
 ![List](list.png)
 
-## 附录二：真随机数生成器，伪随机数发生器 和 熵源
+## 附录二：Apple自研芯片的分类
 
-随机数在安全技术中通常被用于生成随机序列，而要做到“完全随机”是非常困难的，一般需要满足3个条件：
+### 1、主处理器芯片
 
-1. 其必须是不可预知的
-2. 其必须被均匀分布(即任何数均有平等出现的机会)
-3. 其必须统计独立 (即与以前生成的随机数不存在明显关系)
+- A系列：智能终端的iOS，使用于iPhone、iPad、iPod touch、Apple TV及Studio Display产品线。从A4开始，最新型号是 iPhone 13 搭载的 A15
+- S系列：可穿戴设备的Watch OS，使用于Apple Watch和HomePod Mini产品线，最新型号是S7
+- M系列：生产力工具的Mac OS，使用于Mac OS的笔记本电脑和台式机，基于ARM架构的自研处理器，包括M1、M2等
 
-美国国家标准和技术研究所(NIST)制定了随机数发生器的技术规范，称为`NIST SP 800 - 22`和`SP 800 - 90`，其推荐的技术路线是：真随机数生成器TRNG + 伪随机数生成器PRNG。
+## 2、功能芯片
 
-真随机数通常来源于硬件随机数生成器，每次生成的随机数都是真正的随机数，但是因为物理因素，生成的时间较慢。比如STM32中提供的RNG硬件外设。
-随机数发生器(TRNG)从一些随机过程中收获熵(如:晶体管中电流产生的噪音，或放射性衰变事件之间的时间)，继而通过异或运算等方法消除随机位的概率偏差，最后输出高质量的随机数
-
-伪随机数通常来源于某个生成算法，每次生成的随机数虽然是随机的，但还是遵循生成算法的规则，优点是生成速度较快。比如C库中提供的rand函数，在相同的种子下，其生成的随机数序列相同，所以称之为伪随机数。
-PRNG（也叫做确定性随机数生成器，DRBG）的最佳输入设备就是高质量的TRNG，伪随机数所使用的种子就称为熵源（熵池）。
-
-NIST SP 800-90A规范中描述了三种产生伪随机数的算法：
-
-- Hash_DRBG：使用单向散列算法作为伪随机数生成的基础算法；
-- HMAC_DRBG：使用消息认证码算法作为随机数生成的基础算法；
-- CTR_DRBG：使用分组密码算法的计数器模式作为随机数生成的基础算法（重点）。
-
-CTR-DRBG 可以理解为一个AES加密过程，通过利用分组密码算法对一个递增的计数器进行加密来产生期望随机数序列，分组密码算法可以是3DES(64bits)，AES(128, 192, 256bits)。
-
-熵源
-内核 CPRNG 源自启动过程中的多个熵源并存在于设备的整个生命周期。 这些来源包括 (取决于可用性):
-• 安全隔区硬件 TRNG
-• 启动过程中所收集基于时序的时间误差
-• 从硬件中断收集的熵
-• 用于启动过程中保持熵的种子文件
-• Intel 随机指令， 例如 RDSEED 和 RDRAND (仅限基于 Intel 的 Mac)
-
-内核 CPRNG
-内核 CPRNG 的设计源自 Fortuna 算法， 旨在满足 256 位安全级别。 它使用以下 API 为用户空间使用者
-提供高质量的随机数 :
-• getentropy(2) 系统调用
-• 随机设备 (/dev/random)
-内核 CPRNG 通过写入随机设备接受用户提供的熵。
-
----
-
-在 A11 和更新版本以及 S3 和更新版本的 SOC 上，完整性树用于防止对安全至关重要的 Secure Enclave 内存的重放，通过内存保护密钥和存储在片上 SRAM 中的随机数进行身份验证。
-Secure Enclave 保存到文件系统的数据使用与 UID 纠缠的密钥和反重放计数器进行加密。防重放计数器存储在专用的非易失性存储器集成电路 (IC) 中。
-在配备 A12 和 S4 SoC 的设备上，Secure Enclave 与用于防重放计数器存储的安全存储集成电路 (IC) 配对。安全存储 IC 设计有不可变 ROM 代码、硬件随机数生成器、加密引擎和物理篡改检测。为了读取和更新计数器，Secure Enclave 和存储 IC 采用了确保对计数器的独占访问的安全协议。
+- H（W）系列：音频芯片，用于Airpods耳机，2016首发W1芯片，后续还有W2、W3；AirPods第二代之后被更名为H系列
+- U系列：定位芯片，用于UWB（ultra-wide band）精确定位的芯片，替代已被放弃的基于低功耗蓝牙BLE的iBeacons技术，2019年首次出现在iPhone 11，AirTag标签也使用U1
+- T系列：已下线。用于基于Intel芯片的Mac电脑的安全芯片，包括T1和T2，该系列已停止并整合进M系列
 
 ## 附录三：第二代安全存储组件的计数器加密箱的工作原理
 
@@ -297,31 +268,36 @@ Secure Enclave 保存到文件系统的数据使用与 UID 纠缠的密钥和反
     }
     ```
 
-值得注意的是，通过向安全隔区返回密码箱熵值（而非简单的是否），有利于实现与安全存储组件的双向认证，这也是高级别安全的重要特性！
+值得关注的是：
+
+1. 加密过程使用了3个因子，`passcodeEntropyValue`由安全隔区提供，2个内部因子`SSCKey`和`saltValue`只在内部保存，因此传输是安全的
+2. 安全存储组件持久化存储的不是`passcodeEntropyValue`的原始值，而是不可逆的校验值`passcodeVerifierValue`，可以防止反向获得加密因子
+3. 安全存储组件的唯一加密密钥`SSCKey`是个什么东西？估计是`UID`派生出来的一个专用密钥，在安全存储组件内部全局有效
+4. 向安全隔区返回密码箱熵值（而非简单的是否），具备了双向认证的基础，但是否如此没有证据！
 
 ---
 
 ## 参考文献
 
-- [Apple平台安全白皮书](https://help.apple.com/pdf/security/en_US/apple-platform-security-guide.pdf)
-- [iOS Security Architecture](https://itzone.com.vn/en/article/ios-security-architecture/)
-- [蘋果Secure Enclave安全晶片爆硬體漏洞，舊款設備無法修復](https://mrmad.com.tw/secure-enclave-security-chip-explodes-hardware-vulnerabilities)
-- [iOS資料保護機制簡介](https://www.kaotenforensic.com/ios/ios-data-protection/#collapse-1-1786)
-- [A13 芯片很牛，但是这款神秘的 U1 芯片才是苹果的野心](https://www.infoq.cn/article/zy3kmbnn6d4sgateg4qf)
-- [加盐密码哈希：如何正确使用](https://www.tomczhen.com/2016/10/10/hashing-security/)
-- [关于Apple Pay十五个技术问题](https://www.beanpodtech.com/%E5%85%B3%E4%BA%8Eapple-pay%E5%8D%81%E4%BA%94%E4%B8%AA%E6%8A%80%E6%9C%AF%E9%97%AE%E9%A2%98%EF%BC%88%E4%B8%80%EF%BC%89/)
-- [苹果“芯”基建简史](https://finance.sina.com.cn/stock/hkstock/hkstocknews/2020-06-20/doc-iircuyvi9466114.shtml)
-- [MCU 芯片加密历程](https://picture.iczhiku.com/weixin/message1610684573974.html)
-- [iOS 安全设计解析（二）：数据加密和保护](https://blog.blupig.net/ios-security-encryption)
-- [iOS资料保护机制简介](https://www.kaotenforensic.com/ios/ios-data-protection/)
-- [iOS安全体系结构的简要分析](https://github.com/YuZhang/Security-Courseware/blob/master/system-security/ios-security.md)
-- [伪随机数生成器（ctr_drbg）的配置与使用](https://blog.51cto.com/u_13640625/3027985)
-- [写给开发人员的实用密码学（四）—— 安全随机数生成器 CSPRNG](https://thiscute.world/posts/practical-cryptography-basics-4-secure-random-generators/)
-- [CTR-DRBG的缓存侧信道攻击方法](https://securitygossip.com/blog/2020/03/16/pseudorandom-black-swans-cache-attacks-on-ctr-drbg/)
-- [了解硬件信任根 - 新思公司](https://www.synopsys.com/zh-cn/china/resources/dwtb/dwtb-cn-q1-21018-rootsoftrusts.html)
-- [基于 ARM TrustZone 的 Secure Boot 实现](https://bbs.pediy.com/thread-260399.htm)
-
 ### 资料下载
 
-- [apple平台安全白皮书-2021中文版](apple平台安全白皮书-2021中文版.pdf)
-- [iOS安全白皮书-2018英文版](iOS安全白皮书-2018英文版.pdf)
+- [Apple平台安全白皮书 - 2022英文版](apple-platform-security-guide.pdf)
+- [Apple平台安全白皮书 - 2021中文版](apple平台安全白皮书-2021中文版.pdf)
+- [iOS安全白皮书 - 2018英文版](iOS安全白皮书-2018英文版.pdf)
+
+### 技术分析
+
+- [苹果iOS系统安全调研](https://zhuanlan.zhihu.com/p/441603311)
+- [iOS安全体系结构的简要分析](https://github.com/YuZhang/Security-Courseware/blob/master/system-security/ios-security.md)
+- [基于 ARM TrustZone 的 Secure Boot 实现](https://bbs.pediy.com/thread-260399.htm)
+- [了解硬件信任根 - 新思公司](https://www.synopsys.com/zh-cn/china/resources/dwtb/dwtb-cn-q1-21018-rootsoftrusts.html)
+- [关于Apple Pay十五个技术问题](https://www.beanpodtech.com/%E5%85%B3%E4%BA%8Eapple-pay%E5%8D%81%E4%BA%94%E4%B8%AA%E6%8A%80%E6%9C%AF%E9%97%AE%E9%A2%98%EF%BC%88%E4%B8%80%EF%BC%89/)
+- [MCU 芯片加密历程](https://picture.iczhiku.com/weixin/message1610684573974.html)
+- [写给开发人员的实用密码学（四）—— 安全随机数生成器 CSPRNG](https://thiscute.world/posts/practical-cryptography-basics-4-secure-random-generators/)
+
+## 安全漏洞
+
+- [蘋果Secure Enclave安全晶片爆硬體漏洞，舊款設備無法修復](https://mrmad.com.tw/secure-enclave-security-chip-explodes-hardware-vulnerabilities)
+- [iPhone史诗级DFU漏洞分析](https://www.bilibili.com/read/cv9849473/)
+- [Checkm8 漏洞研究](https://xuanxuanblingbling.github.io/ios/2020/07/10/checkm8/)
+- [苹果超级大漏洞 BootROM 的说明及威胁评估](https://zhuanlan.zhihu.com/p/84925896)
