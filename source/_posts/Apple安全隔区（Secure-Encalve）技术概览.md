@@ -18,7 +18,7 @@ tags:
 
 - UID：一个 256 位的 AES 密钥，在设备制造过程中刻录在每个处理器上。这种密钥无法由固件或软件读取，只能由处理器的硬件 AES 引擎使用。UID 与设备上的任何其他标识符均无关，包括但不限于 UDID
 - GID：设备组ID，类似于 UID，但同一类中的每个处理器的 GID 都相同
-- Passcode Key：用户锁屏密码，由用户自行设置
+- Passcode & Password：用户密码，iOS中称为passcode，MacOS中称为password；由用户自行设置,一般是4位数字、6位数字或无限长度的字母组合
 
 ## 二、Secure Enclave的发展历程
 
@@ -89,10 +89,7 @@ S系列处理器同样包含安全隔区，为生物特征数据的采集和存�
   
 ## 四、Secure Enclave的附加组件
 
-上述5个核心组件均属于计算资源范畴，与 ARM TrustZone 通用架构基本一致，但Apple安全隔区还有一些特殊类型的组件：
-
-- 用户数据：UID、各类计数器等，需要持久化保存
-- 辅助功能：各类监控功能、新技术应用等
+上述5个核心组件均属于计算资源范畴，与 ARM TrustZone 通用架构基本一致，但Apple安全隔区还有一些特殊类型的组件。
 
 ### 1. 安全隔区启动代码（Secure Enclave Boot ROM）
 
@@ -127,28 +124,16 @@ Boot ROM 是处理器在首次启动时所执行的第一个代码，一般固�
 
 ### 4、安全非易失性存储（Secure Nonvolatile Storage）
 
-由于安全隔区本身并不包含储存资源，早期产品配备了独立的EEPROM (电可擦除可编程只读存储器) 以提供基本的安全储存服务，但无法提供专用的硬件安全性功能。
+- 安全隔区配备了**专用**的安全非易失性存储器设备（区别于应用处理器的 NAND 存储设备），通过专用的 I2C 总线与安全隔区连接，确保物理层面仅可被安全隔区访问
+- 早期使用 EEPROM 作为数据存储资源，从 A12、S4 开始采用了第一代安全存储组件，它与安全隔区之间使用加密且认证的通信协议，确保对数据资源的独有访问权限
+- 2020年10月，发布了第二代安全组件，主要特性是新增了计数器加密箱，用于保护简单而易受攻击的用户密码passcode
+- 安全储存组件设计用于以下关键业务场景的数据保护，包括：不可更改的 ROM 代码、硬件随机数生成器、每个设备唯一的加密密钥、加密引擎和物理篡改检测等
 
-从 A12 开始，Apple开发了第一代安全存储组件，特点是：
-
-- 为安全隔区配备了专用的安全非易失性存储器设备（Secure Nonvolatile Storage），该储存设备与应用程序处理器和操作系统使用的 NAND 闪存互相独立
-- 安全隔区通过专用的 I2C 总线（Inter-Integrated Circuit Bus，Philips开发的一种简单、双向二线制同步串行总线）与安全存储组件连接，使用加密且认证的协议通信，以确保其仅可被安全隔区访问
-- 安全隔区和安全储存组件以提供对熵的独有访问权限，这个熵是各类用户数据加密密钥的加密因子
-
-2020年10月，苹果突然发布了第二代安全隔区，并紧急升级 A12、A13 以及 S5 芯片，据认为 GrayKey 密码破解设备有关系，其采用暴力破解方式实现iPhone解锁。
-第二代安全储存组件增加了计数器加密箱，包括：
-
-- 1个 128 位盐：
-- 1个 128 位密码验证器：
-- 1个 8 位计数器：
-- 1个 8 位最大尝试值。 对计数器加密箱的访问。
-
-安全储存组件本身设计为 使用不可更改的 ROM 代码、 硬件随机数生成器、 每个设备唯一的加密密钥、 加密引擎和物理篡改检测。 。
-2020 年秋季或之后首次发布的设备配备了第二代安全储存组件。 
-计数器加密箱中含有所需用于解锁受密码保护用户数据的熵。 若要访问用户数据， 配对的安全隔区必须从用户 的密码和安全隔区的 UID 中派生出正确的密码熵值。 从除配对安全隔区之外其他来源发送的解锁尝试均无法 获知用户的密码。 如果密码的尝试次数超过限制 (例如， 在 iPhone 上为 10 次)， 安全储存组件就会完全抹 掉受密码保护的数据。
-为了创建计数器加密箱， 安全隔区会向安全储存组件发送密码熵值和最大尝试次数值。 安全储存组件会使用其 随机数生成器生成盐值。 之后通过提供的密码熵、 安全储存组件的唯一加密密钥和盐值派生出密码验证器值和 加密箱熵值。 安全储存组件使用计数 0、 提供的最大尝试次数值、 派生的密码验证器值和盐值来初始化计数器 加密箱。 之后安全储存组件将生成的加密箱熵值返回到安全隔区。
-为了稍后从计数器加密箱中取回加密箱熵值， 安全隔区会向安全储存组件发送密码熵。 安全储存组件会先为加 密箱递增计数器。 如果递增后的计数器超过最大尝试次数值， 安全储存组件就会完全抹掉计数器加密箱。 如果 尚未达到最大尝试次数， 安全储存组件会尝试通过与用于创建计数器加密箱相同的算法来派生出密码验证器 值和加密箱熵值。 如果派生的密码验证器值匹配所储存的密码验证器值， 安全储存组件会将加密箱熵值返回到 安全隔区并将计数器重设为 0。
-用于访问受密码保护数据的密钥植根于计数器加密箱所储存的熵中。 有关更多信息， 请参阅数据保护概览。
+> 虽然Apple官方文档没有描述，但本人认为，安全存储组件可能存储的数据包括：
+>
+>- 生成密钥：通过UID、passcode和随机数等加密因子生成的各类密钥，需要持久化保存在安全载体之中
+>- 生物特征：指纹识别和人脸识别的特征数据必须且只能保存在本机设备的安全载体之中
+>- 各类计数器：保存状态数据，阻断重放攻击等反复尝试
 
 ### 5. AES引擎（AES Engine）
 
@@ -157,7 +142,7 @@ Boot ROM 是处理器在首次启动时所执行的第一个代码，一般固�
 - 启动时，sepOS 会使用 TRNG 生成一个临时封装密钥，安全隔区使用**专用线路**将此密钥传输到 AES 引擎，旨在防止它被安全隔区外的任何软件访问；随后， sepOS 使用临时封装密钥来封装文件密钥，供应用程序处理器文件系统驱动程序使用，当文件系统驱动程序读取或写入文件时，它会将封装的密钥发送到 AES 引擎 以解封密钥。 AES 引擎绝不会将未封装的密钥透露给软件。
 ![AES-Engine](aes-engine.png)
 
-### 6. 神经单元引擎（Secure Neural Engine）
+### 6. 神经网络引擎（Secure Neural Engine）
 
 - 在配备 Face ID 的设备上，安全神经网络引擎将 2D 图像和深度图转化为用户脸部的数学表达式（不是原始图像，仅包含特征值）
 - 从 A11 开始，安全神经网络引擎已集成到安全隔区中。安全神经网络引擎采用直接内存访问 (DMA) 以实现高性能。由 sepOS 内核控制的输入输出内存管理单元 (IOMMU) 将此直接访问的范围限制在经授权的内存区域。
@@ -167,8 +152,9 @@ Boot ROM 是处理器在首次启动时所执行的第一个代码，一般固�
 
 ### 7. 功耗和时钟监视器（Power and clock monitors）
 
-所有的电子设备都被设计为在一定的电压和频率包络内运行。如果在此包络外运行，电子设备可能会发生故障，然后安全性控制就可能被绕过。为了帮助确保电压和频率保持在安全的范围内，安全隔区中设计了监视电路。
-这些监视电路被设计为具有比安全隔区其余部分更大的运行包络。如果监视器检测到非法运行点，安全隔区中的时钟会自动停止，在下一次 SoC 重设前不会重新开始运行。
+- 所有的电子设备都被设计为在一定的电压和频率包络内运行。如果在此包络外运行，电子设备可能会发生故障，然后安全性控制就可能被绕过
+- 为了帮助确保电压和频率保持在安全的范围内，安全隔区中设计了监视电路
+- 这些监视电路被设计为具有比安全隔区其余部分更大的运行包络。如果监视器检测到非法运行点，安全隔区中的时钟会自动停止，在下一次 SoC 重设前不会重新开始运行。
 
 ## 五、数据安全的密钥体系
 
@@ -179,6 +165,29 @@ sepOS 使用 UID 来保护设备特定的密钥。 有了 UID， 就可以通过
 
 
 ![aaa](key.png)
+
+## 六、几个问题的讨论
+
+### 1. Apple Secure Enclave 的技术实现是虚拟化方案，还是协处理器方案？
+
+由于Mac电脑原来采用Intel芯片，因此Apple发展了T系列安全芯片解决安全问题，显然这是一个独立芯片的方案，而随着Apple自研的M系列CPU的出现，安全隔区已经被整合到CPU芯片之中。
+而从iPhone手机的角度看，A系列CPU都是基于ARM指令集，虚拟化方案和协处理器方案都可以满足TrustZone架构的技术要求，从外部功能提供上无法区别，主要差别就是设计复杂度和成本问题。
+
+从Apple提供的安全性文档中的描述推测，Secure Enclave 采用了协处理器方案，请看关于SCIP的描述。
+> Coprocessor firmware handles many critical system tasks—for example, the Secure Enclave, the image sensor processor, and the motion coprocessor. Therefore its security is a key part of the security of the overall system. To prevent modification of coprocessor firmware, Apple uses a mechanism called System Coprocessor Integrity Protection (SCIP).
+
+但是也有例外，安全神经网络引擎原本是安全隔区的一个组件，但从 A14 开始，调整为应用处理器中神经网络引擎的安全模式，也就是虚拟化方案。考虑到神经网络引擎的专用性，这应该是更有效率的选择。
+> Starting with A14 and the M1 family, the Secure Neural Engine is implemented as a secure mode in the Application Processor’s Neural Engine. A dedicated hardware security controller switches between Application Processor and Secure Enclave tasks, resetting Neural Engine state on each transition to keep Face ID data secure. A dedicated engine applies memory encryption, authentication, and access control. At the same time, it uses a separate cryptographic key and memory range to limit the Secure Neural Engine to authorized memory regions.
+
+### 2. 如何确保 Secure Enclave 外部接口的安全性？
+
+Secure Enclave 虽然是安全世界，但要正常工作就必须与外部世界发生数据交换，因此外部接口的边界安全防护是重点，必须全面、可靠。
+
+- RAM：共享，使用主处理器的内存硬件资源，但通过安全内存保护引擎实现加密和认证
+- ROM：专用，安全隔区有自己的Boot ROM，并完全固化在内部
+- NAND（闪存）：可访问，安全隔区可以访问系统NAND资源，但通过专用AES引擎实现加密保护
+- 安全非易失性存储：专用，存储各类密钥、熵源、计数器和指纹特征等用户敏感数据，通过专用I2C总线连接
+- UID & GID：制造过程中通过E-Fuse固化
 
 ---
 
@@ -230,6 +239,65 @@ CTR-DRBG 可以理解为一个AES加密过程，通过利用分组密码算法�
 在 A11 和更新版本以及 S3 和更新版本的 SOC 上，完整性树用于防止对安全至关重要的 Secure Enclave 内存的重放，通过内存保护密钥和存储在片上 SRAM 中的随机数进行身份验证。
 Secure Enclave 保存到文件系统的数据使用与 UID 纠缠的密钥和反重放计数器进行加密。防重放计数器存储在专用的非易失性存储器集成电路 (IC) 中。
 在配备 A12 和 S4 SoC 的设备上，Secure Enclave 与用于防重放计数器存储的安全存储集成电路 (IC) 配对。安全存储 IC 设计有不可变 ROM 代码、硬件随机数生成器、加密引擎和物理篡改检测。为了读取和更新计数器，Secure Enclave 和存储 IC 采用了确保对计数器的独占访问的安全协议。
+
+## 附录三：第二代安全存储组件的计数器加密箱的工作原理
+
+2020年10月，苹果突然发布了第二代安全存储组件，并紧急升级 A12、A13 以及 S5 芯片，据认为 GrayKey 密码破解设备有关系，其采用暴力破解方式实现iPhone解锁。
+
+第二代安全储存组件增加了计数器加密箱，包括：1个128位盐，1个128位密码验证器，1个8位计数器，1个 8 位最大尝试值，其工作原理如下：
+
+### 1. 创建阶段
+
+- 安全隔区：
+    发送数据：密码熵值（passcodeEntropyValue），最大重试次数（maxRetryTimes）
+    接受数据：密码箱熵值（lockboxEntropyValue）
+- 安全存储组件：
+    自有数据：安全存储组件的唯一加密密钥（SSCKey）
+    处理流程伪代码：
+
+    ``` js
+    saltValue = random(); // 使用随机数生成器生成盐值
+
+    // 利用提供的密码熵值、安全存储组件的唯一加密密钥和盐值中导出密码验证器值和密码箱熵值
+    (passcodeVerifierValue, lockboxEntropyValue) = func(passcodeEntropyValue, SSCKey, saltValue)
+
+    // 初始化计数器密码箱
+    SSC.count = 0；
+    SSC.maxRetryTimes = maxRetryTimes; 
+    SSC.passcodeVerifierValue = passcodeVerifierValue;  // 保存密码验证器值
+    SSC.saltValue = saltValue;                          // 保存盐值
+
+    return lockboxEntropyValue； // 向安全隔区返回密码箱熵值
+    ```
+
+### 2. 验证阶段
+
+- 安全隔区：
+    发送数据：密码熵值（passcodeEntropyValue）
+    接受数据：密码箱熵值（lockboxEntropyValue）
+- 安全存储组件：
+    自有数据：安全存储组件的唯一加密密钥（SSCKey），密码箱(SSC)
+    处理流程伪代码：
+
+    ``` js
+    SSC.count++; // 首先增加密码箱的计数器
+
+    if SSC.count > SSC.maxRetryTimes {  // 检查递增的计数器是否超过最大尝试值
+        reset(SSC);
+        exit -1 ; // 疑似重复攻击，完全清除计数器密码箱并异常退出
+    } else {
+        // 尝试使用用于创建计数器密码箱的相同算法导出密码验证器值和密码箱熵值
+        (passcodeVerifierValue, lockboxEntropyValue) = func(passcodeEntropyValue, SSCKey, SSC.saltValue);
+        if passcodeVerifierValu == SSC.passcodeVerifierValue {
+            SSC.count = 0;               
+            return lockboxEntropyValue; // 向安全隔区返回密码箱熵值并重置计数器
+        } else {
+            return false;               // 校验不成功，返回错误
+        }
+    }
+    ```
+
+值得注意的是，通过向安全隔区返回密码箱熵值（而非简单的是否），有利于实现与安全存储组件的双向认证，这也是高级别安全的重要特性！
 
 ---
 
