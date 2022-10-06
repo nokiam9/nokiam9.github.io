@@ -10,6 +10,8 @@ tags:
 
 ![Key](KEY-ARCH.jpg)
 
+![key](key.png)
+
 User Keybag的金鑰是由硬體UID(AES 256-bit hardware key)與Passcode兩個組合而成(除了No Protection Class Key)，
 Device Keybag的金鑰僅由UID衍生而成，
 Backup Keybag則是兩個組合都有。
