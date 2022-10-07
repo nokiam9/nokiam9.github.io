@@ -80,9 +80,29 @@ iOS 的所有用户数据文件都是加密存储的，Mac的情况复杂一些�
 - A类的技术代价高，估计使用范围有限，主要适用于日历、信息、邮件、照片、通讯录和健康数据等个人敏感信息
 - D类就是不加密了，比较适合系统备份，或USB外接存储
 
+> The contents of a file may be encrypted with one or more per-file (or per-extent) keys that are wrapped with a class key and stored in a file‘s metadata, which in turn is encrypted with the file system key. The class key is protected with the hardware UID and, for some classes, the user’s passcode. This hierarchy provides both flexibility and performance. For example, **changing a file‘s class only requires rewrapping its per-file key, and a change of passcode just rewraps the class key**。
+
 ## 三、钥匙包（keyBag）数据保护
 
-在 iOS、 iPadOS、 watchOS 和 Apple tvOS 上， 文件和钥匙串数据保护类的密钥通过密钥包进行收集和管理，包括以下类型：
+钥匙包是一种用于储存一组类密钥的数据结构，有以下5种类型，但数据格式完全相同，包括：
+
+- 标头：版本号，钥匙包类型，密钥包 UUID，HMAC （若密钥包已签名），用于封装类密钥的方法 ：配合盐和迭代计数使用 Tangling 及UID 或 PBKDF2。
+- 类密钥列表 ：密钥 UUID ；类 （哪个文件或钥匙串数据保护类）；封装类型 （仅 UID 派生密钥 ； UID 派生密钥和密码派生密钥）；封装的类密钥 ；非对称类的公钥。
+
+• A header containing: 
+    – Version (set to three in iOS 5) 
+    – Type (system, backup, escrow, or iCloud Backup) 
+    – Keybag UUID 
+    – An HMAC if the keybag is signed 
+    – The method used for wrapping the class keys—tangling with the UID or PBKDF2,
+    along with the salt and iteration count
+
+• A list of class keys: 
+– Key UUID 
+– Class (which file or Keychain Data Protection class this is) 
+– Wrapping type (UID-derived key only; UID-derived key and passcode-derived key) 
+– Wrapped class key 
+– Public key for asymmetric classes
 
 ### 1. 用户密钥包(User keyBag)
 
