@@ -35,6 +35,8 @@ CPU都是通用的，这些关键密钥都是个性化数据，必须找个存�
 
 > Effaceable Storage：accesses the underlying storage technology (for example, NAND) to directly address and erase a small number of blocks at a very low level.
 
+Hierarchical File System,分层文件系统
+
 在这个关键的区域，存储了许多关键数据：
 
 - EMF：文件系统主密钥，file-system master encryption key。其实是文件系统日志的加密密钥（记得磁盘格式化时Macos日志式文件系统！）
@@ -62,6 +64,12 @@ per-file key是实际用来加密文件的，那它也得被保护啊。这就�
 然后file’s metadata又被加密了，The metadata of all files in the file system are encrypted with a random key, which is created when iOS is first installed or when the device is wiped by a user. The file system key is stored in Effaceable Storage. 其实这个加密价值不大。主要是为了销毁密钥方便。ios界面上操作 “Erase all content and settings” option,就是干掉了这个密钥。最终无法获得加密的per-file key。per-file key到底被谁加密，环境很多。根据不同的环境使用不用的 class key。 class key 又被 hardware UID 保护，有些情况下是通过user’s passcode. 如果你的数据相关联pin，那就得靠他。这非常重要！！！
 
 多层密钥架构还有一个好处，就是对加密的内容更换密钥，无需重新加解密数据，那样效率很低，而只需更换加密key。
+
+有密碼保護與無密碼保護的iTunes備份最大的差異是在Keybag是否被UID Key加密的狀態下儲存於iTunes備份擋內。若iTunes備份檔沒有密碼保護，Keybag會被UID的金鑰加密後儲存於備份檔內(Keychain也是)，這代表這個備份檔案是無法恢復到其他的iOS裝置，僅能恢復到原有備份出來的裝置(因為每個iOS的UID皆不同)。若iTunes備份檔有密碼保護，則Keybag會用iTunes設定的密碼採PBKDF2加密函式反覆運算1千萬次來保護 Keybag ，因Keybag未與UID綁定，當升級新的iOS裝置時就必須採用密碼保護的iTunes備份檔才可進行資料移轉。
+
+有一个特定的储物柜叫做BAGI，它包含一个加密密钥，用来加密所谓的系统密钥包。密钥包包含许多加密“类密钥”，最终保护文件系统中的文件;它们在不同的时间被锁定和解锁，这取决于用户的活动。这让开发人员可以选择在设备被锁定时是否锁定文件，或者在输入密码后保持解锁，等等。文件系统上的每个文件都有自己的随机文件密钥，该密钥使用密钥包中的类密钥进行加密。密钥包的密钥是由BAGI储物柜中的密钥和用户的PIN的组合加密的。
+
+NAND还有另一个储物柜(苹果称之为4类键，我们称之为Dkey)。Dkey不使用用户PIN进行加密，在之前的iOS版本(<8)中，它被用作没有特别使用“数据保护”保护的任何文件的加密基础。根据设计，当时的大多数文件系统都使用Dkey而不是类键。因为密码中没有涉及PIN(就像密钥包中的类密钥一样)，任何具有根级别访问权限的人(比如Apple)都可以轻松地打开Dkey锁，从而解密使用它进行加密的文件系统的绝大多数。在iOS 8之前，只有那些明确启用了数据保护功能的文件才使用PIN保护，这并不包括大多数存储个人数据的苹果文件。在iOS 8中，苹果最终将文件系统的其余部分从Dkey储物柜中取出，现在几乎整个文件系统都在使用密钥包中的类密钥，这些密钥由用户的PIN进行保护。硬件加速的AES加密功能允许对整个硬盘进行非常快速的加密和解密，这在技术上从3GS开始就成为可能，然而，由于没有任何有效的原因(除了设计决定)，苹果决定在iOS 8之前不正确地加密文件系统。
 
 
 
