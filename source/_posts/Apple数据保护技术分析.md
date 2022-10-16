@@ -78,6 +78,30 @@ NAND还有另一个储物柜(苹果称之为4类键，我们称之为Dkey)。Dke
 ![更细架构](arch2.png)
 
 
+``` js
+HEADER
+  VERS = 4
+  TYPE = 0
+  UUID = 32 HEX
+  HMCK = 80 HEX
+  WRAP = 1
+  SALT = 40 Hex
+  ITER = 50000
+  TKMT = 0
+  SART = 98
+  UUID = 32 HEX
+KEYS
+  0:
+    CLAS = 1
+    WRAP = 3
+    KTYP = 0
+    WPKY = 80 HEX
+    UUID = 32 HEX
+
+... up to
+  9:
+```
+
 ---
 
 ## 参考文献
@@ -91,3 +115,8 @@ NAND还有另一个储物柜(苹果称之为4类键，我们称之为Dkey)。Dke
 - [iOS 破解分析 - 乌云](https://paper.seebug.org/papers/Archive/drops2/%E3%80%8AiOS%E5%BA%94%E7%94%A8%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E6%88%98%E3%80%8B%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%9A%E6%97%A0%E6%B3%95%E9%94%80%E6%AF%81%E7%9A%84%E6%96%87%E4%BB%B6.html)
 - [OS 安全攻防之敏感数据保护](https://heyonly.github.io/2017/07/02/iOS-%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E4%B9%8B%E6%95%8F%E6%84%9F%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4/)
 - [iOS backdoor](iOS_backdoor.pdf)
+- [FBE 文件级加密原理 - Android官方](https://source.android.com/docs/security/features/encryption/file-based?hl=zh-cn)
+- [你的安卓手机究竟是FDE加密还是FBE加密？](https://page.om.qq.com/page/O3yauEIx2l-9WrUkHgQgRUBw0)
+- [Android 檔案系統加密機制](https://www.kaotenforensic.com/android/android_encryption/)
+- [Android 系統基本架構 - 開機流程與分區說明](https://www.kaotenforensic.com/android/booting-partitions/)
+- [iOS 数据保护基础知识](https://www.pmbonneau.com/multiboot/dataprotection_basics.php)
