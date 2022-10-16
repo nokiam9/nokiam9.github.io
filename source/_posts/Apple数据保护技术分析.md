@@ -11,7 +11,7 @@ tags:
 
 ## 一、基础原理
 
-![简化架构](arch0.jpeg)
+![更细架构](arch2.png)
 
 - 每个文件创建时会生成一个`Per-file Key`，在文件写入闪存时通过硬件用`AES-XTS`算法加密
 - `Per-file Key`存储在文件元数据 Metadata 中，被`Class Key`和`Filesystem Key`加密
@@ -24,37 +24,118 @@ tags:
 - 如果数据保护级别是 D，存储加密后的`DKey`(Device Key，正好也是D)
 - 如果设置为`discarded`，则意味着密码失效，文件就永远无法打开，也是数据被抹去了...
 
-## 二、物理架构
+## 一. 安全隔区访问的`Secure Nonvolatile Storage`是什么？
 
 ![基本结构](arch3.jpg)
 
-### 1. 文件系统密钥、类密钥的存储位置在哪里？
-
-CPU都是通用的，这些关键密钥都是个性化数据，必须找个存储资源！
-秘密就藏在 NAND 闪存的1号扇区，Apple 将它作为隐藏的可安全擦除区域(Effaceable Storage)，就是安全隔区的技术架构中的`Secure nonvolatile storage`。当然，Apple官方文档说安全隔区通过专用 I2C 总线连接，但 NAND 闪存不太可能再增加一个物理接口，也许是复用吧。
-
+CPU都是通用的，这些关键密钥都是个性化数据，必须有一个存储设备提供数据持久化！
+秘密就藏在 NAND 闪存的1号扇区，Apple 将它作为隐藏的可安全擦除区域(Effaceable Storage)，就是安全隔区的技术架构中的`Secure nonvolatile storage`。
 > Effaceable Storage：accesses the underlying storage technology (for example, NAND) to directly address and erase a small number of blocks at a very low level.
 
-Hierarchical File System,分层文件系统
+当然，Apple官方文档说安全隔区通过专用 I2C 总线连接，但 NAND 闪存不太可能再增加一个物理接口，也许是复用吧。
+这个隐藏存储区域的容量是 960 Bytes，存储了3个关键数据。
 
-在这个关键的区域，存储了许多关键数据：
+### EMF：文件系统主密钥，File-system Master Encryption key（反序？）
 
-- EMF：文件系统主密钥，file-system master encryption key。其实是文件系统日志的加密密钥（记得磁盘格式化时Macos日志式文件系统！）
-    > 注意！EMF key存储时是明文，因此任何人在没有用户密码的情况下很容易解密HFS日志！
-- DKey：设备密钥，Device Key，来自于 UID 派生。
-    保护类型 D 号称无保护，但实际上通过 DKey 获得 UID 保护，。主要用于远程数据擦除。
-    > flash的特点是wear-leveling，删除数据很困难，但加密了就容易多了，直接删除密钥就OK
-- BAGI：KeyBag的密钥？
-- 设备密钥包：就是安全白皮书中说的 Device keyBag，也就是存储`Class Key`的数据文件，安全隔区正常启动并成功解密后，将其内容加载至内存。
+- 功能描述：**数据分区**的加密密钥，也被称为媒体密钥（media key）；iOS 5之后改名为`LwVM`
+- 构造方式：原生随机数，**在首次安装操作系统或被用户擦除设备时创建（ToDO：？）**
+- 加密方式：decrypt(EMF key, key 0x89B)
+- 储存位置：NAND闪存的可擦除区域
 
-### 2. 核心密钥的派生关系是什么？
+### Dkey：设备密钥，Device key
+
+- 功能描述：就是`NSProtectionNone` 类密钥的封装密钥，主要用于远程数据擦除
+- 构造方式：原生随机数
+- 加密方式：decrypt(Dkey, key 0x835)
+- 储存位置：NAND闪存的可擦除区域
+
+> 闪存Flash的特点是wear-leveling，删除数据很困难，但加密了就容易多了，直接删除密钥就OK
+
+### BAG1: system bag
+
+- 功能描述：系统密钥包（`/private/var/keybags/systembag.kb`）的文件级密钥，并包含一个初始向量IV
+- 构造方式：原生随机数
+- 加密方式：**不加密**。系统密钥包实际是一个数据文件，保存的Class Key还有一层加密
+- 储存位置：NAND闪存的可擦除区域
+
+## 二. 安全隔区有那些内置的核心密钥？
+
+![密钥关系图](keys.png)
+
+### UID & GID
+
+UID 密钥：嵌入在应用处理器 AES 引擎中的硬件密钥，对于每个设备都是唯一的。该密钥可以被 CPU 使用，但不能被 CPU 读取。可以从引导加载程序和内核模式使用。也可以通过修补 IOAESAccelerator 从用户态使用。如Apple iOS 安全文档中所述：
+
+“设备的唯一 ID (UID) 和设备组 ID (GID) 是在制造过程中融合到应用处理器中的 AES 256 位密钥。”
+“没有软件或固件可以直接读取它们；他们只能看到使用它们执行的加密或解密操作的结果”
+“UID 对每台设备都是唯一的，Apple 或其任何供应商都不会记录。”
+“UID 与设备上的任何其他标识符无关。”
+“一个 256 位 AES 密钥，在制造时已刻录到每个处理器中。”
+“它不能被固件或软件读取，只能由处理器的硬件 AES 引擎使用。”
+“为了获得真正的密钥，攻击者必须对处理器的芯片进行高度复杂且昂贵的物理攻击。”
+“UID 与设备上的任何其他标识符无关，包括但不限于 UDID。”
+UIDPlus 密钥：iOS 5 内核引用的新硬件密钥，在 iPhone 4S 上未使用，从 iPad 2 开始使用？
+
+`UDID = SHA1(Serial Number + ECID + LOWERCASE (WiFi Address) + LOWERCASE(Bluetooth Address))`
+
+### 派生密钥
+
+仅基于 UID 或 GID，安全隔区启动后在内存中临时计算，无需持久化存储。
+
+- Key 0x835 = AES(UID, 01010101010101010101010101010101)；保护`Class key`
+- Key 0x836 = AES(UID, 00E5A0E6526FAE66C5C1C6D4F16D6180)
+- Key 0x837 = AES(GID, 345A2D6C5050D058780DA431F0710E15)
+- Key 0x838 = AES(UID, 8C8318A27D7F030717D2B8FC5514F8E1)
+- Key 0x89B = AES(UID, 183e99676bb03c546fa468f51c0cbd49)；保护`EMF key`
+
+### Passcode Key
+
+Passcode Key是用戶輸入的passcode結合系統硬件的加密引擎以及PBKDF2(Password-Based Key Derivation Function)算法生成的。PBKDF2的基本原理是通過一個偽隨機函數，把明文和一個鹽值及加密重複次數作為輸入參數，然後重複進行運算，並最終產生密鑰。重複運算的會使得暴力破解的成本變得很高，而硬件key及鹽值的添加基本上斷絕了通過“彩虹表”攻擊的可能。
+
+由於硬件加密引擎的Key無法提取，所以只能在目標的機器上運行暴力破解程序進行破解，假設用戶的密碼設置的足夠複雜的話，那麼破解的周期就會變得非常久。
+
+KDF = Deriving Key from Password
+
+密码密钥：使用 Apple 自定义派生函数 (Tangling) 从用户密码或托管密钥包 BagKey 计算得出。用于从系统/托管密钥包中解开类密钥。解开钥匙包钥匙后立即从内存中删除。
+
+### Filesystem Key：文件系统密钥
+
+系统会使用文件系统密钥解密文件的元数据， 以显露出封装的文件独有密钥和表示它受哪个类保护的记号
+用于加密每个文件的元数据的密钥， 包括其类密钥。 存储在可擦除存储器中， 用于实现快速擦除， 并非用于保密目的。
+加密的文件系统密钥还会使用储存在可擦除存储器中的“可擦除密钥” 封装或者使用受安全隔区反重放机制保护的媒介密钥封装密钥进行封装。 此密钥不会提供数据的额外机密性。 相反， 它可以根据需要快速抹掉
+
+> 数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥进行加密， 该密钥在首次安装操作系统或用户擦除设备时创建。 
+> 此密钥由密钥封装密钥加密和封装， 密钥封装密钥由安全隔区长期储存， 只在安全隔区中可见。 每次用户抹掉设备时， 它都会发生变化。 
+> 在 A9 （及后续型号） SoC 上， 安全隔区依靠由反重放系统支持的熵来实现可擦除性， 以及保护其他资源中的密钥封装密钥。 有关更多信息， 请参阅安全非易失性存储器。
+
+文件系统密钥用于保护GPT分区表（GUID Partition Table）和系统分区（System partition）。
+Todo： 也被称为 NAND 密钥？
+文件系统密钥（f65dae950e906c42b254cc58fc78eece）
+
+### Metadata Key：元数据密钥
+
+元数据密钥(92a742ab08c969bf006c9412d3cc79a5)：加密 NAND 元数据（vfl/ftl 上下文和索引页）
+
+## 三、系统密钥包（System Bag）的工作原理是什么？
+
+- 文件内容被加密，每个文件都有独立的文件密钥`Per-file Key`
+- `Per-file Key`被`Class Key`加密，存储位置：该文件的元数据 Meatadata 的`cprotect`字段
+
+File is encrypted with a File Key
+File Key encrypted with Class Key
+Class Key encrypted with Passcode Key Passcode key derived from:
+    • •
+UID, 0x835, Passcode
+Keybag encrypted with Bag Key Entire disk encrypted with EMF Key 
+EMF key encrypted using 0x89b 
+0x89b and 0x835 derived from UID
+
+
 
 以 UID 为基础衍生出多个密钥，其中：
 
 - `key 0x89B`:
 - ，會衍生出多隻金鑰，其中兩隻金鑰、0x89B與0x835會用於Device Keybag上。0x89B功能同FDE，會透過EMF金鑰針對整個File System/Partition進行加密保護。而Passcode則是用戶自己產生，從iOS 9之後，預設的Passcode長度為6個數字，而0x835 Key與Passcode Key(從Passcode透過加密運算產生)會針對所有的Class Key進行加密(除了Class 4 Key外)。
-
-`Key 0x835 = AES_encrypt (UID, 0101..01)`。。也是UID直接计算出来的，也是和设备绑定的。
 
 data partition 每个文件创建时，Data Protection会创建一个256-bit key (“per-file” key) ，然后使用这个密钥借助硬件 AES engine。加密模式通常是AES CBC mode（不懂的看密码学）. 既然是CBC自然需要IV，IV怎么来， 用文件的块偏移计算LFSR（ linear feedback shift register (LFSR) calculated with the block offset into the file）, IIV也是加密存储，encrypted with the SHA-1 hash of the per-file key.
 
@@ -75,7 +156,7 @@ NAND还有另一个储物柜(苹果称之为4类键，我们称之为Dkey)。Dke
 
 
 ![基本结构](arch1.png)
-![更细架构](arch2.png)
+![简化架构](arch0.jpeg)
 
 
 ``` js
@@ -102,9 +183,42 @@ KEYS
   9:
 ```
 
+Hierarchical File System,分层文件系统
+
+
+---
+
+## 附录一：密钥派生函数 (KDF)
+
+在最一般的意义上，密钥派生函数 (KDF) 接受一个输入，通过一个特殊函数运行它，然后输出安全密钥材料。输入可以是密码或其他弱密钥材料。
+
+密钥派生函数 (KDF) 用于什么？
+密钥派生函数实际上可以做很多事情，包括：
+
+将密码和其他弱密钥材料来源转换为强密钥。这称为键拉伸。
+从单一的密钥材料来源生成大量密钥。这允许我们为密码系统的每个方面使用单独的密钥。
+安全地存储密码以保护它们免受黑客攻击。
+基于密码的密钥派生函数 (PBKDF) 如何工作？
+有许多不同的基于密码的密钥派生函数，但我们将通过讨论 PBKDF2 来演示它们的工作原理：
+
 ---
 
 ## 参考文献
+
+### 精品资料
+
+- [面向开发人员的实用密码学 - Svetlin Nako](https://cryptobook.nakov.com/mac-and-key-derivation/kdf-deriving-key-from-password)
+- [iPhone 4 取证工具包 - Github](https://github.com/nabla-c0d3/iphone-dataprotection)
+
+### 文档下载
+
+- [iOS加密技术高级分析](2016-BSidesROC-iOSCrypto.pdf)
+- [iOS 5的数据保护技术分析](0721C6_Andrey.Belenko_Evolution.of.iOS.Data.Protection.pdf)
+- [iPhone 数据保护技术分析 - Sogeti](iPhone_Data_Protection_in_Depth.pdf)
+- [iPhone 数据保护技术 - ELComSoft](OWASP_BeNeLux_Day_2011_-_A._Belenko_-_Overcoming_iOS_Data_Protection.pdf)
+- [iOS后门分析](iOS_backdoor.pdf)
+
+### 技术分析
 
 - [ios安全团队对ios安全的认识](https://bbs.pediy.com/thread-174935.htm)
 - [iOS资料保护机制简介](https://www.kaotenforensic.com/ios/ios-data-protection/)
@@ -120,3 +234,4 @@ KEYS
 - [Android 檔案系統加密機制](https://www.kaotenforensic.com/android/android_encryption/)
 - [Android 系統基本架構 - 開機流程與分區說明](https://www.kaotenforensic.com/android/booting-partitions/)
 - [iOS 数据保护基础知识](https://www.pmbonneau.com/multiboot/dataprotection_basics.php)
+- [拆解 iPhone 的黑客指南（第 3 部分](http://securityhorror.blogspot.com/2013/09/the-hackers-guide-to-dismantling-iphone_5697.html)
