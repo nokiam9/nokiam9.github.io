@@ -100,12 +100,14 @@ KDF = Deriving Key from Password
 
 ### Filesystem Key：文件系统密钥
 
-系统会使用文件系统密钥解密文件的元数据， 以显露出封装的文件独有密钥和表示它受哪个类保护的记号
+系统会使用文件系统密钥(the file system key)解密文件的元数据， 以显露出封装的文件独有密钥和表示它受哪个类保护的记号
 用于加密每个文件的元数据的密钥， 包括其类密钥。 存储在可擦除存储器中， 用于实现快速擦除， 并非用于保密目的。
-加密的文件系统密钥还会使用储存在可擦除存储器中的“可擦除密钥” 封装或者使用受安全隔区反重放机制保护的媒介密钥封装密钥进行封装。 此密钥不会提供数据的额外机密性。 相反， 它可以根据需要快速抹掉
+加密的文件系统密钥还会使用储存在可擦除存储器中的“可擦除密钥”( an “effaceable key”) 封装，或者使用受安全隔区反重放机制保护的媒介密钥封装密钥（a media key-wrapping key）进行封装。
+> the Secure Storage Component’s unique cryptographic key
+此密钥不会提供数据的额外机密性。 相反，它可以根据需要快速抹掉。
 
-> 数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥进行加密， 该密钥在首次安装操作系统或用户擦除设备时创建。 
-> 此密钥由密钥封装密钥加密和封装， 密钥封装密钥由安全隔区长期储存， 只在安全隔区中可见。 每次用户抹掉设备时， 它都会发生变化。 
+> 数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥(a random volume key)进行加密， 该密钥在首次安装操作系统或用户擦除设备时创建。
+> 此密钥由密钥封装密钥(a key wrapping key)加密和封装， 密钥封装密钥由安全隔区长期储存， 只在安全隔区中可见。 每次用户抹掉设备时， 它都会发生变化。
 > 在 A9 （及后续型号） SoC 上， 安全隔区依靠由反重放系统支持的熵来实现可擦除性， 以及保护其他资源中的密钥封装密钥。 有关更多信息， 请参阅安全非易失性存储器。
 
 文件系统密钥用于保护GPT分区表（GUID Partition Table）和系统分区（System partition）。
@@ -213,6 +215,7 @@ Hierarchical File System,分层文件系统
 ### 文档下载
 
 - [iOS加密技术高级分析](2016-BSidesROC-iOSCrypto.pdf)
+- [iOS Encryption Systems - 奥地利格拉茨技术大学论文](iOS_Encryption_Systems.pdf)
 - [iOS 5的数据保护技术分析](0721C6_Andrey.Belenko_Evolution.of.iOS.Data.Protection.pdf)
 - [iPhone 数据保护技术分析 - Sogeti](iPhone_Data_Protection_in_Depth.pdf)
 - [iPhone 数据保护技术 - ELComSoft](OWASP_BeNeLux_Day_2011_-_A._Belenko_-_Overcoming_iOS_Data_Protection.pdf)
