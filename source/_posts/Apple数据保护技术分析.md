@@ -117,6 +117,7 @@ Todo： 也被称为 NAND 密钥？
 ### Metadata Key：元数据密钥
 
 元数据密钥(92a742ab08c969bf006c9412d3cc79a5)：加密 NAND 元数据（vfl/ftl 上下文和索引页）
+![文件保险箱](FileVault.png)
 
 ## 三、系统密钥包（System Bag）的工作原理是什么？
 
