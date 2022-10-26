@@ -153,6 +153,67 @@ DK = Scrypt(salt, dk_len, n, r, p)
 其中的 salt 是一段随机的盐，dk_len 是输出的哈希值的长度。n 是 CPU/Memory 开销值，越高的开销值，计算就越困难。r 表示块大小，p 表示并行度。
 在高敏感的场景，推荐使用参数为 `n = 2 ** 20, r = 8`，此时需要消耗 1 GB内存。
 
+``` java
+Function scrypt
+   Inputs: This algorithm includes the following parameters:
+      Passphrase:                Bytes    string of characters to be hashed
+      Salt:                      Bytes    string of random characters that modifies the hash to protect against Rainbow table attacks
+      CostFactor (N):            Integer  CPU/memory cost parameter – Must be a power of 2 (e.g. 1024)
+      BlockSizeFactor (r):       Integer  blocksize parameter, which fine-tunes sequential memory read size and performance. (8 is commonly used)
+      ParallelizationFactor (p): Integer  Parallelization parameter. (1 .. 232-1 * hLen/MFlen)
+      DesiredKeyLen (dkLen):     Integer  Desired key length in bytes (Intended output length in octets of the derived key; a positive integer satisfying dkLen ≤ (232− 1) * hLen.)
+      hLen:                      Integer  The length in octets of the hash function (32 for SHA256).
+      MFlen:                     Integer  The length in octets of the output of the mixing function (SMix below). Defined as r * 128 in RFC7914.
+   Output:
+      DerivedKey:                Bytes    array of bytes, DesiredKeyLen long
+
+   Step 1. Generate expensive salt
+   blockSize ← 128*BlockSizeFactor  // Length (in bytes) of the SMix mixing function output (e.g. 128*8 = 1024 bytes)
+
+   Use PBKDF2 to generate initial 128*BlockSizeFactor*p bytes of data (e.g. 128*8*3 = 3072 bytes)
+   Treat the result as an array of p elements, each entry being blocksize bytes (e.g. 3 elements, each 1024 bytes)
+   [B0...Bp−1] ← PBKDF2HMAC-SHA256(Passphrase, Salt, 1, blockSize*ParallelizationFactor)
+
+   Mix each block in B Costfactor times using ROMix function (each block can be mixed in parallel)
+   for i ← 0 to p-1 do
+      Bi ← ROMix(Bi, CostFactor)
+
+   All the elements of B is our new "expensive" salt
+   expensiveSalt ← B0∥B1∥B2∥ ... ∥Bp-1  // where ∥ is concatenation
+ 
+   Step 2. Use PBKDF2 to generate the desired number of bytes, but using the expensive salt we just generated
+   return PBKDF2HMAC-SHA256(Passphrase, expensiveSalt, 1, DesiredKeyLen);
+
+Function ROMix(Block, Iterations)
+
+Create Iterations copies of X
+X ← Block
+for i ← 0 to Iterations−1 do
+   Vi ← X
+   X ← BlockMix(X)
+
+for i ← 0 to Iterations−1 do
+   j ← Integerify(X) mod Iterations 
+   X ← BlockMix(X xor Vj)
+
+return X
+
+Function BlockMix(B):
+
+   The block B is r 128-byte chunks (which is equivalent of 2r 64-byte chunks)
+   r ← Length(B) / 128;
+
+   Treat B as an array of 2r 64-byte chunks
+   [B0...B2r-1] ← B
+
+   X ← B2r−1
+   for i ← 0 to 2r−1 do
+      X ← Salsa20/8(X xor Bi)  // Salsa20/8 hashes from 64-bytes to 64-bytes
+      Yi ← X
+
+return ← Y0∥Y2∥...∥Y2r−2 ∥ Y1∥Y3∥...∥Y2r−1
+```
+
 Scrypt被用在很多新的POW的虚拟货币中，用以表示他们挖矿程序的公平性，比如Tenebrix、 Litecoin 和 Dogecoin等。据说以太坊的 PoW 共识算法也是利用 Scrypt 实现的，但事实上以太坊自己实现了一套哈希算法，叫做 Ethash 。
 
 > Scrypt 是一种资源消耗型的算法，但可以灵活地设定使用的内存大小
@@ -161,29 +222,47 @@ Scrypt被用在很多新的POW的虚拟货币中，用以表示他们挖矿程�
 
 2013 年，NIST（美国国家标准与技术研究院）举办了密码散列竞赛，宣布将选择一种新的标准算法，2015 年 Argon2 被宣布为最终获胜者，其他四种算法获得了特别认可：Catena、Lyra2、Makwa 和 yescrypt。
 
-Argon2 是一种密码散列函数，它总结了记忆硬函数设计中的最新技术，可用于对凭证存储、密钥派生或其他应用程序的密码进行散列。
-它有一个简单的设计，旨在实现最高的内存填充率和多个计算单元的有效使用，同时仍然提供对权衡攻击的防御（通过利用最新处理器的缓存和内存组织）。
+Argon2 的设计目标是实现最高的内存填充率和多个计算单元的有效使用，同时仍然提供对（GPU）权衡攻击的防御。
+Argon2 基于 AES 实现，现代的 x64 和 ARM 处理器已经在指令集扩展中实现了它，从而大大缩小了普通系统和攻击者系统之间的性能差距。
 
 Argon2 具有三个变体：Argon2i、Argon2d 和 Argon2id。
 
-- Argon2d：速度最快，并且使用依赖于数据的内存访问，对 GPU 破解攻击具有很强的抵抗力，适用于不受侧通道定时攻击威胁的应用程序（例如加密货币）
-- Argon2i：使用与数据无关的内存访问，这是密码散列和基于密码的密钥派生的首选，但它更慢，因为它通过更多的内存来防止权衡攻击
-- Argon2id：是 Argon2i 和 Argon2d 的混合体，使用了数据依赖和数据无关的内存访问的组合，这使得 Argon2i 对侧通道缓存定时攻击具有一定的抵抗力，而 Argon2d 对 GPU 破解攻击具有很大的抵抗力。
+- Argon2d：速度最快，并且使用依赖于数据的内存访问，是对抗侧信道攻击的最安全选择，适用于加密货币等场景
+- Argon2i：使用与数据无关的内存访问，速度最慢，内存消耗高，是抵抗 GPU 破解攻击的最安全选择，适用于密钥派生等场景
+- Argon2id：是 Argon2i 和 Argon2d 的混合体，使用了数据依赖和数据无关的内存访问的组合
 
-## 四、Dropbox 的三层加密策略
+下图是最简单的，非并行的Argon2的算法流程。
+![Argon2](argon2.png)
+以下是使用方法的示例：
+
+``` js
+Inputs:
+   password (P):       Bytes (0..232-1)    需要加密的原始信息P
+   salt (S):           Bytes (8..232-1)    Salt盐，建议16个字节
+   parallelism (p):    Number (1..224-1)   并行程度p，表示同时可以有多少独立的计算链同时运行
+   tagLength (T):      Number (4..232-1)   指定返回的Tag密文长度
+   memorySizeKB (m):   Number (8p..232-1)  内存大小, 单位是MB
+   iterations (t):     Number (1..232-1)   迭代器的个数t，用于提升运行速度
+   version (v):        Number (0x13)       版本号v，一个字节，取值0x13
+   key (K):            Bytes (0..232-1)    可选的，安全值key (Errata: PDF says 0..32 bytes, RFC says 0..232 bytes)
+   associatedData (X): Bytes (0..232-1)    可选的，附件数据
+   hashType (y):       Number (0=Argon2d, 1=Argon2i, 2=Argon2id)  Argon2的类型
+Output:
+   tag:                Bytes (tagLength)   运算结算密文, 长度是tagLength
+```
+
+## 四、典型案例：Dropbox 的三层加密策略
 
 Dropbox 公司曾公开分享过自己对用户账号的密码加密的策略，使用了三层加密，从里到外就像洋葱一样层层叠加。
 ![Dropbox](dropbox.png)
 
-- 首先，使用 SHA512 散列算法对明文密码进行散列。
-    有些 Bcrypt 实现会把散列值长度截至 72 字节，从而降低了密码的熵值，而有的则允许变长密码，这样容易受到 DoS 攻击。
-    使用 SHA512 散列可以得到固定长度的 512 字节散列值，避免了上述的两个问题。
-- 然后，针对散列值进行 Bcrypt 再次散列。
-    Bcrypt 散列算法是一种加盐（salt）散列算法，每个密码都有不同的“盐”，并且是分开存储的。
-    Bcrypt 速度比较慢，这样就很难通过硬件加速来加快破解速度。
-    Bcrypt 散列使用了成本因子 10（每个因子相当于每一步计算需要耗费 100 毫秒的时间），这样就更是加大了暴力破解的难度。
-- 最后，散列值会再次经过 AES256 算法的加密，这次加密会使用到对称秘钥，也就是所谓的“胡椒粉”（pepper）。
-    胡椒粉也是被单独存储的，所以就算密码被偷了，没有这些胡椒粉，谁也拿它们没办法。
+1. 首先，对明文密码使用 SHA512 散列算法，得到固定长度的 512 字节散列值。
+   某些 Bcrypt 实现可能默认散列值长度为 72 字节，从而降低了密码的熵值；而有的则允许变长密码，容易受到 DoS 攻击。
+2. 然后，针对散列值进行 Bcrypt 再次散列，每个密码都有不同的“盐”，并且是分开存储的
+   Bcrypt 速度比较慢，这样就很难通过硬件加速来加快破解速度。
+   Bcrypt 散列使用了成本因子 10（每个因子相当于每一步计算需要耗费 100 毫秒的时间），这样就更是加大了暴力破解的难度。
+3. 最后，散列值会再次经过 AES256 算法的加密，这次加密会使用到对称秘钥，也就是所谓的“胡椒粉”（pepper）。
+   pepper 与账号数据库分开存储，但所有账号的pepper都是统一的
 
 ---
 
