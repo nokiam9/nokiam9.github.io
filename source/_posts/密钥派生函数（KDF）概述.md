@@ -269,6 +269,7 @@ Dropbox 公司曾公开分享过自己对用户账号的密码加密的策略，
 ## 参考文献
 
 - [密码加密存储技术详解](https://www.ujcms.com/knowledge/509.html)
+- [加盐密码哈希：如何正确使用](https://www.tomczhen.com/2016/10/10/hashing-security/)
 - [PBKDF2算法原理](https://blog.csdn.net/HORHEART/article/details/119968850)
 - [Salted Password Hashing - Doing it Right](https://crackstation.net/hashing-security.htm)
 - [密码加密存储技术详解](https://www.ujcms.com/knowledge/509.html)
