@@ -21,6 +21,7 @@ derivedKey = keyDerivationFunction(originalKey, salt, difficulty)
 密钥派生函数接受一个密码（或其他弱密钥材料）作为输入，通过一个特殊函数运行它，然后输出安全密钥材料，关键点是增加了一个随机数作为加密因子，这个随机数被称为**盐（Salt）**，针对预计算攻击或rainbow表的随机数据，而`difficulty` 是难度系数的标记，例如迭代计算的次数。
 
 ![KDF](key-derivation-function.png)
+
 以Apple数据保护技术为例，就是将4-6位的用户锁屏密码`Passcode`转化为256位的密文`Passcode Key`。
 
 ### 2、密钥分离（Key Separation）
@@ -218,7 +219,7 @@ Scrypt被用在很多新的POW的虚拟货币中，用以表示他们挖矿程�
 
 > Scrypt 是一种资源消耗型的算法，但可以灵活地设定使用的内存大小
 
-### 5. Argon2
+### 5. Argon2（氩-18号元素）
 
 2013 年，NIST（美国国家标准与技术研究院）举办了密码散列竞赛，宣布将选择一种新的标准算法，2015 年 Argon2 被宣布为最终获胜者，其他四种算法获得了特别认可：Catena、Lyra2、Makwa 和 yescrypt。
 

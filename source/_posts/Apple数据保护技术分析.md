@@ -9,8 +9,6 @@ tags:
 根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为融合的基石。
 任何技术都有路径依赖，虽然 HFS+ 被认为是业界最烂的文件系统，但其许多重要的核心功能仍然需要 AFPS 继承下来，当然也为后续发展打下基础。
 
-## 一、基础原理
-
 ![更细架构](arch2.png)
 
 - 每个文件创建时会生成一个`Per-file Key`，在文件写入闪存时通过硬件用`AES-XTS`算法加密
@@ -24,7 +22,49 @@ tags:
 - 如果数据保护级别是 D，存储加密后的`DKey`(Device Key，正好也是D)
 - 如果设置为`discarded`，则意味着密码失效，文件就永远无法打开，也是数据被抹去了...
 
-## 一. 安全隔区访问的`Secure Nonvolatile Storage`是什么？
+## 一. 安全隔区有那些内置的核心密钥？
+
+![密钥关系图](keys.png)
+
+### 1. UID & GID
+
+- UID 是一个AES 256 位密钥，在 SOC 制造过程中写入一次性的**熔丝**，每个设备唯一且无法更改
+- UID 不能被固件或软件读取，只能由处理器的硬件 AES 引擎使用
+- Apple 或其任何供应商都不会记录 UID
+- UID 与设备上的任何其他标识符无关，包括但不限于 UDID
+
+> `UDID = SHA1(Serial Number + ECID + LOWERCASE (WiFi Address) + LOWERCASE(Bluetooth Address))`
+
+#### 派生的硬件密钥
+
+安全隔区启动时，将从 UID 派生出多个硬件密钥，加密因子是不同的固定盐。
+这些派生的硬件密钥都在内存中，无需持久化存储。
+在各种业务场景下，使用不同的派生密钥，而不是直接使用 UID，可以有效减少 UID 被泄露的风险。
+
+- Key 0x835 = AES(UID, 01010101010101010101010101010101)；保护`Class key`，也被称为`device key`
+- Key 0x836 = AES(UID, 00E5A0E6526FAE66C5C1C6D4F16D6180)
+- Key 0x837 = AES(GID, 345A2D6C5050D058780DA431F0710E15)
+- Key 0x838 = AES(UID, 8C8318A27D7F030717D2B8FC5514F8E1)
+- Key 0x89B = AES(UID, 183e99676bb03c546fa468f51c0cbd49)；保护`EMF key`
+
+### 2. Passcode & Passcode Key = KEK
+
+Passcode Key是用戶輸入的passcode結合系統硬件的加密引擎以及PBKDF2(Password-Based Key Derivation Function)算法生成的。PBKDF2的基本原理是通過一個偽隨機函數，把明文和一個鹽值及加密重複次數作為輸入參數，然後重複進行運算，並最終產生密鑰。重複運算的會使得暴力破解的成本變得很高，而硬件key及鹽值的添加基本上斷絕了通過“彩虹表”攻擊的可能。
+
+`Passcode key = PBKDF2(SHA256, passcode, UID, iter=1, outputLength=32)`
+![passcode-key-kdf](passcode-key.png)
+
+> KEK，密钥加密密钥，好像就是Passcode Key，但是可能只限于Mac OS，而非 iOS？
+
+Passcode-derived key (PDK) The encryption key derived from the entangling of the user password with the long-term SKP key and the UID of the Secure Enclave.
+
+### 3. xART key
+
+扩展反重放技术的密钥（eXtended Anti-Replay Technology key），就是第二代安全存储组件的**唯一加密密钥**.
+后续苹果为了封堵各种暴力猜测Passcode的方法，在64位设备的Secure Enclave中增加了定时器，针对尝试密码的错误次数，增加尝试的延时，即使断电重启也无法解决。
+
+
+## 二. 安全隔区访问的`Secure Nonvolatile Storage`是什么？
 
 ![基本结构](arch3.jpg)
 
@@ -35,14 +75,22 @@ CPU都是通用的，这些关键密钥都是个性化数据，必须有一个�
 当然，Apple官方文档说安全隔区通过专用 I2C 总线连接，但 NAND 闪存不太可能再增加一个物理接口，也许是复用吧。
 这个隐藏存储区域的容量是 960 Bytes，存储了3个关键数据。
 
-### EMF：文件系统主密钥，File-system Master Encryption key（反序？）
+### 1. EMF key = LwVM = VEK
 
-- 功能描述：**数据分区**的加密密钥，也被称为媒体密钥（media key）；iOS 5之后改名为`LwVM`
+在首次系统安装时创建的原生随机数 `FileSystem Key`，以 `key 0x89B` 包裹形成密文 `EMF Key`，并持久化存储在 NAND 的可擦除分区。
+EMF Key 负责数据分区（Data Partition）的加密，也称为卷宗加密密钥 VEK（Volume Encryptition Key）
+在iOS 5之后也被称为 `LwVM`（Lightweight Volume Manager）
+
+- 功能描述：**数据分区**（data partition）的加密密钥，
 - 构造方式：原生随机数，**在首次安装操作系统或被用户擦除设备时创建（ToDO：？）**
-- 加密方式：decrypt(EMF key, key 0x89B)
+- 构造方式：`EMF Key = AES(FileSystem Key, key 0x89B)`
 - 储存位置：NAND闪存的可擦除区域
 
-### Dkey：设备密钥，Device key
+> EMF key used for filesystem key is derived from key 0x89B - can be read by reading the LWVM locker(0x4C77564d) in EffaceableStorage - see iphone data protection project for how get this.
+
+### 2. Dkey
+
+设备密钥，Device key
 
 - 功能描述：就是`NSProtectionNone` 类密钥的封装密钥，主要用于远程数据擦除
 - 构造方式：原生随机数
@@ -51,42 +99,67 @@ CPU都是通用的，这些关键密钥都是个性化数据，必须有一个�
 
 > 闪存Flash的特点是wear-leveling，删除数据很困难，但加密了就容易多了，直接删除密钥就OK
 
-### BAG1: system bag
+### 3. BAG1: system bag
 
 - 功能描述：系统密钥包（`/private/var/keybags/systembag.kb`）的文件级密钥，并包含一个初始向量IV
 - 构造方式：原生随机数
 - 加密方式：**不加密**。系统密钥包实际是一个数据文件，保存的Class Key还有一层加密
 - 储存位置：NAND闪存的可擦除区域
 
-## 二. 安全隔区有那些内置的核心密钥？
+系统密钥包有效负载密钥 （+初始化向量）。未加密地存储在可擦除区域。
 
-![密钥关系图](keys.png)
+### 4. NAND Key
 
-### UID & GID
+负责加密GPT分区表和系统分区表，也被称为媒体密钥（media key）
 
-UID 密钥：嵌入在应用处理器 AES 引擎中的硬件密钥，对于每个设备都是唯一的。该密钥可以被 CPU 使用，但不能被 CPU 读取。可以从引导加载程序和内核模式使用。也可以通过修补 IOAESAccelerator 从用户态使用。如Apple iOS 安全文档中所述：
+## 三、系统密钥包（System Bag）的工作原理是什么？
 
-“设备的唯一 ID (UID) 和设备组 ID (GID) 是在制造过程中融合到应用处理器中的 AES 256 位密钥。”
-“没有软件或固件可以直接读取它们；他们只能看到使用它们执行的加密或解密操作的结果”
-“UID 对每台设备都是唯一的，Apple 或其任何供应商都不会记录。”
-“UID 与设备上的任何其他标识符无关。”
-“一个 256 位 AES 密钥，在制造时已刻录到每个处理器中。”
-“它不能被固件或软件读取，只能由处理器的硬件 AES 引擎使用。”
-“为了获得真正的密钥，攻击者必须对处理器的芯片进行高度复杂且昂贵的物理攻击。”
-“UID 与设备上的任何其他标识符无关，包括但不限于 UDID。”
-UIDPlus 密钥：iOS 5 内核引用的新硬件密钥，在 iPhone 4S 上未使用，从 iPad 2 开始使用？
+- 文件内容被加密，每个文件都有独立的文件密钥`Per-file Key`
+- `Per-file Key`被`Class Key`加密，存储位置：该文件的元数据 Meatadata 的`cprotect`字段
 
-`UDID = SHA1(Serial Number + ECID + LOWERCASE (WiFi Address) + LOWERCASE(Bluetooth Address))`
+File is encrypted with a File Key
+File Key encrypted with Class Key
+Class Key encrypted with Passcode Key Passcode key derived from:
+    • •
+UID, 0x835, Passcode
+Keybag encrypted with Bag Key Entire disk encrypted with EMF Key 
+EMF key encrypted using 0x89b 
+0x89b and 0x835 derived from UID
 
-### 派生密钥
+---
 
-仅基于 UID 或 GID，安全隔区启动后在内存中临时计算，无需持久化存储。
 
-- Key 0x835 = AES(UID, 01010101010101010101010101010101)；保护`Class key`
-- Key 0x836 = AES(UID, 00E5A0E6526FAE66C5C1C6D4F16D6180)
-- Key 0x837 = AES(GID, 345A2D6C5050D058780DA431F0710E15)
-- Key 0x838 = AES(UID, 8C8318A27D7F030717D2B8FC5514F8E1)
-- Key 0x89B = AES(UID, 183e99676bb03c546fa468f51c0cbd49)；保护`EMF key`
+salads
+
+- `BAG1`: System Keybag payload key and IV
+- `Dkey`: NSProtectionNone class master key
+- `EMF!`: Filesystem encryption key
+
+
+### ios 4
+
+- Only User partition is encrypted
+- Available protection classes:
+  - NSProtectionNone
+  - NSProtectionComplete
+- When no protection class set, EMF key is used – Filesystem metadata and unprotected files
+  - Transparent encryption and decryption (same as pre-iOS 4)
+- When protection class is set, per-file random key is used
+  - File key protected with master key is stored in extended attribute com.apple.system.cprotect
+
+### ios Storage
+
+• New partition scheme
+– “LwVM” – Lightweight Volume Manager
+• Any partition can be encrypted • New protection classes
+– NSFileProtectionCompleteUntilFirstUserAuthentication – NSFileProtectionCompleteUnlessOpen
+• IV for file encryption is computed differently
+
+
+
+### 2. EMF key
+
+密钥：数据分区加密密钥。也称为“媒体密钥”。通过密钥0x89B加密存储
 
 ### Passcode Key
 
@@ -98,7 +171,66 @@ KDF = Deriving Key from Password
 
 密码密钥：使用 Apple 自定义派生函数 (Tangling) 从用户密码或托管密钥包 BagKey 计算得出。用于从系统/托管密钥包中解开类密钥。解开钥匙包钥匙后立即从内存中删除。
 
-### Filesystem Key：文件系统密钥
+
+
+在支持数据保护的 Apple 设备上， 密钥加密密钥 (KEK) 既受系统上软件测量值的保护 （或密封）， 又与只能从安全隔区获得的 UID 绑定。 在搭载 Apple 芯片的 Mac 上， 对 KEK 的保护通过整合有关系统安全性策略的信息进一步得到了加强， 因为 macOS 支持其他平台不支持的关键安全性策略更改 （例如， 停用安全启动或 SIP）。 在搭载 Apple 芯片的 Mac 上， 由于文件保险箱的实施使用数据保护 （C 类）， 此保护涵盖文件保险箱密钥。
+On Apple devices that support Data Protection, the key encryption key (KEK) is protected (or sealed) with measurements of the software on the system, as well as being tied to the UID available only from the Secure Enclave.
+
+xART An abbreviation for eXtended Anti-Replay Technology.
+
+![SKP](SKP.png)
+![SKP](SKP-C.png)
+
+PDK = Passcode-derived key，用户密码派生密钥
+KEK = key encryption key，密钥加密密钥
+VEK = volume encryption key，卷宗加密密钥
+xART key = eXtended Anti-Replay Technology key，扩展反重放技术的密钥，就是第二代安全存储组件的**唯一加密密钥**
+SMRK = the crypto-hardware-derived System Measurement Root Key (SMRK)，系统测量根密钥，从加密硬件派生
+SMDK = the system measurement device key，系统测量设备密钥，
+
+关键0x835：由内核在引导时计算。仅用于 iOS 3 及更低版本中的钥匙串加密。用作“设备密钥”，用于保护 iOS 4 中的类密钥。
+
+key835 = AES(UID, bytes("01010101010101010101010101010101"))
+关键0x89B：由内核在引导时计算。用于加密存储在闪存上的数据分区键。防止直接从 NAND 芯片读取数据分区键。
+
+key89B = AES(UID, bytes("183e99676bb03c546fa468f51c0cbd49"))
+
+DKey： NSProtectionNone class key.用于包装 iOS 4 中数据分区上“始终可访问”文件的文件名。由密钥0x835包装存储
+
+BAG1 密钥：系统密钥包有效负载密钥 （+初始化向量）。未加密地存储在可擦除区域。
+
+密码密钥：使用 Apple 自定义派生函数 （Tangling） 从用户密码或托管密钥包 BagKey 计算得出。用于从系统/托管密钥包中解开类密钥。钥匙包钥匙解开包装后立即从内存中删除。
+
+文件系统密钥（f65dae950e906c42b254cc58fc78eece）：用于加密分区表和系统分区（图中称为“NAND 密钥”）
+
+元数据密钥（92a742ab08c969bf006c9412d3cc79a5）：加密NAND元数据（vfl / ftl上下文和索引页面）
+
+---
+The keys used to access file data are stored on disk in a wrapped state. You access these keys through a chain of key-unwrapping operations. The volume encryption key (VEK) is the default key used to access encrypted content on the volume. **The key encryption key (KEK) is used to unwrap the VEK**. The KEK is unwrapped in one of several ways:
+
+- User password. The user enters their password, which is used to unwrap the KEK.
+- Personal recovery key. This key is generated when the drive is formatted and is saved by the user on a paper printout. The string on that printout is used to unwrap the KEK.
+- Institutional recovery key. This key is enabled by the user in Settings and allows the corresponding corporate master key to unwrap the KEK.
+- iCloud recovery key. This key is used by customers working with Apple Support, and isnʼt described in thisdocument.
+
+For example, to access a file given the userʼs password on a volume that uses per-volume encryption, the chain of key unwrapping and data decryption consists of the following high-level operations:
+
+1. Unwrap the KEK using the userʼs password.
+2. Unwrap the VEK using the KEK.
+3. Decrypt the file-system B-tree using the VEK.
+4. Decrypt the file data using the VEK.
+
+The detailed steps are described in Accessing Encrypted Objects below.
+
+> KEK - 密钥加密密钥，似乎就是 Passcode Key；VEK - 卷宗加密密钥，似乎就是 EMF Key
+---
+
+### FileSystem Key：文件系统密钥
+
+- 用于加密 `GPT`分区表 和 系统分区表`System Partition`
+- 也被称为 `NAND Key`
+
+> file system key The key that encrypts each file’s metadata, including its class key. This is kept in Effaceable Storage to facilitate fast wipe, rather than confidentiality.
 
 系统会使用文件系统密钥(the file system key)解密文件的元数据， 以显露出封装的文件独有密钥和表示它受哪个类保护的记号
 用于加密每个文件的元数据的密钥， 包括其类密钥。 存储在可擦除存储器中， 用于实现快速擦除， 并非用于保密目的。
@@ -119,19 +251,7 @@ Todo： 也被称为 NAND 密钥？
 元数据密钥(92a742ab08c969bf006c9412d3cc79a5)：加密 NAND 元数据（vfl/ftl 上下文和索引页）
 ![文件保险箱](FileVault.png)
 
-## 三、系统密钥包（System Bag）的工作原理是什么？
 
-- 文件内容被加密，每个文件都有独立的文件密钥`Per-file Key`
-- `Per-file Key`被`Class Key`加密，存储位置：该文件的元数据 Meatadata 的`cprotect`字段
-
-File is encrypted with a File Key
-File Key encrypted with Class Key
-Class Key encrypted with Passcode Key Passcode key derived from:
-    • •
-UID, 0x835, Passcode
-Keybag encrypted with Bag Key Entire disk encrypted with EMF Key 
-EMF key encrypted using 0x89b 
-0x89b and 0x835 derived from UID
 
 
 
@@ -187,6 +307,20 @@ KEYS
 ```
 
 Hierarchical File System,分层文件系统
+
+---
+
+[https://www.adeleda.com/ios-forensics-en.html]
+
+从iPhone 3GS开始，iDevices包含一个加密芯片，可以对文件系统进行硬件加密。 NAND芯片是按如下方式组织的闪存：
+
+- 块 0：包含 LLB
+- 块 1：包含以下加密密钥：
+  - EMF：用于加密文件系统
+  - Dkey：用于加密保护类“NSFileProtectionNone”的主密钥（大多数文件）
+  - BAG1：与密码一起使用，为其他主密钥生成加密密钥（对于邮件等文件...
+- 块 16 到 （END-15） 块：包含 HFS+ 文件系统
+- 最后 15 个区块：保留给 Apple 用于其他用途。
 
 ---
 
