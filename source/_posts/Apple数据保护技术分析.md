@@ -181,12 +181,23 @@ xART An abbreviation for eXtended Anti-Replay Technology.
 ![SKP](SKP.png)
 ![SKP](SKP-C.png)
 
-PDK = Passcode-derived key，用户密码派生密钥
+SKP = 密封密钥保护，也称为操作系统绑定密钥
 KEK = key encryption key，密钥加密密钥
 VEK = volume encryption key，卷宗加密密钥
 xART key = eXtended Anti-Replay Technology key，扩展反重放技术的密钥，就是第二代安全存储组件的**唯一加密密钥**
+
 SMRK = the crypto-hardware-derived System Measurement Root Key (SMRK)，系统测量根密钥，从加密硬件派生
 SMDK = the system measurement device key，系统测量设备密钥，
+
+PDK = Passcode-derived key，用户密码派生密钥
+？ Key Wrapping Key, 密钥封装密钥。
+  随机宗卷密钥由密钥封装密钥加密和封装。
+  密钥封装密钥由安全隔区长期储存， 只在安全隔区中可见。 每次用户抹掉设备时， 它都会发生变化。
+
+> 在 Apple A10 及后续型号的 SoC 上， PKA 支持操作系统绑定密钥， 也称为密封密钥保护 (SKP)。
+> 这些密钥基于设备 UID 和设备上所运行 sepOS 的哈希值组合生成。
+> 哈希值由安全隔区 Boot ROM 提供， 在Apple A13 及后续型号的 SoC 上， 则由安全隔区启动监视器提供。
+> 这些密钥还用于在请求特定 Apple 服务时验证 sepOS 版本， 以及用于在系统发生重大更改而未获得用户授权时通过协助阻止访问密钥材料来提高受密码保护数据的安全性。
 
 关键0x835：由内核在引导时计算。仅用于 iOS 3 及更低版本中的钥匙串加密。用作“设备密钥”，用于保护 iOS 4 中的类密钥。
 
@@ -321,6 +332,32 @@ Hierarchical File System,分层文件系统
   - BAG1：与密码一起使用，为其他主密钥生成加密密钥（对于邮件等文件...
 - 块 16 到 （END-15） 块：包含 HFS+ 文件系统
 - 最后 15 个区块：保留给 Apple 用于其他用途。
+
+---
+
+Effaceable lockers
+EMF!
+• Data partition encryption key, encrypted with key 0x89B
+• Format: length (0x20) + AES(key89B, emfkey)
+Dkey
+• NSProtectionNone class key, wrapped with key 0x835
+• Format: AESWRAP(key835, Dkey)
+BAG1
+• System keybag payload key
+• Format : magic (BAG1) + IV + Key
+• Read from userland by keybagd to decrypt systembag.kb
+• Erased at each passcode change to prevent attacks on previous keybag
+
+---
+
+Data Wipe
+Operation
+• mobile_obliterator daemon
+• Erase DKey by calling MKBDeviceObliterateClassDKey
+• Erase EMF key by calling selector 0x14C39 in EffacingMediaFilter service
+• Reformat data partition
+• Generate new system keybag
+• High level of confidence that erased data cannot be recovered
 
 ---
 
