@@ -102,7 +102,7 @@ struct cprotect {
  * On-disk structure written as the per-file EA payload 
  * All on-disk multi-byte fields for the CP XATTR must be stored
  * little-endian on-disk.  This means they must be endian swapped to
- * L.E on getxattr() and converted to LE on setxattr().	
+ * L.E on getxattr() and converted to LE on setxattr().
  */
 struct cp_xattr {
     u_int16_t   xattr_major_version;
@@ -332,6 +332,10 @@ PROTECTION_CLASSES={
     `Class key = AES_DECRYPT(Key 0x835, Class Key!)`
 6. 现在类密钥已经出现在内存中，可以用于解封文件 metadata 中的`per-file key`
 
+## 四、遗留问题
+
+1. systembag.kb 文件头部包含的 Salt 和 HMCK 字段，是否已经转移到安全隔区的第二代存储组件了呢？
+
 ---
 
 ## 附录：有意思的一些企业信息
@@ -350,7 +354,6 @@ PROTECTION_CLASSES={
 6. 这是一篇比较完整的技术论文，Peter Teufl 等作者来自于奥地利格拉茨技术大学。
   [iOS加密系统 - iOS Encryption Systems](iOS_Encryption_Systems.pdf)
   
-
 ---
 
 ## 参考文献
