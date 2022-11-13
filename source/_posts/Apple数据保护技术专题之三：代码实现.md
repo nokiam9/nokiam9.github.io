@@ -6,7 +6,13 @@ tags:
 
 Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。
 
-1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，甚至不支持文件名的大小写敏感，被业界嘲笑为**史上最烂的文件系统**。
+1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：
+
+- 大小写不敏感（最新版本已支持大小写敏感，但默认配置仍未不敏感）
+- 不支持对数据内容进行 checksum 校验
+- timestamp 只支持到秒级
+- 不支持并发访问，不支持快照，不支持 sparse file
+- 使用 big-endian 进行存储
 
 2007年，乔布斯发布了第一代 iPhone，其搭载的操作系统称为 iOS，而个人电脑的操作系统被称为 MacOS。由于 iOS 其实是 MacOS 的一个定制化版本，HFS 只能提供类似 FDE 的全盘加密技术，无法在底层提供文件级别的数据加密能力，许多新功能只能基于上层文件的数据结构，以软件补丁的形式强行实现，开发效率和安全性存在严重隐患。
 
@@ -24,7 +30,9 @@ Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Lin
 - inode table：记录文件的权限与属性,一个文件占用一个inode,同时记录此文件的数据所在的 block 号码
 - data block：实际记录文件的内容,若文件太大时,会占用多个 block
 
-Apple 公开了部分操作系统的源代码，可以发现 HFS 仅仅是将 inode 改名为 cnode，但增加了一个 `c_cpentry` 字段用于数据保护。
+### 1. inode 的数据结构
+
+Apple 公开了操作系统的部分源代码，可以发现 HFS 仅仅是将 inode 改名为 cnode，但增加了一个 `c_cpentry` 字段用于数据保护。
 请参见[https://opensource.apple.com/source/xnu/xnu-1699.32.7/bsd/hfs/hfs_cnode.h](https://opensource.apple.com/source/xnu/xnu-1699.32.7/bsd/hfs/hfs_cnode.h)
 
 ``` c
@@ -71,8 +79,10 @@ struct cnode {
 };
 ```
 
-进一步分析 `cprotect` 的数据结构，包含：文件独有密钥 `cp_persistent_key`（密文），类标记 `cp_pclass`，并且有持久化存储和运行态的两种形式。
-请参见[https://opensource.apple.com/source/xnu/xnu-1699.32.7/bsd/sys/cprotect.h.auto.html](https://opensource.apple.com/source/xnu/xnu-1699.32.7/bsd/sys/cprotect.h.auto.html)
+### 2. cprotect 的数据结构
+
+进一步分析 `cprotect` 的数据结构，包含了文件独有密钥 `cp_persistent_key`（密文）和类标记 `cp_pclass`，并且有持久化存储和运行态的两种格式。
+请参见[https://opensource.apple.com/source/xnu/xnu-1699.32.7/bsd/sys/cprotect.h](https://opensource.apple.com/source/xnu/xnu-1699.32.7/bsd/sys/cprotect.h)
 
 ``` c
 typedef struct cprotect *cprotect_t;
@@ -115,23 +125,84 @@ struct cp_root_xattr {
 };
 ```
 
-## 二、设备密钥包 - Device Bag
+## 二、核心密钥提取
 
-系统密钥包是一个加密的 `plist` 格式的二进制文件，存储了所有类密钥的数据。
-默认存储路径是 `/private/var/keybags/systembag.kb`，如果是U盘引导启动，可能位于`/mnt/keybags/systembag.kb`。
+Github 上有一个取证软件包可以读取早期的 iOS 系统数据。请参见[https://github.com/nabla-c0d3/iphone-dataprotection](https://github.com/nabla-c0d3/iphone-dataprotection)。
+基本原理是通过加载修改后的 IPSW 固件，将设备强制进入 DFU 模式，然后通过 SSH 命令行连接到恢复内存盘 (Restore Ramdisk)，从而直接获取系统控制权。
+这些工具只能适配 iPhone 4 （iOS 5）之前的版本，随后苹果公司升级软件就无法越狱了。
 
-Github 上有一个 iOS 取证软件包可以读取早期的 iOS 系统数据。
-请参见[https://github.com/nabla-c0d3/iphone-dataprotection](https://github.com/nabla-c0d3/iphone-dataprotection)。
-后续，又有人基于该软件包开发了一个读取设备密钥包的小工具。
+其中有一段 Python 代码用于读取`Effaceable Storge` 的三个核心密钥，文件路径是 `python_scripts/keystore/effaceable.py`
+
+``` py
+Dkey = 0x446B6579
+EMF = 0x454D4621
+BAG1 = 0x42414731
+DONE = 0x444f4e45   #locker sentinel
+
+# Effaceable Stroge 的数据结构
+# MAGIC (kL) | LEN (2bytes) | TAG (4) | DATA (LEN)
+Locker = Struct("Locker",
+                String("magic",2),
+                ULInt16("length"),
+                Union("tag",
+                      ULInt32("int"),
+                      String("tag",4))
+                ,
+                String("data", lambda ctx: ctx["length"])
+                )
+
+Lockers = RepeatUntil(lambda obj, ctx: obj.tag.int == DONE, Locker)
+
+class EffaceableLockers(object):
+    def __init__(self, data):
+        self.lockers = {}
+        for l in Lockers.parse(data):
+            tag = l.tag.int & ~0x80000000
+            tag = struct.pack("<L", tag)[::-1]
+            self.lockers[tag] = l.data
+    
+    # 获取 DKey，使用 AESUnwrap 算法解包
+    # 注意！ Python 的 AESUnwrap 函数的入参顺序与 RFC 3394 规范正好相反
+    def get_DKey(self, k835):
+        if self.lockers.has_key("Dkey"):        
+            return AESUnwrap(k835, self.lockers["Dkey"])
+
+    # 获取 EMF，很明显兼容了 LwVM，使用 AESdecryptCBC 算法解密
+    def get_EMF(self, k89b):
+        if self.lockers.has_key("LwVM"):
+            lwvm = AESdecryptCBC(self.lockers["LwVM"], k89b)
+            return lwvm[-32:]
+        elif self.lockers.has_key("EMF!"):
+            return AESdecryptCBC(self.lockers["EMF!"][4:], k89b)
+```
+
+下图是 Effaceable Stroge 的数据示例，但是由于版本不同，与上面的 Python 代码并不一致。
+浅蓝色是 length ，红色是 tag 标记，注意HFS 是大端字节顺序。
+第一个标记：0x42414731 = `BAG1`，长度 0x0034 = 52 个字节
+第二个标记：0xC46B6579 = `key`，长度 0x0028 = 40 个字节
+第三个标记：0xC54D4621 = `EMF!`，长度 0x0024 = 36 个字节
+第四个标记：0x444F4E45 = `DONE`，长度 0x0000，这就是结束了！
+
+![plog](plog.png)
+
+## 三、设备密钥包 - Device Bag
+
+系统密钥包是一个加密的 `plist` 格式的二进制文件，存储了所有类密钥的数据，Apple 系统的数据解密实现方式见下图。
+
+![Daemon](daemon.png)
+
+基于上面的取证工具包，找到了一个读取设备密钥包的小工具。
 请参见[https://github.com/russtone/systembag.kb](https://github.com/russtone/systembag.kb) 。
 
 ### 1. Device Bag 的文件级解密
 
+系统密钥包的默认存储路径是 `/private/var/keybags/systembag.kb`，如果是U盘引导启动，可能位于`/mnt/keybags/systembag.kb`。
 参考其操作步骤，Device Bag 文件解封的处理流程是：
 
 1. 安全隔区从`Effaceable Storage` 区域提取 `BAG1` ，以获得 key 和 iv 初始向量
-    ![二进制文件参考](keybag.png)
 2. 系统进程`MKBPayload`读取 `systembag.kb` 文件内容并进行解密，获得所有类密钥的密文` Class Key! `
+
+![二进制文件参考](keybag.png)
 
 ``` shell
 $ get_bag1
@@ -215,7 +286,10 @@ KEYS
     WPKY = 44389e92846f2c7bf1294be2fcaf88153638a881197590df03e0303b1af6ac47
 ```
 
-### 2. Class Key 的解封
+请注意：
+
+- 缺少 Class 4 的类密钥，因为 DKey 的存储路径已经转移到 Effaceable Storage
+- 前面 5 个数据项是 Class 类密钥，后面 6 个数据项是 KeyChain 钥匙串的密钥
 
 ``` py
 PROTECTION_CLASSES={
@@ -223,7 +297,7 @@ PROTECTION_CLASSES={
     1:"NSFileProtectionComplete",
     2:"NSFileProtectionCompleteUnlessOpen",
     3:"NSFileProtectionCompleteUntilFirstUserAuthentication",
-    4:"NSFileProtectionNone",       # 已废弃，DKey = {key, iv}，改为存储在 Effaceable Storage
+    4:"NSFileProtectionNone",       # 已废弃，DKey 的存储位置改为 Effaceable Storage
     5:"NSFileProtectionRecovery?",  # 未使用
     # 钥匙串类型的定义
     6: "kSecAttrAccessibleWhenUnlocked",
@@ -235,87 +309,56 @@ PROTECTION_CLASSES={
 }
 ```
 
-对于这些 `Class Key!`, 后续是如何解密的呢？
+### 2. Class Key 的解封
 
-1. 用户开机时必须手工输入 passcode
-2. 安全隔区再次计算 Passcode Key
+![核心流程](unlock2.png)
+对于这些 `Class Key!`, 有3种解密方式：
+
+- WRAP = 1 ：只有 Device Key 保护，通过 AES_Decrypt 算法解密
+- WRAP = 2 ：只有 Passcode Key 保护，通过 AES_Unwrap 算法解封
+- WRAP = 3 ：模式1 + 模式2，首先使用 Passcode Key 解封，再使用 Device Key 解密
+
+更加具体的算法描述，请参见下图。
+![unlock](unlock.png)
+
+1. 用户（开机时）必须手工输入 passcode
+2. 安全隔区提取 Salt 盐值和 Iter 迭代次数，再次计算 Passcode Key
     `Passcode Key = PBKDF2(passcode, salt, iter, outputLength=32)`
-3. 安全隔区**逐一**解封类密钥
-    `Class Key = AES_DECRYPT(Passcode Key, AES_UNWRAP(Key 0x835, Class Key!))`
-4. 在所有类密钥解封完成后，与`systembag.kb`文件头部的 `HMCK`进行比较，
-    如果失败，可能是passcode 输入错误，或者是硬件被更换。
-    如果成功，则可以使用类密钥去解封数据文件的`per-file key`
-
-### 3. Class Key 的使用
-
-用户开机成功后，类密钥就保留在内存中，后续将根据不同事件触发相应的处理流程。
-
-#### 主动锁屏 & 超时锁屏
-
-• FileProtectionComplete key removed from RAM
-• All Complete protection files now unreadable
-• Other keys remain present
-• Allows connection to Wi-Fi 
-• Lets you see contact information when phone rings
-• [I once found an edge case where this doesn’t happen…]
-
-- 设备锁屏 10 秒后，Class key A 将从内存中删除，此时无法访问 `NSFileProtectionComplete` 保护类型的文件（例如照片、记事本等数据）
-- `NSFileProtectionCompleteUntilFirstUserAuthentication`类型的文件仍然可以访问（这是所有第三方 APP 数据文件的默认类型），因为Class key C 在内存中
-- `NSFileProtectionCompleteUnlessOpen` 是为了解决有些文件可能需要在锁屏后继续写入的需求，例如后台下载邮件附件等，
-    此行为通过使用非对称椭圆曲线加密技术实现，将临时公钥与封装的文件独有密钥一起储存。一旦文件关闭，`per-file key`就会从内存中擦除。
-    要再次打开该文件，系统会使用私钥和文件的临时公钥重新创建共享密钥，用来解开`per-file key！`的封装， 然后用`per-file key`来解密文件
-
-#### 用户重设 passcode
-
-• The system keybag is duplicated
-• Class keys wrapped using new passcode key (encrypted 
-with 0x835 key, wrapped with passcode)
-• New BAG key created and stored in effaceable storage
-• Old BAG key thrown away
-• New keybag encrypted with BAG key
-
-#### 用户擦除 NAND 数据
-
-• mobile_obliterator daemon
-• Erase DKey by calling MKBDeviceObliterateClassDKey
-• Erase EMF key by calling selector 0x14C39 in EffacingMediaFilter service
-• Reformat data partition
-• Generate new system keybag
-• High level of confidence that erased data cannot be recovered
-
-Effaceable storage is wiped, destroying:
-• DKey: All “File protection: none” files are unreadable
-• Bag key: All other class keys are unreadable
-• EMF key: Can’t decrypt the filesystem anyway
-
-### 设备重启
-
-• File Protection Complete key lost from RAM
-• Complete until First Authentication key also lost
-• Only “File Protection: None” files are readable
-• And then only by the OS on the device
-• Because FDE
+3. 安全隔区使用 Passcode Key，**逐一**解封各个类密钥
+    `Class key! = AES_UNWRAP(Passcode Key, Class Key!!)`
+4. 类密钥解封完成后，与`systembag.kb`文件头部的 `HMCK`进行校验
+    如果失败，可能是 passcode 输入错误，或者是硬件被更换。
+5. 安全隔区使用基于 UID 的 Key 0x835 对类密钥进行解密
+    `Class key = AES_DECRYPT(Key 0x835, Class Key!)`
+6. 现在类密钥已经出现在内存中，可以用于解封文件 metadata 中的`per-file key`
 
 ---
 
-## 附录：一些有价值的资源
+## 附录：有意思的一些企业信息
 
-- [iPhone数据保护的深度分析 - iPhone Data Protection in Depth](iPhone_Data_Protection_in_Depth.pdf)
-    Sogeti 是凯捷咨询集团（Capgemini）旗下的一个从事本地化技术服务的子，1967年在法国创建。该集团还包括 CAP 、GEMINI 和安永咨询等公司，是欧洲最大的IT外包服务商。
+1. Sogeti 是凯捷咨询集团（Capgemini）旗下从事本地化技术服务的子公司，1967年在法国创建。该集团还包括 CAP 、GEMINI 和安永咨询等公司，是欧洲最大的IT外包服务商。
+  [iPhone数据保护的深度分析 - iPhone Data Protection in Depth](iPhone_Data_Protection_in_Depth.pdf)
+2. NCC Group 成立于1999年6月，当时美国国家计算中心（the National Computing Centre）将其商业部门出售给其现有的管理团队，是一个专业的安全审计机构。
+  [iOS加密技术高级分析 -  A (not-so-quick) Primer on iOS Encryption](2016-BSidesROC-iOSCrypto.pdf)
+3. ElcomSoft Co. Ltd.公司于1990年在美国成立，是国际领先的数字取证工具开发公司。
+  [iOS取证技术 - iOS Forensics: Overcoming iPhone Data Protection](OWASP_BeNeLux_Day_2011_-_A._Belenko_-_Overcoming_iOS_Data_Protection.pdf)
+  [iOS 数据保护的演变](0721C6_Andrey.Belenko_Evolution.of.iOS.Data.Protection.pdf)
+4. 高田科技是一个台湾的科技企业，文档都是中文的，不过是繁体字。
+  [iOS取证技术的系列文档](https://www.kaotenforensic.com/ios/)
+5. [ibas](https://www.ibas.com/fi) 是一个芬兰的科技公司，主要业务是数据恢复和信息技术取证。  
+  [iPhone裸闪存数据恢复的视频演讲 - iPhone raw NAND recovery and forensics](https://www.youtube.com/watch?v=5Es3wRSe3kY)
+6. 这是一篇比较完整的技术论文，Peter Teufl 等作者来自于奥地利格拉茨技术大学。
+  [iOS加密系统 - iOS Encryption Systems](iOS_Encryption_Systems.pdf)
+  
 
-- [iOS加密技术高级分析 -  A (not-so-quick) Primer on iOS Encryption](2016-BSidesROC-iOSCrypto.pdf)
-    NCC Group 成立于1999年6月，当时美国国家计算中心（the National Computing Centre）将其商业部门出售给其现有的管理团队，是一个专业的安全审计机构。
+---
 
-- [iOS取证技术 - iOS Forensics: Overcoming iPhone Data Protection](OWASP_BeNeLux_Day_2011_-_A._Belenko_-_Overcoming_iOS_Data_Protection.pdf)
-    ElcomSoft Co. Ltd.公司于1990年在美国成立，是国际领先的数字取证工具开发公司。
+## 参考文献
 
-- [iPhone裸闪存数据恢复的视频演讲 - iPhone raw NAND recovery and forensics](https://www.youtube.com/watch?v=5Es3wRSe3kY)
-    [ibas](https://www.ibas.com/fi) 是一个芬兰的科技公司，主要业务是数据恢复和信息技术取证。
-
-- [iOS加密系统 - iOS Encryption Systems](iOS_Encryption_Systems.pdf)
-    这是一篇比较完整的技术论文，Peter Teufl 等作者来自于奥地利格拉茨技术大学。
-
-
+- [Linux文件系统简介](https://www.cnblogs.com/xumenger/p/4491425.html)
+- [ATS-Key-Wrap 算法的 RFC 3394 规范](https://rfc2cn.com/rfc3394.html)
+- [解密iPhone的固件](https://blog.csdn.net/XiNGRZ/article/details/5332915)
+- [通过侧信道分析加强对iPhone用户身份验证的暴力破解攻击](https://www.anquanke.com/post/id/237769)
 
 ### Apple官方文档
 
@@ -323,13 +366,3 @@ Effaceable storage is wiped, destroying:
 - [Apple 平台安全白皮书 - 2021年中文版](apple平台安全白皮书-2021中文版.pdf)
 - [Apple T2 安全芯片概览](Apple_T2_Security_Chip_Overview.pdf)
 - [APFS 文件系统参考手册](Apple-File-System-Reference.pdf)
-- [cprotect.h 的开源代码](https://opensource.apple.com/source/xnu/xnu-1699.32.7/bsd/sys/cprotect.h.auto.html)
-
-
----
-
-
-## 参考文献
-
-- [Linux文件系统简介](https://www.cnblogs.com/xumenger/p/4491425.html)
-- [通过侧信道分析加强对iPhone用户身份验证的暴力破解攻击](https://www.anquanke.com/post/id/237769)
