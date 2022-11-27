@@ -213,7 +213,7 @@ $ ./decrypt_systembag.py -k 71ebb0dd387647d7b1c4d10161f5f0b622937867ffe437e41a02
 
 $ ./parse_keybag.py example/keybag
 HEADER
-  VERS = 4      // iOS 4.3 的版本号是 2 
+  VERS = 4      // 2- iOS 4.3 ，3 - iOS 5
   TYPE = 0      // 0 - System，1 - Backup，3 - Escrow
   UUID = cf7591b3dfc64ce8b4c36018fba96374
   HMCK = e0d8a575d2af7d15bcb26de7688d7c84eb9a4711a845b3c5d56b49c94bdc4216f165ecb4ea97ec18   // HMAC 校验值
@@ -226,7 +226,7 @@ HEADER
 KEYS
   0:
     CLAS = 1    // NSFileProtectionComplete 类
-    WRAP = 3    // 3 - Passcode Key 保护
+    WRAP = 3    // 3 - UID & Passcode Key 保护
     KTYP = 0
     WPKY = 150dd562e3c6a441a879e154617d758af77553121c2b70114e32f6ad87a5819b375c724adee094ee // 该类密钥的密文
     UUID = 9d4e1c3567cc41058b3d2ee381aaa48b
@@ -234,8 +234,8 @@ KEYS
     CLAS = 2    // NSFileProtectionCompleteUnlessOpen 类
     WRAP = 3
     KTYP = 1
-    WPKY = 0df35185f13495d49596531f38d7114e77134a91c16915a14f2531241a78afc0ae4deeaefd2d5933
-    PBKY = 0252ce8f8acc7068e4ca64cab9227035460ed5cef0661818b382e88609b1a908
+    WPKY = 0df35185f13495d49596531f38d7114e77134a91c16915a14f2531241a78afc0ae4deeaefd2d5933 // 类密钥，就是静态私钥！
+    PBKY = 0252ce8f8acc7068e4ca64cab9227035460ed5cef0661818b382e88609b1a908       // 额外存储了静态公钥！
   2:
     UUID = 6f537c62fd22484095c2836b227a38eb
     CLAS = 3    // NSFileProtectionCompleteUntilFirstUserAuthentication 类
@@ -335,6 +335,21 @@ PROTECTION_CLASSES={
 ## 四、遗留问题
 
 1. systembag.kb 文件头部包含的 Salt 和 HMCK 字段，是否已经转移到安全隔区的第二代存储组件了呢？
+
+- 标头（Header）:
+  - VRES：版本号，例如 3 = iOS 5
+  - TYPE：钥匙包类型 ，0 = system, 1 = backup, 3 = escrow, 2 = iCloud Backup
+  - UUID：Apple 规定的应用级 UID
+  - HMCK：可选，用于数据校验，如果密钥包已签名
+  - WRAP：包裹类型，1 = UID保护， 2 = PBKDF2保护
+  - 其它字段：可能有 ITER（随机盐），ITER（迭代次数）等
+
+- 类密钥列表（List of class keys）:
+  - UUID：Apple 规定的应用级 UID
+  - CLAS：文件保护类型（A-D），或者钥匙串保护类型
+  - WRAP：包裹类型，1 = 仅UID派生，2 = passcode key，3 = 1&2
+  - WPKY：类密钥包裹后的密文
+  - 其它字段：可能有非对称的公钥等
 
 ---
 
