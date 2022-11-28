@@ -71,7 +71,11 @@ iOS 的所有用户数据文件都是加密存储的，Mac的情况复杂一些�
 
 ## 三、钥匙包（keyBag）数据保护
 
-钥匙包是一种用于储存一组类密钥的数据结构，有以下5种类型，但数据格式完全相同，包括：
+系统密钥包是一个加密的 `plist` 格式的二进制文件，存储了所有类密钥的数据，Apple 系统的数据解密实现方式见下图。
+
+![Daemon](daemon.png)
+
+有五种不同类型的钥匙包，但数据格式完全相同，包括：
 
 ### 1. 用户密钥包(User keyBag)
 
@@ -107,118 +111,124 @@ iCloud 云备份密钥包与备份密钥包类似。 该密钥包中的所有类
 许多 App 都需要处理密码和其他一些简短但比较敏感的数据，如密钥和登录令牌。钥匙串提供了储存这些项的安全方式。不同的 Apple 操作系统采用不同机制实施与各钥匙串保护类关联的保障。
 在 macOS (包括搭 载 Apple 芯片的 Mac) 中，数据保护不直接用于实施此类保障。
 
-钥匙串项使用两种不同的 AES-256-GCM 密钥加密 : 表格密钥 (元数据) 和行独有密钥 (私密密钥)。 钥匙串元数据 (除 kSecValue 外的所有属性) 使用元数据密钥加密以加速搜索，私密值 (kSecValueData) 使 用私密密钥进行加密。元数据密钥受安全隔区保护，但会缓存在应用程序处理器中以便进行钥匙串快速查询。私密密钥则始终需要通过安全隔区进行往返处理。
+钥匙串项使用两种不同的 AES-256-GCM 密钥加密 : 表格密钥 (元数据) 和行独有密钥 (私密密钥)。钥匙串元数据 (除 kSecValue 外的所有属性) 使用元数据密钥加密以加速搜索，私密值 (kSecValueData) 使用私密密钥进行加密。元数据密钥受安全隔区保护，但会缓存在应用程序处理器中以便进行钥匙串快速查询。私密密钥则始终需要通过安全隔区进行往返处理。
+
+> 元数据密钥就是 FileSystem Key（EMF），私密密钥就是 Passcode Key
+
 钥匙串以储存在文件系统中的`SQLite`数据库的形式实现， 而且数据库只有一个`securityd`监控程序决定每个进程或 App 可以访问哪些钥匙串项。钥匙串访问 API 将生成对监控程序的调用，从而查询 App 的 “keychain-access-groups”、 “application-identifier” 和 “application-group” 权限。访问组允许在 App 之间共享钥匙串项，而非将访问权限限制于单个进程。
 
-### 钥匙串类型的定义
+### 1. 类型定义
 
-与文件保护类型对应的类型：
+根据 Apple 最新的 [KeyChain 的开发技术文档](https://developer.apple.com/documentation/security/ksecattraccessiblewhenunlockedthisdeviceonly)，当前提供如下类型：
 
-- kSecAttrAccessibleWhenUnlocked：未锁定状态下，对应文件保护的 Class A
-- kSecAttrAccessibleAfterFirstUnlock：首次解锁后，对应文件保护的 Class C
-- kSecAttrAccessibleAlways：始终，对应文件保护的 Class D
+对应文件保护的类型定义：
 
-> 文件保护的 Class B 用于后台数据文件处理，此时没有前台业务，因此钥匙串没有对应的类型
+- kSecAttrAccessibleAfterFirstUnlock: 首次解锁后，对应文件保护的 Class C
+- kSecAttrAccessibleWhenUnlocked: 未锁定状态下，对应文件保护的 Class A
+- kSecAttrAccessibleAlways: **iOS 13 已弃用**。始终，对应文件保护的 Class D
 
-与特定设备相关的类型：
+> 使用后台刷新服务的 App 可通过 kSecAttrAccessibleAfterFirstUnlock 访问需要的钥匙串项
 
-其他钥匙串类都有对应的 “仅限本设备” 项目，后者在备份期间从设备拷贝时始终通过 UID 加以保护， 因此如果恢复至其他设备将无法使用。 
-Apple 根据所保护信息的类型以及 iOS 和 iPadOS 需要这些信息的时间来选择钥匙串类，妥善平衡了安全性和可用性。
-例如，VPN 证书必须始终可用，这样设备才能保持连接，但它归类为 “不可迁移”， 因此不能将其移至另一台设备
+钥匙串类都有对应的 “仅限本设备” 项目，后者在备份期间从设备拷贝时始终通过 UID 加以保护，如果恢复（迁移）至其他设备将无法使用，例如 VPN 证书。
 
-- kSecAttrAccessibleWhenUnlockedThisDeviceOnly：密码启用状态下
-- kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly：
-- kSecAttrAccessibleAlwaysThisDeviceOnly：
+- kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly: 仅限本设备，首次解锁后
+- kSecAttrAccessibleWhenUnlockedThisDeviceOnly: 仅限本设备，未锁定状态下
+- kSecAttrAccessibleAlwaysThisDeviceOnly: **iOS 13 已弃用**。仅限本设备，始终
 
-#### Keychain, Protection for build-in applications items
+还有一个仅存在于系统密钥包的特殊类型，一旦用户密码被移除或重设，该类密钥便会丢弃，且不会备份、不同步到 iCloud 钥匙串、不包括在托管密钥包。
 
-Item                                Accessibility
+- kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly：仅当设备配置了密码时可用，行为方式与“未锁定状态下”相同
 
-Wi-Fi passwords,                    Always
-IMAP/POP/SMTP accounts,             AfterFirstUnlock
-Exchange accounts,                  Always
-VPN,                                Always
-LDAP/CalDAV/CardDAV accounts,       lways
-iTunes backup password,             WhenUnlockedThisDeviceOnly
-Device certificate & private key,   AlwaysThisDeviceOnly
+### 2. 典型场景
+
+Apple 根据所保护信息的类型以及 iOS 和 iPadOS 需要这些信息的时间来选择钥匙串类，妥善平衡了安全性和可用性。例如，VPN 证书必须始终可用，这样设备才能保持连接，但它归类为 “不可迁移”， 因此不能将其移至另一台设备.
+
+|Item|                                Accessibility|
+|:-:|:-:|
+|Wi-Fi passwords                   |Always|
+|IMAP/POP/SMTP accounts             |AfterFirstUnlock|
+|Exchange accounts              |Always|
+|VPN                   |Always|
+|LDAP/CalDAV/CardDAV accounts       |Always|
+|iTunes backup password             |WhenUnlockedThisDeviceOnly|
+|Device certificate & private key   |AlwaysThisDeviceOnly|
+
+## 五、文件保管箱（FileVault）
+
+> On Apple devices that support Data Protection, the key encryption key (KEK) is protected (or sealed) with measurements of the software on the system, as well as being tied to the UID available only from the Secure Enclave.
+> On a Mac with Apple silicon, the protection of the KEK is further strengthened by incorporating information about security policy on the system, because macOS supports critical security policy changes (for example, disabling secure boot or SIP) that are unsupported on other platforms.
+> On a Mac with Apple silicon, this protection encompass FileVault keys, because FileVault is implemented using Data Protection (Class C).
+> The key that results from entangling the user password, long-term SKP key, and Hardware key 1 (the UID from Secure Enclave) is called the password-derived key. 
+> This key is used to protect the user keybag (on all supported platforms) and **KEK (in macOS only)**, and then enable biometric unlock or auto unlock with other devices such as Apple Watch.
+
+MacOS 使用文件保险箱（FileVault）技术提供数据保护功能，使用 AES-XTS 数据加密算法保护内部和可移除储存设备上的完整宗卷。
+
+> xART Key 是反重放密钥，SKP、KEK ？？？
+
+数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥（`Volume Key`）进行加密，该密钥在首次安装操作系统或用户擦除设备时创建。此密钥由密钥封装密钥（`Key Wrapping Key`）加密和封装，密钥封装密钥由安全隔区长期储存，只在安全隔区中可见。每次用户抹掉设备时，它都会发生变化。在 A9（及后续型号） SoC 上，安全隔区依靠由反重放系统支持的熵来实现可擦除性，以及保护其他资源中的密钥封装密钥。
+
+在搭载 Apple 芯片的 Mac 上，数据保护默认为 C 类，但**使用宗卷密钥，而非范围独有密钥或文件独有密钥**，可为用户数据高效重建文件保险箱安全模型。用户仍须选择使用文件保险箱，以获得加密密钥层级搭配用户密码的全面保护。开发者也可以选择使用文件独有密钥或范围独有密钥的更高保护类。
+
+搭载 Apple 芯片的 Mac 上的文件保险箱通过使用宗卷密钥的数据保护 C 类来实施。 
+在搭载 Apple T2 安 全芯片的 Mac 和搭载 Apple 芯片的 Mac 上， 直接连接到安全隔区的加密内部储存设备会使用安全隔区的硬件安全性功能和 AES 引擎的功能。 
+用户在 Mac 上启用文件保险箱后，启动过程中将需要其凭证。
+
+### 1. 文件保险箱已打开的内部储存设备
+
+如果没有有效的登录凭证或加密恢复密钥，即使物理储存设备被移除并连接到其他电脑，内置 APFS 宗卷仍保持加密状态，以防止未经授权的访问。在 macOS 10.15 中，此类宗卷同时包括系统宗卷和数据宗卷。从 macOS 11 开始，系统宗卷通过签名系统宗卷 (SSV) 功能进行保护，而数据宗卷仍通过加密进行保护。搭载 Apple 芯片的 Mac 以及搭载 T2 芯片的 Mac 通过构建和管理密钥层级实施内部宗卷加密，基于芯片内建的 硬件加密技术而构建。
+![filevault-on](filevault-on.png)
+
+此密钥层级的设计旨在同时实现四个目标 :
+• 请求用户密码用于加密
+• 保护系统免受针对从 Mac 上移除的储存媒介的直接暴力破解攻击
+• 提供擦除内容的快速安全的方法， 即通过删除必要的加密材料
+• 让用户无需重新加密整个宗卷即可更改其密码 (同时也会更改用于保护其文件的加密密钥)
+
+### 2. 文件保险箱已关闭的内部储存设备
+
+在搭载 Apple 芯片或搭载 T2 芯片的 Mac 上，如果在 “设置助理” 初次运行过程中未启用文件保险箱，宗卷仍会加密，但宗卷加密密钥仅由安全隔区中的硬件 UID 保护。
+![filevault-off](filevault-off.png)
+
+如果稍后启用了文件保险箱 (由于数据已加密， 该过程可立即完成)， 反重放机制会帮助阻止旧密钥 (仅基于硬件 UID) 被用于解密宗卷。 然后宗卷将受用户密码和硬件 UID 共同保护 (如前文所述)。
+
+### 3. 删除文件保险箱宗卷
+
+删除宗卷时，其宗卷加密密钥由安全隔区安全删除。这有助于防止以后使用此密钥进行访问 (即使是通过安全 隔区)。另外，所有宗卷加密密钥都使用媒介密钥封装。媒介密钥不提供额外的数据机密性，而是旨在启用快 速安全的数据删除，如果缺少了它，则不可能进行解密。
+在搭载 Apple 芯片的 Mac 和搭载 T2 芯片的 Mac 上，媒介密钥一定是由受安全隔区支持的技术来抹掉，例如远程 MDM 命令。以这种方式抹掉媒介密钥将导致宗卷因存在加密而不可访问。
+
+### 4. 可移除储存设备
+
+可移除储存设备的加密不使用安全隔区的安全性功能，而是采用与基于 Intel 的 Mac (不搭载 T2 芯片) 相同的方式执行加密。
+
+## 六、技术分析
+
+### 1. 关于 APFS 文件系统
+
+APFS 支持文件克隆（使用写入时拷贝技术的零损耗拷贝）。如果文件被克隆，克隆的每一半都会得到一个新的密钥以接受传入的数据写入，这样新数据会使用新密钥写入媒介。久而久之， 文件可能会由不同的范围（或片段）组成，每个映射到不同的密钥（称为`Per-extend Key`）。但是，组成文件的所有范围受同一类密钥保护。
+
+### 2. 关于文件保护类型
+
+对于早期的 iOS 系统，Class D 是用户数据文件的默认类型，其类密钥是 DKey。也就是说，尽管每个文件都有 per-file key，但是这些文件专有密钥的包裹密钥都是 DKey，而 DKey 并未将 Passcode 作为加密因子（仅由基于 UID 的 Key 0x835 提供保护），因此其加密强度难以抵抗暴力破解。
+
+从 iOS 5 开始，Apple 决定将 Class C 作为默认类型，即在设备开机时，校验用户输入的 passcode，成功后即可自由访问（即使发生了锁屏事件，仍然可以访问数据文件）；但是如果设备关机，就必须在开机之后重新校验 passcode。
+
+Class A 主要适用于日历、信息、邮件、照片、通讯录和健康数据等个人敏感信息，其特点是一旦锁屏事件发生（延迟10秒），将丢弃内存中的类密钥，结果是无法访问数据文件了；只有用户重新输入 passcode 解锁屏幕后，再重新计算类密钥，才可以继续提供数据文件访问。
+
+Class B 的设计目标是解决远程下载等互联网服务的后台权限问题，方法是采用 ECC 非对称密码系统，代价是文件元数据需要额外存储一个临时公钥（类密钥就是静态私钥）
+
+### 3. 关于 MacOS
+
+
+### 4. 遗留问题
+
+1. 用户修改passcode后，需要重新封装metadata中所有的per-file key，似乎计算量也不小啊！
 
 ---
 
-|可用性|文件数据保护|钥匙串数据保护|
-|-|-|-|
-||NSFileProtectionComplete|kSecAttrAccessibleWhenUnlocked|
-|锁定状态下|NSFileProtectionCompleteUnlessOpen|暂无|
-|首次解锁后|NSFileProtectionCompleteUntilFirstUserAuthentication|kSecAttrAccessibleAfterFirstUnlock|
-|始终|NSFileProtectionNone|kSecAttrAccessibleAlways|
-||暂无|kSecAttrAccessibleWhenPasscodeSet ThisDeviceOnly|
+## Apple官方文档
 
-> 使用后台刷新服务的 App 可将 kSecAttrAccessibleAfterFirstUnlock 用于后台更新过程中需要访问的
-钥匙串项。
-
-iOS Keychain的分级保护机制与文件保护基本相同，但增加了 `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`，该级别的`Class Key`在每次`Passcode`修改之后都会被清除，并且数据不会被备份。
-
-- 类 kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly 与 kSecAttrAccessibleWhenUnlocked
-行为方式相同；但前者仅当设备配置了密码时可用。 此类仅存在于系统密钥包中， 且它们：
-• 不同步到 iCloud 钥匙串
-• 不会备份
-• 不包括在托管密钥包中
-如果密码被移除或重设，类密钥便会丢弃，这些项目也变得无法使用。
-
-- 
-
-
-## 五、技术分析
-
-1. 对于早期的 iOS 系统，Class D 是用户数据文件的默认类型，其类密钥是 DKey。也就是说，尽管每个文件都有 per-file key，但是这些文件专有密钥的包裹密钥都是 DKey，而 DKey 并未将 Passcode 作为加密因子（仅由基于 UID 的 Key 0x835 提供保护），因此其加密强度难以抵抗暴力破解。
-2. 从 iOS 5 开始，Apple 决定将 Class C 作为默认类型，即在设备开机时，校验用户输入的 passcode，成功后即可自由访问（即使发生了锁屏事件，仍然可以访问数据文件）；但是如果设备关机，就必须在开机之后重新校验 passcode。
-3. Class A 主要适用于日历、信息、邮件、照片、通讯录和健康数据等个人敏感信息，其特点是一旦锁屏事件发生（延迟10秒），将丢弃内存中的类密钥，结果是无法访问数据文件了；只有用户重新输入 passcode 解锁屏幕后，再重新计算类密钥，才可以继续提供数据文件访问。
-4. Class B 的设计目标是解决远程下载等互联网服务的后台权限问题，方法是采用 ECC 非对称密码系统，代价是文件元数据需要额外存储一个临时公钥（类密钥就是静态私钥）
-
-### 遗留问题
-
-- 用户修改passcode后，需要重新封装metadata中所有的per-file key，似乎计算量也不小啊！
-
-
-## 五、补充说明
-
-- 数据保护通过构建和管理密钥层级来实施，并建立在 Apple 设备内建的硬件加密技术基础上。它通过将某个类分配给每个文件来实现对文件的逐个控制 ；可访问性根据该类密钥是否已解锁确定。APFS (Apple 文件系 统) 使文件系统可进一步以各个范围为基础对密钥进行细分 (文件的各个部分可以拥有不同的密钥)，称为`Per-extend Key`。
-- 使用 APFS 格式运行的设备可能支持文件克隆（使用写入时拷贝技术的零损耗拷贝）。如果文件被克隆，克隆的每一半都会得到一个新的密钥以接受传入的数据写入，这样新数据会使用新密钥写入媒介。久而久之， 文件可能会由不同的范围（或片段）组成，每个映射到不同的密钥。但是，组成文件的所有范围受同一类密钥保护
-- 数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥（`Volume Key`）进行加密，该密钥在首次安装操作系统或用户擦除设备时创建。此密钥由密钥封装密钥（`Key Wrapping Key`）加密和封装，密钥封装密钥由安全隔区长期储存，只在安全隔区中可见。每次用户抹掉设备时，它都会发生变化。 在 A9（及后续型号） SoC 上，安全隔区依靠由反重放系统支持的熵来实现可擦除性， 以及保护其他资源中的密钥封装密钥。
-- 在搭载 Apple 芯片的 Mac 上，数据保护默认为 C 类， 但**使用宗卷密钥，而非范围独有密钥或文件独有密钥**，可为用户数据高效重建文件保险箱安全模型。用户仍须选择使用文件保险箱， 以获得加密密钥层级搭配用户密码的全面保护。开发者也可以选择使用文件独有密钥或范围独有密钥的更高保护类。
-
----
-
-首先,iOS整个磁盘是全盘加密的，解密的EMF Key (file-system master encryption key)保存在闪存中1号扇区的可安全擦除区域(擦除后无法恢复，并且支持远程擦除)，该key对每台设备都是唯一，并且会在数据擦除时销毁；其次，在磁盘之上的文件系统的内容也是加密的， 在每个文件创建的时候会随机生成针对每个文件的Per-File Key，通过这个Per-File Key对文件中的内容进行加密保护，并且苹果又为此设计了Class Key来对Per-File Key进行保护。
-
-无数据保护(Class D)
-没有指定数据保护，但这不意味着文件没有加密保护，对于没有设置数据保护的其他所有文件，iOS中用一个DKey(Device Key)进行保护。该Key设备唯一，并且保存在闪存的可安全擦除区域。
-
-锁屏密码(Passcode)的作用
-假设把每个文件的加密看作为上了一道锁的话，那么对应的开锁的钥匙就存放在系统密钥包里面，而锁屏密码除了防止用户进入系统桌面之外，更重要的角色就是利用密码对系统密钥包进行额外的加密保护。很多人对锁屏密码理解的一个误区，就是锁屏密码只是物理手段上防止进入手机的一个保护，但实际上，用户在第一次设置锁屏密码的时候，锁屏密码会结合硬件加密引擎生成一个叫做Passcode Key的密钥，通过这个密钥对保存在密钥包中的各个钥匙(Class Key)进行加密保护。锁屏密码不会以其他加密的形式保存在设备上，用户在解锁的时候，会直接用输入的密码生成Passcode Key对密钥包中的Class Key解密，解密失败代表用户密码错误。
-
-从苹果的数据加密和锁屏密码的保护机制来看，直接拆除存储芯片并对其进行文件读写操作是不可能的。
-
-破解Passcode Key的手段
-Passcode Key是用户输入的passcode结合系统硬件的加密引擎以及PBKDF2(Password-Based Key Derivation Function)算法生成的。PBKDF2 的基本原理是通过一个伪随机函数，把明文和一个盐值及加密重复次数作为输入参数，然后重复进行运算，并最终产生密钥。重复运算的会使得暴力破解的成本变得很高，而硬件key及盐值的添加基本上断绝了通过“彩虹表”攻击的可能 。
-
-由于硬件加密引擎的Key无法提取，所以 只能在目标的机器上运行暴力破解程序进行破解，假设用户的密码设置的足够复杂的话，那么破解的周期就会变得非常久。
-
-在FBI这个案例中，由于嫌犯可能开启了输错10次密码自动擦除设备的选项，一旦暴力猜测程序连续10次输入错误的密码，设备上的所有内容就会擦除掉。一旦触发数据擦除，苹果会首先对可安全擦除区域进行擦除，物理方式上即使能够恢复大部分加密数据，但是却无法恢复可安全擦除区域中的数据，因为大部分的解密密钥都保存在这个区域中，例如能够解开系统密钥包的二进制数据的BAG1 Key。
-
-后续苹果为了封堵各种暴力猜测Passcode的方法，在64位设备的Secure Enclave中增加了定时器，针对尝试密码的错误次数，增加尝试的延时，即使断电重启也无法解决。
-
----
-
-
----
-
-## 参考文献
-
-### 资料下载
-
-
-
-
-- [iOS 安全设计解析（二）：数据加密和保护](https://blog.blupig.net/ios-security-encryption)
-- [iOS资料保护机制简介](https://www.kaotenforensic.com/ios/ios-data-protection/)
-- [苹果的锁屏密码到底有多难破？ - 头条](https://toutiao.io/posts/324007/app_preview)
+- [Apple 平台安全白皮书 - 2022年英文版](apple-platform-security-guide.pdf)
+- [Apple 平台安全白皮书 - 2021年中文版](apple平台安全白皮书-2021中文版.pdf)
+- [iOS 安全白皮书 - 2018年英文版](iOS安全白皮书-2018英文版.pdf)
+- [Apple T2 安全芯片概览](Apple_T2_Security_Chip_Overview.pdf)
+- [APFS 文件系统参考手册](Apple-File-System-Reference.pdf)
