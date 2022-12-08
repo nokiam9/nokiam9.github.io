@@ -158,24 +158,30 @@ Apple 根据所保护信息的类型以及 iOS 和 iPadOS 需要这些信息的�
 > On Apple devices that support Data Protection, the key encryption key (KEK) is protected (or sealed) with measurements of the software on the system, as well as being tied to the UID available only from the Secure Enclave.
 > On a Mac with Apple silicon, the protection of the KEK is further strengthened by incorporating information about security policy on the system, because macOS supports critical security policy changes (for example, disabling secure boot or SIP) that are unsupported on other platforms.
 > On a Mac with Apple silicon, this protection encompass FileVault keys, because FileVault is implemented using Data Protection (Class C).
-> The key that results from entangling the user password, long-term SKP key, and Hardware key 1 (the UID from Secure Enclave) is called the password-derived key. 
+> The key that results from entangling the user password, long-term SKP key, and Hardware key 1 (the UID from Secure Enclave) is called the password-derived key.
 > This key is used to protect the user keybag (on all supported platforms) and **KEK (in macOS only)**, and then enable biometric unlock or auto unlock with other devices such as Apple Watch.
 
 MacOS 使用文件保险箱（FileVault）技术提供数据保护功能，使用 AES-XTS 数据加密算法保护内部和可移除储存设备上的完整宗卷。
 
 > xART Key 是反重放密钥，SKP、KEK ？？？
 
-数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥（`Volume Key`）进行加密，该密钥在首次安装操作系统或用户擦除设备时创建。此密钥由密钥封装密钥（`Key Wrapping Key`）加密和封装，密钥封装密钥由安全隔区长期储存，只在安全隔区中可见。每次用户抹掉设备时，它都会发生变化。在 A9（及后续型号） SoC 上，安全隔区依靠由反重放系统支持的熵来实现可擦除性，以及保护其他资源中的密钥封装密钥。
+数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥（`Volume Key`）进行加密，该密钥在首次安装操作系统或用户擦除设备时创建。此密钥由密钥封装密钥（`Key Encryption Key`）加密和封装，**密钥封装密钥由安全隔区长期储存，只在安全隔区中可见**。每次用户抹掉设备时，它都会发生变化。在 A9（及后续型号）SoC 上，安全隔区依靠由反重放系统支持的熵来实现可擦除性，以及保护其他资源中的密钥封装密钥。
+
+> Volume Key 负责加密 volume 和文件 metadata，其作用与 iOS 的 FileSystem Key 相同，但加密和存储方式存在显著差异：
+> iOS 中，FileSystem Key 的密文是 EMF，持久化存储在 NAND 可擦除区域；而 MacOS 将
 
 在搭载 Apple 芯片的 Mac 上，数据保护默认为 C 类，但**使用宗卷密钥，而非范围独有密钥或文件独有密钥**，可为用户数据高效重建文件保险箱安全模型。用户仍须选择使用文件保险箱，以获得加密密钥层级搭配用户密码的全面保护。开发者也可以选择使用文件独有密钥或范围独有密钥的更高保护类。
 
-搭载 Apple 芯片的 Mac 上的文件保险箱通过使用宗卷密钥的数据保护 C 类来实施。 
-在搭载 Apple T2 安 全芯片的 Mac 和搭载 Apple 芯片的 Mac 上， 直接连接到安全隔区的加密内部储存设备会使用安全隔区的硬件安全性功能和 AES 引擎的功能。 
+> APFS 支持文件克隆（使用写入时拷贝技术的零损耗拷贝），如果文件被克隆，克隆的每一半都会得到一个新的密钥以接受传入的数据写入，这样新数据会使用新密钥写入媒介。久而久之， 文件可能会由不同的范围（或片段）组成，每个映射到不同的密钥（称为范围密钥，`Per-extend Key`）。
+但是，组成文件的所有范围密钥仍然受同一 Class key 的保护。
+
+搭载 Apple 芯片的 Mac 上的文件保险箱通过使用宗卷密钥的数据保护 C 类来实施。
+在搭载 Apple T2 安 全芯片的 Mac 和搭载 Apple 芯片的 Mac 上， 直接连接到安全隔区的加密内部储存设备会使用安全隔区的硬件安全性功能和 AES 引擎的功能。
 用户在 Mac 上启用文件保险箱后，启动过程中将需要其凭证。
 
 ### 1. 文件保险箱已打开的内部储存设备
 
-如果没有有效的登录凭证或加密恢复密钥，即使物理储存设备被移除并连接到其他电脑，内置 APFS 宗卷仍保持加密状态，以防止未经授权的访问。在 macOS 10.15 中，此类宗卷同时包括系统宗卷和数据宗卷。从 macOS 11 开始，系统宗卷通过签名系统宗卷 (SSV) 功能进行保护，而数据宗卷仍通过加密进行保护。搭载 Apple 芯片的 Mac 以及搭载 T2 芯片的 Mac 通过构建和管理密钥层级实施内部宗卷加密，基于芯片内建的 硬件加密技术而构建。
+如果没有有效的登录凭证或加密恢复密钥，即使物理储存设备被移除并连接到其他电脑，内置 APFS 宗卷仍保持加密状态，以防止未经授权的访问。在 macOS 10.15 中，此类宗卷同时包括系统宗卷和数据宗卷。从 macOS 11 开始，系统宗卷通过签名系统宗卷 (SSV) 功能进行保护，而数据宗卷仍通过加密进行保护。搭载 Apple 芯片的 Mac 以及搭载 T2 芯片的 Mac 通过构建和管理密钥层级实施内部宗卷加密，基于芯片内建的硬件加密技术而构建。
 ![filevault-on](filevault-on.png)
 
 此密钥层级的设计旨在同时实现四个目标 :
@@ -183,6 +189,8 @@ MacOS 使用文件保险箱（FileVault）技术提供数据保护功能，使�
 • 保护系统免受针对从 Mac 上移除的储存媒介的直接暴力破解攻击
 • 提供擦除内容的快速安全的方法， 即通过删除必要的加密材料
 • 让用户无需重新加密整个宗卷即可更改其密码 (同时也会更改用于保护其文件的加密密钥)
+
+在搭载 Apple 芯片的 Mac 以及搭载 T2 芯片的 Mac 上，所有文件保险箱密钥的处理都发生在安全隔区中；加密密钥绝不会直接透露给 Intel CPU。 所有 APFS 宗卷默认使用宗卷加密密钥创建。宗卷和元数据内容使用此宗卷加密密钥加密，此宗卷加密密钥使用**类密钥**封装。 文件保险箱启用时，类密钥受用户密码和硬件 UID 共同保护。
 
 ### 2. 文件保险箱已关闭的内部储存设备
 
@@ -202,11 +210,29 @@ MacOS 使用文件保险箱（FileVault）技术提供数据保护功能，使�
 
 ## 六、技术分析
 
-### 1. 关于 APFS 文件系统
+### 1. SKP 密封密钥保护技术
 
-APFS 支持文件克隆（使用写入时拷贝技术的零损耗拷贝）。如果文件被克隆，克隆的每一半都会得到一个新的密钥以接受传入的数据写入，这样新数据会使用新密钥写入媒介。久而久之， 文件可能会由不同的范围（或片段）组成，每个映射到不同的密钥（称为`Per-extend Key`）。但是，组成文件的所有范围受同一类密钥保护。
+Apple 设备支持一项称为密封密钥保护 (SKP，Sealed Key Prtection) 的技术， 其旨在确保加密材料在这些情况下不可用 : 脱离设备 时， 或者对操作系统版本或安全性设置存在未经用户正确授权的操纵时。
 
-### 2. 关于文件保护类型
+注意！SKP 功能不是由安全隔区提供，而是由位于更底层的硬件寄存器支持（也就意味着，仅在搭载 Apple 设计的 SoC 的设备上提供），目的是针对解密用户数据所需的密钥提供独立于安全隔区的额外保护层。
+
+![SKP](SKP.png)
+
+安全隔区启动监视器会捕获所加载的安全隔区操作系统的测量值。 当应用程序处理器 Boot ROM 测量附于 LLB 的 Image4 清单时， 该清单也包含所有其他已加载的系统配对固件的测量值。 LocalPolicy 
+
+- 安全隔区固件 sepOS ：由安全隔区启动监视器（硬件实现）获取测量值
+- LLB Image4 manifest：包含所有与 macOS 配对的固件和 macOS 核心启动对象 (如启动内核集或签名系统宗卷 (SSV) 根哈希值)的测量值
+- 本地安全策略 LocalPolicy 的测量值：包含已加载 macOS 的核心安全性配置。 还包含 nsih 字段， 它是 macOS Image4 清单的哈希值。
+
+![搭载 Apple 芯片的 Mac 开机时的启动过程步骤](mac-boot.png)
+
+如果攻击者能够意外地更改任何上述测量的固件、 软件或安全性配置组件， 则也会修改储存在硬件寄存器中的测量值。 测量值的修改会导致从加密硬件派生的系统测量根密钥 (SMRK) 派生出不同的值， 从而有效破坏密钥层 级的封章。 这将导致无法访问系统测量设备密钥 (SMDK)， 从而导致无法访问 KEK， 因此也无法访问数据。
+
+但是， 系统在未受到攻击时， 必须容纳合法的软件更新， 这些更新会更改固件测量值和 LocalPolicy 中的 nsih 字段， 以指向新的 macOS 测量值。 在其他尝试整合固件测量值但没有已知真实来源的系统中， 用 户将被要求停用安全性， 更新固件后重新启用安全性， 以便捕获新的测量基线。 这大大增加了攻击者在软件 更新期间篡改固件的风险。 Image4 清单包含所需的所有测量值， 这对系统很有帮助。 正常启动期间如果测 量值匹配， 使用 SMRK 解密 SMDK 的硬件也可以将 SMDK 加密为所建议的将来的 SMRK。 通过指定软 件更新后预期的测量值， 硬件可以加密在当前操作系统中可访问的 SMDK， 以便在将来的操作系统中仍可 访问。 同样地， 当客户在 LocalPolicy 中合法更改其安全性设置时， 必须根据 LLB 下次重新启动时计算的 LocalPolicy 测量值， 将 SMDK 加密为将来的 SMRK。
+
+> Image4 是经 ASN.1（抽象语法标记一）DER 编码的数据结构格式，用于描述 Apple 平台上有关安全启动链对象的信息。
+
+### 2. 关于 iOS 的文件保护类型
 
 对于早期的 iOS 系统，Class D 是用户数据文件的默认类型，其类密钥是 DKey。也就是说，尽管每个文件都有 per-file key，但是这些文件专有密钥的包裹密钥都是 DKey，而 DKey 并未将 Passcode 作为加密因子（仅由基于 UID 的 Key 0x835 提供保护），因此其加密强度难以抵抗暴力破解。
 
@@ -216,12 +242,61 @@ Class A 主要适用于日历、信息、邮件、照片、通讯录和健康数
 
 Class B 的设计目标是解决远程下载等互联网服务的后台权限问题，方法是采用 ECC 非对称密码系统，代价是文件元数据需要额外存储一个临时公钥（类密钥就是静态私钥）
 
-### 3. 关于 MacOS
+### 2. 关于 MacOS 的 Volume Key
 
+
+
+MacOS 使用的 FileVault 技术与 iOS 使用的 Data Protection 存在一些差异，主要体现在：
+
+1. 不支持 Class D 保护类型，也就是说，没有 `DKey` 密钥；
+2. Class C 是默认类型，但并非每个文件都有不同的 per-file key，而是所有文件内容使用统一的卷宗密钥（`Volume Key`）;
+3. 
 
 ### 4. 遗留问题
 
 1. 用户修改passcode后，需要重新封装metadata中所有的per-file key，似乎计算量也不小啊！
+
+## 名词解释
+
+### Effaceable Storage，可擦除区域
+
+可擦除存储器 NAND 存储器中一个用于储存加密密钥的专用区域，可被直接寻址和安全擦除。尽管当攻击者实际占有设备时，可擦除存储器无法提供保护，但其中存储的密钥可用作密钥层级的一部分，用于实现快速擦 除和前向安全性。
+
+### LLB - Low Level Bootloader，底层引导载入程序
+
+在具有两步启动架构的 Mac 电脑上，LLB 包含由 Boot ROM 调用的代码，该代码随后会载入 iBoot，成为安全启动链的一环。
+
+### xART - eXtended Anti-Replay Technology，反重放技术
+
+一组为具有反重放功能 (基于物理储存架构) 的安全隔区提供加密且经认证的永久储存区的服务。
+
+### 3. 核心密钥类型
+
+### UID - unique ID，唯一ID
+
+UID 是一个 256 位的 AES 密钥，在设备制造过程中刻录在每个处理器上。
+这种密钥无法由固件或软件读取，只能由处理器的硬件 AES 引擎使用。 若要获取实际密钥，攻击者必须对处理器的芯片发起极为复杂且代价高昂的物理攻击。 UID 与设备上的任何其他标识符均无关，包括但不限于 UDID。
+
+#### PDK - Passcode-Derived Key，密码派生密钥
+
+用户密码与长期 SKP 密钥和安全隔区的 UID 配合使用，由此派生加密密钥。
+
+#### per-file key，文件独有密钥
+
+数据保护用于在文件系统上加密文件的密钥。文件独有密钥使用类密钥封装，储存在文件的元数据 metadata 中。
+
+#### filesystem key，文件系统密钥
+
+用于加密每个文件的元数据的密钥，包括其类密钥。存储在可擦除存储器中，用于实现快速擦除，并非用于保密目的。
+
+#### Volume Key，卷宗密钥
+
+数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥（Volume Key）进行加密，该密钥在首次安装操作系统或用户擦除设备时创建。
+
+#### KEK - Key Encryption Key，密钥封装密钥
+
+宗卷密钥密钥由密钥封装密钥（Key Encryption Key）加密和封装，密钥封装密钥由安全隔区长期储存，只在安全隔区中可见。每次用户抹掉设备时，它都会发生变化。在 A9（及后续型号） SoC 上，安全隔区依靠由反重放系统支持的熵来实现可擦除性，以及保护其他资源中的密钥封装密钥。
+> 从功能描述上看，KEK 就是 PDK ！！！
 
 ---
 

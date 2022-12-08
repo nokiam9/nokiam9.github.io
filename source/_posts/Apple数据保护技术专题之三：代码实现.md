@@ -368,7 +368,9 @@ PROTECTION_CLASSES={
   [iPhone裸闪存数据恢复的视频演讲 - iPhone raw NAND recovery and forensics](https://www.youtube.com/watch?v=5Es3wRSe3kY)
 6. 这是一篇比较完整的技术论文，Peter Teufl 等作者来自于奥地利格拉茨技术大学。
   [iOS加密系统 - iOS Encryption Systems](iOS_Encryption_Systems.pdf)
-  
+7. 盘古石，是北京奇安信科技有限公司旗下专注于电子数据取证技术研发的团队。
+  [https://qz.qianxin.com/](https://qz.qianxin.com/news-3-1.html)
+
 ---
 
 ## 参考文献
