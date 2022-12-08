@@ -4,6 +4,8 @@ date: 2022-12-08 11:19:15
 tags:
 ---
 
+从本质上说，FileVault 属于 FDE（Full Disk Encryption，全盘加密）技术，早期的 Android 设备也是采用此方案，但随着技术发展，Andriod 和 iOS 逐渐都演进为 FBE（File Based Encryption，文件加密），仅在 MacOS 中保留了 FileVault2，但同时也支持 DataProtection 数据保护技术。
+
 ## 一、Legacy FileVault
 
 FileVault 首次随附于 Mac OS X Panther (10.3),当时的版本只允许加密用户目录，而非启动宗卷。操作系统使用一个加密的稀疏磁盘镜像（一个单一的大文件）为用户目录的数据提供虚拟磁盘。 Mac OS X Leopard 和 Mac OS X Snow Leopard 使用更现代的 稀疏磁盘镜像包，将数据拆分成8 MB大小的文件（被称作 bands）存放于文件包中。 Apple将采用这两种方法加密的版本称为legacy FileVault。
@@ -88,6 +90,10 @@ FDE加密又是怎么一回事呢，看看google怎么定义的吧（以下部�
 6. 使用IK3前16 Bytes作为KEK(用来加密主密钥DEK的KEY)，后16 Bytes作为算法IV(初始化向量)；
 7. 使用AES_CBC算法，采用KEK作为密钥，IV作为初始化向量来加密用户的主密钥DEK，生成加密后的主密钥，存入分区尾部数据结构中；
 
+---
+
+Secure Startup
+Secure Startup 為 FDE 的延伸版本，唯一的差別是保護加密/解密的 Masterkey 金鑰的方式不同。原本在 FDE 架構下保護 Masterkey 的其中一個密碼為 default_password，在 Secure Startup 下可改為用戶自訂的螢幕鎖密碼。
 
 ---
 
