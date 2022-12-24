@@ -77,4 +77,16 @@ tags:
 
 
 
+---
 
+## 参考文献
+
+- [一个椭圆曲线的演示图](https://www.desmos.com/calculator/ialhd71we3?lang=zh-CN)
+- [区块链中的数学 - 系列文章](https://learnblockchain.cn/tags/%E5%8C%BA%E5%9D%97%E9%93%BE%E4%B8%AD%E7%9A%84%E6%95%B0%E5%AD%A6)
+
+### 文档下载
+
+- [基于离散对数的非对称密钥建立方案 - R3](NIST.SP.800-56Ar3.pdf)
+- [基于离散对数的非对称密钥建立方案 - R2](NIST.SP.800-56Ar2.pdf)
+- [深入理解 X25519](190902-intro-x25519.pdf)
+- [Elliptic Curve Cryptography - 椭圆曲线密码学](sec1-v1.99.dif)
