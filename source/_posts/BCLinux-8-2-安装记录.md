@@ -244,5 +244,8 @@ OpenJDK 64-Bit Server VM Bisheng (build 11.0.12+9, mixed mode, sharing)
 
 ## 参考文献
 
+- [openEular - 官方下载](https://www.openeuler.org/zh/download/archive/)
 - [BCLinux ECS 基线版本的构造分析](https://blog.csdn.net/bright69/article/details/126783599)
 - [通过QEMU-GuestAgent实现从外部注入写文件到KVM虚拟机内部](https://cloud.tencent.com/developer/article/1987533)
+- [PVE创建openEuler虚拟机模板](https://cloud.tencent.com/developer/article/2008066)
+- [基于cloud-init定制虚拟机](https://gameapp.club/post/2022-07-30-custom-cloud-init-for-pve/)
