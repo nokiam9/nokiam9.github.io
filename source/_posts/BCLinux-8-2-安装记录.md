@@ -240,6 +240,37 @@ OpenJDK Runtime Environment Bisheng (build 11.0.12+9)
 OpenJDK 64-Bit Server VM Bisheng (build 11.0.12+9, mixed mode, sharing)
 ```
 
+## 附录：Kubernetes集群安装
+
+安装过程参考：[K8S 迁移至 openEuler 指导](https://docs.openeuler.org/zh/docs/20.03_LTS_SP1/docs/thirdparty_migration/k8sinstall.html)
+
+1. 安装docker并调整配置文件，当前版本`18.09.0``
+2. yum安装kubenet组件
+    `yum install -y kubelet-1.15.10 kubeadm-1.15.10 kubectl-1.15.10 kubernetes-cni-0.7.5`
+3. 通过`kubeadm config images list`获取需要的镜像列表
+
+    ```txt
+    k8s.gcr.io/kube-apiserver:v1.15.12
+    k8s.gcr.io/kube-controller-manager:v1.15.12
+    k8s.gcr.io/kube-scheduler:v1.15.12
+    k8s.gcr.io/kube-proxy:v1.15.12
+    k8s.gcr.io/pause:3.1
+    k8s.gcr.io/etcd:3.3.10
+    k8s.gcr.io/coredns:1.3.1
+    ```
+
+4. 从`gcmirrors/kube-apiserver:v1.15.12`等镜像站点获取，再改标签为`k8s.gcr.io`
+5. 启动安装，注意版本号有区别
+
+    ```bash
+    systemctl daemon-reload
+    systemctl restart kubelet
+    kubeadm init --kubernetes-version v1.15.12 --pod-network-cidr=10.244.0.0/16  
+    ```
+
+6. 安装并启动calico网络插件
+7. Master节点启动，并逐一启动Worker各个节点
+
 ---
 
 ## 参考文献
