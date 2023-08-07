@@ -4,74 +4,121 @@ date: 2023-08-05 22:35:18
 tags:
 ---
 
-## 一、准备工作
+## 一、版本概况
 
-苏研的软件源站点是：[https://mirrors.cmecloud.cn](https://mirrors.cmecloud.cn)，提供了一些基础的软件，包括BCLinux。
-BC-Linux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirrors.cmecloud.cn/bclinux/)
+移动云的软件源站点是：[https://mirrors.cmecloud.cn](https://mirrors.cmecloud.cn)，提供了一些基础的软件，包括BCLinux。
+BCLinux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirrors.cmecloud.cn/bclinux/)
+> `mirrors.bclinux.org`是同源域名，yum repolist 内部是这个域名
 
-目前的详细版本情况如下：
-![版本计划](LTS.png)
+### 版本规划
+
+作为Linux的发行版，BCLinux 有两个完全不同的技术路线，早期的版本是基于 Centos 定制化。
 
 - V7: 基于 Centos 7，目前包含 v7.8，仅提供x86架构
 - V8: 基于 Centos 8，目前包含 v8.2、v8.2、v8.6，仅提供 x86 架构
+
+随着 Centos 停服日期的迫近，以及自主可控操作系统的要求，BCLinux 转向了 OpenEular。
+
 - oe1: 基于 OpenEular 20.12，仅提供ARM64架构
 - oe21.10: 基于 OpenEular 21.10 和 21.10U3，提供 x86 和 ARM64 架构
 - oe22.10: 基于 OpenEular 22.10 和 22.10U1，提供 x86 和 ARM64 架构
 
-当前测试的版本是 oe21.10，
+目前 BCLinux 的版本生命周期的规划如下：
+![版本计划](LTS.png)
 
-> `mirrors.bclinux.org`是同源域名，yum repolist 内部是这个域名
+### 与 open Eular 的关系
 
-## 二、安装步骤
+尽管目前的 BCLinux 是基于 [openEular](https://www.openeuler.org/zh/) 的定制化版本，但也存在明显的差异。
+![openEular](openEular.png)
 
-1. 卸载BCLinux的软件许可，否则执行 YUM 等命令时经常要求购买License
+- BCLinux oe22.10 和 oe22.10 都是基于 OpenEular 的非公开发行版本
+- BCLinux 仅提供 x86_64 和 AArch64 架构，但 openEular 还提供了 ARM32、RISC-V、LoongArch64、Power 和 SW64 架构。
+
+## 二、安装方法
+
+本次测试的基准版本是 BCLinux oe21.10 的 x86-64 架构。
+
+### 准备工作
+
+1. 通过官方站点[https://mirrors.cmecloud.cn/bclinux/oe21.10/ISO/x86_64/release/](https://mirrors.cmecloud.cn/bclinux/oe21.10/ISO/x86_64/release/)下载ISO安装盘，有基础版本和全量版本，以及两个后续的补丁版本。
+2. 新建一个虚拟机，挂载ISO安装盘，建议内存至少 2GB，硬盘至少 10GB。
+   启动后，根据安装向导提示信息，选择中国上海时区，设置root密码（8位以上，至少3种类型字符）、硬盘分区默认即可，最小化安装方式。
+3. 安装完成后启动虚拟机，如果 console 成功登录即为正常。
+
+### 环境设置
+
+1. 虚拟机添加一个 cloudinit 类型的 CDROM 设备，用于后续管理个性化配置数据。
+   此时，可以顺便卸载ISO安装盘的 CDROM 设备。
+2. 卸载BCLinux的软件许可，否则执行 YUM 等命令时提示要求购买License。
 
     ```bash
     rpm -evh `rpm -qa |grep bclinux-license`
     ```
 
-    获得如下输出信息：
+3. 默认安装后网卡尚未启用，需要手动调整。
+   在`/etc/sysconfig/network-scripts/`目录中找到网卡配置文件`ifcfg-ens18`（注意不是常见的`eth0`），删除`UUID`，并设置`ONBOOT=yes`。
 
-    ``` console
-    Preparing...                          ################################# [100%]
-    Cleaning up / removing...
-    1:bclinux-license-manager-4.0-1.el8################################# [100%]
+4. reboot重启虚拟机，此时通过`ip a`可以发现IP地址，联网成功。
+   > 建议此时将虚拟机转换为模版，再 clone 一个虚拟机用于后续安装，以避免误操作又来一次冗长的安装过程。
+
+### 基线版本配置
+
+1. 系统软件安装
+
+    ``` bash
+    # 关闭Selinux
+    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+    setenforce 0
+
+    # 关闭Firewalld
+    systemctl disable --now firewalld
+
+    # 安装虚拟化软件
+    yum install -y acpid cloud-init cloud-utils-growpart qemu-guest-agent
+    systemctl enable acpid
+    systemctl start qemu-guest-agent
+
+    # 禁用zeroconf(零配置网络服务规范)，该协议目的是在系统无法连接DHCP服务的时候，尝试获取类似169.254.0.0的保留IP
+    echo "NOZEROCONF=yes" >> /etc/sysconfig/network
+
+    # 防止ssh连接使用dns导致访问过慢
+    sed -ri '/UseDNS/{s@#@@;s@\s+.+@ no@}' /etc/ssh/sshd_config
+    systemctl restart sshd
     ```
 
-2. cloudinit 的配置文件有所不同，默认用户从 centos 改为 anolis
+    其中，acpid 用于控制虚拟机的电源设备以便宿主机执行关机命令，cloud-init 是常见的虚拟机管理软件，cloud-utils-growpart 用于调整虚拟机的分区设置，qemu-guest-agent 用于虚拟机接受宿主机的命令并反馈结果，后续PVE管理界面可以直接显示IP地址信息。
+    BCLinux 已经预置了 git 、net-tools 等常用工具，但没有yum-utils软件包，而是自带 dnf 管理器 yum-config-manager
 
-    ``` config
-    default_user:
-        name: anolis
-        lock_passwd: true
-        gecos: Cloud User
-        groups: [adm, systemd-journal]
-        sudo: ["ALL=(ALL) NOPASSWD:ALL"]
-        shell: /bin/bash
-    ```
+2. 手工调整cloudinit配置文件`/etc/cloud/cloud.cfg`
+   当前cloud-init的版本是 19.4 ，建议修改以下参数：
 
-3. 安装完成后，默认网卡是`ens18`, 安装 cloudinit 后新增网卡 eth0，并被设置为默认。
+   - disable_root：false，即允许直接登录虚拟机（默认不允许 root 登录）
+   - ssh_pwauth：1，即允许以 ssh passwod 方式登录（默认只能通过 private key 登录）
+   - package-update-upgrade-install：以 # 开始注释该行，即避免安装后自动更新系统软件
+   - default-user：以 # 开始注释该段落，默认将创建 openEuler 用户
+
+3. 虚拟机关机，并在PVE控制台上将其转换为模版templete，母鸡就此完成。
+   后续，就可以在 PVE 控制台上设置Cloud-init的信息，并 clone 该模版启动小鸡了。
+
+## 四、问题讨论
+
+### NetworkManager 系统服务
+
+通过 cloudinit 制作 Centos 基准镜像时，关闭 NetworkManager 系统服务，但 OpenEular 基础镜像时无法驱动网卡，暂时先保留该服务。
+    > 默认网卡现在是`ens18`，而非`eth0`
+安装完成后，默认网卡是`ens18`, 安装 cloudinit 后新增网卡 eth0，并被设置为默认。
     但是，如果关闭系统功能服务 NetworkManager，该网卡就无法获得 IP 地址，因此暂时先保留该系统服务。
 
-``` bash
-yum install -y acpid cloud-init cloud-utils-growpart qemu-guest-agent
-systemctl enable acpid
-systemctl start qemu-guest-agent
-```
+### Qemu Guest Agent 系统服务
 
-## 三、注意事项
-
-1. 通过 cloudinit 制作 Centos 基准镜像时，关闭 NetworkManager 系统服务，但 OpenEular 基础镜像时无法驱动网卡，暂时先保留该服务。
-    > 默认网卡现在是`ens18`，而非`eth0`
-
-2. 当前 cloudinit 的版本是 19.4，配置文件`/etc/cloud/cloud.cfg`有修改，默认用户现在是`openeular`
-
-3. PVE在安装虚拟机时会见到`Qemu GA`这个选项，是开启还是关闭呢？
+PVE在安装虚拟机时会见到`Qemu GA`这个选项，是开启还是关闭呢？
     Qemu 代理即 qemu-guest-agent，是一个运行在虚拟机里面的程序 qemu-guest-agent是一个帮助程序，守护程序，它安装在虚拟机中，用于在主机和虚拟机之间交换信息，以及在虚拟机中执行命令。
     在Proxmox VE中，qemu代理主要用于两件事：
     - 正确关闭虚拟机，而不是依赖ACPI命令或Windows策略
     - 在进行备份时冻结来宾文件系统（在Windows上，使用卷影复制服务VSS）。
     如果想用，不仅需要在pve里开启这个选项，还需要手动安装
+
+### YUM 官方软件源
 
 ``` console
 [root@MiWiFi-RA70-srv ~]# ls /etc/yum.repos.d
@@ -275,7 +322,7 @@ OpenJDK 64-Bit Server VM Bisheng (build 11.0.12+9, mixed mode, sharing)
 
 ## 参考文献
 
-- [openEular - 官方下载](https://www.openeuler.org/zh/download/archive/)
+- [openEular 官网软件源](https://www.openeuler.org/zh/download/archive/)
 - [BCLinux ECS 基线版本的构造分析](https://blog.csdn.net/bright69/article/details/126783599)
 - [通过QEMU-GuestAgent实现从外部注入写文件到KVM虚拟机内部](https://cloud.tencent.com/developer/article/1987533)
 - [PVE创建openEuler虚拟机模板](https://cloud.tencent.com/developer/article/2008066)
