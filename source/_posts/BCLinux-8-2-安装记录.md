@@ -10,42 +10,42 @@ tags:
 BCLinux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirrors.cmecloud.cn/bclinux/)
 > `mirrors.bclinux.org`是同源域名，yum repolist 内部是这个域名
 
-### 版本规划
+### 1. 版本规划
 
-作为Linux的发行版，BCLinux 有两个完全不同的技术路线，早期的版本是基于 Centos 定制化。
+作为Linux的发行版，BCLinux 有两个完全不同的技术路线，早期的版本是基于 Centos 定制化，包括：
 
 - V7: 基于 Centos 7，目前包含 v7.8，仅提供x86架构
 - V8: 基于 Centos 8，目前包含 v8.2、v8.2、v8.6，仅提供 x86 架构
 
-随着 Centos 停服日期的迫近，以及自主可控操作系统的要求，BCLinux 转向了 OpenEular。
+随着 Centos 停服日期的迫近，以及自主可控操作系统的要求，BCLinux 转向了 OpenEuler，包括：
 
-- oe1: 基于 OpenEular 20.12，仅提供ARM64架构
-- oe21.10: 基于 OpenEular 21.10 和 21.10U3，提供 x86 和 ARM64 架构
-- oe22.10: 基于 OpenEular 22.10 和 22.10U1，提供 x86 和 ARM64 架构
+- oe1: 基于 OpenEuler 20.12，仅提供ARM64架构
+- oe21.10: 基于 OpenEuler 21.10 和 21.10U3，提供 x86 和 ARM64 架构
+- oe22.10: 基于 OpenEuler 22.10 和 22.10U1，提供 x86 和 ARM64 架构
 
 目前 BCLinux 的版本生命周期的规划如下：
 ![版本计划](LTS.png)
 
-### 与 open Eular 的关系
+### 2. 与 open Euler 的关系
 
-尽管目前的 BCLinux 是基于 [openEular](https://www.openeuler.org/zh/) 的定制化版本，但也存在明显的差异。
-![openEular](openEular.png)
+尽管目前的 BCLinux 是基于 [openEuler](https://www.openeuler.org/zh/) 的定制化版本，但也存在明显的差异。
+![openEuler](openEuler.png)
 
-- BCLinux oe22.10 和 oe22.10 都是基于 OpenEular 的非公开发行版本
-- BCLinux 仅提供 x86_64 和 AArch64 架构，但 openEular 还提供了 ARM32、RISC-V、LoongArch64、Power 和 SW64 架构。
+- BCLinux oe22.10 和 oe22.10 都是基于 OpenEuler 的非公开发行版本
+- BCLinux 仅提供 x86_64 和 AArch64 架构，但 openEuler 还提供了 ARM32、RISC-V、LoongArch64、Power 和 SW64 架构。
 
 ## 二、安装方法
 
 本次测试的基准版本是 BCLinux oe21.10 的 x86-64 架构。
 
-### 准备工作
+### 1. 准备工作
 
 1. 通过官方站点[https://mirrors.cmecloud.cn/bclinux/oe21.10/ISO/x86_64/release/](https://mirrors.cmecloud.cn/bclinux/oe21.10/ISO/x86_64/release/)下载ISO安装盘，有基础版本和全量版本，以及两个后续的补丁版本。
 2. 新建一个虚拟机，挂载ISO安装盘，建议内存至少 2GB，硬盘至少 10GB。
    启动后，根据安装向导提示信息，选择中国上海时区，设置root密码（8位以上，至少3种类型字符）、硬盘分区默认即可，最小化安装方式。
 3. 安装完成后启动虚拟机，如果 console 成功登录即为正常。
 
-### 环境设置
+### 2. 环境设置
 
 1. 虚拟机添加一个 cloudinit 类型的 CDROM 设备，用于后续管理个性化配置数据。
    此时，可以顺便卸载ISO安装盘的 CDROM 设备。
@@ -58,18 +58,14 @@ BCLinux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirro
 3. 默认安装后网卡尚未启用，需要手动调整。
    在`/etc/sysconfig/network-scripts/`目录中找到网卡配置文件`ifcfg-ens18`（注意不是常见的`eth0`），删除`UUID`，并设置`ONBOOT=yes`。
 
-4. reboot重启虚拟机，此时通过`ip a`可以发现IP地址，联网成功。
+4. reboot重启虚拟机，此时通过`ip a`可以发现IP地址已启用，联网成功。
    > 建议此时将虚拟机转换为模版，再 clone 一个虚拟机用于后续安装，以避免误操作又来一次冗长的安装过程。
 
-### 基线版本配置
+### 3. 基线版本配置
 
 1. 系统软件安装
 
     ``` bash
-    # 关闭Selinux
-    sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-    setenforce 0
-
     # 关闭Firewalld
     systemctl disable --now firewalld
 
@@ -86,8 +82,10 @@ BCLinux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirro
     systemctl restart sshd
     ```
 
-    其中，acpid 用于控制虚拟机的电源设备以便宿主机执行关机命令，cloud-init 是常见的虚拟机管理软件，cloud-utils-growpart 用于调整虚拟机的分区设置，qemu-guest-agent 用于虚拟机接受宿主机的命令并反馈结果，后续PVE管理界面可以直接显示IP地址信息。
-    BCLinux 已经预置了 git 、net-tools 等常用工具，但没有yum-utils软件包，而是自带 dnf 管理器 yum-config-manager
+    - 系统安装已默认关闭 selinux， 但仍然启用 firewalld 系统服务
+    - 系统安装已不再启用 
+    - cloud-init 是核心的虚拟机管理软件，acpid 用于控制虚拟机的电源设备以便宿主机执行关机命令，cloud-utils-growpart 用于调整虚拟机的分区设置，qemu-guest-agent 用于虚拟机接受宿主机的命令并反馈结果，后续PVE管理界面可以直接显示IP地址信息。
+    - BCLinux 已经预置了 git 、net-tools 等常用工具，但没有yum-utils软件包，而是自带 dnf 管理器 yum-config-manager
 
 2. 手工调整cloudinit配置文件`/etc/cloud/cloud.cfg`
    当前cloud-init的版本是 19.4 ，建议修改以下参数：
@@ -104,7 +102,7 @@ BCLinux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirro
 
 ### NetworkManager 系统服务
 
-通过 cloudinit 制作 Centos 基准镜像时，关闭 NetworkManager 系统服务，但 OpenEular 基础镜像时无法驱动网卡，暂时先保留该服务。
+通过 cloudinit 制作 Centos 基准镜像时，关闭 NetworkManager 系统服务，但 OpenEuler 基础镜像时无法驱动网卡，暂时先保留该服务。
     > 默认网卡现在是`ens18`，而非`eth0`
 安装完成后，默认网卡是`ens18`, 安装 cloudinit 后新增网卡 eth0，并被设置为默认。
     但是，如果关闭系统功能服务 NetworkManager，该网卡就无法获得 IP 地址，因此暂时先保留该系统服务。
@@ -322,7 +320,7 @@ OpenJDK 64-Bit Server VM Bisheng (build 11.0.12+9, mixed mode, sharing)
 
 ## 参考文献
 
-- [openEular 官网软件源](https://www.openeuler.org/zh/download/archive/)
+- [openEuler 官网软件源](https://www.openeuler.org/zh/download/archive/)
 - [BCLinux ECS 基线版本的构造分析](https://blog.csdn.net/bright69/article/details/126783599)
 - [通过QEMU-GuestAgent实现从外部注入写文件到KVM虚拟机内部](https://cloud.tencent.com/developer/article/1987533)
 - [PVE创建openEuler虚拟机模板](https://cloud.tencent.com/developer/article/2008066)
