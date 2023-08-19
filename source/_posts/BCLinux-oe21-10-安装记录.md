@@ -104,9 +104,6 @@ BCLinux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirro
 
  服务是管理和监控网络设置的守护进程，是2004年，
 
-
-
-
 通过 cloudinit 制作 Centos 基准镜像时，关闭 NetworkManager 系统服务，但 OpenEuler 基础镜像时无法驱动网卡，暂时先保留该服务。
     > 默认网卡现在是`ens18`，而非`eth0`
 安装完成后，默认网卡是`ens18`, 安装 cloudinit 后新增网卡 eth0，并被设置为默认。
@@ -330,4 +327,3 @@ OpenJDK 64-Bit Server VM Bisheng (build 11.0.12+9, mixed mode, sharing)
 - [通过QEMU-GuestAgent实现从外部注入写文件到KVM虚拟机内部](https://cloud.tencent.com/developer/article/1987533)
 - [PVE创建openEuler虚拟机模板](https://cloud.tencent.com/developer/article/2008066)
 - [基于cloud-init定制虚拟机](https://gameapp.club/post/2022-07-30-custom-cloud-init-for-pve/)
-- [如何在 Linux 上从 NetworkManager 切换为 systemd-network](https://linux.cn/article-6629-1.html)

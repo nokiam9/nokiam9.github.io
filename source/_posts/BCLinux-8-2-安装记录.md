@@ -83,7 +83,7 @@ BCLinux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirro
     ```
 
     - 系统安装已默认关闭 selinux， 但仍然启用 firewalld 系统服务
-    - 系统安装已不再启用 
+    - 系统安装已不再启用
     - cloud-init 是核心的虚拟机管理软件，acpid 用于控制虚拟机的电源设备以便宿主机执行关机命令，cloud-utils-growpart 用于调整虚拟机的分区设置，qemu-guest-agent 用于虚拟机接受宿主机的命令并反馈结果，后续PVE管理界面可以直接显示IP地址信息。
     - BCLinux 已经预置了 git 、net-tools 等常用工具，但没有yum-utils软件包，而是自带 dnf 管理器 yum-config-manager
 

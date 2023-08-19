@@ -304,3 +304,4 @@ udev 设备管理器会根据以下方案生成设备名称：
 - [biosdevname网卡命名方式](https://www.cnblogs.com/jackydalong/archive/2013/11/06/3410890.html)
 - [CentOS 7 下网络管理之命令行工具nmcli](https://www.jianshu.com/p/5d5560e9e26a)
 - [从 NetworkManager 切换到 Systemd-networkd](https://linux.cn/article-6629-1.html)
+  
