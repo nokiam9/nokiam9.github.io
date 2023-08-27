@@ -83,9 +83,11 @@ BCLinux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirro
     ```
 
     - 系统安装已默认关闭 selinux， 但仍然启用 firewalld 系统服务
-    - 系统安装已不再关闭 NetworkManager，因为 Centos8 已经不再使用 networkd.service 系统服务
+    - 系统安装默认使用 NetworkManager，因为 networkd.service 已被默认移除
     - cloud-init 是核心的虚拟机管理软件，acpid 用于控制虚拟机的电源设备以便宿主机执行关机命令，cloud-utils-growpart 用于调整虚拟机的分区设置，qemu-guest-agent 用于虚拟机接受宿主机的命令并反馈结果，后续PVE管理界面可以直接显示IP地址信息。
     - BCLinux 已经预置了 git 、net-tools 等常用工具，但没有yum-utils软件包，而是自带 dnf 管理器 yum-config-manager
+
+   > 注意：dnf 工具包中reposync 和 createrepo 等命令的参数有所不同！！！
 
 2. 手工调整cloudinit配置文件`/etc/cloud/cloud.cfg`
    当前cloud-init的版本是 19.4 ，建议修改以下参数：
@@ -98,27 +100,78 @@ BCLinux的镜像地址为：[https://mirrors.cmecloud.cn/bclinux/](https://mirro
 3. 虚拟机关机，并在PVE控制台上将其转换为模版templete，母鸡就此完成。
    后续，就可以在 PVE 控制台上配置 Cloud-init 的参数，并 clone 该模版启动小鸡了。
 
-## 四、问题讨论
+## 三、注意事项
 
-### 1. 关于 NetworkManager 系统服务
+### 1. 上层软件栈
 
- 服务是管理和监控网络设置的守护进程，是2004年，
+好消息！官方软件源已包含了许多常用软件，最新版本信息如下：
 
-通过 cloudinit 制作 Centos 基准镜像时，关闭 NetworkManager 系统服务，但 OpenEuler 基础镜像时无法驱动网卡，暂时先保留该服务。
-    > 默认网卡现在是`ens18`，而非`eth0`
-安装完成后，默认网卡是`ens18`, 安装 cloudinit 后新增网卡 eth0，并被设置为默认。
-    但是，如果关闭系统功能服务 NetworkManager，该网卡就无法获得 IP 地址，因此暂时先保留该系统服务。
+- nginx: 1.16.1
+- python3: 3.7.9
+- docker: 18.09.0
+- docker-compose: 1.22.0
+- openjdk(java): 11.0.12
+- nodejs: v12.22.11
 
-### Qemu Guest Agent 系统服务
+``` bash
+[root@Copy-of-VM-OpenEular21 yum.repos.d]# docker -v
+Docker version 18.09.0, build a8959d5
+[root@Copy-of-VM-OpenEular21 yum.repos.d]# docker-compose -v
+docker-compose version 1.22.0, build f46880f
+[root@Copy-of-VM-OpenEular21 yum.repos.d]# java -version
+openjdk version "11.0.12" 2021-07-20
+OpenJDK Runtime Environment Bisheng (build 11.0.12+9)
+OpenJDK 64-Bit Server VM Bisheng (build 11.0.12+9, mixed mode, sharing)
+```
+
+### 2. Qemu Guest Agent 系统服务
 
 PVE在安装虚拟机时会见到`Qemu GA`这个选项，是开启还是关闭呢？
-    Qemu 代理即 qemu-guest-agent，是一个运行在虚拟机里面的程序 qemu-guest-agent是一个帮助程序，守护程序，它安装在虚拟机中，用于在主机和虚拟机之间交换信息，以及在虚拟机中执行命令。
-    在Proxmox VE中，qemu代理主要用于两件事：
-    - 正确关闭虚拟机，而不是依赖ACPI命令或Windows策略
-    - 在进行备份时冻结来宾文件系统（在Windows上，使用卷影复制服务VSS）。
-    如果想用，不仅需要在pve里开启这个选项，还需要手动安装
 
-### YUM 官方软件源
+Qemu 代理即 qemu-guest-agent，是一个运行在虚拟机里面的程序 qemu-guest-agent是一个帮助程序，守护程序，它安装在虚拟机中，用于在主机和虚拟机之间交换信息，以及在虚拟机中执行命令。
+在Proxmox VE中，qemu代理有以下作用：
+
+- 正确关闭虚拟机，而不是依赖ACPI命令或Windows策略
+- 在进行备份时冻结来宾文件系统（在Windows上，使用卷影复制服务VSS）
+- 使用 DHCP 时，可以在控制台上直接看到虚机的 IP 地址，省去登录小鸡的命令操作了。。。
+
+![qa](qemu-ga.png)
+如果想用，不仅需要在pve里开启这个选项，还需要手动安装。
+
+### 3. Kubernetes集群安装
+
+安装过程参考：[K8S 迁移至 openEuler 指导](https://docs.openeuler.org/zh/docs/20.03_LTS_SP1/docs/thirdparty_migration/k8sinstall.html)
+
+1. 安装docker并调整配置文件，当前版本`18.09.0`
+2. yum安装kubenet组件
+    `yum install -y kubelet-1.15.10 kubeadm-1.15.10 kubectl-1.15.10 kubernetes-cni-0.7.5`
+3. 通过`kubeadm config images list`获取需要的镜像列表
+
+    ```txt
+    k8s.gcr.io/kube-apiserver:v1.15.12
+    k8s.gcr.io/kube-controller-manager:v1.15.12
+    k8s.gcr.io/kube-scheduler:v1.15.12
+    k8s.gcr.io/kube-proxy:v1.15.12
+    k8s.gcr.io/pause:3.1
+    k8s.gcr.io/etcd:3.3.10
+    k8s.gcr.io/coredns:1.3.1
+    ```
+
+4. 从`gcmirrors/kube-apiserver:v1.15.12`等镜像站点获取，再改标签为`k8s.gcr.io`
+5. 启动安装，注意版本号有区别
+
+    ```bash
+    systemctl daemon-reload
+    systemctl restart kubelet
+    kubeadm init --kubernetes-version v1.15.12 --pod-network-cidr=10.244.0.0/16  
+    ```
+
+6. 安装并启动calico网络插件
+7. Master节点启动，并逐一启动Worker各个节点
+
+---
+
+## 附录一：YUM 官方软件源配置
 
 ``` console
 [root@MiWiFi-RA70-srv ~]# ls /etc/yum.repos.d
@@ -167,7 +220,7 @@ enabled=1
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-BCLinux-For-Euler
 ```
 
-cloudinit 的原始配置文件
+## 附录二：cloudinit 的原始配置
 
 ``` txt
 [root@MiWiFi-RA70-srv ~]# cat /etc/cloud/cloud.cfg
@@ -266,57 +319,6 @@ system_info:
       templates_dir: /etc/cloud/templates/
    ssh_svcname: sshd
 ```
-
-## 四、上层软件栈版本
-
-- nginx: 1.16.1
-- python3: 3.7.9
-- docker: 18.09.0
-- docker-compose: 1.22.0
-- openjdk(java): 11.0.12
-- nodejs: v12.22.11
-
-``` bash
-[root@Copy-of-VM-OpenEular21 yum.repos.d]# docker -v
-Docker version 18.09.0, build a8959d5
-[root@Copy-of-VM-OpenEular21 yum.repos.d]# docker-compose -v
-docker-compose version 1.22.0, build f46880f
-[root@Copy-of-VM-OpenEular21 yum.repos.d]# java -version
-openjdk version "11.0.12" 2021-07-20
-OpenJDK Runtime Environment Bisheng (build 11.0.12+9)
-OpenJDK 64-Bit Server VM Bisheng (build 11.0.12+9, mixed mode, sharing)
-```
-
-## 附录：Kubernetes集群安装
-
-安装过程参考：[K8S 迁移至 openEuler 指导](https://docs.openeuler.org/zh/docs/20.03_LTS_SP1/docs/thirdparty_migration/k8sinstall.html)
-
-1. 安装docker并调整配置文件，当前版本`18.09.0``
-2. yum安装kubenet组件
-    `yum install -y kubelet-1.15.10 kubeadm-1.15.10 kubectl-1.15.10 kubernetes-cni-0.7.5`
-3. 通过`kubeadm config images list`获取需要的镜像列表
-
-    ```txt
-    k8s.gcr.io/kube-apiserver:v1.15.12
-    k8s.gcr.io/kube-controller-manager:v1.15.12
-    k8s.gcr.io/kube-scheduler:v1.15.12
-    k8s.gcr.io/kube-proxy:v1.15.12
-    k8s.gcr.io/pause:3.1
-    k8s.gcr.io/etcd:3.3.10
-    k8s.gcr.io/coredns:1.3.1
-    ```
-
-4. 从`gcmirrors/kube-apiserver:v1.15.12`等镜像站点获取，再改标签为`k8s.gcr.io`
-5. 启动安装，注意版本号有区别
-
-    ```bash
-    systemctl daemon-reload
-    systemctl restart kubelet
-    kubeadm init --kubernetes-version v1.15.12 --pod-network-cidr=10.244.0.0/16  
-    ```
-
-6. 安装并启动calico网络插件
-7. Master节点启动，并逐一启动Worker各个节点
 
 ---
 
