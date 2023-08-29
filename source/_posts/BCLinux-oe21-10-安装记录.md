@@ -329,3 +329,4 @@ system_info:
 - [通过QEMU-GuestAgent实现从外部注入写文件到KVM虚拟机内部](https://cloud.tencent.com/developer/article/1987533)
 - [PVE创建openEuler虚拟机模板](https://cloud.tencent.com/developer/article/2008066)
 - [基于cloud-init定制虚拟机](https://gameapp.club/post/2022-07-30-custom-cloud-init-for-pve/)
+- [Alibaba Cloud Linux 2实例修改网络服务的方法及影响说明](https://help.aliyun.com/zh/ecs/methods-and-impacts-of-switching-the-network-service-for-instances-that-run-alibaba-cloud-linux-2)

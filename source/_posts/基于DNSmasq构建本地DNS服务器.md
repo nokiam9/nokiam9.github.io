@@ -125,6 +125,8 @@ DNSmasq是一个小巧且方便地用于配置DNS和DHCP的工具，适用于小
 nameserver 192.168.0.144
 ```
 
+> 在创建虚拟机时，cloudinit 将通过 DHCP 获取网络配置，从而修改 /etc/resolv.conf 文件，为此建议模版中将该文件设置为不可修改，方法是 `chattr +i /etc/resolv.conf`
+
 ## 参考资料
 
 - [Dnsmasq的官方网站](https://wiki.archlinux.org/index.php/Dnsmasq#DNS_addresses_file_and_forwarding)
