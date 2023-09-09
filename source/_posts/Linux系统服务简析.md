@@ -37,7 +37,7 @@ journalctl -u [unit]
 
 ## 二、Centos 7.8的基线版本分析
 
-以刚刚完成操作系统安装的服务器为例，可以通过 `systemcl status` 查看 systemd 系统服务基本配置，具体分为三个部分：
+以刚刚完成操作系统安装的服务器为例，可以通过 `systemcl status` 查看**当前正在运行的**系统服务，具体分为三个部分：
 
 - `init.slice`：systemd 的根进程，进程号是 1 ！即所有用户空间进程的祖先进程
 - `user.slice`：当前登录用户的全部会话进程，包括bash、login、sshd ...
@@ -95,10 +95,13 @@ journalctl -u [unit]
                └─354 /usr/lib/systemd/systemd-journald
 ```
 
+> network、cloud-init等服务是一次性启动，并非常驻内存，因此`systemmctl status`不提供
+> 可以通过`systemctl list-unit-files`
+
 与内核密切相关，一般作为必须的基础服务：
 
 - `rsyslog`: Rocket-fast System Logging Service，用于操作系统收集各种日志信息
-- `tuned`：Dynamic System Tuning Daemon，监视系统组件运行状态，动态优化Linux 内核服务
+- `tuned`：Dynamic System Tuning Daemon，监视系统组件运行状态，动态优化Linux内核
 - `polkit`：Authorization Manager，非特权用户会话与特权系统环境之间的协商者
 - `dbus`：D-Bus System Message Bus，用于进程与内核、进程之间的通信总线
 - `auditd`：Security Auditing Service，负责将Linux审计记录写入磁盘
@@ -110,7 +113,7 @@ journalctl -u [unit]
 
 与应用相关，一般作为可选的服务：
 
-- `postfix`：Postfix Mail Transport Agent，邮件发送服务，注意是内部mail，经常被手工屏蔽
+- `postfix`：Postfix Mail Transport Agent，邮件发送服务，注意是主机mail，经常被手工屏蔽
 - `firewalld`：dynamic firewall daemon，系统防火墙服务，通常被手工屏蔽
 - `NetworkManager`：Network Manager，网络管理服务
 - `qemu-guest-agent`：QEMU Guest Agent，虚拟机和宿主机的命令通道
@@ -125,12 +128,13 @@ journalctl -u [unit]
 
 ## 三、BCLinux 的基线版本分析
 
-众所周知，BCLinux oe21.10 是基于 openEuler 21.10 的套娃版本，但也做了一些调整，检查结果如下：
+众所周知，BCLinux oe21.10 是基于 openEuler 21.10 的套娃版本，但也做了一些调整：
 
 删除的服务有：
 
-- `auditd`
-- `qemu-guest-agent`
+- `auditd`：影响安全审计，不合理！
+- `postfix`：没啥用，而且可能造成日志磁盘满，合理！
+- `qemu-guest-agent`：需要用户自行安装
 
 增加的服务有：
 
@@ -138,7 +142,7 @@ journalctl -u [unit]
 - `chronyd`：另一个版本的 NTP 时间服务器
 - `systemd-networkd`：systemd 提供的网络管理工具。已有 NetworkManager ，这个可删除
 
-除了 kdump 之前，还发现了 1 个异常的服务：
+除了之前的 kdump ，还发现了 1 个异常的服务：
 
 - `lm_sensors`: 检测CentOS系统的CPU温度，对于虚拟机没意义！
 
