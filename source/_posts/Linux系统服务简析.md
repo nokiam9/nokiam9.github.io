@@ -95,23 +95,23 @@ journalctl -u [unit]
                └─354 /usr/lib/systemd/systemd-journald
 ```
 
-与内核密切相关的基础服务包括：
+与内核密切相关，一般作为必须的基础服务：
 
 - `rsyslog`: Rocket-fast System Logging Service，用于操作系统收集各种日志信息
-- `postfix`：Postfix Mail Transport Agent，邮件发送服务，注意是内部mail，经常被手工屏蔽
 - `tuned`：Dynamic System Tuning Daemon，监视系统组件运行状态，动态优化Linux 内核服务
 - `polkit`：Authorization Manager，非特权用户会话与特权系统环境之间的协商者
 - `dbus`：D-Bus System Message Bus，用于进程与内核、进程之间的通信总线
 - `auditd`：Security Auditing Service，负责将Linux审计记录写入磁盘
+- `sshd`：OpenSSH server daemon，SSH后台服务
 - `systemd-udevd`：udev Kernel Device Manager，Linux默认的物理设备管理工具
 - `systemd-journald`：Journal Service，systemd 的标准日志工具
-
-与应用相关的增强型服务包括：
-
 - `systemd-logind`：Login Service，登录服务
 - `crond`：Command Scheduler，定时任务调度服务
+
+与应用相关，一般作为可选的服务：
+
+- `postfix`：Postfix Mail Transport Agent，邮件发送服务，注意是内部mail，经常被手工屏蔽
 - `firewalld`：dynamic firewall daemon，系统防火墙服务，通常被手工屏蔽
-- `sshd`：OpenSSH server daemon，SSH后台服务
 - `NetworkManager`：Network Manager，网络管理服务
 - `qemu-guest-agent`：QEMU Guest Agent，虚拟机和宿主机的命令通道
 
@@ -155,6 +155,23 @@ journalctl -u [unit]
 - 增加了`systemd-hostnamed`，用于修改主机名称，似乎多余了！
 - 网络管理软件仍然是 NetworkManager
 
+## 五、腾讯云 Centos 7 的基线版本
+
+与标准的 Centos 安装版本相比，有以下变化：
+
+- 删除了 postdfix、firewalld，保留了 auditd
+- 网络管理直接基于 cloud-init 的静态文件配置，不采用 NetworkManager !!!
+- 启用基于 ntpd 的时间服务器
+- 启用虚拟机电源管理的 acpid ，但没有 qemu-guest-agent
+
+还有几个有意思的问题：
+
+- 启用了一个类似 crond 的调度任务系统 atd ，很奇怪？
+- 启用了 rhsmcertd：Red Hat Subscription Manager CERTification Daemon，红帽的订阅服务
+- 启用了 libstoragemgmt，用于 ceph 等后端存储阵列管理
+- 启用了 lvm2-lvmetad，用于 lvm2 的元数据管理，可能是安装 docker 引入的？
+- 启用了 tat_agent：TencentCloud Automation Tools，腾讯开发的自动化助手
+
 ---
 
 ## 附录一：Systemd 的进程管理
@@ -183,7 +200,7 @@ Unit 文件按照 Systemd 约定，应该被放置指定的三个系统目录之
 ## 附录三：Systemd 的配置管理
 
 CentOS7的服务systemctl脚本存放在:/usr/lib/systemd/,有系统（system）和用户（user）之分,需要开机不登陆就能运行的程序，存在系统服务里，即：/usr/lib/systemd/system目录下.
-CentOS7的每一个服务以.service结尾，一般会分为3部分：[Unit]、[Service]和[Install] 
+CentOS7的每一个服务以.service结尾，一般会分为3部分：[Unit]、[Service]和[Install]。
 
 [Unit]部分主要是对这个服务的说明，内容包括Description和After，Description 用于描述服务，After用于描述服务类别
 
