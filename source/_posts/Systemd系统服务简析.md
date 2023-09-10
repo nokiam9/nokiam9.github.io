@@ -1,5 +1,5 @@
 ---
-title: Linux系统服务简析
+title: Systemd系统服务简析
 date: 2023-08-29 22:06:52
 tags:
 ---

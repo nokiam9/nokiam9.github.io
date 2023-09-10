@@ -229,6 +229,52 @@ http://centosu7.centos.org/altarch/7.8.2003/kernel/x86_64/
 
 目录/etc/yum/vars/ 下的文件可以自定义变量，并通过$contentdir, $infra 在repo文件中引用
 
+## 如何查看软件包的文件明细
+
+可以使用`repoquery`命令，可能需要安装`yum-utils`软件包，即：`yum install yum-utils`
+具体方法是：`repoquery -ql <package-name>`
+
+```console
+[root@analyst cloudinit]# repoquery -ql chrony.x86_64
+/etc/NetworkManager/dispatcher.d/20-chrony
+/etc/chrony.conf
+/etc/chrony.keys
+/etc/dhcp/dhclient.d/chrony.sh
+/etc/logrotate.d/chrony
+/etc/sysconfig/chronyd
+/usr/bin/chronyc
+/usr/lib/systemd/ntp-units.d/50-chronyd.list
+/usr/lib/systemd/system/chrony-dnssrv@.service
+/usr/lib/systemd/system/chrony-dnssrv@.timer
+/usr/lib/systemd/system/chrony-wait.service
+/usr/lib/systemd/system/chronyd.service
+/usr/libexec/chrony-helper
+/usr/sbin/chronyd
+/usr/share/doc/chrony-3.4
+/usr/share/doc/chrony-3.4/COPYING
+/usr/share/doc/chrony-3.4/FAQ
+/usr/share/doc/chrony-3.4/NEWS
+/usr/share/doc/chrony-3.4/README
+/usr/share/man/man1/chronyc.1.gz
+/usr/share/man/man5/chrony.conf.5.gz
+/usr/share/man/man8/chronyd.8.gz
+/var/lib/chrony
+/var/lib/chrony/drift
+/var/lib/chrony/rtc
+/var/log/chrony
+```
+
+## 如何创建内网的本地 YUM 源
+
+可以参见[Centos7通过reposync搭建本地Yum源](https://www.jianshu.com/p/6c3090968d71)，其中关键是：
+
+- 通过`reposync`命令，将远程 RPM 资源库同步到本地磁盘
+- 通过`createrepo`命令，建立本地 YUM 源
+- 下载 KEY 文件，引入官方的 RPM GPG 公钥（可选）
+- 建立 Nginx 文件服务器，启动 http 服务
+
+注意！openEuler 等发行版不使用 yum-utils 工具包，而是直接使用 dnf 工具包，参数格式可能有所差异！！！
+
 ---
 
 ## 解决yum软件依赖的有效方法
