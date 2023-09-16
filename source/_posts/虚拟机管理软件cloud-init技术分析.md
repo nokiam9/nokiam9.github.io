@@ -30,6 +30,67 @@ cloud-init 基于 Python 开发，可以通过`yum install cloud-init`进行安�
 > cloud-init 版本从 0.7.9 突变为 17.1，最新版本为 23.3.1，测试版本为 19.4.0
 > 早期版本基于 Python2.7 开发，后来改为 Python3，因此代码安装目录可能有变化
 
+## 二、启动流程
+
+cloud-init 对系统的初始化分为四个阶段，分别是：local、init、config、final。
+通过命令`systemctl list-unit-files |grep cloud`，可以列出四个阶段对应的 unit 文件。
+
+```console
+cloud-config.service                          enabled 
+cloud-final.service                           enabled 
+cloud-init-local.service                      enabled 
+cloud-init.service                            enabled 
+cloud-config.target                           static  
+cloud-init.target                             static 
+```
+
+> .target 是静态定义，一般只有描述服务之间依赖关系的 Unit 段，不包含执行命令
+
+在采用 systemd 系统服务时，启动时会有一个简单的系统状态检查，也被称为 generator stage。
+如果满足以下情况，cloud-init 将不在开机时启动：
+
+- `/etc/cloud/cloud-init.disabled` 文件存在时
+- 当内核命令发现文件 `/proc/cmdline`包含 `cloud-init=disabled`时
+
+> 当在容器中运行时，内核命令可能会被忽略，但是 cloud-init 会读取`KERNEL_CMDLINE`环境变量
+
+### 1. Local Stage
+
+分析 systemd 配置文件`/lib/systemd/system/cloud-init-local.service`，发现：
+
+- 依赖于 systemd-remount-fs.service，即需要加载 root 文件系统
+- 检查是否存在缓存文件目录`/var/lib/cloud`
+- 如果存在状态文件`/etc/cloud/cloud-init.disabled`，则禁止启动
+- 核心执行代码：`/usr/bin/cloud-init init --local`
+
+Local Stage 作为虚拟机实例启动 cloud-init 的第一个阶段，核心任务就是：查找**本地**数据源，并应用于网络配置！
+所谓本地数据源，有以下几种方式：
+
+- datasource：本机的config drive（例如 PVE 的Cloud-init CDROM），或者 Openstack、EC2 提供的云网络配置
+- fallback：默认方式，相当于`dhcp on eth0`，即直接通过 DHCP 服务获得网络配置信息
+- none：禁用网络。可以通过在`/etc/cloud/cloud.cfg`中，添加内容`network: {config: disabled}`实现
+
+> 所支持的数据源定义位于：`/usr/lib/python2.7/site-packages/cloudinit/settings.py`中的变量`CFG_BUILTIN.datasource_list`
+
+如果是该实例的第一次启动，那么被选中的网络配置会被应用，所有老旧的配置都会会清除。
+该阶段需要阻止网络服务启动以及老的配置被应用，这可能带来一些负面的影响，比如 DHCP 服务挂起，或者已经广播了老的 hostname，这可能导致系统进入一个奇怪的状态需要重启网络设备。
+
+#### 与 NetworkManager 的关系
+
+通过源代码分析，在 Local Stage 从 datasource 里读取网络配置信息，处理逻辑是：
+
+- 如果发现使用的是静态地址，cloud-init 就会将 datasource 定义的配置信息写入`/etc/network/interfaces`目录下的配置文件
+- 如果发现使用的是 DHCP，cloud-init 并不会创建刷新网卡配置文件，配置ip的工作就交由 NetworkManager 自动获取
+
+从以信息可知，如果创建静态ip的虚拟机，NetworkManager 这个服务必须在 cloudinit-local 之后启动才可正常从配置文件中读取 ip 并配置。而当你在镜像里安装 NetworkManager后，默认情况下它的启动顺序是会在 cloudinit-local 之前的。
+
+> openEuler 的初始网卡是`ens18`，在安装 cloud-init 之后，将被强制改名为`eth0`
+
+#### PVE 的 config drive 网络配置
+
+PVE 的虚拟机模版可以增加一个专用的 Cloud-init CDROM 设备，虚拟机启动 cloud-init 时，将读取`/dev/sr0`的全部文件至缓存，其中
+`network-config`就是网络配置文件。
+
 ## 三、主配置文件
 
 为了实现 instance 定制工作，cloud-init 会主要按 4 个阶段执行任务（事实上还有一个generator阶段只有在systemd管理下才会触发，这里不做叙述）：
@@ -46,8 +107,8 @@ cloud-init 基于 Python 开发，可以通过`yum install cloud-init`进行安�
 users:
  - default
 
-disable_root: 1                             # 默认不允许root登录，一般需修改！
-ssh_pwauth:   0                             # 默认不允许输入口令，一般需修改！
+disable_root: 1                             # 禁止root登录，默认true，一般需修改！
+ssh_pwauth:   0                             # 允许密码登录，默认false，一般需修改！
 
 mount_default_fields: [~, ~, 'auto', 'defaults,nofail,x-systemd.requires=cloud-init.service', '0', '2']
 resize_rootfs_tmp: /dev
@@ -206,6 +267,7 @@ package_upgrade: true
 
 - [cloud-init 源码解读](http://pythontime.iswbm.com/en/latest/c08/c08_06.html#centos-6-x)
 - [cloud-init 介绍](https://xixiliguo.github.io/linux/cloud-init.html)
+- [Cloud-init 初始化虚拟机配置](https://einverne.github.io/post/2020/03/cloud-init.html)
 - [基于 Cloud-init 定制化 PVE 虚拟机](https://gameapp.club/post/2022-07-30-custom-cloud-init-for-pve/)
 - [深度解析 OpenStack metadata 服务架构](https://zhuanlan.zhihu.com/p/55078689)
 - [CentOS 6.x 如何更改网卡名](https://www.alteeve.com/w/Changing_the_ethX_to_Ethernet_Device_Mapping_in_EL6)
