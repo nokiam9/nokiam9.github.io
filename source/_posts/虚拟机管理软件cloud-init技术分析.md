@@ -20,20 +20,21 @@ cloud-init 基于 Python 开发，可以通过`yum install cloud-init`进行安�
 
 - 程序入口：`/usr/bin/cloud-init`
 - 代码安装目录：`/usr/lib/python2.7/site-packages/cloudinit/`
-- 配置文件目录：`/etc/cloud/`，其中：主配置文件是`/etc/cloud/cloud.cfg`
+- 核心配置文件：`/etc/cloud/cloud.cfg`
 - 日志文件位于：`/var/log/cloud-init.log`
+- 模版文件目录：`/etc/cloud/templates/`
 - 缓存数据位于：`/var/lib/cloud/`
-- systemd 系统服务目录仍然是`/usr/lib/systemd/system/`，包含了 cloud-init-local、cloud-init、cloud-config、cloud-final 等四个服务
+- 系统服务目录：`/usr/lib/systemd/system/`
 
 本文以 centos7.8 + cloud-init 19.4 为例，分析其工作原理和实现方式。
 
 > cloud-init 版本从 0.7.9 突变为 17.1，最新版本为 23.3.1，测试版本为 19.4.0
 > 早期版本基于 Python2.7 开发，后来改为 Python3，因此代码安装目录可能有变化
 
-## 二、启动流程
+## 二、工作原理
 
 cloud-init 对系统的初始化分为四个阶段，分别是：local、init、config、final。
-通过命令`systemctl list-unit-files |grep cloud`，可以列出四个阶段对应的 unit 文件。
+一般通过 systemd 进行管理，通过命令`systemctl list-unit-files |grep cloud`，可以列出四个阶段对应的 cloud-init-local、cloud-init、cloud-config、cloud-final 等4个 service 文件。
 
 ```console
 cloud-config.service                          enabled 
@@ -46,8 +47,8 @@ cloud-init.target                             static
 
 > .target 是静态定义，一般只有描述服务之间依赖关系的 Unit 段，不包含执行命令
 
-在采用 systemd 系统服务时，启动时会有一个简单的系统状态检查，也被称为 generator stage。
-如果满足以下情况，cloud-init 将不在开机时启动：
+systemd 服务启动时会有一个简单的 generator stage，其任务是检查系统状态检查，并读取主配置文件`cloud.cfg`。
+如果满足以下情况，cloud-init 将不在开机时启动，本组内其他 service 也遵循该规则：
 
 - `/etc/cloud/cloud-init.disabled` 文件存在时
 - 当内核命令发现文件 `/proc/cmdline`包含 `cloud-init=disabled`时
@@ -56,14 +57,13 @@ cloud-init.target                             static
 
 ### 1. Local Stage
 
-分析 systemd 配置文件`/lib/systemd/system/cloud-init-local.service`，发现：
+作为虚拟机实例启动 cloud-init 的第一个阶段，其任务是：查找**本地**数据源，并应用于网络配置！
+分析 systemd 配置文件`cloud-init-local.service`，发现：
 
 - 依赖于 systemd-remount-fs.service，即需要加载 root 文件系统
 - 检查是否存在缓存文件目录`/var/lib/cloud`
-- 如果存在状态文件`/etc/cloud/cloud-init.disabled`，则禁止启动
 - 核心执行代码：`/usr/bin/cloud-init init --local`
 
-Local Stage 作为虚拟机实例启动 cloud-init 的第一个阶段，核心任务就是：查找**本地**数据源，并应用于网络配置！
 所谓本地数据源，有以下几种方式：
 
 - datasource：本机的config drive（例如 PVE 的Cloud-init CDROM），或者 Openstack、EC2 提供的云网络配置
@@ -75,33 +75,50 @@ Local Stage 作为虚拟机实例启动 cloud-init 的第一个阶段，核心�
 如果是该实例的第一次启动，那么被选中的网络配置会被应用，所有老旧的配置都会会清除。
 该阶段需要阻止网络服务启动以及老的配置被应用，这可能带来一些负面的影响，比如 DHCP 服务挂起，或者已经广播了老的 hostname，这可能导致系统进入一个奇怪的状态需要重启网络设备。
 
-#### 与 NetworkManager 的关系
+### 2. Init Stage
 
-通过源代码分析，在 Local Stage 从 datasource 里读取网络配置信息，处理逻辑是：
+在官方文档中，也称为 Network Stage。
+分析 systemd 配置文件`cloud-init.service`，发现：
 
-- 如果发现使用的是静态地址，cloud-init 就会将 datasource 定义的配置信息写入`/etc/network/interfaces`目录下的配置文件
-- 如果发现使用的是 DHCP，cloud-init 并不会创建刷新网卡配置文件，配置ip的工作就交由 NetworkManager 自动获取
+- 依赖于 cloud-init-local.service 和 NetworkManager.service
+- 核心执行代码：`/usr/bin/cloud-init init`
 
-从以信息可知，如果创建静态ip的虚拟机，NetworkManager 这个服务必须在 cloudinit-local 之后启动才可正常从配置文件中读取 ip 并配置。而当你在镜像里安装 NetworkManager后，默认情况下它的启动顺序是会在 cloudinit-local 之前的。
+此阶段运行核心配置文件中名为`cloud_init_modules下`的所有module，主要包括：
 
-> openEuler 的初始网卡是`ens18`，在安装 cloud-init 之后，将被强制改名为`eth0`
+- 文件系统配置：包括 disk_setup 、resizefs、growpart 等
+  由于 nfs 等依赖于网络配置，这些模块不能过早启动。
+- 主机网络配置：包括 set_hostname、update_hostname、update_etc_hosts等
+- 辅助功能实现：包括 migrator、bootcmd、write-files、rsyslog、user-groups、ssh等
 
-#### PVE 的 config drive 网络配置
+### 3. Config Stage
 
-PVE 的虚拟机模版可以增加一个专用的 Cloud-init CDROM 设备，虚拟机启动 cloud-init 时，将读取`/dev/sr0`的全部文件至缓存，其中
-`network-config`就是网络配置文件。
+分析 systemd 配置文件`cloud-config.service`和`cloud-config.target`，发现：
 
-## 三、主配置文件
+- 依赖于 cloud-init-local.service 和 cloud-init.service
+- 核心执行代码：`/usr/bin/cloud-init modules --mode=config`
 
-为了实现 instance 定制工作，cloud-init 会主要按 4 个阶段执行任务（事实上还有一个generator阶段只有在systemd管理下才会触发，这里不做叙述）：
+此阶段运行核心配置文件中名为`cloud_config_modules下`的所有module，主要包括：
 
-- local stage：寻找本地的data source， 并配置本机网络，以便后续获取user data等信息。
-  网络配置可以来源于本地的data source， 如果获取不到，会启用dhcp。
-  当然，如果在`/etc/cloud/cloud.cfg`定义 `network: {config: disabled}`，将放弃配置网络
-- init stage：
-- config stage：
-- final stage：
+- 文件系统挂载：包括 mounts 等
+- 主机环境配置：包括 locale、timezone、set-password、rh_subscription等
+- 系统软件处理：包括 yum-add-repo、package-update-upgrade-install
+- 辅助功能实现：包括 runcmd、puppet等
 
+### 4. Final Stage
+
+分析 systemd 配置文件`cloud-final.service`，发现：
+
+- 依赖于 cloud-config.service
+- 核心执行代码：`/usr/bin/cloud-init modules --mode=final`
+
+此阶段运行核心配置文件中名为`cloud_final_modules下`的所有module，主要包括：
+
+- 用户脚本处理：包括 scripts-per-once、scripts-per-boot、scripts-per-instance、scripts-user 等
+- 用户登录配置：包括 ssh-authkey-fingerprints、keys-to-console等
+- 系统软件处理：包括 yum-add-repo、package-update-upgrade-install
+- 辅助功能实现：包括 final-message、phone-home等
+
+### 5. cloud.cfg 示例
 
 ```yaml
 users:
@@ -173,14 +190,16 @@ system_info:
   ssh_svcname: sshd
 ```
 
-## 二、个人化配置的元数据
+官方文档提供了配置文件的自定义规则方法，参见[Cloud config examples](https://cloudinit.readthedocs.io/en/latest/reference/examples.html)
 
-### 1. 前台界面的配置信息
+## 三、PVE 的 config drive 实现
 
-以 PVE 为例，前台界面配置了 VM 511。
+PVE 的虚拟机模版通过增加一个专用的 Cloud-init CDROM 设备实现 config drive。
+
+例如，我们从前台界面配置了 一个虚拟机 VM 511。
 ![PVE](pve-cloudinit.png)
 
-配置信息存储在`/etc/pve/qemu-server/511.conf`，内容是：
+第一步，将配置信息存储在`/etc/pve/qemu-server/511.conf`，内容是：
 
 ```yaml
 agent: 1
@@ -202,22 +221,26 @@ sockets: 1
 vmgenid: 297abc09-fa0f-46b0-b9ad-ae3195110f2a
 ```
 
-### 2. cloud-init CDROM 设备
+第二步，PVE 控制台将 VM 配置信息转化为 cloud-init 配置文件，并存储在 CDROM 设备中。
 
-根据前台的 VM 配置信息，PVE 控制台将其转化为 cloud-init 配置文件，并存储在 CDROM 设备中。
+```console
+[root@copy-of-vm-centos7 ~]# mount /dev/sr0 /mnt
+mount: /dev/sr0 写保护，将以只读方式挂载
+[root@copy-of-vm-centos7 ~]# ls -l /mnt
+总用量 2
+-rw-r--r--. 1 root root  54 9月  17 12:08 meta-data
+-rw-r--r--. 1 root root 227 9月  17 12:08 network-config
+-rw-r--r--. 1 root root 170 9月  17 12:08 user-data
+```
+
+第三步，虚拟机启动 cloud-init 时，将读取`/dev/sr0`的全部文件并加载到缓存。
+
 cloud-init 支持四种配置文件，其中：
 
 - `meta-data`（必须）: 一般是 instance id，唯一的一个机器标识符
 - `network-config`: 关于网络如 ip、nameserver、dns等的定义
 - `user-data`（可选）: 我们定义的大多数配置都放在这里
 - `vendor-data`（可选）: 是供应商（云）定义的如 user-data 类似数据，如果定义为 NoCloud 时该文件不存在
-
-
-- Cloud metadata
-- User data (optional)
-- Vendor data (optional)
-
-
 
 ### 元数据配置文件：meta-data
 
@@ -261,13 +284,35 @@ users:
 package_upgrade: true
 ```
 
+## 四、疑难杂症
+
+### 1. cloud-init 与 NetworkManager 的关系
+
+通过源代码分析，在 Local Stage 从 datasource 里读取网络配置信息，处理逻辑是：
+
+- 如果发现使用的是静态地址，cloud-init 就会将 datasource 定义的配置信息写入`/etc/network/interfaces`目录下的配置文件
+- 如果发现使用的是 DHCP，cloud-init 并不会创建刷新网卡配置文件，配置ip的工作就交由 NetworkManager 自动获取
+
+从以信息可知，如果创建静态ip的虚拟机，NetworkManager 这个服务必须在 cloudinit-local 之后启动才可正常从配置文件中读取 ip 并配置。而当你在镜像里安装 NetworkManager后，默认情况下它的启动顺序是会在 cloudinit-local 之前的。
+
+### 2. openEuler 的网卡名称被修改
+
+openEuler 初始化安装时，NetworkManager 采用的是 net.ifnames 命名规范，初始网卡被命名为`ens18`。
+安装 cloud-init 之后，其强制改为 biosdevname 命名规范，因此默认网卡被改名为`eth0`。
+注意，老的网卡配置文件依然存在！具体实现原理参见[CentOS 6.x 如何更改网卡名](http://pythontime.iswbm.com/en/latest/c08/c08_06.html#centos-6-x)
+
+### 3. BCLinux oe21.10 安装 cloud-init 后启动失败，提示错误信息`hosts.redhat`文件不存在
+
+BCLinux oe21.10 提供的 cloud-init 版本，并未建立模版目录`/etc/cloud/templates`，也找不到`hosts.redhat.tmpl`文件。
+根本原因是 cloud-init 目前适配了 Centos 和 openEuler 等主流版本，配置信息在 distor 中，但 BCLinux 不再其中。
+临时解决办法是，手工建模版目录，并拷贝相应的模版文件，凑合着使吧！！！
+
 ---
 
 ## 参考文献
 
-- [cloud-init 源码解读](http://pythontime.iswbm.com/en/latest/c08/c08_06.html#centos-6-x)
+- [cloud-init 源码解读](http://pythontime.iswbm.com/en/latest/c08/c08_06.html#)
 - [cloud-init 介绍](https://xixiliguo.github.io/linux/cloud-init.html)
 - [Cloud-init 初始化虚拟机配置](https://einverne.github.io/post/2020/03/cloud-init.html)
 - [基于 Cloud-init 定制化 PVE 虚拟机](https://gameapp.club/post/2022-07-30-custom-cloud-init-for-pve/)
 - [深度解析 OpenStack metadata 服务架构](https://zhuanlan.zhihu.com/p/55078689)
-- [CentOS 6.x 如何更改网卡名](https://www.alteeve.com/w/Changing_the_ethX_to_Ethernet_Device_Mapping_in_EL6)
