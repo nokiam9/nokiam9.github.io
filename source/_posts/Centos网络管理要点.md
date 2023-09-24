@@ -239,6 +239,40 @@ DNS=8.8.8.8
     由于很多应用程序依赖于`/etc/resolv.conf`，因此为了兼容性需要为两者建立一个软链接。
 - Ubuntu 18.04及更高版本中，默认使用 systemd-networkd 作为网络管理器，但也可以选择切换到 NetworkManager。
 
+### 4. netplan
+
+Netplan 是由 Ubuntu 的母公司 Canonical 开发的网络组件，目标是为不同的后端管理工具提供统一的网络配置抽象方法。
+
+- 目前支持的网络管理工具后端为：NetworkManager 和 NetworkManager
+- 网络配置语言采用 YAML 格式
+- 网络配置存储目录位于：`/etc/netplan/*.yaml`，可以系统管理员手工配置，也可以是云镜像或者其他操作系统部署设施自动生成
+- Github 主页位于：[https://github.com/canonical/netplan](https://github.com/canonical/netplan)
+
+![Alt text](netplan_design_overview.svg)
+
+以最简单的静态网卡配置为例，
+
+```yaml
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    enp3s0:
+      addresses:
+        - 10.10.10.2/24
+      nameservers:
+        search: [mydomain, otherdomain]
+        addresses: [10.10.10.1, 1.1.1.1]
+      routes: 
+        - to: default
+          via: 10.10.10.1
+```
+
+netplan 提供两个命令行工具：
+
+- `netplan generate` ：以 `/etc/netplan` 配置为管理工具生成配置信息
+- `netplan apply` ：应用配置。调整 /etc/netplan 配置后，需要执行该命令方能生效，必要时重启管理工具
+
 ## 三、小结
 
 1. 如果你使用的是 KDE 或者 GOME 等 Linux 桌面，毫无疑问应该使用 NetworkManager。
@@ -250,6 +284,7 @@ DNS=8.8.8.8
     - 不支持无线网络，需要手工关联`wpa_supplicant`服务
     - 全局域名解析存在缺陷，需要手工关联`systemd-resolved`服务
     - 不能为更高层面的脚本编程提供 ifup/ifdown 钩子函数
+4. Netplan 目前并未流行，主要是 Ubuntu 17 以后的版本提供，Centos 似乎没有默认安装包。
 
 ---
 
@@ -304,4 +339,5 @@ udev 设备管理器会根据以下方案生成设备名称：
 - [biosdevname网卡命名方式](https://www.cnblogs.com/jackydalong/archive/2013/11/06/3410890.html)
 - [CentOS 7 下网络管理之命令行工具nmcli](https://www.jianshu.com/p/5d5560e9e26a)
 - [从 NetworkManager 切换到 Systemd-networkd](https://linux.cn/article-6629-1.html)
+- [Netplan Github 主页](https://github.com/canonical/netplan)
   

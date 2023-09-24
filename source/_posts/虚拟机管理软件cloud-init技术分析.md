@@ -194,6 +194,9 @@ system_info:
 
 ## 三、PVE 的 config drive 实现
 
+Config drive 机制是将 metadata 信息写入虚拟机的一个特殊的配置设备（例如 CDROM ）中，然后在虚拟机启动时，自动挂载并读取 metadata 信息，从而达到获取 metadata 的目的。
+> 光盘作为存储介质，也需要安装特定的文件系统来管理数据和文件，这就是 [ISO 9660](https://www.iso.org/obp/ui/#iso:std:iso:9660:ed-1:v1:en)，别名是 CDFS
+
 PVE 的虚拟机模版通过增加一个专用的 Cloud-init CDROM 设备实现 config drive。
 
 例如，我们从前台界面配置了 一个虚拟机 VM 511。
@@ -221,7 +224,14 @@ sockets: 1
 vmgenid: 297abc09-fa0f-46b0-b9ad-ae3195110f2a
 ```
 
-第二步，PVE 控制台将 VM 配置信息转化为 cloud-init 配置文件，并存储在 CDROM 设备中。
+第二步，PVE 控制台将 VM 相关的 metadata 信息写入 libvirt 的虚拟磁盘文件中，并指示 libvirt 将其虚拟为 cdrom 设备。
+
+```console
+root@nuc5i3:/dev/pve# ls -l /dev/pve/vm-511-cloudinit
+lrwxrwxrwx 1 root root 8 Sep 17 23:11 /dev/pve/vm-511-cloudinit -> ../dm-24
+```
+
+这样，当该虚拟机启动时，Guest 操作系统中的 cloud-init 会去挂载该 cloud-init 设备，然后根据所读取出的内容对虚拟机进行配置。
 
 ```console
 [root@copy-of-vm-centos7 ~]# mount /dev/sr0 /mnt
@@ -284,7 +294,35 @@ users:
 package_upgrade: true
 ```
 
-## 四、疑难杂症
+## 四、openStack 的 Metadata RESTful 服务机制
+
+OpenStack 提供了 RESTful 接口，虚拟机可以通过 REST API 来获取 metadata 信息，具体包含了三个服务组件，其中`Nova-api-metadata`运行在云平台的控制节点，`neutron-metadata-agent`和`Neutron-ns-metadata-proxy`运行在网络节点，分别位于 openstack 管理网络和 租户所在的用户网络。
+
+![nova](nova.jpg)
+
+首先要解决一个问题，在虚拟机尚未配置网络的情况下，往哪里发送 REST API 请求呢？
+最早由亚马逊公司提出了 metadata 方案，利用 IPv4 保留的本地链路地址段，规定服务地址为 `169.254.169.254:80`，后来 OpenStack 沿用了这一规定。
+> Link Local Address 遵循[RFC 3927标准](https://datatracker.ietf.org/doc/html/rfc3927)，地址范围是：169.254.0.0/16
+
+在具体实现上，Neutron 有两种方式：
+
+- 通过 router 发送请求
+  如果虚拟机所在 subnet 连接在了 router 上，那么发向 169.254.169.254 的报文会被发至 router，而 neutron-ns-metadata-proxy 就监听着该端口
+- 通过 DHCP 发送请求
+  通过 DHCP 协议的选项 121 来为虚拟机设置静态路由，此时虚拟机所在 subnet 不需连接任何 router。此方式更为常见！！！
+
+虚拟机获取 metadata 的大致流程为：
+![workflow](workflow.png)
+
+1. 首先，请求被发送至`neutron-ns-metadata-proxy`，此时会在请求中添加`X-Neutron-Router-ID`和`X-Neutron-Network-ID`信息。
+2. 该请求通过 unix domian socket 被转发给 `neutron-metadata-agent`。
+3. `neutron-metadata-agent`根据请求中的 router-id、network-id 和 IP，获取 port 信息，从而拿到 instance-id 和 tenant-id 加入请求中。
+4. 请求被转发给`nova-api-metadata`。
+5. `nova-api-metadata`其利用 instance-id 和 tenant-id 获取虚拟机的 metadata，返回相应的结果信息。
+
+注意！为了解决网络节点的网段和租户的虚拟网段重复的问题，OpenStack 引入了网络命名空间，Neutron 中的路由和 DHCP 服务器都在各自独立的命名空间中。由于虚拟机获取 metadata 的请求都是以路由和 DHCP 服务器作为网络出口，所以需要通过 neutron-ns-metadata-proxy 利用基于 unix domain socket 的 HTTP 技术打通不同的网络命名空间，将请求在网络命名空间之间转发。
+
+## 五、疑难杂症
 
 ### 1. cloud-init 与 NetworkManager 的关系
 
@@ -315,4 +353,8 @@ BCLinux oe21.10 提供的 cloud-init 版本，并未建立模版目录`/etc/clou
 - [cloud-init 介绍](https://xixiliguo.github.io/linux/cloud-init.html)
 - [Cloud-init 初始化虚拟机配置](https://einverne.github.io/post/2020/03/cloud-init.html)
 - [基于 Cloud-init 定制化 PVE 虚拟机](https://gameapp.club/post/2022-07-30-custom-cloud-init-for-pve/)
+- [cloud-init简介及组件说明](https://www.cnblogs.com/gushiren/p/9511234.html)
 - [深度解析 OpenStack metadata 服务架构](https://zhuanlan.zhihu.com/p/55078689)
+- [OpenStack 的 metadata 服务机制](https://www.jianshu.com/p/cd8f60e30034)
+- [Metadata Service 架构详解](https://developer.aliyun.com/article/311493)
+- [OpenStack虚拟机如何获取metadata](https://zhuanlan.zhihu.com/p/38774639)
