@@ -37,6 +37,10 @@ external_link:
 filename_case: 0
 render_drafts: false
 post_asset_folder: true
+marked:
+  prependRoot: true
+  postAsset: true
+  dompurify: true
 relative_link: false
 future: true
 highlight:
