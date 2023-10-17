@@ -4,7 +4,14 @@ date: 2023-10-18 00:23:48
 tags:
 ---
 
+原本 HEXO v5.4.2 基于 node v12 版本，但最近个别组件出现安全告警要求强制升级，但新版本的组件依赖 node v14 版本，只好再次升级。
+![version](version.jpg)
+
+当前，node 的最新版本 v20，LTS 版本 v18。Hexo 最新版本 v6.3，Next 主题最新版本 v8.18.2。
+
 ## package.json 配置信息
+
+删除依赖库目录 `node_modules/` ，修改安装配置文件，然后重新`npm install`
 
 ```yaml
 {
@@ -42,6 +49,8 @@ tags:
 ```
 
 ## _config.yml 配置信息
+
+注意需修改 hexo 的主配置文件！然后，根据需要相应调整 Next 的配置文件。
 
 ```yaml
 post_asset_folder: true
