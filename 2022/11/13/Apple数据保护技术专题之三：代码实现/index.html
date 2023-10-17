@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。 1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：">
+    <meta name="description" content="Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。  1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Apple数据保护技术专题之三：代码实现">
 <meta property="og:url" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。 1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：">
+<meta property="og:description" content="Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。  1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/plog.png">
 <meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/daemon.png">

@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。 根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为">
+    <meta name="description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。  根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Apple数据保护技术分析">
 <meta property="og:url" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。 根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为">
+<meta property="og:description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。  根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch2.png">
 <meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/keys.png">

@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="CMD链接  主要目的  提供默认的命令 提供默认的参数，与ENTRYPOINT协同作用 如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT 该方式的命令，会被docker run">
+    <meta name="description" content="CMD 链接   1. 主要目的           * 提供默认的命令      * 提供默认的参数，与ENTRYPOINT协同作用      * 如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT      * 该方式的命令，会被docker run image cmd arg1 arg2命令行方式覆盖      * dockerfile 中最后一个CMD参数才会生效">
 <meta property="og:type" content="article">
 <meta property="og:title" content="深入理解Dockerfile文件中的Entrypoint和Cmd命令">
 <meta property="og:url" content="https://nokiam9.github.io/2019/11/16/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Dockerfile%E6%96%87%E4%BB%B6%E4%B8%AD%E7%9A%84Entrypoint%E5%92%8CCmd%E5%91%BD%E4%BB%A4/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="CMD链接  主要目的  提供默认的命令 提供默认的参数，与ENTRYPOINT协同作用 如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT 该方式的命令，会被docker run">
+<meta property="og:description" content="CMD 链接   1. 主要目的           * 提供默认的命令      * 提供默认的参数，与ENTRYPOINT协同作用      * 如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT      * 该方式的命令，会被docker run image cmd arg1 arg2命令行方式覆盖      * dockerfile 中最后一个CMD参数才会生效">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2019-11-16T07:50:06.000Z">
 <meta property="article:modified_time" content="2023-10-17T00:48:08.226Z">

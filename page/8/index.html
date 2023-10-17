@@ -247,8 +247,16 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。</p>
-<h2 id="配置初始化用户和口令"><a href="#配置初始化用户和口令" class="headerlink" title="配置初始化用户和口令"></a>配置初始化用户和口令</h2><p>以<a target="_blank" rel="noopener" href="https://github.com/docker-library/mongo/tree/master/3.6">mongo:3.6镜像文件</a>为例，启动命令是<code>/usr/local/bin/docker-entrypoint.s
+          Mongo数据库默认采用免鉴权的登录方式，虽然很方便，但是有被劫持勒索的风险，为此最好采用鉴权登录的方法。
+
+配置初始化用户和口令
+以mongo:3.6镜像文件为例，启动命令是/usr/local/bin/docker-entrypoint.sh。
+
+分析该脚本文件可以发现其基本步骤是：
+
+ 1. 下载Mongo数据库的代码，并以免鉴权方式启动。
+ 2. 如果OS设置了环境变量MONGO_INITDB_ROOT_USERNAME和MONGO_INITDB_ROOT_PASSWORD，则新建数据库用户并设置权限规则。
+    注意：mongo初始化用户的角色级别为root，需要授权创建和修改da
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/11/15/Mongo%E6%95%B0%E6%8D%AE%E5%BA%93%E8%AE%BE%E7%BD%AE%E9%89%B4%E6%9D%83%E7%99%BB%E5%BD%95%E7%9A%84%E6%96%B9%E6%B3%95/#more" rel="contents">
@@ -346,8 +354,22 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="问题现象"><a href="#问题现象" class="headerlink" title="问题现象"></a>问题现象</h2><p>测试成功的APP软件包，但在宿主机上安装失败，显示docker container的DNS不成功，判断是宿主机的Docker版本太低，对Docker DNS的支持不好。  </p>
-<p>宿主机是Centos, 内核版本<code>3.10.0-1062.4.1.el7.x86_64</code>, 使用<code>yum install docker</code>安装docker，docker的最新版本号<code>1.13</code>
+          问题现象
+测试成功的APP软件包，但在宿主机上安装失败，显示docker container的DNS不成功，判断是宿主机的Docker版本太低，对Docker DNS的支持不好。 
+
+宿主机是Centos, 内核版本3.10.0-1062.4.1.el7.x86_64, 使用yum install docker安装docker，docker的最新版本号1.13，即使采用yum update docker也无法更新。 
+
+原因分析
+Docker版本多次演进，现在分成社区版和企业版，安装方式已经改变。
+
+解决方案
+ 1. 删除旧版本
+    
+    1
+    2
+    3
+    4
+   
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/10/26/Centos%E5%AE%BF%E4%B8%BB%E6%9C%BA%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85docker%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC/#more" rel="contents">
@@ -445,9 +467,16 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="国密算法的概述"><a href="#国密算法的概述" class="headerlink" title="国密算法的概述"></a>国密算法的概述</h2><p>国密即国家密码局认定的国产密码算法。主要有SM1，SM2，SM3，SM4。密钥长度和分组长度均为128位。</p>
-<p>2011年，国家密码管理局发布了《关于做好公钥密码算法升级工作的通知》，要求“自2011年3月1日起，在建和拟建公钥密码基础设施电子认证系统和密钥管理系统应使用国密算法。自2011年7月1日起，投入运行并使用公钥密码的信息系统，应使用SM2算法。”</p>
-<h2 id="国密SM1"
+          国密算法的概述
+国密即国家密码局认定的国产密码算法。主要有SM1，SM2，SM3，SM4。密钥长度和分组长度均为128位。
+
+2011年，国家密码管理局发布了《关于做好公钥密码算法升级工作的通知》，要求“自2011年3月1日起，在建和拟建公钥密码基础设施电子认证系统和密钥管理系统应使用国密算法。自2011年7月1日起，投入运行并使用公钥密码的信息系统，应使用SM2算法。”
+
+国密SM1
+SM1为对称加密。其加密强度与AES相当。该算法不公开，调用该算法时，需要通过加密芯片的接口进行调用。
+
+国密SM2
+SM2为基于ECC的非对称加密。该算法已公开。由于该算法基于ECC-256位，与RSA-20
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/08/29/%E5%9B%BD%E5%AF%86%E6%A0%87%E5%87%86%E7%9A%84%E7%AE%80%E4%BB%8B/#more" rel="contents">
@@ -545,12 +574,21 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="传统的三层网络架构"><a href="#传统的三层网络架构" class="headerlink" title="传统的三层网络架构"></a>传统的三层网络架构</h2><img src="/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/core-aggregate-access.png" class="" title="传统的三层网络架构">
+          传统的三层网络架构
+特点：
 
-<p>特点：</p>
-<ul>
-<li>每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用</li>
-<li>汇聚层和接入层走二层交
+ * 每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用
+ * 汇聚层和接入层走二层交换，和核心层走三层路由
+ * 所有 OpenStack 网关配置在核心层路由器
+ * 防火墙和核心路由器直连，做一些安全策略
+
+简化的大二层网络架构
+Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：
+
+ * 转发路径更短。以图 7 的 Spine-Leaf（两级 Clos 架构）为例，任何两台服务器经过三跳（Leaf1 -> Spine -> Leaf2）就可以到达，延迟更低，并且可保障（可以按跳数精确计算出来）。
+   
+   
+ * 水平可扩
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/#more" rel="contents">
@@ -648,11 +686,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>昨天开始在北二环上班了。优点很多就不说了，至于缺点嘛……</p>
-<p>一是开车上班要90分钟，地铁也差不多，通勤很痛苦！</p>
-<p>二是物业餐饮真的不咋样，中饭25块钱，还吃不饱！</p>
-<p>慢慢适应吧:)</p>
+          昨天开始在北二环上班了。优点很多就不说了，至于缺点嘛……
 
+一是开车上班要90分钟，地铁也差不多，通勤很痛苦！
+
+二是物业餐饮真的不咋样，中饭25块钱，还吃不饱！
+
+慢慢适应吧:)
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/05/28/%E5%8F%88%E6%90%AC%E5%AE%B6%E4%BA%86/#more" rel="contents">
@@ -750,8 +790,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>最近，租用的腾讯云服务器ECS中招了，来自伦敦IDC的黑客通过ssh访问暴力破解root密码，并种上了木马（估计是挖矿的），看来必须重视安全加固工作了。<br>ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也是必须的。虽然可以为root设置更加复杂的密码，但也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下：</p>
-<h2 id="在腾讯云上，配置ECS采用ssh密钥登录方式"
+          最近，租用的腾讯云服务器ECS中招了，来自伦敦IDC的黑客通过ssh访问暴力破解root密码，并种上了木马（估计是挖矿的），看来必须重视安全加固工作了。
+ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也是必须的。虽然可以为root设置更加复杂的密码，但也是给自己找麻烦，想来想去，最好还是取消ssh的密码登录方式，改为密钥登录方式，具体的操作步骤如下：
+
+在腾讯云上，配置ECS采用ssh密钥登录方式
+ 1. 登录腾讯云，并转到ECS控制台。注意：为保障安全，ECS在关机状态才能修改登录方式！
+    
+    
+ 2. 选择SSH密钥-创建密钥，在弹出式窗口中选
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/05/04/%E4%B8%BAECS%E8%AE%BE%E7%BD%AEssh%E5%AF%86%E9%92%A5%E7%99%BB%E5%BD%95%E7%9A%84%E6%96%B9%E6%B3%95/#more" rel="contents">
@@ -849,8 +895,19 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！</p>
-<h2 id="服务器的问题表现"><a href="#服务器的问题表现" class="headerlink" title="服务器的问题表现"></a>服务器的问题表现</h2
+          突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！
+
+服务器的问题表现
+ * 登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中/tmp/vThHH严重消耗资源，确认中招了！
+
+ * 服务器的root口令没有变化，但登录成功时提示有几百个failed login attempts，说明SSH口令已经被暴力破解
+
+系统检查的主要工作
+主要从以下几个方面入手：
+
+ 1. 检查网络服务
+    
+     使用netstat -nlp，发现除了22，80，443端口，还对外暴露了可
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/#more" rel="contents">
@@ -948,7 +1005,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="安装Kubernetes的最简单方法"><a href="#安装Kubernetes的最简单方法" class="headerlink" title="安装Kubernetes的最简单方法"></a>安装Kubernetes的最简单方法</h2><p>著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。<br>docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴械投降了，目前Kubernets已经集成到了Docker中。
+          安装Kubernetes的最简单方法
+著名的Docker三剑客，Docker + Docker-compose + Docker Swarm。
+docker-compose比较简单，适用于单机的服务编排，已经得到很好的应用，但是Docker Swarm作为集群的服务编排工具，受到K8s的强烈冲击，已经缴械投降了，目前Kubernets已经集成到了Docker中。
+最简单的安装方法，就是在菜单Docker-Preferences-Kubernetes中，Enable即可。
+
+如果看到‘Kubernetes is running…’，就是成功加载了！！！
+
+Dashboard的安装和启动
+Kube
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/04/01/Kubernetes-for-Mac%E7%9A%84%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95%E5%92%8C%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/#more" rel="contents">
@@ -1046,10 +1111,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Kubernetes 是一个跨主机集群的 开源的容器调度平台，它可以自动化应用容器的部署、扩展和操作，提供以容器为中心的基础架构。<br>Kubernetes集群主要包括一个Master组件，和多个Node组件。</p>
-<img src="/2019/04/01/Kubernetes%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BB%84%E4%BB%B6/k8s-basic.png" class="" title="Kubernetes的技术架构">
+          Kubernetes 是一个跨主机集群的 开源的容器调度平台，它可以自动化应用容器的部署、扩展和操作，提供以容器为中心的基础架构。
+Kubernetes集群主要包括一个Master组件，和多个Node组件。
 
-<h2 id="一、Master组件"
+一、Master组件
+Master 组件提供的集群控制。Master 组件对集群做出全局性决策(例如：调度)，以及检测和响应集群事件(副本控制器的replicas字段不满足时,启动新的副本)。
+Master 组件可以在集群中的任何节点上运行。然而，为了简单起见，设置脚本通常会启动同一个虚拟机上所有 Master 组件，并且不会在此虚拟机上运行用户容器。
+
+1、核心数据库（etcd）
+et
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/04/01/Kubernetes%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%BB%84%E4%BB%B6/#more" rel="contents">
@@ -1147,9 +1217,22 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="安装步骤"><a href="#安装步骤" class="headerlink" title="安装步骤"></a>安装步骤</h2><p>昨天在新Mac上重新安装Hexo Blog的编辑环境出现了不少问题，解决情况如下。</p>
-<p>1、确认已经安装node.js和npm，最简单的办法是采用图形化的安装包。<br>2、至少需要全局安装hexo和hexco-cli（hexo的命令行工具包），方法是</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1
+          安装步骤
+昨天在新Mac上重新安装Hexo Blog的编辑环境出现了不少问题，解决情况如下。
+
+1、确认已经安装node.js和npm，最简单的办法是采用图形化的安装包。
+2、至少需要全局安装hexo和hexco-cli（hexo的命令行工具包），方法是
+
+1
+2
+
+
+sudo npm install hexo -g
+sudo npm install hexo-cli -g
+
+
+ * npm全局安装方式时，默认存储目录是/usr/local/lib/node_modules/，普通用户可能出现权限问题，需要sudo提权
+ * 为了加快npm安装速度，可以提前全局安装cnpm，以后的命令可以用c
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/02/12/%E9%87%8D%E8%A3%85Hexo%E5%8F%91%E5%B8%83%E7%8E%AF%E5%A2%83%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98/#more" rel="contents">

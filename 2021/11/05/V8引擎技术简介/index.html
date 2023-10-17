@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="前言2009年，Google启动了浏览器项目，V8引擎诞生的使命就是性能的极致，Google觉得这这种架构生成字节码会浪费时间，决定一步到位直接采用机器码。 早期V8引擎包含了Full-Codegen和 Crankshaft(曲轴) 两个编译器，即：JS源代码会被V8引擎进行两次解析，第一次使用Full-Codegen进行快速编译，而第">
+    <meta name="description" content="前言 2009年，Google启动了浏览器项目，V8引擎诞生的使命就是性能的极致，Google觉得这这种架构生成字节码会浪费时间，决定一步到位直接采用机器码。  早期V8引擎包含了Full-Codegen和 Crankshaft(曲轴) 两个编译器，即：JS源代码会被V8引擎进行两次解析，第一次使用Full-Codegen进行快速编译，而第二次使用Crankshaft进行深度优化编译，其基本处理流">
 <meta property="og:type" content="article">
 <meta property="og:title" content="V8引擎技术简介">
 <meta property="og:url" content="https://nokiam9.github.io/2021/11/05/V8%E5%BC%95%E6%93%8E%E6%8A%80%E6%9C%AF%E7%AE%80%E4%BB%8B/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="前言2009年，Google启动了浏览器项目，V8引擎诞生的使命就是性能的极致，Google觉得这这种架构生成字节码会浪费时间，决定一步到位直接采用机器码。 早期V8引擎包含了Full-Codegen和 Crankshaft(曲轴) 两个编译器，即：JS源代码会被V8引擎进行两次解析，第一次使用Full-Codegen进行快速编译，而第">
+<meta property="og:description" content="前言 2009年，Google启动了浏览器项目，V8引擎诞生的使命就是性能的极致，Google觉得这这种架构生成字节码会浪费时间，决定一步到位直接采用机器码。  早期V8引擎包含了Full-Codegen和 Crankshaft(曲轴) 两个编译器，即：JS源代码会被V8引擎进行两次解析，第一次使用Full-Codegen进行快速编译，而第二次使用Crankshaft进行深度优化编译，其基本处理流">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2021/11/05/V8%E5%BC%95%E6%93%8E%E6%8A%80%E6%9C%AF%E7%AE%80%E4%BB%8B/v8-arch-0.png">
 <meta property="og:image" content="https://nokiam9.github.io/2021/11/05/V8%E5%BC%95%E6%93%8E%E6%8A%80%E6%9C%AF%E7%AE%80%E4%BB%8B/v8.jpg">

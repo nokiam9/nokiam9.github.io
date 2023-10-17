@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="传统的三层网络架构  特点：  每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用 汇聚层和接入层走二层交">
+    <meta name="description" content="传统的三层网络架构 特点：   * 每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用  * 汇聚层和接入层走二层交换，和核心层走三层路由  * 所有 OpenStack 网关配置在核心层路由器  * 防火墙和核心路由器直连，做一些安全策略  简化的大二层网络架构 Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：   * 转发路径更短。以图 7 的 Spine-L">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SDN学习笔记之一">
 <meta property="og:url" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="传统的三层网络架构  特点：  每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用 汇聚层和接入层走二层交">
+<meta property="og:description" content="传统的三层网络架构 特点：   * 每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用  * 汇聚层和接入层走二层交换，和核心层走三层路由  * 所有 OpenStack 网关配置在核心层路由器  * 防火墙和核心路由器直连，做一些安全策略  简化的大二层网络架构 Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：   * 转发路径更短。以图 7 的 Spine-L">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/core-aggregate-access.png">
 <meta property="og:image" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/spine-leaf.png">

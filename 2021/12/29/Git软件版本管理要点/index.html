@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="一、概述传统的版本控制系统采用集中化方式（CVCS - Centralized Version Control Systems）包括CVS、Subversion 以及 Perforce 等，都有一个单一的集中管理的服务器，保存所有文件的修订版本，而协同工作的人们都通过客户端连到这台服务器，取出最新的文件或者提交更新。 多年以来，这已成为版本控制系统的标准做法。 集中式版本管理系统最显而易见的缺点是">
+    <meta name="description" content="一、概述 传统的版本控制系统采用集中化方式（CVCS - Centralized Version Control Systems）包括CVS、Subversion 以及 Perforce 等，都有一个单一的集中管理的服务器，保存所有文件的修订版本，而协同工作的人们都通过客户端连到这台服务器，取出最新的文件或者提交更新。 多年以来，这已成为版本控制系统的标准做法。  集中式版本管理系统最显而易见的缺">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Git软件版本管理要点">
 <meta property="og:url" content="https://nokiam9.github.io/2021/12/29/Git%E8%BD%AF%E4%BB%B6%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E8%A6%81%E7%82%B9/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="一、概述传统的版本控制系统采用集中化方式（CVCS - Centralized Version Control Systems）包括CVS、Subversion 以及 Perforce 等，都有一个单一的集中管理的服务器，保存所有文件的修订版本，而协同工作的人们都通过客户端连到这台服务器，取出最新的文件或者提交更新。 多年以来，这已成为版本控制系统的标准做法。 集中式版本管理系统最显而易见的缺点是">
+<meta property="og:description" content="一、概述 传统的版本控制系统采用集中化方式（CVCS - Centralized Version Control Systems）包括CVS、Subversion 以及 Perforce 等，都有一个单一的集中管理的服务器，保存所有文件的修订版本，而协同工作的人们都通过客户端连到这台服务器，取出最新的文件或者提交更新。 多年以来，这已成为版本控制系统的标准做法。  集中式版本管理系统最显而易见的缺">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2021/12/29/Git%E8%BD%AF%E4%BB%B6%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E8%A6%81%E7%82%B9/git.jpg">
 <meta property="og:image" content="https://nokiam9.github.io/2021/12/29/Git%E8%BD%AF%E4%BB%B6%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E8%A6%81%E7%82%B9/commit-message-example.png">

@@ -247,9 +247,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、面向对象编程（Object-oriented-programming）"><a href="#一、面向对象编程（Object-oriented-programming）" class="headerlink" title="一、面向对象编程（Object-oriented programming）"></a>一、面向对象编程（Object-oriented programming）</h2><p>对于面向对象的 OOP 编程语言，最基本的概念就是是：类、实例、对象。</p>
-<ul>
-<li>Class - 类是对象的类型模板<br>  类是抽象的，而不是其所描述的对象集合
+          一、面向对象编程（Object-oriented programming）
+对于面向对象的 OOP 编程语言，最基本的概念就是是：类、实例、对象。
+
+ * Class - 类是对象的类型模板
+   类是抽象的，而不是其所描述的对象集合中的任何特定的个体。
+   类定义了某一对象集合所具有的共同特征，包含了存储数据的结构（Attribute属性）和操纵数据的行为（Method方法）
+ * Instance - 实例是根据类创建的对象
+   对象就是实例，是一个类的实例化。例如， Victoria 是 Employee 类的一个实例，表示一个特定的雇员个体。
+   实例具有和其父类完全一致的属性，
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/#more" rel="contents">
@@ -347,10 +353,19 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、常用资料"><a href="#一、常用资料" class="headerlink" title="一、常用资料"></a>一、常用资料</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://www.runoob.com/js/js-class-intro.html">JavaScript - 菜鸟课堂</a></li>
-<li><a target="_blank" rel="noopener" href="https://es6.ruanyifeng.com/#docs/class">ECMAScript 6 入门 - 阮一峰</a></li>
-<li
+          一、常用资料
+ * JavaScript - 菜鸟课堂
+ * ECMAScript 6 入门 - 阮一峰
+ * JavaScript教程 - 廖雪峰
+ * HTML DOM 参考手册 - W3School
+
+二、有用技巧
+1. 如何获得唯一标识符（UID）
+利用toString(36)，将一个数字转换为36进制，也就是10个数字+26个字母
+uid = Number(Math.random().toString().split('.')[1]).toString(36);
+
+2. localStorage采用[k,v]格式，仅支持字符串格式，怎么存储对象格式？
+ * 存储：通过JSON.str
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/05/05/JavaScript-%E5%BC%80%E5%8F%91%E7%BB%8F%E9%AA%8C%E7%82%B9%E6%BB%B4/#more" rel="contents">
@@ -448,8 +463,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>nginx（发音为“engine x”）是一个免费的开源 Web 服务器，由俄罗斯软件工程师 Igor Sysoev 编写。自 2004 年公开推出以来，nginx 一直专注于高性能、高并发和低内存使用。Web 服务器功能之上的附加功能，如负载平衡、缓存、访问和带宽控制，以及与各种应用程序有效集成的能力，有助于使 nginx 成为现代网站架构的理想选择。目前 nginx 是 Internet 上第二受欢迎的开源 Web 服务器。</p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>如前所述，n
+          nginx（发音为“engine x”）是一个免费的开源 Web 服务器，由俄罗斯软件工程师 Igor Sysoev 编写。自 2004 年公开推出以来，nginx 一直专注于高性能、高并发和低内存使用。Web 服务器功能之上的附加功能，如负载平衡、缓存、访问和带宽控制，以及与各种应用程序有效集成的能力，有助于使 nginx 成为现代网站架构的理想选择。目前 nginx 是 Internet 上第二受欢迎的开源 Web 服务器。
+
+概述
+如前所述，nginx 代码库由一个核心和许多模块组成。nginx的核心负责提供web服务器、web和邮件反向代理功能的基础；它支持使用底层网络协议，构建必要的
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/04/23/Nginx-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/#more" rel="contents">
@@ -547,7 +564,42 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br
+          1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+
+
+[root@VM-0-17-centos git]# tree /home/git/blog.git -F
+/home/git/blog.git
+├── branches/
+├── config
+├── description
+├── HEAD
+├── hooks/
+├── index
+├── info/
+│   └── exclude
+├── objects/
+│   ├── info/
+│   └── pack/
+└── refs/
+    ├── heads/
+    │   └── master
+ 
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/04/21/Git-%E8%A3%B8%E4%BB%93%E5%BA%93%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
@@ -645,7 +697,16 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>Transmission是一个轻量级、跨平台、开源的 BitTorrent 客户端，官网地址是<a target="_blank" rel="noopener" href="https://transmissionbt.com/">https://transmissionbt.com/</a>，源码地址是<a target="_blank" rel="noopener" href="https://github.com/transmission/transmission">https://github.com/transmission/transmissio
+          一、概述
+Transmission是一个轻量级、跨平台、开源的 BitTorrent 客户端，官网地址是https://transmissionbt.com/，源码地址是https://github.com/transmission/transmission，当前最新版本是3.0。
+
+
+
+其实现了BT协议的几乎全部功能，覆盖了Linux、MacOS、Windows等所有主流操作系统，核心组件包括：
+
+ * 1个基于MacOS的Native Application
+ * 2个基于Linux的Native Application，分别支持 GTK GUI和 QT GUI
+ * 1个基于Linux的
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/#more" rel="contents">
@@ -743,10 +804,19 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>Mermaid(美人鱼)是一种基于Javascript的绘图工具，使用类似于Markdown的语法，使用户可以方便快捷地通过代码创建图表。<br>项目地址：<a target="_blank" rel="noopener" href="https://github.com/mermaid-js/mermaid">https://github.com/mermaid-js/mermaid</a></p>
-<p>Mermaid支持以下类型的图形：</p>
-<ul>
-<li>流程图：使用<code>grap
+          一、概述
+Mermaid(美人鱼)是一种基于Javascript的绘图工具，使用类似于Markdown的语法，使用户可以方便快捷地通过代码创建图表。
+项目地址：https://github.com/mermaid-js/mermaid
+
+Mermaid支持以下类型的图形：
+
+ * 流程图：使用graph关键字，具体用法后文将详细介绍
+ * 饼状图：使用pie关键字，具体用法后文将详细介绍
+ * 序列图：使用sequenceDiagram关键字
+ * 甘特图：使用gantt关键字
+ * 类图：使用classDiagram关键字
+ * 状态图：使用stateDiagram关键字
+ * 用户旅程图：
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/04/10/HEXO%E7%9A%84Next%E4%B8%BB%E9%A2%98%E5%BC%95%E5%85%A5mermaid%E6%B5%81%E7%A8%8B%E5%9B%BE%E6%8F%92%E4%BB%B6/#more" rel="contents">
@@ -844,7 +914,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>2014年，雷军发布了小米第一台路由器，号称要引领路由器市场的革命，定位是家庭网络入口，形态是路由器+NAS存储。理想很丰满、现实很骨感！两个都想做，两个都做不好，路由器的网络质量屡屡被吐槽，口碑炸裂。。。<br>从Wi-Fi 6开始，小米痛下决心只做纯粹的路由器，招安了斐讯研发团队，芯片也转向高通的整体方案。从早期的AX1800初入江湖到 Redmi AX5\AX6补全产品线，从AX3600开始普及家用Wi-Fi 6再到AX6000紧跟手机SOC的发展进一步提高无线规格，小米路由器在逐渐在中高端站稳了脚跟，有了进一步向更高层冲击的实力。<br>2021年，小米发布了高端旗舰路由器小米A
+          2014年，雷军发布了小米第一台路由器，号称要引领路由器市场的革命，定位是家庭网络入口，形态是路由器+NAS存储。理想很丰满、现实很骨感！两个都想做，两个都做不好，路由器的网络质量屡屡被吐槽，口碑炸裂。。。
+从Wi-Fi 6开始，小米痛下决心只做纯粹的路由器，招安了斐讯研发团队，芯片也转向高通的整体方案。从早期的AX1800初入江湖到 Redmi AX5\AX6补全产品线，从AX3600开始普及家用Wi-Fi 6再到AX6000紧跟手机SOC的发展进一步提高无线规格，小米路由器在逐渐在中高端站稳了脚跟，有了进一步向更高层冲击的实力。
+2021年，小米发布了高端旗舰路由器小米AX9000，这是小
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/#more" rel="contents">
@@ -942,10 +1014,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>从理论上看，Wi-Fi的理论速率与以下因素密切相关：频宽、频率复用技术、调制方法、编码方案和天线数量等，可以表示为下面的公式：</p>
-<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/rate.png" class="">
+          从理论上看，Wi-Fi的理论速率与以下因素密切相关：频宽、频率复用技术、调制方法、编码方案和天线数量等，可以表示为下面的公式：
 
-<p>回顾整个 802.11 协议标准的发展历程，每一代新的协议都在与3GPP的移动通信技术相互借鉴，传输速率和数据吞吐率方面有着较大的提升
+回顾整个 802.11 协议标准的发展历程，每一代新的协议都在与3GPP的移动通信技术相互借鉴，传输速率和数据吞吐率方面有着较大的提升，尤其是演进到 802.11ac 协议后，无线网络带宽与有线差距越来越小，基本可以满足大部分应用的需求。但802.11ac 的最大速率6.9Gbps只是实验室环境的理论值，在实际应用场景的有效带宽远远低于理论值，且并发用户数越多，有效吞吐率就会越差。
+
+802.11ax 的关键字是高效率无线标准（HEW，High-Efficiency
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/#more" rel="contents">
@@ -1043,11 +1116,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Wi-Fi背后的技术标准，是由美国的电气电子工程师协会（IEEE）制定的802.11系列协议，主要包含几个物理层（PHY）规范和一个链路层（MAC）规范。</p>
-<blockquote>
-<p>IEEE 802.11的链路层规范为CSMA&#x2F;CA（载波侦听多路访问&#x2F;碰撞避免），与以太网IEEE 802.3的CSMA&#x2F;CD（载波侦听多路访问&#x2F;冲突检测）非常相似</p>
-</blockquote>
-<p>从1997年的第一个版本开始，802.11系列协议不断向前演进，经历了802.11a&#x2F;b&#x2F;g&#x2F;n&#x2F;ac等多个版
+          Wi-Fi背后的技术标准，是由美国的电气电子工程师协会（IEEE）制定的802.11系列协议，主要包含几个物理层（PHY）规范和一个链路层（MAC）规范。
+
+IEEE 802.11的链路层规范为CSMA/CA（载波侦听多路访问/碰撞避免），与以太网IEEE 802.3的CSMA/CD（载波侦听多路访问/冲突检测）非常相似
+
+从1997年的第一个版本开始，802.11系列协议不断向前演进，经历了802.11a/b/g/n/ac等多个版本，支持的上网速率也不断提升。目前最新的协议版本是802.11ax，也就是近年来迅速发展的Wi-Fi 6。
+
+一、Wi-Fi技术标准的演进
+IEEE 802.11a
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/03/27/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86/#more" rel="contents">
@@ -1145,9 +1221,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Wi-Fi联盟（英语：Wi-Fi Alliance，缩写WFA），是一个商业联盟，拥有Wi-Fi的商标。它负责Wi-Fi认证，与商标授权的工作，也负责制定Wi-Fi的标准，总部位于美国德州首府Austin。</p>
-<p>Wi-Fi背后的技术标准，是由美国的电气电子工程师协会（IEEE）制定的802.11系列协议。在最初的很多年里，Wi-Fi虽然一代代向前发展，但世界上并没有Wi-Fi几代这样的说法，直接就用802.11后面加几个字母这样的协议编号，对普通用户非常不友好。</p>
-<p>2018年，Wi-Fi联盟决定把下一代技术标准802.11ax用更为简单易懂的Wi-Fi 6来宣传，上
+          Wi-Fi联盟（英语：Wi-Fi Alliance，缩写WFA），是一个商业联盟，拥有Wi-Fi的商标。它负责Wi-Fi认证，与商标授权的工作，也负责制定Wi-Fi的标准，总部位于美国德州首府Austin。
+
+Wi-Fi背后的技术标准，是由美国的电气电子工程师协会（IEEE）制定的802.11系列协议。在最初的很多年里，Wi-Fi虽然一代代向前发展，但世界上并没有Wi-Fi几代这样的说法，直接就用802.11后面加几个字母这样的协议编号，对普通用户非常不友好。
+
+2018年，Wi-Fi联盟决定把下一代技术标准802.11ax用更为简单易懂的Wi-Fi 6来宣传，上一代的802.11ac和802
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/03/27/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%A2%91%E7%8E%87%E8%A7%84%E5%88%92/#more" rel="contents">

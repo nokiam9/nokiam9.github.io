@@ -247,9 +247,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>已经是2019年了！<br>从兰州搬家，终于回到了北京！</p>
-<p>阿里云的香港ECS到期了，续费太贵，就把域名搬到了成都的腾讯云！<br>效果还不错，就是不得不做了域名备案。</p>
+          已经是2019年了！
+从兰州搬家，终于回到了北京！
 
+阿里云的香港ECS到期了，续费太贵，就把域名搬到了成都的腾讯云！
+效果还不错，就是不得不做了域名备案。
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/01/17/%E6%90%AC%E5%AE%B6%E4%BA%86/#more" rel="contents">
@@ -356,10 +358,46 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="添加关于页面"><a href="#添加关于页面" class="headerlink" title="添加关于页面"></a>添加<code>关于</code>页面</h2><ul>
-<li>运行hexo新建一个名为<code>about</code>的页面</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$
+          添加关于页面
+ * 运行hexo新建一个名为about的页面
+
+1
+
+
+$ hexo new page "about"
+
+
+ * 找到source/about/index.md文件，自由编辑并存盘
+
+添加分类页面
+ * 打开项目配置文件，设置所有分类的属性和目录名
+
+1
+2
+3
+4
+5
+6
+7
+8
+
+
+# ~/_config.yml
+
+default_category: uncategorized
+category_map:
+	编程: programming
+	生活: life
+	其他: other
+tag_map:
+
+
+ * 运行hexo新建一个名为caterogies的页面
+
+1
+
+
+$ 
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2018/12/24/HEXO%E8%AE%BE%E7%BD%AEAbout-Categories-Tags%E9%A1%B5%E9%9D%A2%E7%9A%84%E6%96%B9%E6%B3%95/#more" rel="contents">
@@ -466,16 +504,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>饭可以不吃，药不能停！！！<br>好多药啊！</p>
-<blockquote>
-<ul>
-<li>拜糖平</li>
-<li>二甲双瓜</li>
-<li>甲钴胺</li>
-<li>阿斯匹林</li>
-</ul>
-</blockquote>
+          饭可以不吃，药不能停！！！
+好多药啊！
 
+ * 拜糖平
+ * 二甲双瓜
+ * 甲钴胺
+ * 阿斯匹林
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2018/12/23/%E4%BB%8A%E5%A4%A9%E6%99%9A%E4%B8%8A%E5%BF%98%E4%BA%86%E5%90%83%E8%8D%AF/#more" rel="contents">
@@ -582,13 +617,34 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <ol>
-<li>开启新blog</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&#x27;圣诞节怎么过？`</span></span><br></pre></td></tr></table></figure>
+          1. 开启新blog
 
-<ol start="2">
-<li><p>在 
+1
+
+
+$ hexo new '圣诞节怎么过？`
+
+
+ 2. 在 /source/_posts目录下发现一个新文件圣诞节怎么过？.md，自由编辑该文件
+    
+    在md文件的注释部分，可以标记category和tag，具体方法为：
+    
+    1
+    2
+    3
+    4
+    5
+    
+    
+    # hello-world.md
+    categories: 编程
+    tags: 
+        - hexo
+        - github
+    
+    
+    
+ 3. 文章写完了，看看效果如何，并点击本地浏览器
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2018/12/23/%E5%8F%91%E5%B8%83blog%E7%9A%84%E6%93%8D%E4%BD%9C%E6%AD%A5%E9%AA%A4/#more" rel="contents">
@@ -695,8 +751,7 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>老孙打了好几个电话过来</p>
-
+          老孙打了好几个电话过来
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2018/12/23/%E5%86%AC%E8%87%B3%E5%9C%A8%E5%85%B0%E5%B7%9E/#more" rel="contents">
@@ -794,7 +849,23 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you c
+          Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub.
+
+Quick Start
+Create a new post
+1
+
+
+$ hexo new "My New Post"
+
+
+More info: Writing
+
+Run server
+1
+
+
+$ hexo s
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2018/12/21/hello-world/#more" rel="contents">

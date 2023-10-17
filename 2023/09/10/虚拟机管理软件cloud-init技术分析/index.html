@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="一、概述cloud-init 最初由 ubuntu 的母公司 Canonical 开发，基本设计思路是：  当用户首次创建虚拟机时，将前台设置的主机名，密码或者秘钥等存入后台的元数据服务器 - metadata server 当 cloud-init 随虚拟机启动而运行时，通过 http 协议访问 metadata server 虚拟机根据预设的元数据信息修改主机配置，从而完成系统的环境初">
+    <meta name="description" content="一、概述 cloud-init 最初由 ubuntu 的母公司 Canonical 开发，基本设计思路是：   * 当用户首次创建虚拟机时，将前台设置的主机名，密码或者秘钥等存入后台的元数据服务器 - metadata server  * 当 cloud-init 随虚拟机启动而运行时，通过 http 协议访问 metadata server  * 虚拟机根据预设的元数据信息修改主机配置，从而完成">
 <meta property="og:type" content="article">
 <meta property="og:title" content="虚拟机管理软件cloud-init技术分析">
 <meta property="og:url" content="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="一、概述cloud-init 最初由 ubuntu 的母公司 Canonical 开发，基本设计思路是：  当用户首次创建虚拟机时，将前台设置的主机名，密码或者秘钥等存入后台的元数据服务器 - metadata server 当 cloud-init 随虚拟机启动而运行时，通过 http 协议访问 metadata server 虚拟机根据预设的元数据信息修改主机配置，从而完成系统的环境初">
+<meta property="og:description" content="一、概述 cloud-init 最初由 ubuntu 的母公司 Canonical 开发，基本设计思路是：   * 当用户首次创建虚拟机时，将前台设置的主机名，密码或者秘钥等存入后台的元数据服务器 - metadata server  * 当 cloud-init 随虚拟机启动而运行时，通过 http 协议访问 metadata server  * 虚拟机根据预设的元数据信息修改主机配置，从而完成">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/pve-cloudinit.png">
 <meta property="og:image" content="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/nova.jpg">

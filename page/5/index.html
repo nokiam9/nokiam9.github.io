@@ -247,9 +247,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、vxLan技术的应用"><a href="#一、vxLan技术的应用" class="headerlink" title="一、vxLan技术的应用"></a>一、vxLan技术的应用</h2><h3 id="经典网络的问题"><a href="#经典网络的问题" class="headerlink" title="经典网络的问题"></a>经典网络的问题</h3><p>传统IDC一般采用基于Vlan的经典网络，其特点是：</p>
-<ul>
-<li>首先进行安全规划划分为若干个安全域，一个维度是用户归属的管理权限，例如每个法人主体各自一个安全域；另一个维度是安全级别，例如互
+          一、vxLan技术的应用
+经典网络的问题
+传统IDC一般采用基于Vlan的经典网络，其特点是：
+
+ * 首先进行安全规划划分为若干个安全域，一个维度是用户归属的管理权限，例如每个法人主体各自一个安全域；另一个维度是安全级别，例如互联网接口域、DMZ域、核心域等
+ * 为每个安全域设立硬件防火墙，确保网络资源的物理隔离
+ * 在每个安全域内部，所有用户共享公共网络资源池，用户之间不做逻辑隔离，或者基于VLan进行逻辑隔离。用户的内网IP由系统统一分配，相同的内网IP无法分配给不同用户。
+
+但是，对于大规模的公有云来说，如果采用VLAN，每个用户一个二层网络，那最多只能带4096多个用户，公有云许
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/06/27/VPC%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92%E7%9A%84%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
@@ -347,8 +353,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>虚拟私有云（Virtual Private Cloud，以下简称VPC，有的厂商也称为<code>私有网络</code>），是一个<strong>用户自定义的</strong>、<strong>逻辑隔离</strong>的虚拟网络环境，以提升用户云上资源的安全性，并满足不同的应用场景需求。</p>
-<p>您可以在VPC中定义安全组、VPN、IP地址段、带宽等网络特性。用户可以通过VPC方便地管理、配置内部网络，进行安全、快捷的网络变更。同时
+          一、前言
+虚拟私有云（Virtual Private Cloud，以下简称VPC，有的厂商也称为私有网络），是一个用户自定义的、逻辑隔离的虚拟网络环境，以提升用户云上资源的安全性，并满足不同的应用场景需求。
+
+您可以在VPC中定义安全组、VPN、IP地址段、带宽等网络特性。用户可以通过VPC方便地管理、配置内部网络，进行安全、快捷的网络变更。同时，用户可以自定义安全组内与组间弹性云服务器的访问规则，加强弹性云服务器的安全保护。
+
+从业务连续性的角度，大型业务系统必须支持多中心部署，例如“两地三中心”，“四地八中心”等，为此VPC的网络规划需要基于 Region 和 Zone 。
+
+Region
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/#more" rel="contents">
@@ -446,9 +458,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Spring Cloud是一个相对比较新的微服务框架，2016年才推出1.0的release版本. 虽然Spring Cloud时间最短, 但是相比Dubbo等RPC框架, Spring Cloud提供的全套的分布式系统解决方案。</p>
-<p>Spring Cloud是一系列框架的有序集合。它利用Spring Boot的开发便利性巧妙地简化了分布式系统基础设施的开发，如服务发现注册、配置中心、消息总线、负载均衡、断路器、数据监控等，都可以用Spring Boot的开发风格做到一键启动和部署。</p>
-<p>Spring并没有重复制造轮子，它只是将目前各家公司(主要是 Netflix )
+          Spring Cloud是一个相对比较新的微服务框架，2016年才推出1.0的release版本. 虽然Spring Cloud时间最短, 但是相比Dubbo等RPC框架, Spring Cloud提供的全套的分布式系统解决方案。
+
+Spring Cloud是一系列框架的有序集合。它利用Spring Boot的开发便利性巧妙地简化了分布式系统基础设施的开发，如服务发现注册、配置中心、消息总线、负载均衡、断路器、数据监控等，都可以用Spring Boot的开发风格做到一键启动和部署。
+
+Spring并没有重复制造轮子，它只是将目前各家公司(主要是 Netflix )开发的比较成熟、经得起实际考验
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/06/20/%E5%9F%BA%E4%BA%8ESpring-Cloud%E7%9A%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%86%E6%9E%90/#more" rel="contents">
@@ -546,7 +560,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="Nexus简介"><a href="#Nexus简介" class="headerlink" title="Nexus简介"></a>Nexus简介</h2><p>Nexus是一个强大的Maven仓库管理器，它极大地简化了本地内部仓库的维护和外部仓库的访问。 如果使用了公共的Maven仓库服务器，可以从Maven中央仓库下载所需要的构件（Artifact），但这通常不是一个好的做法。<br>正常做法是在本地架设一个Maven仓库服务器，即利用Nexus可以只在一个地方就能够完全控制访问和部署在你所维护仓库中的每个Artifact。 Nexus在代理远程仓库的同时维护本地仓库，以
+          Nexus简介
+Nexus是一个强大的Maven仓库管理器，它极大地简化了本地内部仓库的维护和外部仓库的访问。 如果使用了公共的Maven仓库服务器，可以从Maven中央仓库下载所需要的构件（Artifact），但这通常不是一个好的做法。
+正常做法是在本地架设一个Maven仓库服务器，即利用Nexus可以只在一个地方就能够完全控制访问和部署在你所维护仓库中的每个Artifact。 Nexus在代理远程仓库的同时维护本地仓库，以降低中央仓库的负荷,节省外网带宽和时间，Nexus就可以满足这样的需要。
+Nexus是一套“开箱即用”的系统不需要数据库，它使用文件系统加Lucene来组织数据。
+Nex
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/02/14/Nexus%E7%A7%81%E6%9C%89%E4%BB%93%E5%BA%93%E7%9A%84%E5%AE%89%E8%A3%85%E6%97%A5%E5%BF%97/#more" rel="contents">
@@ -644,8 +662,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="JSBridge的起源"><a href="#JSBridge的起源" class="headerlink" title="JSBridge的起源"></a>JSBridge的起源</h2><p><code>PhoneGap</code>（Codova 的前身）作为 Hybrid 鼻祖框架，是一个开源的移动开发框架，允许你用标准的web技术-HTML5,CSS3和JavaScript做跨平台的Hybird WebUI开发，应该是最先被开发者广泛认知的 JSBridge 的应用场景。而对于 JSBridge 的应用在国内真正兴盛起来，则是因为杀手级应用微信的出现。</p>
-<p>
+          JSBridge的起源
+PhoneGap（Codova 的前身）作为 Hybrid 鼻祖框架，是一个开源的移动开发框架，允许你用标准的web技术-HTML5,CSS3和JavaScript做跨平台的Hybird WebUI开发，应该是最先被开发者广泛认知的 JSBridge 的应用场景。而对于 JSBridge 的应用在国内真正兴盛起来，则是因为杀手级应用微信的出现。
+
+JSBridge 是一种JS 实现的Bridge，连接着桥两端的 Native 和 H5。 简单来讲，它在APP 内方便地让Native 调用JS，JS 调用Native ，是双向通信的通道。 JSBridge 主要提供了JS
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/02/12/JSBridge%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/#more" rel="contents">
@@ -743,12 +763,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="WebKit的发展历程"><a href="#WebKit的发展历程" class="headerlink" title="WebKit的发展历程"></a>WebKit的发展历程</h2><blockquote>
-<p>粗略地说，Webkit &#x3D; WebCore + JavaScriptCore， Chromimum &#x3D; Blink + V8</p>
-</blockquote>
-<p>1998，自由软件社区KDE开发了HTML渲染引擎KHTML和JavaScript解析引擎KJS，也就是现代浏览器两个重要的引擎，其中：</p>
-<ul>
-<li>渲染引擎(
+          WebKit的发展历程
+粗略地说，Webkit = WebCore + JavaScriptCore， Chromimum = Blink + V8
+
+1998，自由软件社区KDE开发了HTML渲染引擎KHTML和JavaScript解析引擎KJS，也就是现代浏览器两个重要的引擎，其中：
+
+ * 渲染引擎(layout engineer 或者 Rendering Engine)
+   负责渲染引擎负责取得网页的内容（HTML、XML、图像等等）、整理讯息（例如加入 CSS 等），以及计算网页的显示方式，然后会输出至显示器或打印机。浏览器的内核的不同对于网页的语法解释会有不同，所以渲染的效果也不
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/02/12/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E7%9A%84%E8%BF%90%E8%A1%8C%E6%80%81%E7%8E%AF%E5%A2%83/#more" rel="contents">
@@ -846,9 +867,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>在实际生产环境下，机器都不能访问外部互联网，或者访问互联网络的带宽有限，同时有大量的容器镜像需要从外部下载，如果每次开发、测试、部署时都需要从互联网下载容器镜像，则将占用大量的带宽而且效率较低。同时，在某些场景如物联网场景中，需要使用移动网络接入互联网，这时带宽可能是系统部署的瓶颈。</p>
-<p>更为严重的问题是，Docker Hub公有云容器镜像服务对客户端有限流设置，当镜像拉取操作达到一定流量时，会导致服务无法使用。Docker Hub最新免费服务条款（11月1日生效），匿名用户每6小时只允许拉取100次，登录用户200次，只有付费用户不受此限制。</p>
-<p>Mirror代理缓
+          在实际生产环境下，机器都不能访问外部互联网，或者访问互联网络的带宽有限，同时有大量的容器镜像需要从外部下载，如果每次开发、测试、部署时都需要从互联网下载容器镜像，则将占用大量的带宽而且效率较低。同时，在某些场景如物联网场景中，需要使用移动网络接入互联网，这时带宽可能是系统部署的瓶颈。
+
+更为严重的问题是，Docker Hub公有云容器镜像服务对客户端有限流设置，当镜像拉取操作达到一定流量时，会导致服务无法使用。Docker Hub最新免费服务条款（11月1日生效），匿名用户每6小时只允许拉取100次，登录用户200次，只有付费用户不受此限制。
+
+Mirror代理缓存仓库的作用就是为了以上问题，
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/01/31/Docker-Mirror-%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9C%8D%E5%8A%A1%E8%A7%A3%E6%9E%90/#more" rel="contents">
@@ -946,12 +969,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、PVE存储的性质类型（Storage-Properties）"><a href="#一、PVE存储的性质类型（Storage-Properties）" class="headerlink" title="一、PVE存储的性质类型（Storage Properties）"></a>一、PVE存储的性质类型（Storage Properties）</h2><p>PVE需要管理的存储资源，分为以下6种，分别用于不同类型的数据持久化。</p>
-<table>
-<thead>
-<tr>
-<th align="center">标识符</th>
-<th align="left">类
+          一、PVE存储的性质类型（Storage Properties）
+PVE需要管理的存储资源，分为以下6种，分别用于不同类型的数据持久化。
+
+标识符类型特性说明iso安装盘ISO images，包括Centos、Ubuntu等操作系统的安装镜像文件，也可以是Win7安装盘vztmpl模版文件Container templates，LXC的模版文件，仅支持Linunx类型rootdir根系统Allow to store container data.用于VM或LXC的系统盘images虚拟磁盘KVM-Qemu VM images，一般用于数据盘，VM或LXC均可挂载，文件格式或者LV块设备均可以b
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/#more" rel="contents">
@@ -1049,9 +1070,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="NFC简介"><a href="#NFC简介" class="headerlink" title="NFC简介"></a>NFC简介</h2><p>NFC(近场通信，Near Field Communication）是一种短距高频的无线电技术，由非接触式射频识别(RFID)演变而来。<br>NFC工作频率为13.56Hz，通常只有在距离不超过4厘米时才能启动连接，其传输速度有106 Kbit&#x2F;秒、212 Kbit&#x2F;秒或者424 Kbit&#x2F;秒三种。<br>NFC有3种工作模式：读卡器模式、点对点模式、卡模拟模式。</p>
-<ul>
-<li>读取器&#
+          NFC简介
+NFC(近场通信，Near Field Communication）是一种短距高频的无线电技术，由非接触式射频识别(RFID)演变而来。
+NFC工作频率为13.56Hz，通常只有在距离不超过4厘米时才能启动连接，其传输速度有106 Kbit/秒、212 Kbit/秒或者424 Kbit/秒三种。
+NFC有3种工作模式：读卡器模式、点对点模式、卡模拟模式。
+
+ * 读取器/写入器模式（Reader/writer mode）：NFC设备产生射频场从外部采用相同标准的NFC标签中读写数据，支持 NFC 设备读取和/或写入被动 NFC 标签和贴纸。
+ * 点对点模式（P2P mode）：支
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/#more" rel="contents">
@@ -1149,10 +1174,31 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="改写为SQLALCHEMY"><a href="#改写为SQLALCHEMY" class="headerlink" title="改写为SQLALCHEMY"></a>改写为SQLALCHEMY</h2><h2 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h2><ul>
-<li><p>pyecharts &#x3D;&#x3D; 0.5.3</p>
-</li>
-<li><p>python3不再支持 mysql库了，需要使用pymysql；<br>修改为engine&#x3D;creat
+          改写为SQLALCHEMY
+注意事项
+ * pyecharts == 0.5.3
+   
+   
+ * python3不再支持 mysql库了，需要使用pymysql；
+   修改为engine=create_engine(‘mysql+pymysql://root:password@localhost:3306/test’)就可以了
+   
+   
+
+1
+2
+3
+4
+5
+6
+7
+
+
+>>> str
+'2020-12-20'
+>>> atime = time.mktime(time.strptime(str, '%Y-%m-%d'))
+>>> atime
+1608393600.0
+>>> ti
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/12/16/Sqlalchemy%E7%9A%84%E5%87%A0%E4%B8%AA%E5%B0%8F%E9%97%AE%E9%A2%98/#more" rel="contents">

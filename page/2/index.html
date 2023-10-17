@@ -247,7 +247,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="附录一：一次性迪菲-赫尔曼密钥交换协议"><a href="#附录一：一次性迪菲-赫尔曼密钥交换协议" class="headerlink" title="附录一：一次性迪菲-赫尔曼密钥交换协议"></a>附录一：一次性迪菲-赫尔曼密钥交换协议</h2><p>一次性迪菲-赫尔曼密钥交换协议（One-Pass Diffie-Hellman Key Agreement），定义在 <a href="NIST.SP.800-56Ar2.pdf">NISP SP 800-56A</a> 的 6.2.2.2 章节，名称为<code>One-Pass Diffie-Hellman, C(1e
+          附录一：一次性迪菲-赫尔曼密钥交换协议
+一次性迪菲-赫尔曼密钥交换协议（One-Pass Diffie-Hellman Key Agreement），定义在 NISP SP 800-56A 的 6.2.2.2 章节，名称为One-Pass Diffie-Hellman, C(1e,1s,ECC CDH) Scheme，含义是：
+
+ * 密钥交换通过一次性的DH（Diffie-Hellman）协议，C 是指协因子（Cofactor）
+ * 使用了1个临时密钥，1个静态密钥
+ * 加密算法是椭圆曲线加密算法 ECC（Elliptic Curve Cryptography）
+
+DH 协议最初采用 F
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/#more" rel="contents">
@@ -345,12 +352,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。</p>
-<p>1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：</p>
-<ul>
-<li>大小写不敏感（最新版本已支持大小写敏感，但默认配置仍未不敏感）</li>
-<li>不支持对数据内容进行 checksum 校验</li>
-<li>times
+          Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。
+
+1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：
+
+ * 大小写不敏感（最新版本已支持大小写敏感，但默认配置仍未不敏感）
+ * 不支持对数据内容进行 checksum 校验
+ * timestamp 只支持到秒级
+ * 不支持并发访问，不支持快照，不
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/#more" rel="contents">
@@ -448,8 +457,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>EMF Key &#x3D; file-system master encryption key</p>
-<h2 id="四、Dkey-密钥的演进分析"><a href="#四、Dkey-密钥的演进分析" class="headerlink" title="四、Dkey 密钥的演进分析"></a>四、Dkey 密钥的演进分析</h2><p>根据 iOS 的初期设计，<code>Class D</code>是所有用户数据文件的默认类型，其类密钥就是 DKey，即大多数文件的<code>per-file key</code>都通过 Dkey 进行封装。<br>此时 DKey 的存储路径就
+          EMF Key = file-system master encryption key
+
+四、Dkey 密钥的演进分析
+根据 iOS 的初期设计，Class D是所有用户数据文件的默认类型，其类密钥就是 DKey，即大多数文件的per-file key都通过 Dkey 进行封装。
+此时 DKey 的存储路径就是systembag.kb文件的 Class 4 字段，当然受到了基于 UID 的 Key 0x835 的保护。
+
+由于 DKey 直接保存在一个普通的数据文件中，任何具有 root 级别访问权限的用户都可以轻松地获得并展开暴力破解，这显然是非常危险的。
+从 iOS 5 开始，苹果公司将 
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%BA%8C%EF%BC%9A%E5%AF%86%E9%92%A5%E5%B1%82%E7%BA%A7/#more" rel="contents">
@@ -547,8 +562,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>长期以来 Apple 公司有两条数据安全的技术演进路线，iPhone 和 iPad 等智能终端设备使用称为<strong>数据保护（Data Protection）</strong>的文件加密方法，基于Intel的Mac设备通过<strong>文件保险箱（FileVault）</strong>的宗卷加密技术。</p>
-<p>MacOS 和 iOS 都是基于 FreeBSD 发展而来，基础架构是一个多用户的操作系统，但 iPhone 等作为个人化（无需支持多用户）的终端设备，存储了通信录、照片等非常敏感的隐私数据，对数据保护的要求更高；其次，App Store 和 iCloud等云服务大量
+          长期以来 Apple 公司有两条数据安全的技术演进路线，iPhone 和 iPad 等智能终端设备使用称为数据保护（Data Protection）的文件加密方法，基于Intel的Mac设备通过文件保险箱（FileVault）的宗卷加密技术。
+
+MacOS 和 iOS 都是基于 FreeBSD 发展而来，基础架构是一个多用户的操作系统，但 iPhone 等作为个人化（无需支持多用户）的终端设备，存储了通信录、照片等非常敏感的隐私数据，对数据保护的要求更高；其次，App Store 和 iCloud等云服务大量出现，在网络开放环境下既要支持便利的后台服务管理，又要解决数据迁移过程中的数据保护，对
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/#more" rel="contents">
@@ -646,8 +662,18 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、什么是-KDF"><a href="#一、什么是-KDF" class="headerlink" title="一、什么是 KDF"></a>一、什么是 KDF</h2><p>KDF（Key Derivation Function）的最初用途是密钥派生，即从秘密密码或密码短语生成密钥。</p>
-<h3 id="1、密钥拉伸（Key-Stretching）"><a href="#1、密钥拉伸（Key-Stretching）" class="headerlink" title="1、密钥拉伸（Key Stretching）"></a>1、密钥拉伸（Key Stretching）
+          一、什么是 KDF
+KDF（Key Derivation Function）的最初用途是密钥派生，即从秘密密码或密码短语生成密钥。
+
+1、密钥拉伸（Key Stretching）
+在系统要求用户设置密码时，我们习惯用4-6位的数字组合，或者字母、数字和特殊符号的某种组合，这种密码强度肯定无法抵御暴力破解、字典攻击、彩虹表攻击等技术手段，密钥派生函数由此应运而生。
+
+KDF 最基础的用途是将密码和其他弱密钥材料来源转换为强密钥，文绉绉地说，就是采用具有低熵（安全性或随机性）的密钥，并将其扩展为更安全的更长密钥。
+
+1
+
+
+derivedKey = keyDerivationFunction(or
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/#more" rel="contents">
@@ -745,9 +771,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。</p>
-<p>根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为融合的基石。<br>任何技术都有路径依赖，虽然 HFS+ 被认为是业界最烂的文件系统，但其许多重要的核心功能仍然需要 AFPS 继承下来，当然也为后续发展打下基础。</p>
-<p>
+          花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。
+
+根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为融合的基石。
+任何技术都有路径依赖，虽然 HFS+ 被认为是业界最烂的文件系统，但其许多重要的核心功能仍然需要 AFPS 继承下来，当然也为后续发展打下基础。
+
+
+
+ * 每个文件创建时会生成一个P
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
@@ -845,13 +876,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>在密码学中，熵（entropy，指不可预测的随机性）扮演了一个非常重要的角色，许多算法都要求使用一个不可预测的随机数，只有在生成的随机数不可预测时，这些算法才能保证其安全性，典型应用包括：</p>
-<ul>
-<li>密钥生成</li>
-<li>生成初始化向量，IV，用于分组密码的 CBC，CFB，OFB 模式</li>
-<li>某些签名方案中的盐，如 ECDSA， RSASSA-PSS</li>
-</ul>
-<h2 id="一、伪随机数生成器-PRNG"
+          在密码学中，熵（entropy，指不可预测的随机性）扮演了一个非常重要的角色，许多算法都要求使用一个不可预测的随机数，只有在生成的随机数不可预测时，这些算法才能保证其安全性，典型应用包括：
+
+ * 密钥生成
+ * 生成初始化向量，IV，用于分组密码的 CBC，CFB，OFB 模式
+ * 某些签名方案中的盐，如 ECDSA， RSASSA-PSS
+
+一、伪随机数生成器 - PRNG
+PRNG（Pseudo-Random Number Generators）是一种数字序列的生成算法，它生成出的数字序列的统计学属性跟真正的随机数序列非常相似，但它生成的伪随机数序列并不是真正的随机数序列！
+换句话说，
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/#more" rel="contents">
@@ -949,7 +982,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、Apple平台安全性-软件-硬件-服务"><a href="#一、Apple平台安全性-软件-硬件-服务" class="headerlink" title="一、Apple平台安全性 &#x3D; 软件 + 硬件 + 服务"></a>一、Apple平台安全性 &#x3D; 软件 + 硬件 + 服务</h2><p><a href="apple%E5%B9%B3%E5%8F%B0%E5%AE%89%E5%85%A8%E7%99%BD%E7%9A%AE%E4%B9%A6-2021%E4%B8%AD%E6%96%87%E7%89%88.pdf">apple平台安全白皮书</a>指
+          一、Apple平台安全性 = 软件 + 硬件 + 服务
+apple平台安全白皮书指出，Apple平台安全性的核心理念是：强调硬件、软件和服务的紧密联系和共同协作，为智能终端（iOS）、台式设备（MacOS）、可穿戴设备（WatchOS）和家居设备等不同类型设备提供具备独特性的安全性架构，目标是在为用户提供最高的安全性和透明的使用体验，其中：
+
+ * 硬件：遵循“支持有限且单独定义的功能”的准则，依托Apple自行设计的芯片和安全性硬件，为关键的安全性功能提供支持，以使攻击面最小化
+ * 软件：通过软件保护为操作系统和第三方App提供了安全保障
+ * 服务：通过服务提供安全且及时的软件更新机制，
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/10/03/Apple%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%EF%BC%88Secure-Encalve%EF%BC%89%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/#more" rel="contents">
@@ -1047,8 +1085,16 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、安全元件-SE（Secure-Element）"><a href="#一、安全元件-SE（Secure-Element）" class="headerlink" title="一、安全元件 - SE（Secure Element）"></a>一、安全元件 - SE（Secure Element）</h2><p>19世纪70年代就出现了安全元件Secure Element，其外在表现就是一块物理上独立的芯片卡，负责提供私密信息的安全存储、重要程序的安全执行等功能。</p>
-<p>按照Global Platform的定义，SE具有自己独立的执行环境和安全存储，采用安全协议与外部
+          一、安全元件 - SE（Secure Element）
+19世纪70年代就出现了安全元件Secure Element，其外在表现就是一块物理上独立的芯片卡，负责提供私密信息的安全存储、重要程序的安全执行等功能。
+
+按照Global Platform的定义，SE具有自己独立的执行环境和安全存储，采用安全协议与外部通讯，支持软件防篡改和硬件防篡改，其内部组件包含有：CPU、RAM、ROM、加密引擎、传感器等。
+
+
+从产品形态上，SE可以分为三种：
+
+ * UICC：也称通用集成电路卡，就是电信运营商发布和使用的手机SIM卡
+ * Embedded SE：嵌入式SE，以一个独立芯片的形式集成在设备的
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/#more" rel="contents">
@@ -1146,8 +1192,18 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、作用域"><a href="#一、作用域" class="headerlink" title="一、作用域"></a>一、作用域</h2><p>作用域（Scope），是指程序源代码中定义变量的区域作用域。<br>作用域规定了如何查找变量，也就是确定当前执行代码对变量的访问权限。其核心任务就是隔离变量，以确保在不同作用域下的同名变量不会发生冲突。<br>作用域有两种不同的设计思路，分别是静态作用域和动态作用域。</p>
-<h3 id="静态作用域"><a href="#静态作用域" class="headerlink" title="静态作用域"></a>静态作用域</h3>
+          一、作用域
+作用域（Scope），是指程序源代码中定义变量的区域作用域。
+作用域规定了如何查找变量，也就是确定当前执行代码对变量的访问权限。其核心任务就是隔离变量，以确保在不同作用域下的同名变量不会发生冲突。
+作用域有两种不同的设计思路，分别是静态作用域和动态作用域。
+
+静态作用域
+静态作用域是指函数的作用域在定义的时候就确定了，本质是在编译阶段就以唯一标志符的形式确定了作用域。
+C++、Java等大多数语言都采用静态作用域，JavaScript自称为词法作用域(lexical scoping)。
+
+JavaScript有三种作用域：
+
+ * 全局作用域：在函数定义之外声明的变量是全局变量，它
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2022/06/05/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%BA%8C%EF%BC%9Athis%E6%8C%87%E5%90%91%E5%93%AA%E9%87%8C/#more" rel="contents">

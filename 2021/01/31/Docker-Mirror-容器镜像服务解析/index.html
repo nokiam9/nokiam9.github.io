@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="在实际生产环境下，机器都不能访问外部互联网，或者访问互联网络的带宽有限，同时有大量的容器镜像需要从外部下载，如果每次开发、测试、部署时都需要从互联网下载容器镜像，则将占用大量的带宽而且效率较低。同时，在某些场景如物联网场景中，需要使用移动网络接入互联网，这时带宽可能是系统部署的瓶颈。 更为严重的问题是，Docker Hub公有云容器镜像服务对客户端有限流设置，当镜像拉取操作达到一定流量时，会导致服">
+    <meta name="description" content="在实际生产环境下，机器都不能访问外部互联网，或者访问互联网络的带宽有限，同时有大量的容器镜像需要从外部下载，如果每次开发、测试、部署时都需要从互联网下载容器镜像，则将占用大量的带宽而且效率较低。同时，在某些场景如物联网场景中，需要使用移动网络接入互联网，这时带宽可能是系统部署的瓶颈。  更为严重的问题是，Docker Hub公有云容器镜像服务对客户端有限流设置，当镜像拉取操作达到一定流量时，会导致">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Docker Mirror 容器镜像服务解析">
 <meta property="og:url" content="https://nokiam9.github.io/2021/01/31/Docker-Mirror-%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9C%8D%E5%8A%A1%E8%A7%A3%E6%9E%90/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="在实际生产环境下，机器都不能访问外部互联网，或者访问互联网络的带宽有限，同时有大量的容器镜像需要从外部下载，如果每次开发、测试、部署时都需要从互联网下载容器镜像，则将占用大量的带宽而且效率较低。同时，在某些场景如物联网场景中，需要使用移动网络接入互联网，这时带宽可能是系统部署的瓶颈。 更为严重的问题是，Docker Hub公有云容器镜像服务对客户端有限流设置，当镜像拉取操作达到一定流量时，会导致服">
+<meta property="og:description" content="在实际生产环境下，机器都不能访问外部互联网，或者访问互联网络的带宽有限，同时有大量的容器镜像需要从外部下载，如果每次开发、测试、部署时都需要从互联网下载容器镜像，则将占用大量的带宽而且效率较低。同时，在某些场景如物联网场景中，需要使用移动网络接入互联网，这时带宽可能是系统部署的瓶颈。  更为严重的问题是，Docker Hub公有云容器镜像服务对客户端有限流设置，当镜像拉取操作达到一定流量时，会导致">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-01-31T00:53:09.000Z">
 <meta property="article:modified_time" content="2023-10-17T00:48:07.914Z">

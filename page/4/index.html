@@ -247,8 +247,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>传统的版本控制系统采用集中化方式（CVCS - Centralized Version Control Systems）包括CVS、Subversion 以及 Perforce 等，都有一个单一的集中管理的服务器，保存所有文件的修订版本，而协同工作的人们都通过客户端连到这台服务器，取出最新的文件或者提交更新。 多年以来，这已成为版本控制系统的标准做法。</p>
-<p>集中式版本管理系统最显而易见的缺点是中央服务器的单点故障。 如果宕机一小时
+          一、概述
+传统的版本控制系统采用集中化方式（CVCS - Centralized Version Control Systems）包括CVS、Subversion 以及 Perforce 等，都有一个单一的集中管理的服务器，保存所有文件的修订版本，而协同工作的人们都通过客户端连到这台服务器，取出最新的文件或者提交更新。 多年以来，这已成为版本控制系统的标准做法。
+
+集中式版本管理系统最显而易见的缺点是中央服务器的单点故障。 如果宕机一小时，那么在这一小时内，谁都无法提交更新，也就无法协同工作。 如果中心数据库所在的磁盘发生损坏，又没有做恰当备份，毫无疑问你将丢失所有数据——包括项目的整个变更历
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/29/Git%E8%BD%AF%E4%BB%B6%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E8%A6%81%E7%82%B9/#more" rel="contents">
@@ -346,9 +348,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>原来HEXO的版本是3.6，都是几年前的老东西了，最近总是提示<code>highlight.js</code>的旧版本存在安全漏洞，需要升级到10以上版本，此外由于node、next-theme-next等版本都存在不少问题，周末下定决心做一次版本升级。</p>
-<h2 id="一、目标版本环境"><a href="#一、目标版本环境" class="headerlink" title="一、目标版本环境"></a>一、目标版本环境</h2><ul>
-<li><code>node 12.22.8</code>: 最新版本v17，推荐LTS版本v16.13.1，但是由于兼容性问题，本次采
+          原来HEXO的版本是3.6，都是几年前的老东西了，最近总是提示highlight.js的旧版本存在安全漏洞，需要升级到10以上版本，此外由于node、next-theme-next等版本都存在不少问题，周末下定决心做一次版本升级。
+
+一、目标版本环境
+ * node 12.22.8: 最新版本v17，推荐LTS版本v16.13.1，但是由于兼容性问题，本次采用v12的最新补丁版本。
+   另一方面，HEXO官方要求：Node.js 版本需不低于 10.13，建议使用 Node.js 12.0 及以上版本
+ * hexo 5.4: 最新版本，2021年2月发布；相应hexo-cli的版本是4.3
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/19/HEXO-5-4-NEXT-8-8-2-%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7%E8%AE%B0%E5%BD%95/#more" rel="contents">
@@ -446,8 +451,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>NFS - Network File System（网络文件系统），是一种基于TCP&#x2F;IP传输的网络文件系统协议，最早由SUN公司研发，通过使用NFS协议，客户机可以像访问本地目录一样，访问远程服务器中的共享资源。<br>NFS 的基本原则是“容许不同的客户端及服务端通过一组RPC分享相同的文件系统”，它是独立于操作系统，容许不同硬件及操作系统的系统共同进行文件的分享。</p>
-<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>NFS在文件传送或信息传送过程中依赖于RPC协议。RPC，远程
+          NFS - Network File System（网络文件系统），是一种基于TCP/IP传输的网络文件系统协议，最早由SUN公司研发，通过使用NFS协议，客户机可以像访问本地目录一样，访问远程服务器中的共享资源。
+NFS 的基本原则是“容许不同的客户端及服务端通过一组RPC分享相同的文件系统”，它是独立于操作系统，容许不同硬件及操作系统的系统共同进行文件的分享。
+
+概述
+NFS在文件传送或信息传送过程中依赖于RPC协议。RPC，远程过程调用 (Remote Procedure Call) 是能使客户端执行其他系统中程序的一种机制。NFS本身是没有提供信息传输的协议和功能的，但NFS却能让我们
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/12/11/NFS%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E7%9A%84%E5%AE%89%E8%A3%85%E8%A6%81%E7%82%B9/#more" rel="contents">
@@ -545,8 +553,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>1995年，Sun公司正式发布了Java语言，并建立了<code>JCP（Java Community Process）</code>开源社区，负责管理Java技术标准。<br><code>JSR（Java Specification Requests）</code>是JCP发布的技术规范，由拥有投票权的JCP成员集体投票决定。</p>
-<p>为了开发和运行Java应用软件，必须为用户提供一个完整的开发套件，这就是<code>JDK</code>（Java
+          前言
+1995年，Sun公司正式发布了Java语言，并建立了JCP（Java Community Process）开源社区，负责管理Java技术标准。
+JSR（Java Specification Requests）是JCP发布的技术规范，由拥有投票权的JCP成员集体投票决定。
+
+为了开发和运行Java应用软件，必须为用户提供一个完整的开发套件，这就是JDK（Java Development Kit），包含了编译器、软件库和Java虚拟机等核心组件。1999年之后，Sun公司发布了多个版本的JDK产品，主要包括：
+
+ * J2SE：Java Platform Standard Edition，
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/11/21/OpenJDK%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/#more" rel="contents">
@@ -644,8 +657,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>Java语言的最大优势就是<strong>一次编译，处处运行</strong>的特性，通过<code>javac</code>编译器将源代码编译成通用的中间形式——字节码，然后再由<code>java</code>解释器逐条将字节码解释为机器码来执行。尽管在性能上，Java远不如C++这类编译型语言，但由于良好的平台移植性而大行其道，其中的关键技术就是<strong>Java虚拟机</strong>。</p>
-<h2 id="一、什么是JVM"><a href="#一、什么是JVM" class="headerlink" title="一、什么是JVM"></a>一、什么是JV
+          Java语言的最大优势就是一次编译，处处运行的特性，通过javac编译器将源代码编译成通用的中间形式——字节码，然后再由java解释器逐条将字节码解释为机器码来执行。尽管在性能上，Java远不如C++这类编译型语言，但由于良好的平台移植性而大行其道，其中的关键技术就是Java虚拟机。
+
+一、什么是JVM
+JVM（Java Virtual Machine）是一台虚拟的计算机，本质上通过定义一组技术规范，在物理的计算机上模拟实现各种功能。
+JVM屏蔽了与具体操作系统平台相关的信息，使Java程序只需生成在Java虚拟机上运行的目标代码（字节码），就可以在多种平台上不加修改地运行。在执行字节码时，实
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/11/14/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA%20-%20%E4%BB%A5Android%E4%B8%BA%E4%BE%8B/#more" rel="contents">
@@ -743,7 +759,36 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="GDM软件配置"><a href="#GDM软件配置" class="headerlink" title="GDM软件配置"></a>GDM软件配置</h2><h2 id="环境变量DISPLAY的设置"><a href="#环境变量DISPLAY的设置" class="headerlink" title="环境变量DISPLAY的设置"></a>环境变量DISPLAY的设置</h2><h2 id="启动脚本"><a href="#启动脚本" class="headerlink" title="启动脚本"></a>启动脚本</h2
+          GDM软件配置
+环境变量DISPLAY的设置
+启动脚本
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+
+
+export DISPLAY=:0.0
+
+kill -9 `ps -ef |grep firefox |grep -v grep|awk '{print $2}'`
+sleep 5
+
+/usr/lib64/firefox/firefox https://b2b.10086.cn/b2b/main/listVendorNotice.html?noticeType=1 &
+sleep 5
+/usr/lib64/firefox/firefox https:/
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/11/06/%E5%85%B3%E4%BA%8EGNOME%E5%9B%BE%E5%BD%A2%E7%BB%88%E7%AB%AF%E7%9A%84%E9%85%8D%E7%BD%AE%E8%A6%81%E7%82%B9/#more" rel="contents">
@@ -841,8 +886,14 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>2009年，Google启动了浏览器项目，V8引擎诞生的使命就是性能的极致，Google觉得这这种架构生成字节码会浪费时间，决定<strong>一步到位直接采用机器码</strong>。</p>
-<p>早期V8引擎包含了<code>Full-Codegen</code>和 <code>Crankshaft</code>(曲轴) 两个编译器，即：JS源代码会被V8引擎进行两次解析，第一次使用<code>Full-Codegen</code>进行快速编译，而第
+          前言
+2009年，Google启动了浏览器项目，V8引擎诞生的使命就是性能的极致，Google觉得这这种架构生成字节码会浪费时间，决定一步到位直接采用机器码。
+
+早期V8引擎包含了Full-Codegen和 Crankshaft(曲轴) 两个编译器，即：JS源代码会被V8引擎进行两次解析，第一次使用Full-Codegen进行快速编译，而第二次使用Crankshaft进行深度优化编译，其基本处理流程为：
+
+ 1. 将js源代码转化成AST（抽象语法树）。
+ 2. 通过Full-Codegen引擎编译AST变成基准的机器码，然后直接执行这些未经优化的二进制文件。
+ 3. 在执行机器码的过程中，通
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/11/05/V8%E5%BC%95%E6%93%8E%E6%8A%80%E6%9C%AF%E7%AE%80%E4%BB%8B/#more" rel="contents">
@@ -940,9 +991,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="汇编语言-Assembly-Language"><a href="#汇编语言-Assembly-Language" class="headerlink" title="汇编语言 - Assembly Language"></a>汇编语言 - Assembly Language</h2><p>先看Wiki关于编译器的定义。</p>
-<blockquote>
-<p>In computing, a compiler is a computer program that translates computer code written in one programming langua
+          汇编语言 - Assembly Language
+先看Wiki关于编译器的定义。
+
+In computing, a compiler is a computer program that translates computer code written in one programming language (the source language) into another language (the target language). The name “compiler” is primarily used for programs that translate source code 
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/10/31/%E7%BC%96%E8%AF%91%E5%9E%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E8%A7%A3%E9%87%8A%E5%9E%8B%E8%AF%AD%E8%A8%80%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/#more" rel="contents">
@@ -1040,10 +1092,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>NFC（<code>Near Field Communication</code>，近场通信），也叫做近距离无线通信技术，用于在两个非常接近的设备之间执行数据传输。</p>
-<ul>
-<li>2002年，NFC技术由<code>Philips</code>和<code>Sony</code>两家公司联合推出。</li>
-<li>2004年，<code>Nokia</code>、<code>Philips</code>、<code>Sony</code>等公
+          概述
+NFC（Near Field Communication，近场通信），也叫做近距离无线通信技术，用于在两个非常接近的设备之间执行数据传输。
+
+ * 2002年，NFC技术由Philips和Sony两家公司联合推出。
+ * 2004年，Nokia、Philips、Sony等公司共同组建了非盈利性组织NFC Forum ，负责制定NFC相关的技术标准，致力于促进 NFC 技术在消费类电子产品、移动设备和 PC 中的应用，并通过NFC认证测试来保证各厂家的NFC产品符合NFC规范以实现互联互通。
+ * 2006年，恩智浦半导体公司(NXP Semiconductors)从Philips剥离，总
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/#more" rel="contents">
@@ -1141,8 +1195,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>随着IC卡从简单的同步卡发展到异步卡，从简单的EPROM卡发展到内带微处理器的智能卡(又称CPU卡)，对IC卡的各种要求越来越高。而卡本身所需要的各种管理工作也越来越复杂，因此就迫切地需要有一种工具来解决这一矛盾，而内部带有微处理器的智能卡的出现，使得这种工具的实现变成了现实。</p>
-<p>Chip Operating System（片内操作系统，简称COS），就是基于智能卡内置的微处理器芯片的操作系统。COS的出现不仅大大地改善了智能卡的交互界面，使智能卡的管理变得容易；而且，更为重要的是使智能卡本身向着个人计算机化的方向迈出了一大步，为智能卡的发展开拓了极为广阔的前景。</p>
+          随着IC卡从简单的同步卡发展到异步卡，从简单的EPROM卡发展到内带微处理器的智能卡(又称CPU卡)，对IC卡的各种要求越来越高。而卡本身所需要的各种管理工作也越来越复杂，因此就迫切地需要有一种工具来解决这一矛盾，而内部带有微处理器的智能卡的出现，使得这种工具的实现变成了现实。
+
+Chip Operating System（片内操作系统，简称COS），就是基于智能卡内置的微处理器芯片的操作系统。COS的出现不仅大大地改善了智能卡的交互界面，使智能卡的管理变得容易；而且，更为重要的是使智能卡本身向着个人计算机化的方向迈出了一大步，为智能卡的发展开拓了极为广阔的前景。
+
+在这一领域处于领导地位的有
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2021/07/10/%E8%B6%85%E7%BA%A7SIM%E5%8D%A1%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E5%88%86%E6%9E%90/#more" rel="contents">

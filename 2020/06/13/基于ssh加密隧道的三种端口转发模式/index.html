@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="去年购入的腾讯云ECS服务器虽然只有1vCpu、1G内存、40G硬盘，但是Linux服务器的效率就是高，跑个小网站那是杠杠的，不过XunSearch中文索引的磁盘消耗比较大，存储利用率超过95%，需要考虑扩容了。 本着可劲折腾的原则，最近入手了一台Intel NUC主机，开始琢磨把Linux服务器搬到自己家里的宽带上，ECS只保留一个公网入口（家里宽带都是运营商的浮动私网IP地址，需要保留公网入口">
+    <meta name="description" content="去年购入的腾讯云ECS服务器虽然只有1vCpu、1G内存、40G硬盘，但是Linux服务器的效率就是高，跑个小网站那是杠杠的，不过XunSearch中文索引的磁盘消耗比较大，存储利用率超过95%，需要考虑扩容了。  本着可劲折腾的原则，最近入手了一台Intel NUC主机，开始琢磨把Linux服务器搬到自己家里的宽带上，ECS只保留一个公网入口（家里宽带都是运营商的浮动私网IP地址，需要保留公网入">
 <meta property="og:type" content="article">
 <meta property="og:title" content="基于ssh加密隧道的三种端口转发模式">
 <meta property="og:url" content="https://nokiam9.github.io/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="去年购入的腾讯云ECS服务器虽然只有1vCpu、1G内存、40G硬盘，但是Linux服务器的效率就是高，跑个小网站那是杠杠的，不过XunSearch中文索引的磁盘消耗比较大，存储利用率超过95%，需要考虑扩容了。 本着可劲折腾的原则，最近入手了一台Intel NUC主机，开始琢磨把Linux服务器搬到自己家里的宽带上，ECS只保留一个公网入口（家里宽带都是运营商的浮动私网IP地址，需要保留公网入口">
+<meta property="og:description" content="去年购入的腾讯云ECS服务器虽然只有1vCpu、1G内存、40G硬盘，但是Linux服务器的效率就是高，跑个小网站那是杠杠的，不过XunSearch中文索引的磁盘消耗比较大，存储利用率超过95%，需要考虑扩容了。  本着可劲折腾的原则，最近入手了一台Intel NUC主机，开始琢磨把Linux服务器搬到自己家里的宽带上，ECS只保留一个公网入口（家里宽带都是运营商的浮动私网IP地址，需要保留公网入">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/ssh-local.jpeg">
 <meta property="og:image" content="https://nokiam9.github.io/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/ssh-remote.jpeg">

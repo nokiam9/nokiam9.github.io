@@ -19,12 +19,12 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="问题分析一、如何解决明文攻击问题？ECB 模式最大的缺点是，相同的明文块会被加密成相同的密文块！下图演示了一个图像文件通过 ECB 模式的加密结果，因此 ECB 模式被认为存在严重的安全隐患。">
+    <meta name="description" content="问题分析 一、如何解决明文攻击问题？ ECB 模式最大的缺点是，相同的明文块会被加密成相同的密文块！ 下图演示了一个图像文件通过 ECB 模式的加密结果，因此 ECB 模式被认为存在严重的安全隐患。   造成选择明文攻击的根本原因是，用单一密钥对多个明文分组进行加密，解决方案就是增加随机数作为密钥的加密因子。   * CBC 模式引入了初始向量 IV（initialization vector）。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="分组加密的工作模式概述">
 <meta property="og:url" content="https://nokiam9.github.io/2022/12/17/%E5%88%86%E7%BB%84%E5%8A%A0%E5%AF%86%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%E6%A6%82%E8%BF%B0/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="问题分析一、如何解决明文攻击问题？ECB 模式最大的缺点是，相同的明文块会被加密成相同的密文块！下图演示了一个图像文件通过 ECB 模式的加密结果，因此 ECB 模式被认为存在严重的安全隐患。">
+<meta property="og:description" content="问题分析 一、如何解决明文攻击问题？ ECB 模式最大的缺点是，相同的明文块会被加密成相同的密文块！ 下图演示了一个图像文件通过 ECB 模式的加密结果，因此 ECB 模式被认为存在严重的安全隐患。   造成选择明文攻击的根本原因是，用单一密钥对多个明文分组进行加密，解决方案就是增加随机数作为密钥的加密因子。   * CBC 模式引入了初始向量 IV（initialization vector）。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2022/12/17/%E5%88%86%E7%BB%84%E5%8A%A0%E5%AF%86%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%E6%A6%82%E8%BF%B0/plaintext-attack.png">
 <meta property="og:image" content="https://nokiam9.github.io/2022/12/17/%E5%88%86%E7%BB%84%E5%8A%A0%E5%AF%86%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%E6%A6%82%E8%BF%B0/CTS_ECB.png">

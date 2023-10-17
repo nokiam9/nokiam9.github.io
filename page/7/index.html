@@ -247,8 +247,9 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>YUM（ Yellow dog Updater, Modified）是一个在Fedora和RedHat以及CentOS中的Shell前端软件包管理器。它基于RPM包管理，能够从指定的服务器自动下载RPM包并且安装，可以自动处理依赖性关系，无须繁琐地一次次下载、安装。</p>
-<p>yum 的理念是使用一个中心仓库(repository)管理一部分甚至一个distribution 的应用程序相互关系，根据计算出来的软件依赖关系进行相关的升级、安装、删除等等操作，减少了Linux 用户一直头痛的dependencies 的问题。这一点上，yum 和apt 相同。apt 原为debian 的d
+          YUM（ Yellow dog Updater, Modified）是一个在Fedora和RedHat以及CentOS中的Shell前端软件包管理器。它基于RPM包管理，能够从指定的服务器自动下载RPM包并且安装，可以自动处理依赖性关系，无须繁琐地一次次下载、安装。
+
+yum 的理念是使用一个中心仓库(repository)管理一部分甚至一个distribution 的应用程序相互关系，根据计算出来的软件依赖关系进行相关的升级、安装、删除等等操作，减少了Linux 用户一直头痛的dependencies 的问题。这一点上，yum 和apt 相同。apt 原为debian 的deb 类型软件管理
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/06/27/Yum%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
@@ -346,8 +347,38 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="重装Centos系统"><a href="#重装Centos系统" class="headerlink" title="重装Centos系统"></a>重装Centos系统</h2><p>使用Centos安装U盘，选择最小化安装，设置root口令，设置失去，最后重新启动。</p>
-<h2 id="配置有线网卡"><a href="#配置有线网卡" class="headerlink" title="配置有线网卡"></a>配置有线网卡</h2><p>安装完成后，编辑网卡配置文件<code>/etc/sysconfig/network-scripts/ifcfg-eno
+          重装Centos系统
+使用Centos安装U盘，选择最小化安装，设置root口令，设置失去，最后重新启动。
+
+配置有线网卡
+安装完成后，编辑网卡配置文件/etc/sysconfig/network-scripts/ifcfg-eno1
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+
+
+[root@localhost network-scripts]# more /etc/sysconfig/network-scripts/ifcfg-eno1
+TYPE=Ethernet
+PROXY_METHOD=none
+BROWSER_ONLY=no
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/06/25/Centos%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/#more" rel="contents">
@@ -445,11 +476,19 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="Step-0-Kubernets集群安装的准备工作"><a href="#Step-0-Kubernets集群安装的准备工作" class="headerlink" title="Step 0. Kubernets集群安装的准备工作"></a>Step 0. Kubernets集群安装的准备工作</h2><p>本次安装测试的基础硬件是Intel NUC5i3 &amp; NUC8i3，基准软件是：</p>
-<ul>
-<li>Centos 7.8（启动速度快、版本稳定性好）</li>
-<li>Docker-ce 19.03.12</li>
-<li>Kubernetes 1.18.
+          Step 0. Kubernets集群安装的准备工作
+本次安装测试的基础硬件是Intel NUC5i3 & NUC8i3，基准软件是：
+
+ * Centos 7.8（启动速度快、版本稳定性好）
+ * Docker-ce 19.03.12
+ * Kubernetes 1.18.2 (v1.18.4拉取国内镜像不成功！！！)
+ * Calico 3.8.9
+ * Nginx-ingress 1.5.3
+
+本Kubernetes集群包含了2个Node，分别是：
+
+ * 1个Master节点：Hostname = master1，IPADDR = 192.168.0.132
+ * 1个Worker节点
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/06/25/Kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/#more" rel="contents">
@@ -547,10 +586,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="DNS概述"><a href="#DNS概述" class="headerlink" title="DNS概述"></a>DNS概述</h2><p>DNS（Domain Name Server，域名服务器）是进行域名(domain name)和与之相对应的IP地址 (IP address)转换的服务器。DNS中保存了一张域名(domain name)和与之相对应的IP地址 (IP address)的表，以解析消息的域名。</p>
-<p>DNS服务是一件很复杂的事情，有很多不同来源的设置途径相互影响，主要包括：</p>
-<ul>
-<li>全局配置文件: <code>/etc/sy
+          DNS概述
+DNS（Domain Name Server，域名服务器）是进行域名(domain name)和与之相对应的IP地址 (IP address)转换的服务器。DNS中保存了一张域名(domain name)和与之相对应的IP地址 (IP address)的表，以解析消息的域名。
+
+DNS服务是一件很复杂的事情，有很多不同来源的设置途径相互影响，主要包括：
+
+ * 全局配置文件: /etc/systemd/resolved.conf
+ * 单个连接的静态配置文件：通过/etc/netplan/*.yaml对单个网卡配置nameserver，还有/etc/systemd/network/
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/#more" rel="contents">
@@ -648,12 +690,19 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><p>磁盘管理模式：</p>
-<ul>
-<li><p>MBR（Master Boot Record）：即硬盘的主引导记录分区列表，在主引导扇区，位于硬盘的cylinder 0， head 0， sector 1 （Sector是从1开始的）。</p>
-</li>
-<li><p>GPT（GUID Partition Table）：即全局唯一标识分区列表，是一个物理硬盘的分区结构。它用来替代BIOS中的主引导记录分区表（MBR）。</p>
-</li>
+          名词解释
+磁盘管理模式：
+
+ * MBR（Master Boot Record）：即硬盘的主引导记录分区列表，在主引导扇区，位于硬盘的cylinder 0， head 0， sector 1 （Sector是从1开始的）。
+   
+   
+ * GPT（GUID Partition Table）：即全局唯一标识分区列表，是一个物理硬盘的分区结构。它用来替代BIOS中的主引导记录分区表（MBR）。
+   
+   
+
+主板接口标准：
+
+ * BIOS（Basic Input Output System）：它的全称应该是ROM－BIOS，意思是只读存储器基本输入输出系统。其实，它是一组固化到计算机内
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/06/20/%E7%A1%AC%E7%9B%98%E5%88%86%E5%8C%BA%E8%A1%A8%E4%B9%8BMBR%E5%92%8CGPT/#more" rel="contents">
@@ -751,12 +800,25 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>这几天折腾NUC主机，在安装Ubuntu 18.04.4 LTS（长期支持的稳定版本）的过程中遇到不少坑，立此存照吧。</p>
-<h2 id="Step-0：安装前的准备工作"><a href="#Step-0：安装前的准备工作" class="headerlink" title="Step 0：安装前的准备工作"></a>Step 0：安装前的准备工作</h2><p>已安装内存和硬盘的NUC主机之外，还需要：</p>
-<ul>
-<li><p>独立显示器：感谢LP赞助的DELL S2319SP</p>
-</li>
-<li><p>USB键盘 + USB鼠标：开机BIOS设置硬件启动顺序时键
+          这几天折腾NUC主机，在安装Ubuntu 18.04.4 LTS（长期支持的稳定版本）的过程中遇到不少坑，立此存照吧。
+
+Step 0：安装前的准备工作
+已安装内存和硬盘的NUC主机之外，还需要：
+
+ * 独立显示器：感谢LP赞助的DELL S2319SP
+   
+   
+ * USB键盘 + USB鼠标：开机BIOS设置硬件启动顺序时键盘操作不方便
+   
+   
+ * 有线网络接口：备用先不接
+   
+   
+ * Ubuntu启动U盘：制作方法参见如何制作Ubuntu的USB启动盘，Server版本912M，Desktop版本2.13G
+   
+   
+
+Step 1: 安装Ubuntu
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/#more" rel="contents">
@@ -854,10 +916,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>去年购入的腾讯云ECS服务器虽然只有1vCpu、1G内存、40G硬盘，但是Linux服务器的效率就是高，跑个小网站那是杠杠的，不过XunSearch中文索引的磁盘消耗比较大，存储利用率超过95%，需要考虑扩容了。</p>
-<p>本着可劲折腾的原则，最近入手了一台Intel NUC主机，开始琢磨把Linux服务器搬到自己家里的宽带上，ECS只保留一个公网入口（家里宽带都是运营商的浮动私网IP地址，需要保留公网入口作为跳板机），为此潜心研究基于ssh加密隧道实现端口转发。</p>
-<blockquote>
-<pre><code>实际在咸鱼上剁手了两台NUC，新的八代i3作为开发机，二手五代i
+          去年购入的腾讯云ECS服务器虽然只有1vCpu、1G内存、40G硬盘，但是Linux服务器的效率就是高，跑个小网站那是杠杠的，不过XunSearch中文索引的磁盘消耗比较大，存储利用率超过95%，需要考虑扩容了。
+
+本着可劲折腾的原则，最近入手了一台Intel NUC主机，开始琢磨把Linux服务器搬到自己家里的宽带上，ECS只保留一个公网入口（家里宽带都是运营商的浮动私网IP地址，需要保留公网入口作为跳板机），为此潜心研究基于ssh加密隧道实现端口转发。
+
+实际在咸鱼上剁手了两台NUC，新的八代i3作为开发机，二手五代i3作为生产机
+另外，感谢LP赞助了一台Huawei AR111 Acce
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/#more" rel="contents">
@@ -955,9 +1019,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>这个周末新入手一台INTEL的NUC主机，八代i3版本，另外新购8G DDR4内存 + 256G NVME SSD硬盘.<br>本次采购是为了将网站改造为VPS + 本地Linux Server的模式，为此需要为NUC主机安装Ubuntu的Server版本。</p>
-<h2 id="Step-0-准备工作"><a href="#Step-0-准备工作" class="headerlink" title="Step 0: 准备工作"></a>Step 0: 准备工作</h2><ul>
-<li>An Intel NUC with BIOS updated to the latest vers
+          这个周末新入手一台INTEL的NUC主机，八代i3版本，另外新购8G DDR4内存 + 256G NVME SSD硬盘.
+本次采购是为了将网站改造为VPS + 本地Linux Server的模式，为此需要为NUC主机安装Ubuntu的Server版本。
+
+Step 0: 准备工作
+ * An Intel NUC with BIOS updated to the latest version (update instructions)
+ * A USB 2.0 or 3.0 flash drive (4GB minimum for Dawson Canyon NUCs, 2GB for olde
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2020/06/07/%E5%A6%82%E4%BD%95%E5%88%B6%E4%BD%9CUbuntu%E7%9A%84USB%E5%90%AF%E5%8A%A8%E7%9B%98/#more" rel="contents">
@@ -1055,10 +1122,12 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>区块链的本质是DLT，即分布式账本技术（Distributed Ledger Technologies），目前比较活跃的有5个开源软件，分别是Hyperledger Fabric、R3 Corda、Ethereum、Facebook Libra、FISCO BCOS（分别简称为 Fabric、Corda、以太坊、Libra、BCOS）。</p>
-<p>三种不同的框架在可能的应用领域上分别具有完全不同的想法，其中：</p>
-<ul>
-<li>Corda的起源来自于金融服务行业，其业务模型与标准的区块链存在较大差异，可以称之为一个<strong>受区块链启发的开源的分布式账本平
+          区块链的本质是DLT，即分布式账本技术（Distributed Ledger Technologies），目前比较活跃的有5个开源软件，分别是Hyperledger Fabric、R3 Corda、Ethereum、Facebook Libra、FISCO BCOS（分别简称为 Fabric、Corda、以太坊、Libra、BCOS）。
+
+三种不同的框架在可能的应用领域上分别具有完全不同的想法，其中：
+
+ * Corda的起源来自于金融服务行业，其业务模型与标准的区块链存在较大差异，可以称之为一个受区块链启发的开源的分布式账本平台。
+ * Fabric设计提供一种模块化、可扩展的架构，可用于从
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/11/29/%E5%9F%BA%E4%BA%8E%E5%8C%BA%E5%9D%97%E9%93%BE%E7%9A%84%E4%BA%94%E7%A7%8D%E5%BC%80%E6%BA%90%E6%8A%80%E6%9C%AF%E5%B9%B3%E5%8F%B0/#more" rel="contents">
@@ -1156,14 +1225,24 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="CMD"><a href="#CMD" class="headerlink" title="CMD"></a>CMD</h2><p><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/reference/builder/#cmd">链接</a></p>
-<ol>
-<li><p>主要目的</p>
-<ul>
-<li>提供默认的命令</li>
-<li>提供默认的参数，与ENTRYPOINT协同作用</li>
-<li>如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT</li>
-<li>该方式的命令，会被<code>docker run 
+          CMD
+链接
+
+ 1. 主要目的
+    
+     * 提供默认的命令
+     * 提供默认的参数，与ENTRYPOINT协同作用
+     * 如果一个容器每次都要运行同一个可执行文件，推荐使用ENTRYPOINT
+     * 该方式的命令，会被docker run image cmd arg1 arg2命令行方式覆盖
+     * dockerfile 中最后一个CMD参数才会生效
+    
+    
+ 2. 格式
+    
+    
+
+exec form(推荐的方式): CMD ["executable","param1","param2"]
+最终会被解析成json array， 
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/11/16/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Dockerfile%E6%96%87%E4%BB%B6%E4%B8%AD%E7%9A%84Entrypoint%E5%92%8CCmd%E5%91%BD%E4%BB%A4/#more" rel="contents">
