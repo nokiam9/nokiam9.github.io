@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha256-CTSx/A06dm1B063156EVh15m6Y67pAjZZaQc89LLSrU=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。 根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apple数据保护技术分析">
+<meta property="og:url" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。 根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/keys.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/passcode-key.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch3.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/SKP.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/SKP-C.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/FileVault.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch1.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch0.jpeg">
+<meta property="article:published_time" content="2022-10-08T12:05:45.000Z">
+<meta property="article:modified_time" content="2023-10-17T00:48:07.867Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch2.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/","path":"2022/10/08/Apple数据保护技术分析/","title":"Apple数据保护技术分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Apple数据保护技术分析 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E6%9C%89%E9%82%A3%E4%BA%9B%E5%86%85%E7%BD%AE%E7%9A%84%E6%A0%B8%E5%BF%83%E5%AF%86%E9%92%A5%EF%BC%9F"><span class="nav-text">一. 安全隔区有那些内置的核心密钥？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-UID-GID"><span class="nav-text">1. UID &amp; GID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B4%BE%E7%94%9F%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AF%86%E9%92%A5"><span class="nav-text">派生的硬件密钥</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Passcode-Passcode-Key-KEK"><span class="nav-text">2. Passcode &amp; Passcode Key &#x3D; KEK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-xART-key"><span class="nav-text">3. xART key</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E8%AE%BF%E9%97%AE%E7%9A%84Secure-Nonvolatile-Storage%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">二. 安全隔区访问的Secure Nonvolatile Storage是什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-EMF-key-LwVM-VEK"><span class="nav-text">1. EMF key &#x3D; LwVM &#x3D; VEK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Dkey"><span class="nav-text">2. Dkey</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-BAG1-system-bag"><span class="nav-text">3. BAG1: system bag</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-NAND-Key"><span class="nav-text">4. NAND Key</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%B3%BB%E7%BB%9F%E5%AF%86%E9%92%A5%E5%8C%85%EF%BC%88System-Bag%EF%BC%89%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">三、系统密钥包（System Bag）的工作原理是什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ios-4"><span class="nav-text">ios 4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ios-Storage"><span class="nav-text">ios Storage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-EMF-key"><span class="nav-text">2. EMF key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Passcode-Key"><span class="nav-text">Passcode Key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FileSystem-Key%EF%BC%9A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AF%86%E9%92%A5"><span class="nav-text">FileSystem Key：文件系统密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metadata-Key%EF%BC%9A%E5%85%83%E6%95%B0%E6%8D%AE%E5%AF%86%E9%92%A5"><span class="nav-text">Metadata Key：元数据密钥</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B2%BE%E5%93%81%E8%B5%84%E6%96%99"><span class="nav-text">精品资料</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">技术分析</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">86</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Apple数据保护技术分析 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Apple数据保护技术分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-10-08 20:05:45" itemprop="dateCreated datePublished" datetime="2022-10-08T20:05:45+08:00">2022-10-08</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-17 08:48:07" itemprop="dateModified" datetime="2023-10-17T08:48:07+08:00">2023-10-17</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>18 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。</p>
+<p>根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为融合的基石。<br>任何技术都有路径依赖，虽然 HFS+ 被认为是业界最烂的文件系统，但其许多重要的核心功能仍然需要 AFPS 继承下来，当然也为后续发展打下基础。</p>
+<p><img src="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch2.png" alt="更细架构"></p>
+<ul>
+<li>每个文件创建时会生成一个<code>Per-file Key</code>，在文件写入闪存时通过硬件用<code>AES-XTS</code>算法加密</li>
+<li><code>Per-file Key</code>存储在文件元数据 Metadata 中，被<code>Class Key</code>和<code>Filesystem Key</code>加密</li>
+<li><code>Class Key</code>和<code>Filesystem Key</code>都被硬件密钥<code>UID</code>保护</li>
+<li><code>Class Key</code>还被用户密码<code>Passcode</code>保护</li>
+</ul>
+<p>实际上，Apple就是在 HFS+ 文件系统的 inode 中增加了一个<code>cprotect</code> 字段：</p>
+<ul>
+<li>如果数据保护级别是 A &#x2F; B &#x2F; C，存储以<code>Class Key</code>加密的<code>Per-file Key</code></li>
+<li>如果数据保护级别是 D，存储加密后的<code>DKey</code>(Device Key，正好也是D)</li>
+<li>如果设置为<code>discarded</code>，则意味着密码失效，文件就永远无法打开，也是数据被抹去了…</li>
+</ul>
+<h2 id="一-安全隔区有那些内置的核心密钥？"><a href="#一-安全隔区有那些内置的核心密钥？" class="headerlink" title="一. 安全隔区有那些内置的核心密钥？"></a>一. 安全隔区有那些内置的核心密钥？</h2><p><img src="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/keys.png" alt="密钥关系图"></p>
+<h3 id="1-UID-GID"><a href="#1-UID-GID" class="headerlink" title="1. UID &amp; GID"></a>1. UID &amp; GID</h3><ul>
+<li>UID 是一个AES 256 位密钥，在 SOC 制造过程中写入一次性的<strong>熔丝</strong>，每个设备唯一且无法更改</li>
+<li>UID 不能被固件或软件读取，只能由处理器的硬件 AES 引擎使用</li>
+<li>Apple 或其任何供应商都不会记录 UID</li>
+<li>UID 与设备上的任何其他标识符无关，包括但不限于 UDID</li>
+</ul>
+<blockquote>
+<p><code>UDID = SHA1(Serial Number + ECID + LOWERCASE (WiFi Address) + LOWERCASE(Bluetooth Address))</code></p>
+</blockquote>
+<h4 id="派生的硬件密钥"><a href="#派生的硬件密钥" class="headerlink" title="派生的硬件密钥"></a>派生的硬件密钥</h4><p>安全隔区启动时，将从 UID 派生出多个硬件密钥，加密因子是不同的固定盐。<br>这些派生的硬件密钥都在内存中，无需持久化存储。<br>在各种业务场景下，使用不同的派生密钥，而不是直接使用 UID，可以有效减少 UID 被泄露的风险。</p>
+<ul>
+<li>Key 0x835 &#x3D; AES(UID, 01010101010101010101010101010101)；保护<code>Class key</code>，也被称为<code>device key</code></li>
+<li>Key 0x836 &#x3D; AES(UID, 00E5A0E6526FAE66C5C1C6D4F16D6180)</li>
+<li>Key 0x837 &#x3D; AES(GID, 345A2D6C5050D058780DA431F0710E15)</li>
+<li>Key 0x838 &#x3D; AES(UID, 8C8318A27D7F030717D2B8FC5514F8E1)</li>
+<li>Key 0x89B &#x3D; AES(UID, 183e99676bb03c546fa468f51c0cbd49)；保护<code>EMF key</code></li>
+</ul>
+<h3 id="2-Passcode-Passcode-Key-KEK"><a href="#2-Passcode-Passcode-Key-KEK" class="headerlink" title="2. Passcode &amp; Passcode Key &#x3D; KEK"></a>2. Passcode &amp; Passcode Key &#x3D; KEK</h3><p>Passcode Key是用戶輸入的passcode結合系統硬件的加密引擎以及PBKDF2(Password-Based Key Derivation Function)算法生成的。PBKDF2的基本原理是通過一個偽隨機函數，把明文和一個鹽值及加密重複次數作為輸入參數，然後重複進行運算，並最終產生密鑰。重複運算的會使得暴力破解的成本變得很高，而硬件key及鹽值的添加基本上斷絕了通過“彩虹表”攻擊的可能。</p>
+<p><code>Passcode key = PBKDF2(SHA256, passcode, UID, iter=1, outputLength=32)</code><br><img src="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/passcode-key.png" alt="passcode-key-kdf"></p>
+<blockquote>
+<p>KEK，密钥加密密钥，好像就是Passcode Key，但是可能只限于Mac OS，而非 iOS？</p>
+</blockquote>
+<p>Passcode-derived key (PDK) The encryption key derived from the entangling of the user password with the long-term SKP key and the UID of the Secure Enclave.</p>
+<h3 id="3-xART-key"><a href="#3-xART-key" class="headerlink" title="3. xART key"></a>3. xART key</h3><p>扩展反重放技术的密钥（eXtended Anti-Replay Technology key），就是第二代安全存储组件的<strong>唯一加密密钥</strong>.<br>后续苹果为了封堵各种暴力猜测Passcode的方法，在64位设备的Secure Enclave中增加了定时器，针对尝试密码的错误次数，增加尝试的延时，即使断电重启也无法解决。</p>
+<h2 id="二-安全隔区访问的Secure-Nonvolatile-Storage是什么？"><a href="#二-安全隔区访问的Secure-Nonvolatile-Storage是什么？" class="headerlink" title="二. 安全隔区访问的Secure Nonvolatile Storage是什么？"></a>二. 安全隔区访问的<code>Secure Nonvolatile Storage</code>是什么？</h2><p><img src="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch3.jpg" alt="基本结构"></p>
+<p>CPU都是通用的，这些关键密钥都是个性化数据，必须有一个存储设备提供数据持久化！<br>秘密就藏在 NAND 闪存的1号扇区，Apple 将它作为隐藏的可安全擦除区域(Effaceable Storage)，就是安全隔区的技术架构中的<code>Secure nonvolatile storage</code>。</p>
+<blockquote>
+<p>Effaceable Storage：accesses the underlying storage technology (for example, NAND) to directly address and erase a small number of blocks at a very low level.</p>
+</blockquote>
+<p>当然，Apple官方文档说安全隔区通过专用 I2C 总线连接，但 NAND 闪存不太可能再增加一个物理接口，也许是复用吧。<br>这个隐藏存储区域的容量是 960 Bytes，存储了3个关键数据。</p>
+<h3 id="1-EMF-key-LwVM-VEK"><a href="#1-EMF-key-LwVM-VEK" class="headerlink" title="1. EMF key &#x3D; LwVM &#x3D; VEK"></a>1. EMF key &#x3D; LwVM &#x3D; VEK</h3><p>在首次系统安装时创建的原生随机数 <code>FileSystem Key</code>，以 <code>key 0x89B</code> 包裹形成密文 <code>EMF Key</code>，并持久化存储在 NAND 的可擦除分区。<br>EMF Key 负责数据分区（Data Partition）的加密，也称为卷宗加密密钥 VEK（Volume Encryptition Key）<br>在iOS 5之后也被称为 <code>LwVM</code>（Lightweight Volume Manager）</p>
+<ul>
+<li>功能描述：<strong>数据分区</strong>（data partition）的加密密钥，</li>
+<li>构造方式：原生随机数，<strong>在首次安装操作系统或被用户擦除设备时创建（ToDO：？）</strong></li>
+<li>构造方式：<code>EMF Key = AES(FileSystem Key, key 0x89B)</code></li>
+<li>储存位置：NAND闪存的可擦除区域</li>
+</ul>
+<blockquote>
+<p>EMF key used for filesystem key is derived from key 0x89B - can be read by reading the LWVM locker(0x4C77564d) in EffaceableStorage - see iphone data protection project for how get this.</p>
+</blockquote>
+<h3 id="2-Dkey"><a href="#2-Dkey" class="headerlink" title="2. Dkey"></a>2. Dkey</h3><p>设备密钥，Device key</p>
+<ul>
+<li>功能描述：就是<code>NSProtectionNone</code> 类密钥的封装密钥，主要用于远程数据擦除</li>
+<li>构造方式：原生随机数</li>
+<li>加密方式：decrypt(Dkey, key 0x835)</li>
+<li>储存位置：NAND闪存的可擦除区域</li>
+</ul>
+<blockquote>
+<p>闪存Flash的特点是wear-leveling，删除数据很困难，但加密了就容易多了，直接删除密钥就OK</p>
+</blockquote>
+<h3 id="3-BAG1-system-bag"><a href="#3-BAG1-system-bag" class="headerlink" title="3. BAG1: system bag"></a>3. BAG1: system bag</h3><ul>
+<li>功能描述：系统密钥包（<code>/private/var/keybags/systembag.kb</code>）的文件级密钥，并包含一个初始向量IV</li>
+<li>构造方式：原生随机数</li>
+<li>加密方式：<strong>不加密</strong>。系统密钥包实际是一个数据文件，保存的Class Key还有一层加密</li>
+<li>储存位置：NAND闪存的可擦除区域</li>
+</ul>
+<p>系统密钥包有效负载密钥 （+初始化向量）。未加密地存储在可擦除区域。</p>
+<h3 id="4-NAND-Key"><a href="#4-NAND-Key" class="headerlink" title="4. NAND Key"></a>4. NAND Key</h3><p>负责加密GPT分区表和系统分区表，也被称为媒体密钥（media key）</p>
+<h2 id="三、系统密钥包（System-Bag）的工作原理是什么？"><a href="#三、系统密钥包（System-Bag）的工作原理是什么？" class="headerlink" title="三、系统密钥包（System Bag）的工作原理是什么？"></a>三、系统密钥包（System Bag）的工作原理是什么？</h2><ul>
+<li>文件内容被加密，每个文件都有独立的文件密钥<code>Per-file Key</code></li>
+<li><code>Per-file Key</code>被<code>Class Key</code>加密，存储位置：该文件的元数据 Meatadata 的<code>cprotect</code>字段</li>
+</ul>
+<p>File is encrypted with a File Key<br>File Key encrypted with Class Key<br>Class Key encrypted with Passcode Key Passcode key derived from:<br>    • •<br>UID, 0x835, Passcode<br>Keybag encrypted with Bag Key Entire disk encrypted with EMF Key<br>EMF key encrypted using 0x89b<br>0x89b and 0x835 derived from UID</p>
+<hr>
+<p>salads</p>
+<ul>
+<li><code>BAG1</code>: System Keybag payload key and IV</li>
+<li><code>Dkey</code>: NSProtectionNone class master key</li>
+<li><code>EMF!</code>: Filesystem encryption key</li>
+</ul>
+<h3 id="ios-4"><a href="#ios-4" class="headerlink" title="ios 4"></a>ios 4</h3><ul>
+<li>Only User partition is encrypted</li>
+<li>Available protection classes:<ul>
+<li>NSProtectionNone</li>
+<li>NSProtectionComplete</li>
+</ul>
+</li>
+<li>When no protection class set, EMF key is used – Filesystem metadata and unprotected files<ul>
+<li>Transparent encryption and decryption (same as pre-iOS 4)</li>
+</ul>
+</li>
+<li>When protection class is set, per-file random key is used<ul>
+<li>File key protected with master key is stored in extended attribute com.apple.system.cprotect</li>
+</ul>
+</li>
+</ul>
+<h3 id="ios-Storage"><a href="#ios-Storage" class="headerlink" title="ios Storage"></a>ios Storage</h3><p>• New partition scheme<br>– “LwVM” – Lightweight Volume Manager<br>• Any partition can be encrypted • New protection classes<br>– NSFileProtectionCompleteUntilFirstUserAuthentication – NSFileProtectionCompleteUnlessOpen<br>• IV for file encryption is computed differently</p>
+<h3 id="2-EMF-key"><a href="#2-EMF-key" class="headerlink" title="2. EMF key"></a>2. EMF key</h3><p>密钥：数据分区加密密钥。也称为“媒体密钥”。通过密钥0x89B加密存储</p>
+<h3 id="Passcode-Key"><a href="#Passcode-Key" class="headerlink" title="Passcode Key"></a>Passcode Key</h3><p>Passcode Key是用戶輸入的passcode結合系統硬件的加密引擎以及PBKDF2(Password-Based Key Derivation Function)算法生成的。PBKDF2的基本原理是通過一個偽隨機函數，把明文和一個鹽值及加密重複次數作為輸入參數，然後重複進行運算，並最終產生密鑰。重複運算的會使得暴力破解的成本變得很高，而硬件key及鹽值的添加基本上斷絕了通過“彩虹表”攻擊的可能。</p>
+<p>由於硬件加密引擎的Key無法提取，所以只能在目標的機器上運行暴力破解程序進行破解，假設用戶的密碼設置的足夠複雜的話，那麼破解的周期就會變得非常久。</p>
+<p>KDF &#x3D; Deriving Key from Password</p>
+<p>密码密钥：使用 Apple 自定义派生函数 (Tangling) 从用户密码或托管密钥包 BagKey 计算得出。用于从系统&#x2F;托管密钥包中解开类密钥。解开钥匙包钥匙后立即从内存中删除。</p>
+<p>在支持数据保护的 Apple 设备上， 密钥加密密钥 (KEK) 既受系统上软件测量值的保护 （或密封）， 又与只能从安全隔区获得的 UID 绑定。 在搭载 Apple 芯片的 Mac 上， 对 KEK 的保护通过整合有关系统安全性策略的信息进一步得到了加强， 因为 macOS 支持其他平台不支持的关键安全性策略更改 （例如， 停用安全启动或 SIP）。 在搭载 Apple 芯片的 Mac 上， 由于文件保险箱的实施使用数据保护 （C 类）， 此保护涵盖文件保险箱密钥。<br>On Apple devices that support Data Protection, the key encryption key (KEK) is protected (or sealed) with measurements of the software on the system, as well as being tied to the UID available only from the Secure Enclave.</p>
+<p>xART An abbreviation for eXtended Anti-Replay Technology.</p>
+<p><img src="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/SKP.png" alt="SKP"><br><img src="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/SKP-C.png" alt="SKP"></p>
+<p>SKP &#x3D; 密封密钥保护，也称为操作系统绑定密钥<br>KEK &#x3D; key encryption key，密钥加密密钥<br>VEK &#x3D; volume encryption key，卷宗加密密钥<br>xART key &#x3D; eXtended Anti-Replay Technology key，扩展反重放技术的密钥，就是第二代安全存储组件的<strong>唯一加密密钥</strong></p>
+<p>SMRK &#x3D; the crypto-hardware-derived System Measurement Root Key (SMRK)，系统测量根密钥，从加密硬件派生<br>SMDK &#x3D; the system measurement device key，系统测量设备密钥，</p>
+<p>PDK &#x3D; Passcode-derived key，用户密码派生密钥<br>？ Key Wrapping Key, 密钥封装密钥。<br>  随机宗卷密钥由密钥封装密钥加密和封装。<br>  密钥封装密钥由安全隔区长期储存， 只在安全隔区中可见。 每次用户抹掉设备时， 它都会发生变化。</p>
+<blockquote>
+<p>在 Apple A10 及后续型号的 SoC 上， PKA 支持操作系统绑定密钥， 也称为密封密钥保护 (SKP)。<br>这些密钥基于设备 UID 和设备上所运行 sepOS 的哈希值组合生成。<br>哈希值由安全隔区 Boot ROM 提供， 在Apple A13 及后续型号的 SoC 上， 则由安全隔区启动监视器提供。<br>这些密钥还用于在请求特定 Apple 服务时验证 sepOS 版本， 以及用于在系统发生重大更改而未获得用户授权时通过协助阻止访问密钥材料来提高受密码保护数据的安全性。</p>
+</blockquote>
+<p>关键0x835：由内核在引导时计算。仅用于 iOS 3 及更低版本中的钥匙串加密。用作“设备密钥”，用于保护 iOS 4 中的类密钥。</p>
+<p>key835 &#x3D; AES(UID, bytes(“01010101010101010101010101010101”))<br>关键0x89B：由内核在引导时计算。用于加密存储在闪存上的数据分区键。防止直接从 NAND 芯片读取数据分区键。</p>
+<p>key89B &#x3D; AES(UID, bytes(“183e99676bb03c546fa468f51c0cbd49”))</p>
+<p>DKey： NSProtectionNone class key.用于包装 iOS 4 中数据分区上“始终可访问”文件的文件名。由密钥0x835包装存储</p>
+<p>BAG1 密钥：系统密钥包有效负载密钥 （+初始化向量）。未加密地存储在可擦除区域。</p>
+<p>密码密钥：使用 Apple 自定义派生函数 （Tangling） 从用户密码或托管密钥包 BagKey 计算得出。用于从系统&#x2F;托管密钥包中解开类密钥。钥匙包钥匙解开包装后立即从内存中删除。</p>
+<p>文件系统密钥（f65dae950e906c42b254cc58fc78eece）：用于加密分区表和系统分区（图中称为“NAND 密钥”）</p>
+<p>元数据密钥（92a742ab08c969bf006c9412d3cc79a5）：加密NAND元数据（vfl &#x2F; ftl上下文和索引页面）</p>
+<hr>
+<p>The keys used to access file data are stored on disk in a wrapped state. You access these keys through a chain of key-unwrapping operations. The volume encryption key (VEK) is the default key used to access encrypted content on the volume. <strong>The key encryption key (KEK) is used to unwrap the VEK</strong>. The KEK is unwrapped in one of several ways:</p>
+<ul>
+<li>User password. The user enters their password, which is used to unwrap the KEK.</li>
+<li>Personal recovery key. This key is generated when the drive is formatted and is saved by the user on a paper printout. The string on that printout is used to unwrap the KEK.</li>
+<li>Institutional recovery key. This key is enabled by the user in Settings and allows the corresponding corporate master key to unwrap the KEK.</li>
+<li>iCloud recovery key. This key is used by customers working with Apple Support, and isnʼt described in thisdocument.</li>
+</ul>
+<p>For example, to access a file given the userʼs password on a volume that uses per-volume encryption, the chain of key unwrapping and data decryption consists of the following high-level operations:</p>
+<ol>
+<li>Unwrap the KEK using the userʼs password.</li>
+<li>Unwrap the VEK using the KEK.</li>
+<li>Decrypt the file-system B-tree using the VEK.</li>
+<li>Decrypt the file data using the VEK.</li>
+</ol>
+<p>The detailed steps are described in Accessing Encrypted Objects below.</p>
+<blockquote>
+<p>KEK - 密钥加密密钥，似乎就是 Passcode Key；VEK - 卷宗加密密钥，似乎就是 EMF Key</p>
+</blockquote>
+<hr>
+<h3 id="FileSystem-Key：文件系统密钥"><a href="#FileSystem-Key：文件系统密钥" class="headerlink" title="FileSystem Key：文件系统密钥"></a>FileSystem Key：文件系统密钥</h3><ul>
+<li>用于加密 <code>GPT</code>分区表 和 系统分区表<code>System Partition</code></li>
+<li>也被称为 <code>NAND Key</code></li>
+</ul>
+<blockquote>
+<p>file system key The key that encrypts each file’s metadata, including its class key. This is kept in Effaceable Storage to facilitate fast wipe, rather than confidentiality.</p>
+</blockquote>
+<p>系统会使用文件系统密钥(the file system key)解密文件的元数据， 以显露出封装的文件独有密钥和表示它受哪个类保护的记号<br>用于加密每个文件的元数据的密钥， 包括其类密钥。 存储在可擦除存储器中， 用于实现快速擦除， 并非用于保密目的。<br>加密的文件系统密钥还会使用储存在可擦除存储器中的“可擦除密钥”( an “effaceable key”) 封装，或者使用受安全隔区反重放机制保护的媒介密钥封装密钥（a media key-wrapping key）进行封装。</p>
+<blockquote>
+<p>the Secure Storage Component’s unique cryptographic key<br>此密钥不会提供数据的额外机密性。 相反，它可以根据需要快速抹掉。</p>
+</blockquote>
+<blockquote>
+<p>数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥(a random volume key)进行加密， 该密钥在首次安装操作系统或用户擦除设备时创建。<br>此密钥由密钥封装密钥(a key wrapping key)加密和封装， 密钥封装密钥由安全隔区长期储存， 只在安全隔区中可见。 每次用户抹掉设备时， 它都会发生变化。<br>在 A9 （及后续型号） SoC 上， 安全隔区依靠由反重放系统支持的熵来实现可擦除性， 以及保护其他资源中的密钥封装密钥。 有关更多信息， 请参阅安全非易失性存储器。</p>
+</blockquote>
+<p>文件系统密钥用于保护GPT分区表（GUID Partition Table）和系统分区（System partition）。<br>Todo： 也被称为 NAND 密钥？<br>文件系统密钥（f65dae950e906c42b254cc58fc78eece）</p>
+<h3 id="Metadata-Key：元数据密钥"><a href="#Metadata-Key：元数据密钥" class="headerlink" title="Metadata Key：元数据密钥"></a>Metadata Key：元数据密钥</h3><p>元数据密钥(92a742ab08c969bf006c9412d3cc79a5)：加密 NAND 元数据（vfl&#x2F;ftl 上下文和索引页）<br><img src="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/FileVault.png" alt="文件保险箱"></p>
+<p>以 UID 为基础衍生出多个密钥，其中：</p>
+<ul>
+<li><code>key 0x89B</code>:</li>
+<li>，會衍生出多隻金鑰，其中兩隻金鑰、0x89B與0x835會用於Device Keybag上。0x89B功能同FDE，會透過EMF金鑰針對整個File System&#x2F;Partition進行加密保護。而Passcode則是用戶自己產生，從iOS 9之後，預設的Passcode長度為6個數字，而0x835 Key與Passcode Key(從Passcode透過加密運算產生)會針對所有的Class Key進行加密(除了Class 4 Key外)。</li>
+</ul>
+<p>data partition 每个文件创建时，Data Protection会创建一个256-bit key (“per-file” key) ，然后使用这个密钥借助硬件 AES engine。加密模式通常是AES CBC mode（不懂的看密码学）. 既然是CBC自然需要IV，IV怎么来， 用文件的块偏移计算LFSR（ linear feedback shift register (LFSR) calculated with the block offset into the file）, IIV也是加密存储，encrypted with the SHA-1 hash of the per-file key.</p>
+<p>per-file key是实际用来加密文件的，那它也得被保护啊。这就得分好几种条件了。<br>然后，加密的 per-file key is stored in the file’s metadata。.</p>
+<p>然后file’s metadata又被加密了，The metadata of all files in the file system are encrypted with a random key, which is created when iOS is first installed or when the device is wiped by a user. The file system key is stored in Effaceable Storage. 其实这个加密价值不大。主要是为了销毁密钥方便。ios界面上操作 “Erase all content and settings” option,就是干掉了这个密钥。最终无法获得加密的per-file key。per-file key到底被谁加密，环境很多。根据不同的环境使用不用的 class key。 class key 又被 hardware UID 保护，有些情况下是通过user’s passcode. 如果你的数据相关联pin，那就得靠他。这非常重要！！！</p>
+<p>多层密钥架构还有一个好处，就是对加密的内容更换密钥，无需重新加解密数据，那样效率很低，而只需更换加密key。</p>
+<p>有密碼保護與無密碼保護的iTunes備份最大的差異是在Keybag是否被UID Key加密的狀態下儲存於iTunes備份擋內。若iTunes備份檔沒有密碼保護，Keybag會被UID的金鑰加密後儲存於備份檔內(Keychain也是)，這代表這個備份檔案是無法恢復到其他的iOS裝置，僅能恢復到原有備份出來的裝置(因為每個iOS的UID皆不同)。若iTunes備份檔有密碼保護，則Keybag會用iTunes設定的密碼採PBKDF2加密函式反覆運算1千萬次來保護 Keybag ，因Keybag未與UID綁定，當升級新的iOS裝置時就必須採用密碼保護的iTunes備份檔才可進行資料移轉。</p>
+<p>有一个特定的储物柜叫做BAGI，它包含一个加密密钥，用来加密所谓的系统密钥包。密钥包包含许多加密“类密钥”，最终保护文件系统中的文件;它们在不同的时间被锁定和解锁，这取决于用户的活动。这让开发人员可以选择在设备被锁定时是否锁定文件，或者在输入密码后保持解锁，等等。文件系统上的每个文件都有自己的随机文件密钥，该密钥使用密钥包中的类密钥进行加密。密钥包的密钥是由BAGI储物柜中的密钥和用户的PIN的组合加密的。</p>
+<p><img src="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch1.png" alt="基本结构"><br><img src="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch0.jpeg" alt="简化架构"></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable constant_">HEADER</span></span><br><span class="line">  <span class="variable constant_">VERS</span> = <span class="number">4</span></span><br><span class="line">  <span class="variable constant_">TYPE</span> = <span class="number">0</span></span><br><span class="line">  <span class="variable constant_">UUID</span> = <span class="number">32</span> <span class="variable constant_">HEX</span></span><br><span class="line">  <span class="variable constant_">HMCK</span> = <span class="number">80</span> <span class="variable constant_">HEX</span></span><br><span class="line">  <span class="variable constant_">WRAP</span> = <span class="number">1</span></span><br><span class="line">  <span class="variable constant_">SALT</span> = <span class="number">40</span> <span class="title class_">Hex</span></span><br><span class="line">  <span class="variable constant_">ITER</span> = <span class="number">50000</span></span><br><span class="line">  <span class="variable constant_">TKMT</span> = <span class="number">0</span></span><br><span class="line">  <span class="variable constant_">SART</span> = <span class="number">98</span></span><br><span class="line">  <span class="variable constant_">UUID</span> = <span class="number">32</span> <span class="variable constant_">HEX</span></span><br><span class="line"><span class="variable constant_">KEYS</span></span><br><span class="line">  <span class="number">0</span>:</span><br><span class="line">    <span class="variable constant_">CLAS</span> = <span class="number">1</span></span><br><span class="line">    <span class="variable constant_">WRAP</span> = <span class="number">3</span></span><br><span class="line">    <span class="variable constant_">KTYP</span> = <span class="number">0</span></span><br><span class="line">    <span class="variable constant_">WPKY</span> = <span class="number">80</span> <span class="variable constant_">HEX</span></span><br><span class="line">    <span class="variable constant_">UUID</span> = <span class="number">32</span> <span class="variable constant_">HEX</span></span><br><span class="line"></span><br><span class="line">... up to</span><br><span class="line">  <span class="number">9</span>:</span><br></pre></td></tr></table></figure>
+
+<p>Hierarchical File System,分层文件系统</p>
+<hr>
+<p>[<a target="_blank" rel="noopener" href="https://www.adeleda.com/ios-forensics-en.html]">https://www.adeleda.com/ios-forensics-en.html]</a></p>
+<p>从iPhone 3GS开始，iDevices包含一个加密芯片，可以对文件系统进行硬件加密。 NAND芯片是按如下方式组织的闪存：</p>
+<ul>
+<li>块 0：包含 LLB</li>
+<li>块 1：包含以下加密密钥：<ul>
+<li>EMF：用于加密文件系统</li>
+<li>Dkey：用于加密保护类“NSFileProtectionNone”的主密钥（大多数文件）</li>
+<li>BAG1：与密码一起使用，为其他主密钥生成加密密钥（对于邮件等文件…</li>
+</ul>
+</li>
+<li>块 16 到 （END-15） 块：包含 HFS+ 文件系统</li>
+<li>最后 15 个区块：保留给 Apple 用于其他用途。</li>
+</ul>
+<hr>
+<p>Effaceable lockers<br>EMF!<br>• Data partition encryption key, encrypted with key 0x89B<br>• Format: length (0x20) + AES(key89B, emfkey)<br>Dkey<br>• NSProtectionNone class key, wrapped with key 0x835<br>• Format: AESWRAP(key835, Dkey)<br>BAG1<br>• System keybag payload key<br>• Format : magic (BAG1) + IV + Key<br>• Read from userland by keybagd to decrypt systembag.kb<br>• Erased at each passcode change to prevent attacks on previous keybag</p>
+<hr>
+<p>Data Wipe<br>Operation<br>• mobile_obliterator daemon<br>• Erase DKey by calling MKBDeviceObliterateClassDKey<br>• Erase EMF key by calling selector 0x14C39 in EffacingMediaFilter service<br>• Reformat data partition<br>• Generate new system keybag<br>• High level of confidence that erased data cannot be recovered</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><h3 id="精品资料"><a href="#精品资料" class="headerlink" title="精品资料"></a>精品资料</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://cryptobook.nakov.com/mac-and-key-derivation/kdf-deriving-key-from-password">面向开发人员的实用密码学 - Svetlin Nako</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/nabla-c0d3/iphone-dataprotection">iPhone 4 取证工具包 - Github</a></li>
+</ul>
+<h3 id="文档下载"><a href="#文档下载" class="headerlink" title="文档下载"></a>文档下载</h3><ul>
+<li><a href="2016-BSidesROC-iOSCrypto.pdf">iOS加密技术高级分析</a></li>
+<li><a href="iOS_Encryption_Systems.pdf">iOS Encryption Systems - 奥地利格拉茨技术大学论文</a></li>
+<li><a href="0721C6_Andrey.Belenko_Evolution.of.iOS.Data.Protection.pdf">iOS 5的数据保护技术分析</a></li>
+<li><a href="iPhone_Data_Protection_in_Depth.pdf">iPhone 数据保护技术分析 - Sogeti</a></li>
+<li><a href="OWASP_BeNeLux_Day_2011_-_A._Belenko_-_Overcoming_iOS_Data_Protection.pdf">iPhone 数据保护技术 - ELComSoft</a></li>
+<li><a href="iOS_backdoor.pdf">iOS后门分析</a></li>
+</ul>
+<h3 id="技术分析"><a href="#技术分析" class="headerlink" title="技术分析"></a>技术分析</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://bbs.pediy.com/thread-174935.htm">ios安全团队对ios安全的认识</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.kaotenforensic.com/ios/ios-data-protection/">iOS资料保护机制简介</a></li>
+<li><a target="_blank" rel="noopener" href="https://toutiao.io/posts/324007/app_preview">苹果的锁屏密码到底有多难破？ - 头条</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.osslab.com.tw/iphone-5c-nand/">超越FBI NSA, iPhone 5c 以物理NAND備份法破解iOS密碼</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.theiphonewiki.com/wiki/File_System_Crypto">Jonathan Zdziarski 对iOS文件系统的论述</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.leiphone.com/category/zhuanlan/4dO3QQ178rkZ3mo5.html">FBI vs Apple：FBI是幸运的 - 盘古团队</a></li>
+<li><a target="_blank" rel="noopener" href="https://paper.seebug.org/papers/Archive/drops2/%E3%80%8AiOS%E5%BA%94%E7%94%A8%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E6%88%98%E3%80%8B%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%9A%E6%97%A0%E6%B3%95%E9%94%80%E6%AF%81%E7%9A%84%E6%96%87%E4%BB%B6.html">iOS 破解分析 - 乌云</a></li>
+<li><a target="_blank" rel="noopener" href="https://heyonly.github.io/2017/07/02/iOS-%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E4%B9%8B%E6%95%8F%E6%84%9F%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4/">OS 安全攻防之敏感数据保护</a></li>
+<li><a href="iOS_backdoor.pdf">iOS backdoor</a></li>
+<li><a target="_blank" rel="noopener" href="https://source.android.com/docs/security/features/encryption/file-based?hl=zh-cn">FBE 文件级加密原理 - Android官方</a></li>
+<li><a target="_blank" rel="noopener" href="https://page.om.qq.com/page/O3yauEIx2l-9WrUkHgQgRUBw0">你的安卓手机究竟是FDE加密还是FBE加密？</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.kaotenforensic.com/android/android_encryption/">Android 檔案系統加密機制</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.kaotenforensic.com/android/booting-partitions/">Android 系統基本架構 - 開機流程與分區說明</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.pmbonneau.com/multiboot/dataprotection_basics.php">iOS 数据保护基础知识</a></li>
+<li><a target="_blank" rel="noopener" href="http://securityhorror.blogspot.com/2013/09/the-hackers-guide-to-dismantling-iphone_5697.html">拆解 iPhone 的黑客指南（第 3 部分</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/" rel="prev" title="随机数生成技术概述">
+                  <i class="fa fa-angle-left"></i> 随机数生成技术概述
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/" rel="next" title="密钥派生函数（KDF）概述">
+                  密钥派生函数（KDF）概述 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">197k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">11:57</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script><script src="/js/bookmark.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.2.12/pdfobject.min.js","integrity":"sha256-g2xji1rlE3KsGVClvuxTbcR0Kn2+wtQADSff2Tbb4zA="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.5.0/mermaid.min.js","integrity":"sha256-K7oJiQlDulzl24ZUFOywuYme1JqBBvQzK6m8qHjt9Gk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>
