@@ -40,7 +40,7 @@ post_asset_folder: true
 marked:
   prependRoot: true
   postAsset: true
-  dompurify: true
+  dompurify: false  # 默认启用HTML标签净化，将导致markdown代码渲染失败
 relative_link: false
 future: true
 highlight:
