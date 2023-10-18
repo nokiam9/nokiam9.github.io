@@ -7,7 +7,12 @@ tags:
 原本 HEXO v5.4.2 基于 node v12 版本，但最近个别组件出现安全告警要求强制升级，但新版本的组件依赖 node v14 版本，只好再次升级。
 ![version](version.jpg)
 
-当前，node 的最新版本 v20，LTS 版本 v18。Hexo 最新版本 v6.3，Next 主题最新版本 v8.18.2。
+其中一个开发设备是古老的 Mac 一体机，通过 node 官网下载 v18 的 pkg 安装包，运行异常退出，核查原因是操作系统版本是 High Sierra 10.13（最后一个支持32位App的版本，告别了僵尸大战！），被迫升级到 Catalina 10.15，经过好几番折腾，最后完成情况如下：
+
+node：最新版本 v20，LTS 版本 v18
+npm：9.8.1
+Hexo：6.3
+Next：8.18.2
 
 ## package.json 配置信息
 
@@ -62,14 +67,19 @@ marked:
 
 ## 更新说明
 
-1. 出于 HTML 安全考虑，新版本的[hexo-renderer-marked](https://github.com/hexojs/hexo-renderer-marked) 嵌入了[DOMPurify](https://github.com/cure53/DOMPurify)，但经常造成渲染异常，已建议采用新的插件 [hexo-renderer-markdown-it](https://github.com/hexojs/hexo-renderer-markdown-it/)
-2. [hexo-auto-excerpt](https://github.com/ashisherc/hexo-auto-excerpt)插件通常用于显示文章摘要，已改为独立安装插件，而非进行配置；但由于 HTML 难以准确截断，推荐采用 <!--more--> 标签在文章内部进行显式截断
-3. Hexo 默认安装了 hexo-renderer-marked 和 hexo-renderer-ejs，因此你不仅可以用 Markdown 写作，你还可以用 EJS 写作。如果你安装了 hexo-renderer-pug，你甚至可以用 Pug 模板语言书写文章。只需要将文章的扩展名从 md 改成 ejs，Hexo 就会使用 hexo-renderer-ejs 渲染这个文件，其他格式同理。
-4. 早期 Next 主题的版本库位于：[theme-next/hexo-theme-next](https://github.com/theme-next/hexo-theme-next)，由于开发团队的内部矛盾而长期无法更新...于是部分开发者又搞了一个新版本：[next-theme/hexo-theme-next](https://github.com/next-theme/hexo-theme-next)，这就是 5.x 版本升级到 8.x 版本的重大变换，主要改造点：
-   - 将配置文件移动到最外层，使用`_config.next.yml`，目的是后续的主题更新只需`git pull`，不需要担心配置文件冲突或者丢失的问题
-   - 把库文件独立出来：[@next-theme/plugins](https://github.com/next-theme/plugins)；该插件需要独立安装，且版本号务必相同
-   - 模板格式从 swig 调整为 njk
-   - 保留 git 安装方式，但也可以支持 npm
+出于 HTML 安全考虑，新版本的[hexo-renderer-marked](https://github.com/hexojs/hexo-renderer-marked) 嵌入了[DOMPurify](https://github.com/cure53/DOMPurify)，但经常造成渲染异常，已建议采用新的插件 [hexo-renderer-markdown-it](https://github.com/hexojs/hexo-renderer-markdown-it/)。
+
+[hexo-auto-excerpt](https://github.com/ashisherc/hexo-auto-excerpt)插件通常用于显示文章摘要，已改为独立安装插件，而非进行配置；但由于 HTML 难以准确截断，推荐采用`<!-- more -->`标签在文章内部进行显式截断。
+注意！默认版本 1.1.0 正常，但强制升级到最新 1.1.2 可能造成首页渲染错位
+
+Hexo 默认安装了 hexo-renderer-marked 和 hexo-renderer-ejs，因此你不仅可以用 Markdown 写作，你还可以用 EJS 写作。如果你安装了 hexo-renderer-pug，你甚至可以用 Pug 模板语言书写文章。只需要将文章的扩展名从 md 改成 ejs。
+
+早期 Next 主题的版本库位于：[theme-next/hexo-theme-next](https://github.com/theme-next/hexo-theme-next)，由于开发团队的内部矛盾而长期无法更新...于是部分开发者又搞了一个新版本：[next-theme/hexo-theme-next](https://github.com/next-theme/hexo-theme-next)，这就是 5.x 版本升级到 8.x 版本的重大变换，主要改造点：
+
+- 将配置文件移动到最外层，使用`_config.next.yml`，目的是后续的主题更新只需`git pull`，不需要担心配置文件冲突或者丢失的问题
+- 把库文件独立出来：[@next-theme/plugins](https://github.com/next-theme/plugins)；该插件需要独立安装，且版本号务必相同
+- 模板格式从 swig 调整为 njk
+- 保留 git 安装方式，但也可以支持 npm
 
 ---
 
