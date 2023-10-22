@@ -40,7 +40,7 @@ post_asset_folder: true
 marked:
   prependRoot: true
   postAsset: true
-  dompurify: true
+  dompurify: false
 relative_link: false
 future: true
 highlight:
