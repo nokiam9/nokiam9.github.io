@@ -30,7 +30,7 @@
 <meta property="og:image" content="https://nokiam9.github.io/2023/10/29/AES-XTS-%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/enc-dec.png">
 <meta property="og:image" content="https://nokiam9.github.io/2023/10/29/AES-XTS-%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/enc-dec-last2.png">
 <meta property="article:published_time" content="2023-10-29T12:51:15.000Z">
-<meta property="article:modified_time" content="2023-11-20T16:21:14.802Z">
+<meta property="article:modified_time" content="2023-11-26T07:39:59.804Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2023/10/29/AES-XTS-%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/XTS_mode_encryption.png">
@@ -142,7 +142,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="nav-text">二、基本流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%8D%95%E4%B8%80%E5%88%86%E7%BB%84%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-text">1. 单一分组的处理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95%EF%BC%9A-C-XTS-AES-blockEnc-Key-P-i-j"><span class="nav-text">加密算法：$C &#x3D; XTS-AES-blockEnc(Key, P, i, j)$</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86%E7%AE%97%E6%B3%95%EF%BC%9A-C-XTS-AES-blockDec-Key-C-i-j"><span class="nav-text">解密算法：$C &#x3D; XTS-AES-blockDec(Key, C, i, j)$</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">技术分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AF%86%E6%96%87%E7%AA%83%E5%8F%96%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-text">2. 密文窃取的处理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95"><span class="nav-text">加密算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86%E7%AE%97%E6%B3%95"><span class="nav-text">解密算法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-text">三、代码示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E4%BA%A7%E5%93%81%E5%AE%9E%E7%8E%B0"><span class="nav-text">四、产品实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E4%BC%BD%E7%BD%97%E7%93%A6%E5%9F%9F%E7%9A%84%E4%B9%98%E6%B3%95"><span class="nav-text">附录：伽罗瓦域的乘法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E9%99%90%E5%9F%9F"><span class="nav-text">有限域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%8E%9F%E5%A4%9A%E9%A1%B9%E5%BC%8F"><span class="nav-text">本原多项式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSFR"><span class="nav-text">LSFR</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="nav-text">二、基本流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%8D%95%E4%B8%80%E5%88%86%E7%BB%84%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-text">1. 单一分组的处理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95%EF%BC%9A-C-XTS-AES-blockEnc-Key-P-i-j"><span class="nav-text">加密算法：$C &#x3D; XTS-AES-blockEnc(Key, P, i, j)$</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86%E7%AE%97%E6%B3%95%EF%BC%9A-C-XTS-AES-blockDec-Key-C-i-j"><span class="nav-text">解密算法：$C &#x3D; XTS-AES-blockDec(Key, C, i, j)$</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AF%86%E6%96%87%E7%AA%83%E5%8F%96%E7%9A%84%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="nav-text">2. 密文窃取的处理方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95"><span class="nav-text">加密算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86%E7%AE%97%E6%B3%95"><span class="nav-text">解密算法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-text">三、代码示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%90%8E%E7%BB%AD%E6%BC%94%E8%BF%9B"><span class="nav-text">四、后续演进</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-P1619-1"><span class="nav-text">1. P1619.1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-P1619-2"><span class="nav-text">2. P1619.2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-P1619-3"><span class="nav-text">3. P1619.3</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%BA%A7%E5%93%81%E5%AE%9E%E7%8E%B0"><span class="nav-text">五、产品实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Mac-OS-X-Lion%E2%80%99s-FileVault-2"><span class="nav-text">1. Mac OS X Lion’s FileVault 2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Windows-Vista-BitLocker"><span class="nav-text">2. Windows Vista BitLocker</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">六、技术分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-AES-XTS-%E5%A6%82%E4%BD%95%E5%8A%A0%E5%AF%86%E5%B0%8F%E6%96%87%E4%BB%B6%EF%BC%9F"><span class="nav-text">1. AES-XTS 如何加密小文件？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%A6%82%E6%9E%9C%E6%9B%B4%E6%94%B9-tweak-key-%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">2. 如果更改 tweak key 会发生什么？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E4%BC%BD%E7%BD%97%E7%93%A6%E5%9F%9F%E7%9A%84%E4%B9%98%E6%B3%95"><span class="nav-text">附录：伽罗瓦域的乘法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E9%99%90%E5%9F%9F"><span class="nav-text">有限域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%AC%E5%8E%9F%E5%A4%9A%E9%A1%B9%E5%BC%8F"><span class="nav-text">本原多项式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSFR"><span class="nav-text">LSFR</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -229,7 +229,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-21 00:21:14" itemprop="dateModified" datetime="2023-11-21T00:21:14+08:00">2023-11-21</time>
+      <time title="修改时间：2023-11-26 15:39:59" itemprop="dateModified" datetime="2023-11-26T15:39:59+08:00">2023-11-26</time>
     </span>
 
   
@@ -246,14 +246,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>3.8k</span>
+      <span>4.6k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>14 分钟</span>
+      <span>17 分钟</span>
     </span>
 </div>
 
@@ -284,7 +284,7 @@
 <li>完成初始化加密后，tweak value 甚至可以任意修改而不影响密文的解密，也意味着 tweak 修改后不需要重新计算并存储加密数据；</li>
 <li>各个区块数据的加密解密互相独立（tweak key 各不相同），不存在依赖关系，加密和解密都可以完全并行化。</li>
 </ol>
-<p>2007年，IEEE 组织发布了<a target="_blank" rel="noopener" href="https://luca-giuzzi.unibs.it/corsi/Support/papers-cryptography/1619-2007-NIST-Submission.pdf">IEEE std 1619-2007</a> ，提供 XTS-AES 算法用于以数据单元（包括扇区、逻辑磁盘块等）为基础结构的存储设备中静止状态数据的加密。</p>
+<p>2007年，IEEE 组织发布了<a target="_blank" rel="noopener" href="https://luca-giuzzi.unibs.it/corsi/Support/papers-cryptography/1619-2007-NIST-Submission.pdf">IEEE std 1619-2007</a> ，提供 XTS-AES 算法用于以数据单元（包括扇区、逻辑磁盘块等）为基础结构的存储设备中静止状态数据的加密，SISWG（存储安全工作组，Security in Storage Working Group）负责维护该标准。</p>
 <p><img src="/2023/10/29/AES-XTS-%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/XTS_mode_encryption.png" alt="total"></p>
 <p>2010年，美国密码局也接纳了该标准，并命名为<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/38/e/final">NIST SP800-38E</a>。</p>
 <h2 id="二、基本流程"><a href="#二、基本流程" class="headerlink" title="二、基本流程"></a>二、基本流程</h2><h3 id="1-单一分组的处理方式"><a href="#1-单一分组的处理方式" class="headerlink" title="1. 单一分组的处理方式"></a>1. 单一分组的处理方式</h3><p><img src="/2023/10/29/AES-XTS-%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/enc-dec.png" alt="vs"></p>
@@ -302,14 +302,6 @@
 <p>处理逻辑为：<br>$T &#x3D; AES-enc(key_2, i) \bigotimes \alpha^j$<br>$C &#x3D; AES-enc(key_1, P \bigoplus T) \bigoplus T$</p>
 <h4 id="解密算法：-C-XTS-AES-blockDec-Key-C-i-j"><a href="#解密算法：-C-XTS-AES-blockDec-Key-C-i-j" class="headerlink" title="解密算法：$C &#x3D; XTS-AES-blockDec(Key, C, i, j)$"></a>解密算法：$C &#x3D; XTS-AES-blockDec(Key, C, i, j)$</h4><p>输入参数、输出结果的结构与加密算法保持一致，只是 C 和 P 换了位置。</p>
 <p>处理逻辑为：<br>$T &#x3D; AES-enc(key_2, i) \bigotimes \alpha^j$<br>$P &#x3D; AES-dec(key_1, C \bigoplus T) \bigoplus T$</p>
-<h4 id="技术分析"><a href="#技术分析" class="headerlink" title="技术分析"></a>技术分析</h4><ol>
-<li>tweak key 实际上是一种流密码，解密和加密的算法是同质的；但是用于 AES 的主密钥的加密和解密算法是互逆的。</li>
-<li>XTS 是一种工作模式，首先基于 key2 和 i 完成 T 的初始化，后续对于每个明文分组，T 密钥是基于$GF(2^{128})$的 j 阶乘法。</li>
-<li>tweak key 基于 XOR-ENCRYPT-XOR 模式，更改密钥时不需要掌握原密钥，也不需要更新已存储的密文，这个特点对于磁盘级数据加密非常有价值！</li>
-</ol>
-<blockquote>
-<p>用 T1 加密，解密时换了 T2<br>$$<br>\begin{aligned}<br>    P’’&amp;&#x3D;AES-dec(key_1,C\oplus T_2)\oplus T_2\\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus T_2) \oplus T_2 \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus T_2 \oplus T_2) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus 0) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1 \oplus T_1)) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus 0)) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P)) \\<br>    &amp;&#x3D;P<br>\end{aligned}<br>$$</p>
-</blockquote>
 <h3 id="2-密文窃取的处理方式"><a href="#2-密文窃取的处理方式" class="headerlink" title="2. 密文窃取的处理方式"></a>2. 密文窃取的处理方式</h3><p><img src="/2023/10/29/AES-XTS-%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/enc-dec-last2.png" alt="2"></p>
 <h4 id="加密算法"><a href="#加密算法" class="headerlink" title="加密算法"></a>加密算法</h4><ul>
 <li>明文$P_{m-1}$执行 AES-enc，密文结果 $C$ 的前 i 个字节作为$C_{m-1}$</li>
@@ -323,7 +315,22 @@
 <h2 id="三、代码示例"><a href="#三、代码示例" class="headerlink" title="三、代码示例"></a>三、代码示例</h2><p>AES-XTS 的硬件实现很方便，有限域的乘法就是一个 LSFR（线性移位反馈寄存器）。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> GF_128_FDBK     0x87                <span class="comment">// 设定本原生成式 = x^4 + x^2 + x + 1，FDBK=feedback</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> AES_BLK_BYTES   16                  <span class="comment">// 1 byte = 8 bits, 128位 = 16个字节</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">XTS_EncryptSector</span><span class="params">( AES_Key &amp;k2,       <span class="comment">// tweak 可调整密钥 </span></span></span><br><span class="line"><span class="params">                        AES_Key &amp;k1,       <span class="comment">// ECB 主密钥</span></span></span><br><span class="line"><span class="params">                        u64b    S,         <span class="comment">// 扇区sector的序号，最长64位</span></span></span><br><span class="line"><span class="params">                        uint    N,         <span class="comment">// 扇区sectot的长度，按字节计算</span></span></span><br><span class="line"><span class="params">                        <span class="type">const</span>   u08b *pt,  <span class="comment">// 明文，输入，const声明防止被修改</span></span></span><br><span class="line"><span class="params">                        u08b    *ct )</span>      <span class="comment">// 密文，输出，地址传参</span></span><br><span class="line">&#123;                                          </span><br><span class="line">    uint    i,j;</span><br><span class="line">    u08b    T[AES_BLK_BYTES];               <span class="comment">// tweak value， </span></span><br><span class="line">    u08b    x[AES_BLK_BYTES];               <span class="comment">// 临时工作变量</span></span><br><span class="line">    u08b    Cin, Cout;                      <span class="comment">// LSFR 的携位信息</span></span><br><span class="line"></span><br><span class="line">    assert(N &gt;= AES_BLK_BYTES == <span class="number">0</span>);         <span class="comment">// 断言：确认至少有一个完整分组</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 将扇区序号作为 i，导入tweak value；注意需调整为小端字节序：123456789a-&gt;9a78563412</span></span><br><span class="line">    <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; AES_BLK_BYTES; j++&gt;) &#123;  </span><br><span class="line">        T[j] = (u08b) (S &amp; <span class="number">0xFF</span>);           </span><br><span class="line">        S = S &gt;&gt; <span class="number">8</span>;                         <span class="comment">// S 是64位，高8个字节实际填充0；物理限制2^128，建议2^20</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 基于 tweakl key 加密，完成 T 的初始化</span></span><br><span class="line">    AES_ECB_Encrypt(k2, T);                 T</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 每次处理16字节的分组，i 记录当前扇区的处理位置，注意循环结束在倒数第二个分组！</span></span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">0</span>; i+AES_BLK_BYTES &lt;= N; i += AES_BLK_BYTES) &#123;</span><br><span class="line">        <span class="comment">// 明文 pt 和 T 的第一轮XOR</span></span><br><span class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; AES_BLK_BYTES; j++)</span><br><span class="line">            x[j] = pt[i+j] ^ T[j];          </span><br><span class="line"></span><br><span class="line">        <span class="comment">// 基于主密钥完成加密</span></span><br><span class="line">        AES_ECB_Encrypt(k1, x);             </span><br><span class="line"></span><br><span class="line">        <span class="comment">// 明文 pt 和 T 的第二轮XOR，ct 作为密文结果输出</span></span><br><span class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; AES_BLK_BYTES; j++) </span><br><span class="line">            ct[i+j] = x[j] ^ T[j];         </span><br><span class="line"></span><br><span class="line">        <span class="comment">// 基于GF(2^128)乘法，LSFR 为下一循环构造 T，包含移位和反馈两个步骤</span></span><br><span class="line">        <span class="comment">// 移位步骤：T 的16个字节依次左移1位，末位补0。不能简单的整体左移1位！因为是小端字节序</span></span><br><span class="line">        Cin = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; AES_BLK_BYTES; j++) &#123;   </span><br><span class="line">            Cout = (T[j] &gt;&gt; <span class="number">7</span> ) &amp; <span class="number">1</span>;            <span class="comment">// 第j个字节的最高位溢出，暂存Cout</span></span><br><span class="line">            T[j] = ((T[j] &lt;&lt; <span class="number">1</span>) + Cin) &amp; <span class="number">0xFF</span>;  <span class="comment">// 当前字节左移1位，末位填充上个字节的溢出位</span></span><br><span class="line">            Cin = Cout;                         <span class="comment">// 为下个字节准备溢出位</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 反馈步骤：如果T最高位溢出的比特为1，则最低位字节 XOR (1000 0111)</span></span><br><span class="line">        <span class="keyword">if</span> (Cout)                           </span><br><span class="line">            T[<span class="number">0</span>] ^= GF_128_FDBK;                <span class="comment">// 本原生成式的最高位x^4，T[0]就够用</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 如果 i == N，说明没有不完整分组，无需处理；否则，对最后一个不完整扇区进行密文窃取</span></span><br><span class="line">    <span class="keyword">if</span> (i &lt; N) &#123;   </span><br><span class="line">        <span class="comment">// 明文 pt 和 T 的第一轮XOR                         </span></span><br><span class="line">        <span class="keyword">for</span> (j=<span class="number">0</span>; i+j&lt;N; j++) &#123;</span><br><span class="line">            x[j] = pt[i+j] ^ T[j];              <span class="comment">// x[0..z-1]：仅处理明文的剩余 z 个字节 </span></span><br><span class="line">            ct[i+j] = ct[i+j-AES_BLK_BYTES];    <span class="comment">// 保存上一分组密文的前 z 个字节，并追加到密文输出的尾部</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">for</span> (; j&lt;AES_BLK_BYTES; j++)            <span class="comment">// 注意！j 开始于上个循环的结束位置 m-1 ！</span></span><br><span class="line">            x[j] = ct[i+j-AES_BLK_BYTES];       <span class="comment">// x[z,15]：窃取上一轮密文的后 16-z 个字节</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 基于主密钥完成加密</span></span><br><span class="line">        AES_ECB_Encrypt(k1, x);                 </span><br><span class="line"></span><br><span class="line">        <span class="comment">// 填充窃取数据的明文 pt 和 T 的第二轮XOR，ct 作为密文结果输出</span></span><br><span class="line">        <span class="keyword">for</span> (j=<span class="number">0</span>; j&lt;AES_BLK_BYTES; j++)</span><br><span class="line">            ct[i+j-AES_BLK_BYTES] =x[j] ^ T[j]; </span><br><span class="line">    &#125;                                </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="四、产品实现"><a href="#四、产品实现" class="headerlink" title="四、产品实现"></a>四、产品实现</h2><p>Mac OS X Lion’s FileVault 2、Windows 10’s BitLocker 等主流文件系统均已实现 XTS-AES 算法，并满足如下技术要求：</p>
+<h2 id="四、后续演进"><a href="#四、后续演进" class="headerlink" title="四、后续演进"></a>四、后续演进</h2><h3 id="1-P1619-1"><a href="#1-P1619-1" class="headerlink" title="1. P1619.1"></a>1. P1619.1</h3><p>IEEE 1619 定义的 AES-XTS 仅提供机密性保护的能力，不包含完整性保护和身份认证的能力。<br>AES-XTS 可能被攻击者改写数据而不表现出异常（选择密文攻击），也无法抵御流量分析和重放攻击，请参见 <a target="_blank" rel="noopener" href="https://crypto.stackexchange.com/questions/5587/what-is-the-advantage-of-xts-over-cbc-mode-with-diffuser">Compare Blockmode CBC (with diffuser) against XTS</a>。</p>
+<p>P1619.1 定义了若干附加身份认证的加密算法，用于支持长度扩展的存储设备，包括：</p>
+<ul>
+<li>Counter mode with CBC-MAC (CCM)</li>
+<li>Galois&#x2F;Counter Mode (GCM)</li>
+<li>Cipher Block Chaining (CBC) with HMAC-Secure Hash Algorithm</li>
+<li>XTS-HMAC-Secure Hash Algorithm</li>
+</ul>
+<h3 id="2-P1619-2"><a href="#2-P1619-2" class="headerlink" title="2. P1619.2"></a>2. P1619.2</h3><p>AES-XTS 也被称为窄块加密算法（Narrow-block encryption），其特点是一个扇区被分成多个分组进行加密处理，例如 AES-128 就是 16 个字节，突出优势是硬件实现的效率高，但也存在某些安全隐患，例如较小的分组长度为数据修改攻击提供了便利条件。</p>
+<p>对应的，宽块加密算法（wide-block encryption）以一个完整的扇区为单位（通常为 512 个字节）进行加密处理，P1619.2 为此定了若干算法：</p>
+<ul>
+<li>XCB：<a target="_blank" rel="noopener" href="https://eprint.iacr.org/2004/278.pdf">the Extended Codebook (XCB) Mode of Operation</a></li>
+<li>EME2：Encrypt Mix Encrypt V2 Advanced Encryption Standard</li>
+</ul>
+<h3 id="3-P1619-3"><a href="#3-P1619-3" class="headerlink" title="3. P1619.3"></a>3. P1619.3</h3><p>定义了一套密钥管理的基础架构，包括体系结构、命名空间、操作、消息传递和传输。</p>
+<h2 id="五、产品实现"><a href="#五、产品实现" class="headerlink" title="五、产品实现"></a>五、产品实现</h2><h3 id="1-Mac-OS-X-Lion’s-FileVault-2"><a href="#1-Mac-OS-X-Lion’s-FileVault-2" class="headerlink" title="1. Mac OS X Lion’s FileVault 2"></a>1. Mac OS X Lion’s FileVault 2</h3><p>Apple 开发的 FileVault 基于 XTS-AES 算法实现，是一个磁盘级加密产品（不是文件级加密），满足如下技术要求：</p>
 <ul>
 <li>密⽂文应该与明⽂⼤小相同，从⽽不改变数据的布局</li>
 <li>数据分组可单独访问，且相互独⽴</li>
@@ -332,11 +339,14 @@
 <li>不同位置 相同明⽂ &#x3D;&#x3D;》密⽂不不同</li>
 <li>符合标准的加解密设备可以相互通⽤</li>
 </ul>
-<p>Apple安全白皮书中有一些关于 AES-XTS 的描述，例如：</p>
-<ol>
-<li>Mac 电脑会提供文件保险箱，这是一项内建加密功能，用于保护所有静态数据安全。文件保险箱使用 AES-XTS 数据加密算法保护内部和可移除储存设备上的完整宗卷。<br>文件保险箱 FileValut 构建的密钥层级需要满足四个目标，其中之一就是：<strong>让用户无需重新加密整个宗卷即可更改其密码 （同时也会更改用于保护其文件的加密密钥）</strong>。</li>
-<li>每次在数据宗卷中创建文件时，数据保护都会创建一个新的 256 位密钥 （文件独有密钥），并将其提供给硬件 AES 引擎， 此引擎会使用该密钥在文件写入闪存时对其进行加密。<br> 采用 A9 到 A13、 S5 和 S6 的每一代硬件在 XTS 模式中使用 AES-128， 其中 256 位文件独有密钥会被拆分， 以提供一个 128 位tweak 密钥和一个 128 位 cipher 密钥。<br> 搭载 A14 和 M1 的设备上，加密模式升级为 AES-256，密钥派生算法基于 NIST Special Publication 800-108。</li>
-</ol>
+<p>Apple 安全白皮书中有一些关于 AES-XTS 的描述，例如：</p>
+<ul>
+<li>Mac 电脑会提供文件保险箱，这是一项内建加密功能，用于保护所有静态数据安全。文件保险箱使用 AES-XTS 数据加密算法保护内部和可移除储存设备上的完整宗卷。</li>
+<li>文件保险箱 FileValut 构建的密钥层级需要满足四个目标，其中之一就是：<strong>让用户无需重新加密整个宗卷即可更改其密码 （同时也会更改用于保护其文件的加密密钥）</strong>。</li>
+<li>每次在数据宗卷中创建文件时，数据保护都会创建一个新的 256 位密钥 （文件独有密钥），并将其提供给硬件 AES 引擎， 此引擎会使用该密钥在文件写入闪存时对其进行加密。</li>
+<li>采用 A9 到 A13、 S5 和 S6 的每一代硬件在 XTS 模式中使用 AES-128， 其中 256 位文件独有密钥会被拆分， 以提供一个 128 位tweak 密钥和一个 128 位 cipher 密钥。</li>
+<li>搭载 A14 和 M1 的设备上，加密模式升级为 AES-256，密钥派生算法基于 NIST Special Publication 800-108。</li>
+</ul>
 <p>根据<a target="_blank" rel="noopener" href="https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc">FileVault Drive Encryption (FVDE)</a>的描述，其AES-XTS协议的实现方式是：</p>
 <ul>
 <li>primary key（key1）：源自于 Volume Master Key (VMK)，128位</li>
@@ -344,6 +354,27 @@
 <li>tweak value：源自于磁盘扇区序号，以 512 字节为单位</li>
 </ul>
 <p>执行命令<code>diskutil coreStorage info</code>可以查看 logical volume family identifier，或者检索系统变量<code>com.apple.corestorage.lv.familyUUID</code>，这充分体现了 twaek key 的可公开性。</p>
+<h3 id="2-Windows-Vista-BitLocker"><a href="#2-Windows-Vista-BitLocker" class="headerlink" title="2. Windows Vista BitLocker"></a>2. Windows Vista BitLocker</h3><p>微软开发的 Windows Vista BitLocker 使用的 AES-CBC+Elephant diffuser 模式也采用宽块加密模式，加密粒度是一个扇区，工作原理如下：</p>
+<ol>
+<li>$K &#x3D; K_1 ｜ K_2$</li>
+<li>$PP &#x3D; P \oplus K_1$</li>
+<li>PP 经过 2 个 diffuser 算法的作用后，使用 CBC 模式进行加密。<br> 其中，每个扇区的 $IV &#x3D; E_{K_2}(e(sector))$<br> sector为扇区号，$e()$将扇区号映射为一个唯一的 16 字节的 value。</li>
+</ol>
+<p>微软已经证明了使用扩散体(diffuser)后的 CBC 比原来的 CBC 更难攻击，</p>
+<h2 id="六、技术分析"><a href="#六、技术分析" class="headerlink" title="六、技术分析"></a>六、技术分析</h2><p>做个简要的技术分析：</p>
+<ol>
+<li>tweak key 实际上是一种流密码，解密和加密的算法是同质的；而用于 AES 的主密钥的加密和解密算法是互逆的。</li>
+<li>AES-XTS 采用窄块加密模式，一个 512 字节的标准扇区将分为 32 个 AES-128 的分组。</li>
+<li>T 的初始化基于可公开的 $key_2$ 和 扇区序号 i，为文件和扇区级别的加密提供了随机数；<br> 后续每个分组的 T 密钥将基于 LFSR 的 j 阶乘法，为扇区内部的分组加密提供了随机数。<br> 通过 i 和 j 的组合使用，既提供了随机因子对抗明文攻击，又不需要额外的 IV 存储。</li>
+<li>T 密钥是基于$GF(2^{128})$的 j 阶乘法，即确保提供伪随机性，又充分利用有限域的元素空间。</li>
+<li>注意！AES-XST 的明文输入要求至少有一个完整的分组。</li>
+</ol>
+<p>还有一些遗留问题：</p>
+<h3 id="1-AES-XTS-如何加密小文件？"><a href="#1-AES-XTS-如何加密小文件？" class="headerlink" title="1. AES-XTS 如何加密小文件？"></a>1. AES-XTS 如何加密小文件？</h3><p>IEEE 1619 明确指出 AES-XTS 不支持小于一个分组的明文长度，如 AES-128-XTS 加密文件不得少于16个字节，那么小文件如何加密呢？<br>一种可能的方案是，采用类似 PKCS#7 的填充技术（文心一言的回答！），但结果是明文和密文的长度不一致，不利于磁盘管理。<br>另一种方案是，改用 ECB 工作模式，但解决明文攻击的问题如何解决呢？</p>
+<h3 id="2-如果更改-tweak-key-会发生什么？"><a href="#2-如果更改-tweak-key-会发生什么？" class="headerlink" title="2. 如果更改 tweak key 会发生什么？"></a>2. 如果更改 tweak key 会发生什么？</h3><p>tweak key 基于 XOR-ENCRYPT-XOR 模式，更改密钥时是否需要更新已存储的密文呢？<br>以下理论推演是否成立？</p>
+<blockquote>
+<p>用 T1 加密，解密时换了 T2<br>$$<br>\begin{aligned}<br>    P’’&amp;&#x3D;AES-dec(key_1,C\oplus T_2)\oplus T_2\\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus T_2) \oplus T_2 \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus T_2 \oplus T_2) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus 0) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus T_1 \oplus T_1)) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P \oplus 0)) \\<br>    &amp;&#x3D;AES-dec(key_1, AES-enc(key_1, P)) \\<br>    &amp;&#x3D;P<br>\end{aligned}<br>$$</p>
+</blockquote>
 <hr>
 <h2 id="附录：伽罗瓦域的乘法"><a href="#附录：伽罗瓦域的乘法" class="headerlink" title="附录：伽罗瓦域的乘法"></a>附录：伽罗瓦域的乘法</h2><h3 id="有限域"><a href="#有限域" class="headerlink" title="有限域"></a>有限域</h3><p>从群论的角度看，域是特殊的群，域有单位元e和逆元，而且加法和乘法上具有封闭性，即：对域中的元素进行加法或乘法运算后的结果仍然是域中的元素。</p>
 <blockquote>
@@ -373,6 +404,7 @@
 <li><a target="_blank" rel="noopener" href="http://blog.foool.net/2013/01/%E4%BC%BD%E7%BD%97%E7%93%A6%E5%9F%9F%E4%B8%8A%E7%9A%84%E4%B9%98%E6%B3%95/">伽罗瓦域上的乘法</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.bilibili.com/read/cv2922069/">另一种世界观——有限域</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/weijianlong/p/11947741.html">线性反馈移位寄存器（LFSR）</a></li>
+<li><a href="%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E5%88%86%E6%9E%90.pdf">磁盘加密模式分析</a></li>
 </ul>
 
     </div>
@@ -423,14 +455,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">202k</span>
+    <span title="站点总字数">203k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:14</span>
+    <span title="站点阅读时长">12:17</span>
   </span>
 </div>
 <div class="busuanzi-count">
