@@ -210,6 +210,7 @@ Apple 安全白皮书中有一些关于 AES-XTS 的描述，例如：
 - 采用 A9 到 A13、 S5 和 S6 的每一代硬件在 XTS 模式中使用 AES-128， 其中 256 位文件独有密钥会被拆分， 以提供一个 128 位tweak 密钥和一个 128 位 cipher 密钥。
 - 搭载 A14 和 M1 的设备上，加密模式升级为 AES-256，密钥派生算法基于 NIST Special Publication 800-108。
 
+![arch](filevault2.png)
 根据[FileVault Drive Encryption (FVDE)](https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc)的描述，其AES-XTS协议的实现方式是：
 
 - primary key（key1）：源自于 Volume Master Key (VMK)，128位
