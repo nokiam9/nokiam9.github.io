@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-count">89</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -174,6 +174,114 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/11/26/Hexo-%E6%94%AF%E6%8C%81-kaTeX-%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/11/26/Hexo-%E6%94%AF%E6%8C%81-kaTeX-%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/" class="post-title-link" itemprop="url">Hexo 支持 kaTeX 数学公式</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-11-26 16:14:55 / 修改时间：17:04:03" itemprop="dateCreated datePublished" datetime="2023-11-26T16:14:55+08:00">2023-11-26</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>419</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          Hexo博客中支持复杂数学公式的渲染，MathJax 和 KaTeX 是两个常见的渲染引擎。
+
+MathJax是一个开源JavaScript库。它支持LaTeX、MathML、AsciiMath符号，可以运行于所有流行浏览器上。MathJax使用网络字体（大部分浏览器都支持）去产生高质量的排版，使其在所有分辨率都可缩放和显示。使用MathJax显示数学公式是基于文本的，而非图片，因此可以被搜索引擎使用。
+
+MathJax 使用者多、兼容性好、但渲染速度慢；KaTeX渲染速度快，且根号无错位，但时有bug。
+
+配置方法
+_config.next.yml的配置实例：
+
+1
+2
+3
+4
+5
+6
+7
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/11/26/Hexo-%E6%94%AF%E6%8C%81-kaTeX-%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -1078,7 +1186,7 @@ mirrors.bclinux.org是同源域名，yum repolist 内部是这个域名
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-28 15:02:19" itemprop="dateModified" datetime="2023-10-28T15:02:19+08:00">2023-10-28</time>
+      <time title="修改时间：2023-11-26 16:07:26" itemprop="dateModified" datetime="2023-11-26T16:07:26+08:00">2023-11-26</time>
     </span>
 
   
@@ -1088,7 +1196,7 @@ mirrors.bclinux.org是同源域名，yum repolist 内部是这个域名
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>1.3k</span>
+      <span>1.4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -1106,132 +1214,21 @@ mirrors.bclinux.org是同源域名，yum repolist 内部是这个域名
     
     
     <div class="post-body" itemprop="articleBody">
-          密码学的目标：
-机密性、完整性、身份认证和不可否认性。
+          密码学的 CIA 目标
+ * 机密性（Confidentiality）：确保数据在存储或传输中保持秘密状态
+ * 完整性（Integrity）：保证数据在传输中不被篡改
+ * 不可否认性（Availability）：为接收者提供担保，保证消息确实来自发送者而不是来自伪装者
 
- * 机密性：确保数据在存储或传输中保持秘密状态
- * 完整性：保证数据在传输中不被篡改
- * 身份认证：对声明的系统用户进行身份验证
- * 不可否认性：为接收者提供了担保，保证消息确实来自发送者而不是来自伪装者。
+有的理论还补充了一些目标，例如：
+
+ * 身份认证（Authentication）：对声明的系统用户进行身份验证
 
 A军给B军发送了一封加密的文件，只有B军通过密码本能看懂，这体现了机密性；
 C军截获这封文件并篡改后发给B军，但是B军通过文件袋的印刷痕迹可以看出这个文件已经被篡改，这体现了完整性；
-B军通过文件的印章可以看出这是A军写的，而不是C军伪造的，体现了身份验证。
-
-$$E=mc^2$$
-
-Cipher & Encrypt
-在密
+B军通过文件的印章可以看
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2023/01/02/%E5%85%B3%E4%BA%8E%E5%AF%86%E7%A0%81%E5%AD%A6%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/12/23/%E6%B5%81%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AE%9E%E7%8E%B0-%E4%BB%A5GSM%E7%BD%91%E7%BB%9C%E7%9A%84A5%E7%AE%97%E6%B3%95%E4%B8%BA%E4%BE%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/12/23/%E6%B5%81%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AE%9E%E7%8E%B0-%E4%BB%A5GSM%E7%BD%91%E7%BB%9C%E7%9A%84A5%E7%AE%97%E6%B3%95%E4%B8%BA%E4%BE%8B/" class="post-title-link" itemprop="url">流密码算法的硬件实现-以GSM网络的A5算法为例</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-12-23 17:17:12" itemprop="dateCreated datePublished" datetime="2022-12-23T17:17:12+08:00">2022-12-23</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-23 00:02:06" itemprop="dateModified" datetime="2023-10-23T00:02:06+08:00">2023-10-23</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>15 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          1917 年, Vernam 密码体制被提出, 后来 Mauborgne 提出了改进方案, 即 “一次一密” 密码体制。
-1949 年, Shannon 证明 “一次一密” 密码体制具备完全的理论安全性，但必须满足三个条件：
-
- * 密钥流必须完全随机生成
- * 密钥长度至少与明文相同
- * 密钥不能重复使用
-
-这些限制条件在实际应用中存在很大困难，而且密钥的生成、分配和管理也是不容忽视的问题，因此科学家设计了各种流密码（Stream cipher，也称为流加密）算法来代替 “一次一密” 体制，其基本特征是：
-
- * 作为一种对称加密算法，加密和解密双方使用相同的伪随机加密数据流（pseudo
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/12/23/%E6%B5%81%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AE%9E%E7%8E%B0-%E4%BB%A5GSM%E7%BD%91%E7%BB%9C%E7%9A%84A5%E7%AE%97%E6%B3%95%E4%B8%BA%E4%BE%8B/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1285,7 +1282,7 @@ Cipher & Encrypt
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:17</span>
+    <span title="站点阅读时长">12:18</span>
   </span>
 </div>
 <div class="busuanzi-count">
