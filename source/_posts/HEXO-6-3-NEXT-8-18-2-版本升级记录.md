@@ -86,3 +86,4 @@ Hexo 默认安装了 hexo-renderer-marked 和 hexo-renderer-ejs，因此你不�
 ## 参考文献
 
 - [Hexo-5.x 与 NexT-8.x 跨版本升级](https://www.imczw.com/post/tech/hexo5-next8-updated.html)
+- [Hexo的多种Markdown渲染器对比分析](https://bugwz.com/2019/09/17/hexo-markdown-renderer/)

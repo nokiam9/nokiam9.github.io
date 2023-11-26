@@ -68,6 +68,7 @@ math:
 - [KaTeX 的中文简明语法](https://blog.csdn.net/wzk4869/article/details/126863936)
 - [MathJax 中文文档 - 官方](https://mathjax-chinese-doc.readthedocs.io/en/latest/index.html#)
 - [MathJax 语法快速指南](https://bachzart.github.io/2020/09/17/MathJax-%E8%AF%AD%E6%B3%95%E5%BF%AB%E9%80%9F%E6%8C%87%E5%8D%97/)
+- [解决mathjax公式不换行问题](https://blog.csdn.net/xm_ovo/article/details/107536132)
 
 ### 文档下载
 
