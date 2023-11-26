@@ -32,7 +32,7 @@ DES 通常使用的密钥是56位，为了增加迭代分组加密安全性，DE
 3. 完成初始化加密后，tweak value 甚至可以任意修改而不影响密文的解密，也意味着 tweak 修改后不需要重新计算并存储加密数据；
 4. 各个区块数据的加密解密互相独立（tweak key 各不相同），不存在依赖关系，加密和解密都可以完全并行化。
 
-2007年，IEEE 组织发布了[IEEE std 1619-2007](https://luca-giuzzi.unibs.it/corsi/Support/papers-cryptography/1619-2007-NIST-Submission.pdf) ，提供 XTS-AES 算法用于以数据单元（包括扇区、逻辑磁盘块等）为基础结构的存储设备中静止状态数据的加密。
+2007年，IEEE 组织发布了[IEEE std 1619-2007](https://luca-giuzzi.unibs.it/corsi/Support/papers-cryptography/1619-2007-NIST-Submission.pdf) ，提供 XTS-AES 算法用于以数据单元（包括扇区、逻辑磁盘块等）为基础结构的存储设备中静止状态数据的加密，SISWG（存储安全工作组，Security in Storage Working Group）负责维护该标准。
 
 ![total](XTS_mode_encryption.png)
 
@@ -68,27 +68,6 @@ $C = AES-enc(key_1, P \bigoplus T) \bigoplus T$
 处理逻辑为：
 $T = AES-enc(key_2, i) \bigotimes \alpha^j$
 $P = AES-dec(key_1, C \bigoplus T) \bigoplus T$
-
-#### 技术分析
-
-1. tweak key 实际上是一种流密码，解密和加密的算法是同质的；但是用于 AES 的主密钥的加密和解密算法是互逆的。
-2. XTS 是一种工作模式，首先基于 key2 和 i 完成 T 的初始化，后续对于每个明文分组，T 密钥是基于$GF(2^{128})$的 j 阶乘法。
-3. tweak key 基于 XOR-ENCRYPT-XOR 模式，更改密钥时不需要掌握原密钥，也不需要更新已存储的密文，这个特点对于磁盘级数据加密非常有价值！
-
-> 用 T1 加密，解密时换了 T2
-$$
-\begin{aligned}
-    P''&=AES-dec(key_1,C\oplus T_2)\oplus T_2\\\\
-    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus T_2) \oplus T_2 \\\\
-    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus T_2 \oplus T_2) \\\\
-    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus 0) \\\\
-    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1) \\\\
-    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1 \oplus T_1)) \\\\
-    &=AES-dec(key_1, AES-enc(key_1, P \oplus 0)) \\\\
-    &=AES-dec(key_1, AES-enc(key_1, P)) \\\\
-    &=P
-\end{aligned}
-$$
 
 ### 2. 密文窃取的处理方式
 
@@ -183,9 +162,38 @@ void XTS_EncryptSector( AES_Key &k2,       // tweak 可调整密钥
 }
 ```
 
-## 四、产品实现
+## 四、后续演进
 
-Mac OS X Lion's FileVault 2、Windows 10's BitLocker 等主流文件系统均已实现 XTS-AES 算法，并满足如下技术要求：
+### 1. P1619.1
+
+IEEE 1619 定义的 AES-XTS 仅提供机密性保护的能力，不包含完整性保护和身份认证的能力。
+AES-XTS 可能被攻击者改写数据而不表现出异常（选择密文攻击），也无法抵御流量分析和重放攻击，请参见 [Compare Blockmode CBC (with diffuser) against XTS](https://crypto.stackexchange.com/questions/5587/what-is-the-advantage-of-xts-over-cbc-mode-with-diffuser)。
+
+P1619.1 定义了若干附加身份认证的加密算法，用于支持长度扩展的存储设备，包括：
+
+- Counter mode with CBC-MAC (CCM)
+- Galois/Counter Mode (GCM)
+- Cipher Block Chaining (CBC) with HMAC-Secure Hash Algorithm
+- XTS-HMAC-Secure Hash Algorithm
+
+### 2. P1619.2
+
+AES-XTS 也被称为窄块加密算法（Narrow-block encryption），其特点是一个扇区被分成多个分组进行加密处理，例如 AES-128 就是 16 个字节，突出优势是硬件实现的效率高，但也存在某些安全隐患，例如较小的分组长度为数据修改攻击提供了便利条件。
+
+对应的，宽块加密算法（wide-block encryption）以一个完整的扇区为单位（通常为 512 个字节）进行加密处理，P1619.2 为此定了若干算法：
+
+- XCB：[the Extended Codebook (XCB) Mode of Operation](https://eprint.iacr.org/2004/278.pdf)
+- EME2：Encrypt Mix Encrypt V2 Advanced Encryption Standard
+
+### 3. P1619.3
+
+定义了一套密钥管理的基础架构，包括体系结构、命名空间、操作、消息传递和传输。
+
+## 五、产品实现
+
+### 1. Mac OS X Lion's FileVault 2
+
+Apple 开发的 FileVault 基于 XTS-AES 算法实现，是一个磁盘级加密产品（不是文件级加密），满足如下技术要求：
 
 - 密⽂文应该与明⽂⼤小相同，从⽽不改变数据的布局
 - 数据分组可单独访问，且相互独⽴
@@ -194,13 +202,13 @@ Mac OS X Lion's FileVault 2、Windows 10's BitLocker 等主流文件系统均已
 - 不同位置 相同明⽂ ==》密⽂不不同
 - 符合标准的加解密设备可以相互通⽤
 
-Apple安全白皮书中有一些关于 AES-XTS 的描述，例如：
+Apple 安全白皮书中有一些关于 AES-XTS 的描述，例如：
 
-1. Mac 电脑会提供文件保险箱，这是一项内建加密功能，用于保护所有静态数据安全。文件保险箱使用 AES-XTS 数据加密算法保护内部和可移除储存设备上的完整宗卷。
-   文件保险箱 FileValut 构建的密钥层级需要满足四个目标，其中之一就是：**让用户无需重新加密整个宗卷即可更改其密码 （同时也会更改用于保护其文件的加密密钥）**。
-2. 每次在数据宗卷中创建文件时，数据保护都会创建一个新的 256 位密钥 （文件独有密钥），并将其提供给硬件 AES 引擎， 此引擎会使用该密钥在文件写入闪存时对其进行加密。
-    采用 A9 到 A13、 S5 和 S6 的每一代硬件在 XTS 模式中使用 AES-128， 其中 256 位文件独有密钥会被拆分， 以提供一个 128 位tweak 密钥和一个 128 位 cipher 密钥。
-    搭载 A14 和 M1 的设备上，加密模式升级为 AES-256，密钥派生算法基于 NIST Special Publication 800-108。
+- Mac 电脑会提供文件保险箱，这是一项内建加密功能，用于保护所有静态数据安全。文件保险箱使用 AES-XTS 数据加密算法保护内部和可移除储存设备上的完整宗卷。
+- 文件保险箱 FileValut 构建的密钥层级需要满足四个目标，其中之一就是：**让用户无需重新加密整个宗卷即可更改其密码 （同时也会更改用于保护其文件的加密密钥）**。
+- 每次在数据宗卷中创建文件时，数据保护都会创建一个新的 256 位密钥 （文件独有密钥），并将其提供给硬件 AES 引擎， 此引擎会使用该密钥在文件写入闪存时对其进行加密。
+- 采用 A9 到 A13、 S5 和 S6 的每一代硬件在 XTS 模式中使用 AES-128， 其中 256 位文件独有密钥会被拆分， 以提供一个 128 位tweak 密钥和一个 128 位 cipher 密钥。
+- 搭载 A14 和 M1 的设备上，加密模式升级为 AES-256，密钥派生算法基于 NIST Special Publication 800-108。
 
 根据[FileVault Drive Encryption (FVDE)](https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc)的描述，其AES-XTS协议的实现方式是：
 
@@ -209,6 +217,58 @@ Apple安全白皮书中有一些关于 AES-XTS 的描述，例如：
 - tweak value：源自于磁盘扇区序号，以 512 字节为单位
 
 执行命令`diskutil coreStorage info`可以查看 logical volume family identifier，或者检索系统变量`com.apple.corestorage.lv.familyUUID`，这充分体现了 twaek key 的可公开性。
+
+### 2. Windows Vista BitLocker
+
+微软开发的 Windows Vista BitLocker 使用的 AES-CBC+Elephant diffuser 模式也采用宽块加密模式，加密粒度是一个扇区，工作原理如下：
+
+1. $K = K_1 ｜ K_2$
+2. $PP = P \oplus K_1$
+3. PP 经过 2 个 diffuser 算法的作用后，使用 CBC 模式进行加密。
+    其中，每个扇区的 $IV = E_{K_2}(e(sector))$
+    sector为扇区号，$e()$将扇区号映射为一个唯一的 16 字节的 value。
+
+微软已经证明了使用扩散体(diffuser)后的 CBC 比原来的 CBC 更难攻击，
+
+## 六、技术分析
+
+做个简要的技术分析：
+
+1. tweak key 实际上是一种流密码，解密和加密的算法是同质的；而用于 AES 的主密钥的加密和解密算法是互逆的。
+2. AES-XTS 采用窄块加密模式，一个 512 字节的标准扇区将分为 32 个 AES-128 的分组。
+3. T 的初始化基于可公开的 $key_2$ 和 扇区序号 i，为文件和扇区级别的加密提供了随机数；
+    后续每个分组的 T 密钥将基于 LFSR 的 j 阶乘法，为扇区内部的分组加密提供了随机数。
+    通过 i 和 j 的组合使用，既提供了随机因子对抗明文攻击，又不需要额外的 IV 存储。
+4. T 密钥是基于$GF(2^{128})$的 j 阶乘法，即确保提供伪随机性，又充分利用有限域的元素空间。
+5. 注意！AES-XST 的明文输入要求至少有一个完整的分组。
+
+还有一些遗留问题：
+
+### 1. AES-XTS 如何加密小文件？
+
+IEEE 1619 明确指出 AES-XTS 不支持小于一个分组的明文长度，如 AES-128-XTS 加密文件不得少于16个字节，那么小文件如何加密呢？
+一种可能的方案是，采用类似 PKCS#7 的填充技术（文心一言的回答！），但结果是明文和密文的长度不一致，不利于磁盘管理。
+另一种方案是，改用 ECB 工作模式，但解决明文攻击的问题如何解决呢？
+
+### 2. 如果更改 tweak key 会发生什么？
+
+tweak key 基于 XOR-ENCRYPT-XOR 模式，更改密钥时是否需要更新已存储的密文呢？
+以下理论推演是否成立？
+
+> 用 T1 加密，解密时换了 T2
+$$
+\begin{aligned}
+    P''&=AES-dec(key_1,C\oplus T_2)\oplus T_2\\\\
+    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus T_2) \oplus T_2 \\\\
+    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus T_2 \oplus T_2) \\\\
+    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1 \oplus 0) \\\\
+    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1) \oplus T_1) \\\\
+    &=AES-dec(key_1, AES-enc(key_1, P \oplus T_1 \oplus T_1)) \\\\
+    &=AES-dec(key_1, AES-enc(key_1, P \oplus 0)) \\\\
+    &=AES-dec(key_1, AES-enc(key_1, P)) \\\\
+    &=P
+\end{aligned}
+$$
 
 ---
 
@@ -267,3 +327,4 @@ c&0x80 可以判断数c 最高位是否为1，如果为1 则异或0x1d。
 - [伽罗瓦域上的乘法](http://blog.foool.net/2013/01/伽罗瓦域上的乘法/)
 - [另一种世界观——有限域](https://www.bilibili.com/read/cv2922069/)
 - [线性反馈移位寄存器（LFSR）](https://www.cnblogs.com/weijianlong/p/11947741.html)
+- [磁盘加密模式分析](磁盘加密模式分析.pdf)
