@@ -223,7 +223,7 @@ Apple 安全白皮书中有一些关于 AES-XTS 的描述，例如：
 
 微软开发的 Windows Vista BitLocker 使用的 AES-CBC+Elephant diffuser 模式也采用宽块加密模式，加密粒度是一个扇区，工作原理如下：
 
-1. $K = K_1 ｜ K_2$
+1. $K = K_1 \| K_2$
 2. $PP = P \oplus K_1$
 3. PP 经过 2 个 diffuser 算法的作用后，使用 CBC 模式进行加密。
     其中，每个扇区的 $IV = E_{K_2}(e(sector))$
