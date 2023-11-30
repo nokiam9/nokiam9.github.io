@@ -19,22 +19,27 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="一、基本概念 移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证，判明和确认通信双方真实身">
+    <meta name="description" content="先给个总体演进图。    一、基本概念 移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证">
 <meta property="og:type" content="article">
 <meta property="og:title" content="移动通信网的鉴权认证技术">
 <meta property="og:url" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="一、基本概念 移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证，判明和确认通信双方真实身">
+<meta property="og:description" content="先给个总体演进图。    一、基本概念 移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/vs.png">
 <meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/GSM-arch.jpg">
 <meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/GSM.jpeg">
 <meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/comp128-struct.jpg">
-<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/vs.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/3G-1.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/network.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/usim.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/eap.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/6g.jpg">
 <meta property="article:published_time" content="2023-04-16T09:05:41.000Z">
-<meta property="article:modified_time" content="2023-10-17T18:10:12.294Z">
+<meta property="article:modified_time" content="2023-11-27T15:24:23.144Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/GSM-arch.jpg">
+<meta name="twitter:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/vs.png">
 
 
 <link rel="canonical" href="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/">
@@ -143,7 +148,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-text">一、基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81GSM-%E7%9A%84-%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">二、GSM 的 鉴权流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%89%E5%85%83%E7%BB%84%E8%AE%A4%E8%AF%81%E5%90%91%E9%87%8F%EF%BC%88RAND%E3%80%81XRES%E3%80%81Kc%EF%BC%89"><span class="nav-text">1. 三元组认证向量（RAND、XRES、Kc）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-COMP128-1-%E7%AE%97%E6%B3%95%E5%92%8C%E5%85%8B%E9%9A%86%E5%8D%A1%E9%97%AE%E9%A2%98"><span class="nav-text">2. COMP128-1 算法和克隆卡问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8D%95%E5%90%91%E9%89%B4%E6%9D%83%E5%92%8C%E4%BC%AA%E5%9F%BA%E7%AB%99%E9%97%AE%E9%A2%98"><span class="nav-text">3. 单向鉴权和伪基站问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81CDMA-%E9%87%87%E7%94%A8%E7%9A%84-%E7%AE%97%E6%B3%95"><span class="nav-text">三、CDMA 采用的 算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3G-%E7%9A%84%E7%AE%97%E6%B3%95"><span class="nav-text">3G 的算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4G-%E7%9A%84%E7%AE%97%E6%B3%95"><span class="nav-text">4G 的算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5G-%E7%9A%84%E7%AE%97%E6%B3%95"><span class="nav-text">5G 的算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9ACOMP128-%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><span class="nav-text">附录一：COMP128 算法实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-text">一、基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81GSM-%E7%9A%84-%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">二、GSM 的 鉴权流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%89%E5%85%83%E7%BB%84%E8%AE%A4%E8%AF%81%E5%90%91%E9%87%8F%EF%BC%88RAND%E3%80%81XRES%E3%80%81Kc%EF%BC%89"><span class="nav-text">1. 三元组认证向量（RAND、XRES、Kc）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-COMP128-1-%E7%AE%97%E6%B3%95%E5%92%8C%E5%85%8B%E9%9A%86%E5%8D%A1%E9%97%AE%E9%A2%98"><span class="nav-text">2. COMP128-1 算法和克隆卡问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8D%95%E5%90%91%E9%89%B4%E6%9D%83%E5%92%8C%E4%BC%AA%E5%9F%BA%E7%AB%99%E9%97%AE%E9%A2%98"><span class="nav-text">3. 单向鉴权和伪基站问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81CDMA-%E7%9A%84%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">三、CDMA 的鉴权流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%813G%EF%BC%88UTMS%EF%BC%89%E7%9A%84%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">四、3G（UTMS）的鉴权流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BA%94%E5%85%83%E7%BB%84%E8%AE%A4%E8%AF%81%E5%90%91%E9%87%8F%EF%BC%88RAND-XRES-CK-IK-AUTN%EF%BC%89"><span class="nav-text">1. 五元组认证向量（RAND, XRES, CK, IK, AUTN）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-MILENAGE-%E7%AE%97%E6%B3%95%E7%B0%87"><span class="nav-text">2. MILENAGE 算法簇</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%814G-%E7%9A%84%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">五、4G 的鉴权流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%815G-%E7%9A%84%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">六、5G 的鉴权流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81-%E6%80%BB%E7%BB%93"><span class="nav-text">七、 总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9ACOMP128-%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><span class="nav-text">附录一：COMP128 算法实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -156,7 +161,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">88</span>
+          <span class="site-state-item-count">89</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -230,7 +235,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-18 02:10:12" itemprop="dateModified" datetime="2023-10-18T02:10:12+08:00">2023-10-18</time>
+      <time title="修改时间：2023-11-27 23:24:23" itemprop="dateModified" datetime="2023-11-27T23:24:23+08:00">2023-11-27</time>
     </span>
 
   
@@ -247,14 +252,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.3k</span>
+      <span>4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>8 分钟</span>
+      <span>15 分钟</span>
     </span>
 </div>
 
@@ -264,7 +269,9 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="一、基本概念"><a href="#一、基本概念" class="headerlink" title="一、基本概念"></a>一、基本概念</h2><p>移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证，判明和确认通信双方真实身份。</p>
+    <div class="post-body" itemprop="articleBody"><p>先给个总体演进图。</p>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/vs.png" alt="VS"></p>
+<h2 id="一、基本概念"><a href="#一、基本概念" class="headerlink" title="一、基本概念"></a>一、基本概念</h2><p>移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证，判明和确认通信双方真实身份。</p>
 <p>移动通信网的鉴权认证过程采用的是古老的“Challenge - Response”（挑战 - 响应）的机制，即认证方向被认证方发送一个“挑战”（一般是一个随机数），被认证方基于双方共有密钥，以及挑战中所包含的信息计算一个“响应”。显然，只有拥有密钥的参与方才能正确计算出这个响应。</p>
 <blockquote>
 <p>一般情况下，认证可基于被认证方拥有一个独特的、不可复制的构件；或者双方都知道的一个秘密；又或者被认证方的某种唯一特征。<br>除第一代模拟通信外，从2G开始的移动通信网络的认证综合了前两种方式：一个共同的秘密（密钥）和被认证方一个独特的构件（SIM&#x2F;USIM卡）。</p>
@@ -302,12 +309,62 @@
 <li>伪基站设备把网络下发的 RAND 转给受害者移动终端，并把终端返回的 SRES 转给网络，这就完成了鉴权认证流程</li>
 </ul>
 <p>理论上说，如果伪基站接入了运营商网络，可以解析信令数据并通过 A5 算法解密话音数据，从而实现主叫通话的窃听功能（此时无法做被叫，因为终端未在公众通信网络注册），但由于这些功能实现较为复杂，实际上典型的犯罪应用是短信欺诈，即伪装成任意号码（例如95588、95533、10086等银行或通信运营商的客服号码）下发垃圾短信，或者伪造短信验证码。</p>
-<h2 id="三、CDMA-采用的-算法"><a href="#三、CDMA-采用的-算法" class="headerlink" title="三、CDMA 采用的 算法"></a>三、CDMA 采用的 算法</h2><p>CDMA 系统的鉴权流程在 IS-41 MAP 中被详细定义。<br>CDMA 系统中用于移动台鉴权的密码分为两级，第一级为移动台的密钥 A_Key，第二级为共享加密数据(SSD，shared secret data)。</p>
+<h2 id="三、CDMA-的鉴权流程"><a href="#三、CDMA-的鉴权流程" class="headerlink" title="三、CDMA 的鉴权流程"></a>三、CDMA 的鉴权流程</h2><p>CDMA 系统的鉴权流程在 IS-41 MAP 中被详细定义。<br>CDMA 系统中用于移动台鉴权的密码分为两级，第一级为移动台的密钥 A_Key，第二级为共享加密数据(SSD，shared secret data)。</p>
 <ul>
 <li>密钥 A_Key是高级密码，长度为 64 bit，由运营商分配，它和 IMSI 一同被写入移动终端永久性存储器中。<br>  同时，运营商核心网存储该用户的 IMSI 和对应的 A_Key。该密钥是永久性的，不在网络和空中信道上传播。</li>
 <li>SSD 是低级密码，长为 128 bit(分为 SSD_A 为 64 bit 和 SSD_B 为 64 bit)，它由A_Key 运算产生，存在于移动台、鉴权中心和拜访者位置寄存器。<br>  在鉴权过程中，核心网使用RAND 和 SSD_A 计算出期望的响应 AUTHx，倘若移动终端计算的 AUTHx(用 RAND 和 SSD_A计算所得)和核心网计算的 AUTHx 相同，则鉴权成功，攻击者因没有正确有效的 SSD 值，无法计算得到核心网所期望的 AUTHx 值导致鉴权 失败]。</li>
 </ul>
-<h2 id="3G-的算法"><a href="#3G-的算法" class="headerlink" title="3G 的算法"></a>3G 的算法</h2><h2 id="4G-的算法"><a href="#4G-的算法" class="headerlink" title="4G 的算法"></a>4G 的算法</h2><h2 id="5G-的算法"><a href="#5G-的算法" class="headerlink" title="5G 的算法"></a>5G 的算法</h2><p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/vs.png" alt="VS"></p>
+<h2 id="四、3G（UTMS）的鉴权流程"><a href="#四、3G（UTMS）的鉴权流程" class="headerlink" title="四、3G（UTMS）的鉴权流程"></a>四、3G（UTMS）的鉴权流程</h2><p>2000年，ITU 制定 3G 空口传输标准制式的时候，针对2G智能卡及网络的破解攻击已经存在。因此，在 3G 网络认证标准制定时，采用了两项关键技术：一是建立“用户+网络”的<strong>双向认证机制</strong>，二是将智能卡升级为USIM卡（Universal Subscriber Identity Module，全球用户识别卡），并选用更加安全的认证算法。</p>
+<blockquote>
+<p>CMCC是个特例！因为政府只给了 TD-SCDMA 牌照，巨大的市场压力下提出“不换号、不换卡”的业务策略，直到 4G 时代才将 SIM 卡换成 USIM 卡。</p>
+</blockquote>
+<h3 id="1-五元组认证向量（RAND-XRES-CK-IK-AUTN）"><a href="#1-五元组认证向量（RAND-XRES-CK-IK-AUTN）" class="headerlink" title="1. 五元组认证向量（RAND, XRES, CK, IK, AUTN）"></a>1. 五元组认证向量（RAND, XRES, CK, IK, AUTN）</h3><p>3G 标准的鉴权流程与 GSM 基本相同，关键是用户认证向量发生变化。</p>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/3G-1.jpg" alt="1"></p>
+<ol>
+<li>在第三步中，网络侧发送<code>(RAND，AUTN)</code>。不仅有用于挑战的随机数 RAND，还增加了 AUTN（Authentication Token）参数，使得 USIM 可以鉴别网络的真伪，防止接入伪基站<ul>
+<li>GSM 中的长期密钥Ki，3G 标准改名为 K，GSM AKA 也改为 UMTS AKA</li>
+<li>AUTN 通过终端与归属网络之间的共享密钥K，以及一些其他输入参数计算得出</li>
+</ul>
+</li>
+<li>在第四步中，如果 AUTN 验证通过，USIM 基于长期密钥 K 计算形成<code>(XRES，CK，IK)</code>。<ul>
+<li>XRES：挑战的响应值，第五步将此上报给网络侧，实现网络对用户的认证，</li>
+<li>CK：机密性保护密钥，与GSM的 Kc 对应</li>
+<li>IK：完整性保护密钥，3G 标准新增</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-MILENAGE-算法簇"><a href="#2-MILENAGE-算法簇" class="headerlink" title="2. MILENAGE 算法簇"></a>2. MILENAGE 算法簇</h3><p>3GPP 使用代号为$f1$ - $f5$ 的5个算法来产生认证向量，但允许运营商自行决定采用何种具体算法，因为这些算法应用于 USIM 和 AUC 之间，不涉及到运营商之间的互操作。<br>3GPP 推荐使用基于 AES 的 MILENAGE 算法簇，加密分组和密钥长度都是128比特，</p>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/network.png" alt="N"></p>
+<ul>
+<li>SQN：48bit序列号，通过序列号确保每个认证向量不会被重放；</li>
+<li>AK：48bit用于隐藏序列号的临时密钥，基于K和RAND生成；</li>
+<li>MAC：64bit，用于构成AUTN的主要变量，由于包含了K的计算，可用于作为网络认证；</li>
+<li>AMF：Authentication Management Field，共16bit，未标准化。在4G的时候，最高位被用于区分AMF所在的认证向量是4G的认证向量还是3G的认证向量，因为4G和3G可能会共用HSS&#x2F;AuC。</li>
+</ul>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/usim.png" alt="N"></p>
+<ul>
+<li>$f1(SQN, AFM, K) \Rightarrow MAC$</li>
+<li>$f2(K，RAND) \Rightarrow XRES$</li>
+<li>$f3(K, RAND) \Rightarrow CK$</li>
+<li>$f4(K, RAND) \Rightarrow IK$</li>
+<li>$f5(K, RAND) \Rightarrow AK$</li>
+<li>$AUTN &#x3D; SQN \oplus AK || MAC || AMF$</li>
+</ul>
+<p>理论上来说，在3G认证过程实施之后就不会再出现伪基站了，但也有一些例外情况，如为了方便2G存量用户的使用，3G网络在推荐使用USIM卡接入的基础上、同时也允许SIM卡直接认证后接入；因此，对于使用SIM卡接入网络的用户还是容易受到2G伪基站的攻击。<br>另外，3G认证协议标准化不久，就发现易受到重定向攻击 (redirection attack) ，2017年的黑帽大会上有针对4G网络攻击案例被披露.</p>
+<h2 id="五、4G-的鉴权流程"><a href="#五、4G-的鉴权流程" class="headerlink" title="五、4G 的鉴权流程"></a>五、4G 的鉴权流程</h2><p>4G 基本沿用了3G认证的协议流程和认证算法，只在卡的兼容性和后续密钥的衍生方面有少量的修改，称为 EPS-AKA，主要改进包括：</p>
+<ol>
+<li>LTE 仅允许 USIM 接入，不允许 SIM 接入，意味着双向认证和信令的完整性保护是必选的。<br>但在少量特殊的情况下，例如终端被叫因为不支持 VoLTE 而被切换到 2G，或者 4G 过载向 2G 进行切换时，可能仍然存在伪基站的问题，2017 年的黑帽大会上就曝出了一个“呼叫劫持”漏洞。</li>
+<li>为了支持 WLAN 的接入方式，提供了扩展的 EAP-AKA 和 EAP-AKA’ 认证。<br>EAP-AKA 是将 AKA 认证过程使用 EAP 协议进行封装，其核心参数仍然是AKA认证向量，参与认证的网元有UE、AC、AAA Server、HSS。<br><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/eap.jpg" alt="1"></li>
+</ol>
+<h2 id="六、5G-的鉴权流程"><a href="#六、5G-的鉴权流程" class="headerlink" title="六、5G 的鉴权流程"></a>六、5G 的鉴权流程</h2><p>5G 继承了 AKA 作为网络接入的认证方式，重点考虑认证体系的扩展，主要改进包括：</p>
+<ol>
+<li>增强了归属网络对认证的控制。<br>5G-AKA 对认证向量进行一次单向变换，拜访地运营商仅能获取漫游用户经过变换之后的认证向量，并将漫游用户反馈的认证结果发送给归属地。<br><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/6g.jpg" alt="6"></li>
+<li>统一的认证框架更好支持 WLAN 等非蜂窝通信网络。<br> 一方面，5G 无线网接入可以采用 EAP-AKA’ 认证方式，EAP-AKA’认证方式提升到了和 5G-AKA 并列的位置；另一方面，EAP-AKA’ 认证和 5G-AKA 认证在网络架构上使用了同样的网元，意味着5G的认证网元在标准上必须同时支持这两种认证方式。</li>
+</ol>
+<h2 id="七、-总结"><a href="#七、-总结" class="headerlink" title="七、 总结"></a>七、 总结</h2><p>通信网络的认证协议，基于“挑战-响应”的AKA协议是一条贯穿始终的线索。但从2G到5G，AKA也一直在演进以适应形势的变化。所谓形势，主要是新的威胁的出现，或一些预期的安全风险逐渐变成现实。毕竟，算力在不断强大，而网络越来越复杂。AKA的演进，在AKA的前缀上表现出来：在2G的时候，AKA就叫AKA；在3G的时候，应对伪基站风险，增加了双向认证，解决了用户对网络的信任问题，3G的AKA被称为UMTS AKA；在4G的时候，Authentication部分没有变化，但Key Agreement发生了变化，针对无线网络、核心网络，衍生出不同的密钥，解决了无线网和核心网的互信问题，4G的AKA被称为EPS AKA；5G的AKA增强了归属网络的控制，解决归属网络和拜访网络的互信问题，并被称为5G AKA。</p>
+<p>相对来说，算法变动倒是相对小些，在2G被证明不安全的COMP128在3G之后就被可以以AES为核心的MILENAGE替代，目前这个部分仍然被认为是安全的。</p>
+<p>在AKA这条主脉络之外，5G作为一个“野心勃勃”的网络，在认证上也体现出与以往几代不同之处，如EAP。在4G的时候可以作为WLAN接入的认证方式，但并非特别重要。在5G中，EAP还承载了为外部数据网络提供认证服务、为垂直行业应用提供认证服务的职能，充分体现了5G希望超越“人与手机”的单一形态，从设计上就契合物联网、工业互联网等形态的需求。</p>
+<hr>
 <h2 id="附录一：COMP128-算法实现"><a href="#附录一：COMP128-算法实现" class="headerlink" title="附录一：COMP128 算法实现"></a>附录一：COMP128 算法实现</h2><p>COMP128 - Details</p>
 <ol>
 <li>x[16-31] &#x3D; RAND</li>
@@ -323,8 +380,10 @@
 <li><a target="_blank" rel="noopener" href="https://www.secrss.com/articles/36563">移动通信网中的密码算法演进 (二)：完整性保护</a></li>
 <li><a target="_blank" rel="noopener" href="https://github.com/osmocom/libosmocore/blob/master/src/gsm/comp128.c">COMP128算法源码 - Github</a></li>
 <li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/528866024">GSM SIM卡算法COMP128生日攻击原理 - 知乎</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_31985307/article/details/115265685">3GPP USIM milenage 算法代码</a></li>
 </ul>
 <h3 id="文档下载"><a href="#文档下载" class="headerlink" title="文档下载"></a>文档下载</h3><ul>
+<li><a href="5G%E7%BD%91%E7%BB%9C%E7%9A%84%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB---%E9%BD%90%E9%B9%8F%E6%99%8F.pdf">5G网络的认证体系—齐鹏晏</a></li>
 <li><a href="%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E7%BB%BC%E8%BF%B0_%E8%83%A1%E9%91%AB%E9%91%AB.pdf">移动通信网鉴权认证综述 - 胡鑫鑫</a></li>
 <li><a href="chinois.pdf">COMP128算法分析中关键问题研究 - 汪涛</a></li>
 <li><a href="comp128-a-birthday-surprise-rev.pdf">COMP128: A Birthday Surprise - Stuart Wray</a></li>
@@ -381,14 +440,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">203k</span>
+    <span title="站点总字数">205k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:17</span>
+    <span title="站点阅读时长">12:25</span>
   </span>
 </div>
 <div class="busuanzi-count">
