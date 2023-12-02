@@ -280,3 +280,4 @@ Dropbox 公司曾公开分享过自己对用户账号的密码加密的策略，
 - [Argon2 的技术白皮书 - 英文](https://github.com/P-H-C/phc-winner-argon2/blob/master/argon2-specs.pdf)
 - [Argon2 的参考 C 实现 - Github](https://github.com/p-h-c/phc-winner-argon2)
 - [什么是彩虹表 Rainbow Table](https://www.11meigui.com/2020/rainbow-table.html)
+- [KDF是怎么工作的？- 英文加速](https://www.comparitech.com/blog/information-security/key-derivation-function-kdf/)

@@ -218,6 +218,8 @@ Apple 安全白皮书中有一些关于 AES-XTS 的描述，例如：
 
 执行命令`diskutil coreStorage info`可以查看 logical volume family identifier，或者检索系统变量`com.apple.corestorage.lv.familyUUID`，这充分体现了 twaek key 的可公开性。
 
+> 国内某公司提供了完整的技术方案，参见[FileVault2加密分区的解密技术](FileVault2加密分区离线解密技术及其取证应用_蓝朝祥.pdf)。
+
 ### 2. Windows Vista BitLocker
 
 微软开发的 Windows Vista BitLocker 采用的 AES-CBC+Elephant diffuser 是一种宽块加密模式，加密粒度是一个扇区，工作原理如下：
@@ -304,16 +306,18 @@ c&0x80 可以判断数c 最高位是否为1，如果为1 则异或0x1d。
 
 ## 参考文献
 
-- [系列 - 写给开发人员的实用密码学](https://thiscute.world/posts/practical-cryptography-basics-1/)
 - [XTS-AES模式主要是解决什么问题，是怎样解决的?](https://www.zhihu.com/question/26452995)
 - [XEX - Wiki](https://en.wikipedia.org/wiki/Xor%E2%80%93encrypt%E2%80%93xor)
-- [A Construction of a Cipher from a Single Pseudorandom Permutation](https://link.springer.com/content/pdf/10.1007/s001459900025)
 - [FileVault Drive Encryption (FVDE)](https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc)
 - [XTS-AES 参考代码实现 - Github](https://github.com/heisencoder/XTS-AES)
 - [OS X Disk Util Manual Basic](https://zhuanlan.zhihu.com/p/20279484)
-- [AES with XTS mode example - IBM](https://www.ibm.com/docs/en/linux-on-systems?topic=examples-aes-xts-mode-example)
-- [伽罗瓦域上的乘法](http://blog.foool.net/2013/01/伽罗瓦域上的乘法/)
-- [另一种世界观——有限域](https://www.bilibili.com/read/cv2922069/)
 - [线性反馈移位寄存器（LFSR）](https://www.cnblogs.com/weijianlong/p/11947741.html)
+- [FileVault2加密分区离线解密技术及其取证应用_蓝朝祥](FileVault2加密分区离线解密技术及其取证应用_蓝朝祥.pdf)
+
+### 理论研究
+
+- [A Construction of a Cipher from a Single Pseudorandom Permutation](https://link.springer.com/content/pdf/10.1007/s001459900025)
 - [磁盘加密模式分析](磁盘加密模式分析.pdf)
 - [Tweaking Tweakable AES XTS Mode](https://crossbowerbt.github.io/xts_mode_tweaking.html)
+- [伽罗瓦域上的乘法](http://blog.foool.net/2013/01/伽罗瓦域上的乘法/)
+- [另一种世界观——有限域](https://www.bilibili.com/read/cv2922069/)
