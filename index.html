@@ -211,9 +211,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-12-02 17:29:03 / 修改时间：21:26:47" itemprop="dateCreated datePublished" datetime="2023-12-02T17:29:03+08:00">2023-12-02</time>
+      <time title="创建时间：2023-12-02 17:29:03" itemprop="dateCreated datePublished" datetime="2023-12-02T17:29:03+08:00">2023-12-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-03 18:06:12" itemprop="dateModified" datetime="2023-12-03T18:06:12+08:00">2023-12-03</time>
     </span>
 
   
@@ -223,14 +229,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>966</span>
+      <span>1.8k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
+      <span>7 分钟</span>
     </span>
 </div>
 
@@ -241,10 +247,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          加密技术研究的核心是机密性保护，历史上曾经将完整性保护（即在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但现代的研究已经确立信息安全的“CIA原理（Confidentiality、Integrity、Availability）”，普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标。
+          一、背景
+研究分组密码工作模式的核心是机密性保护（Confidentiality），历史上曾经将完整性保护（Integrity，例如在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但在发现兼顾两个设计目标的难度之后，密码学社区已经普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标，并开始研究专门的认证加密模式（AE，Authenticated Encryption）。
 
-三、认证加密模式 - Authenticated Encryption
-ECB，CBC，OFB，CFB，CTR 和 XTS 模式仅仅提供了机密性；为了保证加密信息没有被意外修改或恶意篡改，需要采用分离的消息验证码，例如CBC-MAC。密码学社群认识到了对专用的保证完整性的方法的需求，
+在密码学中，消息验证码（MAC，Message Authentication Code，也称为标签Tag）是用于验证消息的一小段信息。换句话说，用于确认消息来自指定的发送者（其真实性）并且没有被篡改
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/#more" rel="contents">
@@ -1261,14 +1267,14 @@ mirrors.bclinux.org是同源域名，yum repolist 内部是这个域名
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">202k</span>
+    <span title="站点总字数">203k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:14</span>
+    <span title="站点阅读时长">12:18</span>
   </span>
 </div>
 <div class="busuanzi-count">

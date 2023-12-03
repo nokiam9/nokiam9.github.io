@@ -19,16 +19,17 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="加密技术研究的核心是机密性保护，历史上曾经将完整性保护（即在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但现代的研究已经确立信息安全的“CIA原理（Confidentiality、Integrity、Availability）”，普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标。  三、认证加密模式 - Authenticated Encryption ECB，CB">
+    <meta name="description" content="一、背景 研究分组密码工作模式的核心是机密性保护（Confidentiality），历史上曾经将完整性保护（Integrity，例如在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但在发现兼顾两个设计目标的难度之后，密码学社区已经普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标，并开始研究专门的认证加密模式（AE，Authenticated Encryption）。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GCM（Galois&#x2F;Counter Mode）认证加密模式">
 <meta property="og:url" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="加密技术研究的核心是机密性保护，历史上曾经将完整性保护（即在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但现代的研究已经确立信息安全的“CIA原理（Confidentiality、Integrity、Availability）”，普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标。  三、认证加密模式 - Authenticated Encryption ECB，CB">
+<meta property="og:description" content="一、背景 研究分组密码工作模式的核心是机密性保护（Confidentiality），历史上曾经将完整性保护（Integrity，例如在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但在发现兼顾两个设计目标的难度之后，密码学社区已经普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标，并开始研究专门的认证加密模式（AE，Authenticated Encryption）。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/GCM.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/arch.png">
 <meta property="article:published_time" content="2023-12-02T09:29:03.000Z">
-<meta property="article:modified_time" content="2023-12-02T13:26:47.000Z">
+<meta property="article:modified_time" content="2023-12-03T10:06:12.070Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/GCM.png">
@@ -140,7 +141,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F-Authenticated-Encryption"><span class="nav-text">三、认证加密模式 - Authenticated Encryption</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-GCM-Galois-Counter-Mode%EF%BC%8C%E5%88%86%E7%BB%84%E6%A8%A1%E5%BC%8F%EF%BC%89"><span class="nav-text">1. GCM (Galois Counter Mode，分组模式）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E8%83%8C%E6%99%AF"><span class="nav-text">一、背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="nav-text">二、基本流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%A0%B8%E5%BF%83%E7%AE%97%E6%B3%95"><span class="nav-text">三、核心算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9C%89%E9%99%90%E5%9F%9F%E4%B9%98%E6%B3%95%E8%BF%90%E7%AE%97-Z-X-otimes-Y"><span class="nav-text">1. 有限域乘法运算 $Z&#x3D;X \otimes Y$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%B8%A6%E5%AF%86%E9%92%A5%E7%9A%84%E5%93%88%E5%B8%8C%E5%80%BC%E8%AE%A1%E7%AE%97-Y-GHASH-H-X"><span class="nav-text">2. 带密钥的哈希值计算 $Y&#x3D;GHASH_H(X)$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%AE%A1%E6%95%B0%E5%99%A8%E6%93%8D%E4%BD%9C-Y-GCTR-K-ICB-X"><span class="nav-text">3. 计数器操作 $Y&#x3D;GCTR_K(ICB,X)$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95-C-T-GCM-AE-K-IV-P-A"><span class="nav-text">4. 认证加密算法 $(C,T)&#x3D;GCM-AE_K(IV,P,A)$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%AE%A4%E8%AF%81%E8%A7%A3%E5%AF%86%E7%AE%97%E6%B3%95-P-GCM-AD-K-IV-C-A%EF%BC%8CT"><span class="nav-text">5. 认证解密算法 $P&#x3D;GCM-AD_K(IV,C,A，T)$</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">四、技术分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E5%85%A8%E6%80%A7%E8%A6%81%E6%B1%82"><span class="nav-text">1. 安全性要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9F"><span class="nav-text">2. 硬件加速</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -219,9 +220,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2023-12-02 17:29:03 / 修改时间：21:26:47" itemprop="dateCreated datePublished" datetime="2023-12-02T17:29:03+08:00">2023-12-02</time>
+      <time title="创建时间：2023-12-02 17:29:03" itemprop="dateCreated datePublished" datetime="2023-12-02T17:29:03+08:00">2023-12-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-03 18:06:12" itemprop="dateModified" datetime="2023-12-03T18:06:12+08:00">2023-12-03</time>
     </span>
 
   
@@ -238,14 +245,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>966</span>
+      <span>1.8k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
+      <span>7 分钟</span>
     </span>
 </div>
 
@@ -255,20 +262,67 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>加密技术研究的核心是<strong>机密性保护</strong>，历史上曾经将<strong>完整性保护</strong>（即在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但现代的研究已经确立信息安全的“<strong>CIA原理（Confidentiality、Integrity、Availability）</strong>”，普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标。</p>
-<h2 id="三、认证加密模式-Authenticated-Encryption"><a href="#三、认证加密模式-Authenticated-Encryption" class="headerlink" title="三、认证加密模式 - Authenticated Encryption"></a>三、认证加密模式 - Authenticated Encryption</h2><p>ECB，CBC，OFB，CFB，CTR 和 XTS 模式仅仅提供了机密性；为了保证加密信息没有被意外修改或恶意篡改，需要采用分离的消息验证码，例如CBC-MAC。密码学社群认识到了对专用的保证完整性的方法的需求，NIST 因此提出了 HMAC，CMAC 和 GMAC。HMAC 在2002年通过了认证，CMAC 在2005年通过，GMAC 则在2007年被标准化。</p>
-<blockquote>
-<p>HMAC 基于单向散列函数实现，可以检查消息的完整性，但<strong>无法确保来源的可靠性</strong><br>CMAC 基于分组密码实现，基于共享密钥派生出两个中间密钥，并进行两次哈希计算得到<br>GMAC 基于伽罗华域乘法等算法实现，可以看做对称加密算法和消息认证码的结合</p>
-</blockquote>
-<p>在发现将认证模式与加密模式联合起来的难度之后，密码学社区开始研究结合了加密和认证的单一模式，这种模式被称为认证加密模式（AE，Authenticated Encryption），或称为authenc。AE模式的例子包括CCM，GCM，CWC，EAX，IAPM 和 OCB。</p>
-<h3 id="1-GCM-Galois-Counter-Mode，分组模式）"><a href="#1-GCM-Galois-Counter-Mode，分组模式）" class="headerlink" title="1. GCM (Galois Counter Mode，分组模式）"></a>1. GCM (Galois Counter Mode，分组模式）</h3><p><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/GCM.png" alt="GCM"></p>
-<p>GCM (Galois&#x2F;Counter) 模式在 CTR 模式的基础上，添加了消息认证的功能，而且同时还具有与 CTR 模式相同的并行计算能力。因此相比 CTR 模式，GCM 不仅速度一样快，还能额外提供对消息完整性、真实性的验证能力。</p>
-<p>在密码学中，伽罗瓦&#x2F;计数器模式( GCM ) 是对称密钥加密分组密码的一种操作模式，因其性能而被广泛采用。可以使用廉价的硬件资源实现最先进的高速通信通道的 GCM 吞吐率。 [1]该操作是一种经过身份验证的加密算法，旨在提供数据真实性（完整性）和保密性。 GCM 是为块大小为 128 位的块密码定义的。 伽罗瓦消息认证码（Galois Message Authentication Code ，GMAC ) 是 GCM 的仅认证变体，可以形成增量消息认证代码。 GCM 和 GMAC 都可以接受任意长度的初始化向量。</p>
-<p>不同的分组密码操作模式可能具有明显不同的性能和效率特性，即使使用相同的分组密码也是如此。 GCM 可以充分利用并行处理，实现 GCM 可以有效利用指令流水线或硬件流水线。相比之下，密码块链接（CBC）操作模式会导致流水线停顿，从而影响其效率和性能。</p>
-<p>与普通计数器模式一样，块按顺序编号，然后该块编号与初始化向量（Initialization Vector，IV） 组合并使用块密码E加密，通常为AES 。然后将此加密的结果与明文进行异或以产生密文。与所有计数器模式一样，这本质上是一个流密码，因此对于每个加密的流使用不同的 IV 是必不可少的。</p>
-<p>密文块被视为多项式的系数，然后在依赖于密钥的点H使用有限域算术对其进行评估。然后对结果进行加密，生成可用于验证数据完整性的身份验证标签。然后，加密文本包含 IV、密文和身份验证标签。</p>
+    <div class="post-body" itemprop="articleBody"><h2 id="一、背景"><a href="#一、背景" class="headerlink" title="一、背景"></a>一、背景</h2><p>研究分组密码工作模式的核心是<strong>机密性保护（Confidentiality）</strong>，历史上曾经将<strong>完整性保护（Integrity</strong>，例如在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但在发现兼顾两个设计目标的难度之后，密码学社区已经普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标，并开始研究专门的认证加密模式（AE，Authenticated Encryption）。</p>
+<p>在密码学中，消息验证码（MAC，Message Authentication Code，也称为标签Tag）是用于验证消息的一小段信息。换句话说，用于确认消息来自指定的发送者（其真实性）并且没有被篡改了。<br>一般情况下，消息认证码由三种算法组成：</p>
+<ul>
+<li>密钥生成算法：从密钥空间中随机均匀地选择一个密钥。</li>
+<li>签名算法：有效地返回给定密钥和消息的标签。</li>
+<li>验证算法：有效地验证给定密钥和标签的消息的真实性。 也就是说，当消息和标签没有被篡改或伪造时，返回被接受，否则返回被拒绝。</li>
+</ul>
+<p>针对消息验证码，NIST 提出了 HMAC，CMAC 和 GMAC。HMAC 在2002年通过了认证，CMAC 在2005年通过，GMAC 则在2007年被标准化。</p>
+<ul>
+<li>HMAC 基于单向散列函数实现，可以检查消息的完整性，但无法确保来源的可靠性</li>
+<li>CMAC 基于分组密码实现，基于共享密钥派生出两个中间密钥，并进行两次哈希计算得到</li>
+<li>GMAC 基于伽罗华域乘法实现，可以看做对称加密算法和消息认证码的结合</li>
+</ul>
+<h2 id="二、基本流程"><a href="#二、基本流程" class="headerlink" title="二、基本流程"></a>二、基本流程</h2><p>GCM（Galois&#x2F;Counter Mode）是一种基于对称加密算法的认证加密（Authenticated Encryption）模式，用于确保数据的机密性和完整性。GCM 结合了 CTR（Counter）模式用于加密和 GHASH（Galois Hash）用于认证，因此不仅继承了 CTR 模式优秀的并行计算能力，还能额外提供对消息完整性、真实性的验证能力，因此广泛应用于 TLS、IPsec 等安全协议中。</p>
+<p>根据<a href="nistspecialpublication800-38d.pdf">NIST SP800-38D</a>的定义，其认证加密过程分为三个阶段：</p>
+<ol>
+<li><strong>初始化阶段</strong>：<br> 根据给定的密钥（key）和初始向量（IV）生成一个初始计数器 ICB；<br> 计算计数器的初始值J0，当 IV 长度为96位时，J0 &#x3D; IV || 0^31 || 1。</li>
+<li><strong>加密阶段</strong>：<br> 使用 GCTR（Galois Counter）模式对明文进行加密，通过将计数器块（CB）与密钥（key）进行加密，然后将结果与明文异或，生成密文。<br> 计数器每次递增，直至加密整个明文。这里，CB 的初始值是 J0 的递增值（即 J0 + 1）。</li>
+<li><strong>认证阶段</strong>：<br> 首先，使用密钥（key）计算一个值H（称为GHASH_H），用于 GHASH 运算。<br> 接着，将关联数据AD 和密文一起输入到 GHASH 算法中，生成一个认证标签。</li>
+</ol>
+<p><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/GCM.png" alt="GCM"></p>
+<p>解密过程与加密过程类似，首先使用 GHASH 验证密文的认证标签。如果认证通过，再使用 GCTR 模式解密密文，还原成明文。</p>
+<h2 id="三、核心算法"><a href="#三、核心算法" class="headerlink" title="三、核心算法"></a>三、核心算法</h2><h3 id="1-有限域乘法运算-Z-X-otimes-Y"><a href="#1-有限域乘法运算-Z-X-otimes-Y" class="headerlink" title="1. 有限域乘法运算 $Z&#x3D;X \otimes Y$"></a>1. 有限域乘法运算 $Z&#x3D;X \otimes Y$</h3><p>基于有限域$GF(2^{128})$，定义本原多项式&#x3D;$x^{128}+x^7+x^2+1$。<br>处理逻辑：略。</p>
+<h3 id="2-带密钥的哈希值计算-Y-GHASH-H-X"><a href="#2-带密钥的哈希值计算-Y-GHASH-H-X" class="headerlink" title="2. 带密钥的哈希值计算 $Y&#x3D;GHASH_H(X)$"></a>2. 带密钥的哈希值计算 $Y&#x3D;GHASH_H(X)$</h3><p>先决条件：哈希算法的子密钥$H$<br>输入参数：128位比特流$X$<br>输出结果：分组$Y$<br>核心逻辑：</p>
+<ol>
+<li>$Y_0&#x3D;0^{128}$ ,就是一个128位的全零数据块</li>
+<li>$Y_i &#x3D; (Y_{i-1} \oplus X_i) \otimes H $</li>
+</ol>
+<h3 id="3-计数器操作-Y-GCTR-K-ICB-X"><a href="#3-计数器操作-Y-GCTR-K-ICB-X" class="headerlink" title="3. 计数器操作 $Y&#x3D;GCTR_K(ICB,X)$"></a>3. 计数器操作 $Y&#x3D;GCTR_K(ICB,X)$</h3><p>先决条件：底层的128位分组密码算法$CIPH$<br>输入参数：128位比特流$X$<br>输出结果：分组$Y$<br>核心逻辑：</p>
+<ol>
+<li>初始计数器块ICB（Initial Counter Block），构造方式为：96位 IV + 31位0 + 1，<br>$J_0 &#x3D; IV \parallel 0^{31} \parallel 1$</li>
+<li>计数器递增<br> $CB_1&#x3D;ICB$<br> $CB_i&#x3D;inc_{32}(CB_{i-1})$</li>
+<li>根据流密钥进行加密或解密<br> $Y_i&#x3D; X_i \oplus CIPH_k(CB_i)$</li>
+</ol>
+<h3 id="4-认证加密算法-C-T-GCM-AE-K-IV-P-A"><a href="#4-认证加密算法-C-T-GCM-AE-K-IV-P-A" class="headerlink" title="4. 认证加密算法 $(C,T)&#x3D;GCM-AE_K(IV,P,A)$"></a>4. 认证加密算法 $(C,T)&#x3D;GCM-AE_K(IV,P,A)$</h3><p>先决条件：底层的128位分组密码算法$CIPH$；密钥$K$；标签长度$t$<br>输入参数：初始化向量$IV$；明文$P$；附加认证数据$A$<br>输出结果：密文$C$；标签$T$<br>核心逻辑：</p>
+<ol>
+<li>调用 GCTR 生成密文C<br> $C &#x3D; GCTR_k(inc_{32}(J_0),P)$</li>
+<li>构造验证数据块S，关键数据是 A 和C，还有一些填充位<br> $u &#x3D; len(C) \ mod\ 128;\ v &#x3D; len(A) \ mod\ 128$<br> $S &#x3D; GHASH_H(A \parallel 0^v \parallel C \parallel 0^u \parallel [len(A)]_{64} \parallel [len(C)]_{64})$</li>
+<li>计算数据块S的哈希值，并存入tag<br> $T &#x3D; MSB_i(GCTR_k(J_0,S))$</li>
+</ol>
+<p><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/arch.png" alt="arch"></p>
+<h3 id="5-认证解密算法-P-GCM-AD-K-IV-C-A，T"><a href="#5-认证解密算法-P-GCM-AD-K-IV-C-A，T" class="headerlink" title="5. 认证解密算法 $P&#x3D;GCM-AD_K(IV,C,A，T)$"></a>5. 认证解密算法 $P&#x3D;GCM-AD_K(IV,C,A，T)$</h3><p>先决条件：底层的128位分组密码算法$CIPH$；密钥$K$；标签长度$t$<br>输入参数：初始化向量$IV$；密文$C$；附加认证数据$A$；标签$T$<br>输出结果：明文$P，或者 FAIL<br>核心逻辑：</p>
+<ol>
+<li>调用 GCTR 生成明文P<br> $P &#x3D; GCTR_k(inc_{32}(J_0),C)$</li>
+<li>构造验证数据块S，关键数据是 A 和C，还有一些填充位<br> $u &#x3D; len(C) \ mod\ 128;\ v &#x3D; len(A) \ mod\ 128$<br> $S &#x3D; GHASH_H(A \parallel 0^v \parallel C \parallel 0^u \parallel [len(A)]_{64} \parallel [len(C)]_{64})$</li>
+<li>计算数据块S的哈希值，并存入$T’$<br> $T’ &#x3D; MSB_i(GCTR_k(J_0,S))$</li>
+<li>如果$T &#x3D; T’$，验证通过返回明文P；否则返回 FAIL</li>
+</ol>
+<h2 id="四、技术分析"><a href="#四、技术分析" class="headerlink" title="四、技术分析"></a>四、技术分析</h2><h3 id="1-安全性要求"><a href="#1-安全性要求" class="headerlink" title="1. 安全性要求"></a>1. 安全性要求</h3><p>GCM 在具体的安全模型中被证明是安全的。当它与与随机排列无法区分的分组密码一起使用时，它是安全的；然而，安全性取决于为使用相同密钥执行的每个加密选择唯一的初始化向量（参见流密码攻击）。对于任何给定的密钥和初始化向量组合，GCM 仅限于加密$2^{39}−256$位纯文本 (64 GiB)。</p>
+<p>身份验证强度取决于 MAC 的长度。一般来说，标签长度 t 应该在[128，120，112，104，96]中选择。对于某些应用，t 可能是 64 或 32，但必须限制输入的长度数据和密钥的生命周期。</p>
+<p>附加身份验证数据AAD：Additional Authenticated Data。通常包含源IP，源端口，目的IP，IV等信息，AAD 是不需要加密但需要认证的数据，以明文形式与密文一起传递给接收者。</p>
+<h3 id="2-硬件加速"><a href="#2-硬件加速" class="headerlink" title="2. 硬件加速"></a>2. 硬件加速</h3><p>GCM 要求对每个加密和验证数据块（128 位）在有限域中进行一次分组密码操作和一次 128 位乘法。分组密码操作很容易流水线化或并行化；乘法运算也很容易流水线化，并且可以通过一些适度的努力进行并行化。</p>
+<p>Intel 添加了<code>PCLMULQDQ</code>指令，突出了它对 GCM 的使用。<br>2011 年，SPARC 添加了 XMULX 和 XMULXHI 指令，它们也执行 64 × 64 位无进位乘法。<br>2015 年，SPARC 添加了 XMPMUL 指令，该指令对更大的值执行 XOR 乘法，高达 2048 × 2048 位的输入值产生 4096 位的结果。</p>
 <hr>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="nistspecialpublication800-38d.pdf">NIST SP800-38D</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Galois/Counter_Mode">Galois&#x2F;Counter Mode - WiKi</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/Chahot/article/details/130407149">GCM与CCM的的规格和加解密过程</a></li>
+<li><a target="_blank" rel="noopener" href="https://const.net.cn/tool/aes/aes-gcm/">aes-gcm 在线加密工具</a></li>
+</ul>
+
     </div>
 
     
@@ -317,14 +371,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">202k</span>
+    <span title="站点总字数">203k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:14</span>
+    <span title="站点阅读时长">12:18</span>
   </span>
 </div>
 <div class="busuanzi-count">

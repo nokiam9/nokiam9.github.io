@@ -19,15 +19,15 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="密码学的 CIA 目标  * 机密性（Confidentiality）：确保数据在存储或传输中保持秘密状态  * 完整性（Integrity）：保证数据在传输中不被篡改  * 不可否认性（Availability）：为接收者提供担保，保证消息确实来自发送者而不是来自伪装者  有的理论还补充了一些目标，例如：   * 身份认证（Authentication）：对声明的系统用户进行身份验证  A军给B">
+    <meta name="description" content="现代密码学 1949年，Shannon（香农）发表《保密系统的通信理论》标志着现代密码学的真正开始（第一次质的飞跃）。 1976年，Diffie 和 Hellman 发表《密码学的新方向》，标志着公钥密码体制的诞生（第二次质的飞跃）。 1978年，Rivest、Shamir 和 Adleman 提出了 RSA 公钥密码体制。  密码学的 CIA 目标  * 机密性（Confidentiality）">
 <meta property="og:type" content="article">
 <meta property="og:title" content="关于密码学的几个基本概念">
 <meta property="og:url" content="https://nokiam9.github.io/2023/01/02/%E5%85%B3%E4%BA%8E%E5%AF%86%E7%A0%81%E5%AD%A6%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="密码学的 CIA 目标  * 机密性（Confidentiality）：确保数据在存储或传输中保持秘密状态  * 完整性（Integrity）：保证数据在传输中不被篡改  * 不可否认性（Availability）：为接收者提供担保，保证消息确实来自发送者而不是来自伪装者  有的理论还补充了一些目标，例如：   * 身份认证（Authentication）：对声明的系统用户进行身份验证  A军给B">
+<meta property="og:description" content="现代密码学 1949年，Shannon（香农）发表《保密系统的通信理论》标志着现代密码学的真正开始（第一次质的飞跃）。 1976年，Diffie 和 Hellman 发表《密码学的新方向》，标志着公钥密码体制的诞生（第二次质的飞跃）。 1978年，Rivest、Shamir 和 Adleman 提出了 RSA 公钥密码体制。  密码学的 CIA 目标  * 机密性（Confidentiality）">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2023-01-02T03:53:17.000Z">
-<meta property="article:modified_time" content="2023-12-02T13:20:28.692Z">
+<meta property="article:modified_time" content="2023-12-03T03:24:30.616Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 
@@ -138,7 +138,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E5%AD%A6%E7%9A%84-CIA-%E7%9B%AE%E6%A0%87"><span class="nav-text">密码学的 CIA 目标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E7%AE%B1"><span class="nav-text">工具箱</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cipher-Encrypt"><span class="nav-text">Cipher &amp; Encrypt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Key-encapsulation-Vs-Key-wrapping"><span class="nav-text">Key encapsulation Vs Key wrapping</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E6%94%BB%E5%87%BB%E6%96%B9%E5%BC%8F"><span class="nav-text">密码攻击方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E6%96%87%E7%8C%AE"><span class="nav-text">经典文献</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E4%BB%A3%E5%AF%86%E7%A0%81%E5%AD%A6"><span class="nav-text">现代密码学</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E5%AD%A6%E7%9A%84-CIA-%E7%9B%AE%E6%A0%87"><span class="nav-text">密码学的 CIA 目标</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E7%AE%B1"><span class="nav-text">工具箱</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%84%E9%87%91%E6%B3%95%E5%88%99"><span class="nav-text">黄金法则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Cipher-Encrypt"><span class="nav-text">Cipher &amp; Encrypt</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Key-encapsulation-Vs-Key-wrapping"><span class="nav-text">Key encapsulation Vs Key wrapping</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%86%E7%A0%81%E6%94%BB%E5%87%BB%E6%96%B9%E5%BC%8F"><span class="nav-text">密码攻击方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%8F%E5%85%B8%E6%96%87%E7%8C%AE"><span class="nav-text">经典文献</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -225,7 +225,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-02 21:20:28" itemprop="dateModified" datetime="2023-12-02T21:20:28+08:00">2023-12-02</time>
+      <time title="修改时间：2023-12-03 11:24:30" itemprop="dateModified" datetime="2023-12-03T11:24:30+08:00">2023-12-03</time>
     </span>
 
   
@@ -242,14 +242,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
+      <span>1.7k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
+      <span>6 分钟</span>
     </span>
 </div>
 
@@ -259,7 +259,8 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="密码学的-CIA-目标"><a href="#密码学的-CIA-目标" class="headerlink" title="密码学的 CIA 目标"></a>密码学的 CIA 目标</h2><ul>
+    <div class="post-body" itemprop="articleBody"><h2 id="现代密码学"><a href="#现代密码学" class="headerlink" title="现代密码学"></a>现代密码学</h2><p>1949年，Shannon（香农）发表《保密系统的通信理论》标志着<strong>现代密码学</strong>的真正开始（第一次质的飞跃）。<br>1976年，Diffie 和 Hellman 发表《密码学的新方向》，标志着公钥密码体制的诞生（第二次质的飞跃）。<br>1978年，Rivest、Shamir 和 Adleman 提出了 RSA 公钥密码体制。</p>
+<h2 id="密码学的-CIA-目标"><a href="#密码学的-CIA-目标" class="headerlink" title="密码学的 CIA 目标"></a>密码学的 CIA 目标</h2><ul>
 <li>机密性（Confidentiality）：确保数据在存储或传输中保持秘密状态</li>
 <li>完整性（Integrity）：保证数据在传输中不被篡改</li>
 <li>不可否认性（Availability）：为接收者提供担保，保证消息确实来自发送者而不是来自伪装者</li>
@@ -270,6 +271,8 @@
 </ul>
 <p>A军给B军发送了一封加密的文件，只有B军通过密码本能看懂，这体现了机密性；<br>C军截获这封文件并篡改后发给B军，但是B军通过文件袋的印刷痕迹可以看出这个文件已经被篡改，这体现了完整性；<br>B军通过文件的印章可以看出这是A军写的，而不是C军伪造的，体现了身份验证。</p>
 <h2 id="工具箱"><a href="#工具箱" class="headerlink" title="工具箱"></a>工具箱</h2><p>消息认证码是密码学家工具箱中的 6 大工具之一：对称密码、公钥密码、单向散列函数、消息认证码、数字签名和伪随机数生成器。<br>MAC 跟哈希有点像但比哈希要复杂，因为 Mac 的生成和验证过程都是需要密钥的。</p>
+<h3 id="黄金法则"><a href="#黄金法则" class="headerlink" title="黄金法则"></a>黄金法则</h3><p>黄金法则主要包含三部分：认证（Authentication）、授权（Authorization）、审计（Audit）。</p>
+<p>认证:可信的身份认证是建立安全保障体系的第一步<br>授权：当用户被认证后，确定该用户有那些操作的权限<br>审计与问责：当在授权完成后，安全需要检查一下“你做了什么”，记录行为日志，这个检查的过程就是审计；当发现做了某些异常操作时，安全还会提供你做了这些操作的“证据”，让你无法抵赖，这个过程就是问责</p>
 <h2 id="Cipher-Encrypt"><a href="#Cipher-Encrypt" class="headerlink" title="Cipher &amp; Encrypt"></a>Cipher &amp; Encrypt</h2><p>在密码学（cryptographic）里面，encrypt &amp; decrpty 就是加密和解密，但也经常见到 cipher，而且“密码”的中文表述就更加混乱了，cipher、password、passphrase 都可以被翻译成”密码”，分析其英文单词来源：</p>
 <ul>
 <li>cipher：&#x3D;cypher（名词，暗号），后来被衍生为动词：把（消息）写成密码，也就是加密。<br>  decipher：由 cipher 衍生的反义词，即：动词，解密。<br>  进一步，明文被称为 plaintext，对应的密文则是 ciphertext</li>
@@ -348,14 +351,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">202k</span>
+    <span title="站点总字数">203k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:14</span>
+    <span title="站点阅读时长">12:18</span>
   </span>
 </div>
 <div class="busuanzi-count">
