@@ -27,9 +27,11 @@
 <meta property="og:description" content="一、背景 研究分组密码工作模式的核心是机密性保护（Confidentiality），历史上曾经将完整性保护（Integrity，例如在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但在发现兼顾两个设计目标的难度之后，密码学社区已经普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标，并开始研究专门的认证加密模式（AE，Authenticated Encryption）。">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/GCM.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/ghash.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/gctr.png">
 <meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/arch.png">
 <meta property="article:published_time" content="2023-12-02T09:29:03.000Z">
-<meta property="article:modified_time" content="2023-12-03T10:06:12.070Z">
+<meta property="article:modified_time" content="2023-12-10T05:54:06.797Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/GCM.png">
@@ -228,7 +230,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-03 18:06:12" itemprop="dateModified" datetime="2023-12-03T18:06:12+08:00">2023-12-03</time>
+      <time title="修改时间：2023-12-10 13:54:06" itemprop="dateModified" datetime="2023-12-10T13:54:06+08:00">2023-12-10</time>
     </span>
 
   
@@ -245,7 +247,7 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>1.8k</span>
+      <span>1.9k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
@@ -286,16 +288,18 @@
 <p>解密过程与加密过程类似，首先使用 GHASH 验证密文的认证标签。如果认证通过，再使用 GCTR 模式解密密文，还原成明文。</p>
 <h2 id="三、核心算法"><a href="#三、核心算法" class="headerlink" title="三、核心算法"></a>三、核心算法</h2><h3 id="1-有限域乘法运算-Z-X-otimes-Y"><a href="#1-有限域乘法运算-Z-X-otimes-Y" class="headerlink" title="1. 有限域乘法运算 $Z&#x3D;X \otimes Y$"></a>1. 有限域乘法运算 $Z&#x3D;X \otimes Y$</h3><p>基于有限域$GF(2^{128})$，定义本原多项式&#x3D;$x^{128}+x^7+x^2+1$。<br>处理逻辑：略。</p>
 <h3 id="2-带密钥的哈希值计算-Y-GHASH-H-X"><a href="#2-带密钥的哈希值计算-Y-GHASH-H-X" class="headerlink" title="2. 带密钥的哈希值计算 $Y&#x3D;GHASH_H(X)$"></a>2. 带密钥的哈希值计算 $Y&#x3D;GHASH_H(X)$</h3><p>先决条件：哈希算法的子密钥$H$<br>输入参数：128位比特流$X$<br>输出结果：分组$Y$<br>核心逻辑：</p>
-<ol>
-<li>$Y_0&#x3D;0^{128}$ ,就是一个128位的全零数据块</li>
-<li>$Y_i &#x3D; (Y_{i-1} \oplus X_i) \otimes H $</li>
-</ol>
+<p>$Y&#x3D;(X_1 \otimes H^m) \oplus (X_2 \otimes H^{m-1}) \oplus … \oplus (X_{m-1} \otimes H^2) \oplus (X_m \otimes H) $</p>
+<blockquote>
+<p>类似二项式乘法：将输入分组切割，并作为密钥 H 各阶的系数，与 CBC 的链式特征很相似</p>
+</blockquote>
+<p><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/ghash.png" alt="GHASH"></p>
 <h3 id="3-计数器操作-Y-GCTR-K-ICB-X"><a href="#3-计数器操作-Y-GCTR-K-ICB-X" class="headerlink" title="3. 计数器操作 $Y&#x3D;GCTR_K(ICB,X)$"></a>3. 计数器操作 $Y&#x3D;GCTR_K(ICB,X)$</h3><p>先决条件：底层的128位分组密码算法$CIPH$<br>输入参数：128位比特流$X$<br>输出结果：分组$Y$<br>核心逻辑：</p>
 <ol>
 <li>初始计数器块ICB（Initial Counter Block），构造方式为：96位 IV + 31位0 + 1，<br>$J_0 &#x3D; IV \parallel 0^{31} \parallel 1$</li>
 <li>计数器递增<br> $CB_1&#x3D;ICB$<br> $CB_i&#x3D;inc_{32}(CB_{i-1})$</li>
 <li>根据流密钥进行加密或解密<br> $Y_i&#x3D; X_i \oplus CIPH_k(CB_i)$</li>
 </ol>
+<p><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/gctr.png" alt="GCTR"></p>
 <h3 id="4-认证加密算法-C-T-GCM-AE-K-IV-P-A"><a href="#4-认证加密算法-C-T-GCM-AE-K-IV-P-A" class="headerlink" title="4. 认证加密算法 $(C,T)&#x3D;GCM-AE_K(IV,P,A)$"></a>4. 认证加密算法 $(C,T)&#x3D;GCM-AE_K(IV,P,A)$</h3><p>先决条件：底层的128位分组密码算法$CIPH$；密钥$K$；标签长度$t$<br>输入参数：初始化向量$IV$；明文$P$；附加认证数据$A$<br>输出结果：密文$C$；标签$T$<br>核心逻辑：</p>
 <ol>
 <li>调用 GCTR 生成密文C<br> $C &#x3D; GCTR_k(inc_{32}(J_0),P)$</li>
@@ -310,17 +314,23 @@
 <li>计算数据块S的哈希值，并存入$T’$<br> $T’ &#x3D; MSB_i(GCTR_k(J_0,S))$</li>
 <li>如果$T &#x3D; T’$，验证通过返回明文P；否则返回 FAIL</li>
 </ol>
-<h2 id="四、技术分析"><a href="#四、技术分析" class="headerlink" title="四、技术分析"></a>四、技术分析</h2><h3 id="1-安全性要求"><a href="#1-安全性要求" class="headerlink" title="1. 安全性要求"></a>1. 安全性要求</h3><p>GCM 在具体的安全模型中被证明是安全的。当它与与随机排列无法区分的分组密码一起使用时，它是安全的；然而，安全性取决于为使用相同密钥执行的每个加密选择唯一的初始化向量（参见流密码攻击）。对于任何给定的密钥和初始化向量组合，GCM 仅限于加密$2^{39}−256$位纯文本 (64 GiB)。</p>
-<p>身份验证强度取决于 MAC 的长度。一般来说，标签长度 t 应该在[128，120，112，104，96]中选择。对于某些应用，t 可能是 64 或 32，但必须限制输入的长度数据和密钥的生命周期。</p>
-<p>附加身份验证数据AAD：Additional Authenticated Data。通常包含源IP，源端口，目的IP，IV等信息，AAD 是不需要加密但需要认证的数据，以明文形式与密文一起传递给接收者。</p>
+<h2 id="四、技术分析"><a href="#四、技术分析" class="headerlink" title="四、技术分析"></a>四、技术分析</h2><h3 id="1-安全性要求"><a href="#1-安全性要求" class="headerlink" title="1. 安全性要求"></a>1. 安全性要求</h3><p>GCM 在具体的安全模型中被证明是机密性安全，但需要同时满足三个前提条件：</p>
+<ul>
+<li>$len(P) &lt;&#x3D; 2^{39} - 256$</li>
+<li>$len(A) &lt;&#x3D; 2^{64} -1$</li>
+<li>$1 &lt;&#x3D; len(IV) &lt;&#x3D; 2^{64}-1$</li>
+</ul>
+<p>对于任何给定的密钥和初始化向量组合，GCM 加密数据 P 的长度不得高于大约 64 GB。<br>附加身份验证数据 AAD（Additional Authenticated Data）是不需要加密但需要认证的数据，以明文形式与密文一起传递给接收者，通常包含源IP，源端口，目的IP，IV等信息。<br>IV 通常为 96 位长度。</p>
+<p>身份验证的安全性取决于 MAC 的长度。一般来说，标签长度 t 应该在[128，120，112，104，96]中选择。对于某些应用，t 可能是 64 或 32，但必须限制输入的长度数据和密钥的生命周期。</p>
 <h3 id="2-硬件加速"><a href="#2-硬件加速" class="headerlink" title="2. 硬件加速"></a>2. 硬件加速</h3><p>GCM 要求对每个加密和验证数据块（128 位）在有限域中进行一次分组密码操作和一次 128 位乘法。分组密码操作很容易流水线化或并行化；乘法运算也很容易流水线化，并且可以通过一些适度的努力进行并行化。</p>
-<p>Intel 添加了<code>PCLMULQDQ</code>指令，突出了它对 GCM 的使用。<br>2011 年，SPARC 添加了 XMULX 和 XMULXHI 指令，它们也执行 64 × 64 位无进位乘法。<br>2015 年，SPARC 添加了 XMPMUL 指令，该指令对更大的值执行 XOR 乘法，高达 2048 × 2048 位的输入值产生 4096 位的结果。</p>
+<p>Intel 添加了<code>PCLMULQDQ</code>指令，突出了它对 GCM 的使用。<br>2011 年，SPARC 添加了<code>XMULX</code>和<code>XMULXHI</code>指令，它们也执行 64 × 64 位无进位乘法。<br>2015 年，SPARC 添加了<code>XMPMUL</code>指令，该指令对更大的值执行 XOR 乘法，高达 2048 × 2048 位的输入值产生 4096 位的结果。</p>
 <hr>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
 <li><a href="nistspecialpublication800-38d.pdf">NIST SP800-38D</a></li>
 <li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Galois/Counter_Mode">Galois&#x2F;Counter Mode - WiKi</a></li>
 <li><a target="_blank" rel="noopener" href="https://blog.csdn.net/Chahot/article/details/130407149">GCM与CCM的的规格和加解密过程</a></li>
 <li><a target="_blank" rel="noopener" href="https://const.net.cn/tool/aes/aes-gcm/">aes-gcm 在线加密工具</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/openluopworld/aes_gcm/blob/master/gcm.c">GCM 的C语言代码示例</a></li>
 </ul>
 
     </div>
