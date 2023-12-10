@@ -55,8 +55,10 @@ GCM（Galois/Counter Mode）是一种基于对称加密算法的认证加密（A
 输出结果：分组$Y$
 核心逻辑：
 
-1. $Y_0=0^{128}$ ,就是一个128位的全零数据块
-2. $Y_i = (Y_{i-1} \oplus X_i) \otimes H $
+$Y=(X_1 \otimes H^m) \oplus (X_2 \otimes H^{m-1}) \oplus ... \oplus (X_{m-1} \otimes H^2) \oplus (X_m \otimes H) $
+> 类似二项式乘法：将输入分组切割，并作为密钥 H 各阶的系数，与 CBC 的链式特征很相似
+
+![GHASH](ghash.png)
 
 ### 3. 计数器操作 $Y=GCTR_K(ICB,X)$
 
@@ -72,6 +74,8 @@ GCM（Galois/Counter Mode）是一种基于对称加密算法的认证加密（A
     $CB_i=inc_{32}(CB_{i-1})$
 3. 根据流密钥进行加密或解密
     $Y_i= X_i \oplus CIPH_k(CB_i)$
+
+![GCTR](gctr.png)
 
 ### 4. 认证加密算法 $(C,T)=GCM-AE_K(IV,P,A)$
 
@@ -110,19 +114,25 @@ GCM（Galois/Counter Mode）是一种基于对称加密算法的认证加密（A
 
 ### 1. 安全性要求
 
-GCM 在具体的安全模型中被证明是安全的。当它与与随机排列无法区分的分组密码一起使用时，它是安全的；然而，安全性取决于为使用相同密钥执行的每个加密选择唯一的初始化向量（参见流密码攻击）。对于任何给定的密钥和初始化向量组合，GCM 仅限于加密$2^{39}−256$位纯文本 (64 GiB)。
+GCM 在具体的安全模型中被证明是机密性安全，但需要同时满足三个前提条件：
 
-身份验证强度取决于 MAC 的长度。一般来说，标签长度 t 应该在[128，120，112，104，96]中选择。对于某些应用，t 可能是 64 或 32，但必须限制输入的长度数据和密钥的生命周期。
+- $len(P) <= 2^{39} - 256$
+- $len(A) <= 2^{64} -1$
+- $1 <= len(IV) <= 2^{64}-1$
 
-附加身份验证数据AAD：Additional Authenticated Data。通常包含源IP，源端口，目的IP，IV等信息，AAD 是不需要加密但需要认证的数据，以明文形式与密文一起传递给接收者。
+对于任何给定的密钥和初始化向量组合，GCM 加密数据 P 的长度不得高于大约 64 GB。
+附加身份验证数据 AAD（Additional Authenticated Data）是不需要加密但需要认证的数据，以明文形式与密文一起传递给接收者，通常包含源IP，源端口，目的IP，IV等信息。
+IV 通常为 96 位长度。
+
+身份验证的安全性取决于 MAC 的长度。一般来说，标签长度 t 应该在[128，120，112，104，96]中选择。对于某些应用，t 可能是 64 或 32，但必须限制输入的长度数据和密钥的生命周期。
 
 ### 2. 硬件加速
 
 GCM 要求对每个加密和验证数据块（128 位）在有限域中进行一次分组密码操作和一次 128 位乘法。分组密码操作很容易流水线化或并行化；乘法运算也很容易流水线化，并且可以通过一些适度的努力进行并行化。
 
 Intel 添加了`PCLMULQDQ`指令，突出了它对 GCM 的使用。
-2011 年，SPARC 添加了 XMULX 和 XMULXHI 指令，它们也执行 64 × 64 位无进位乘法。
-2015 年，SPARC 添加了 XMPMUL 指令，该指令对更大的值执行 XOR 乘法，高达 2048 × 2048 位的输入值产生 4096 位的结果。
+2011 年，SPARC 添加了`XMULX`和`XMULXHI`指令，它们也执行 64 × 64 位无进位乘法。
+2015 年，SPARC 添加了`XMPMUL`指令，该指令对更大的值执行 XOR 乘法，高达 2048 × 2048 位的输入值产生 4096 位的结果。
 
 ---
 
@@ -132,3 +142,4 @@ Intel 添加了`PCLMULQDQ`指令，突出了它对 GCM 的使用。
 - [Galois/Counter Mode - WiKi](https://en.wikipedia.org/wiki/Galois/Counter_Mode)
 - [GCM与CCM的的规格和加解密过程](https://blog.csdn.net/Chahot/article/details/130407149)
 - [aes-gcm 在线加密工具](https://const.net.cn/tool/aes/aes-gcm/)
+- [GCM 的C语言代码示例](https://github.com/openluopworld/aes_gcm/blob/master/gcm.c)
