@@ -16,8 +16,13 @@ tags:
 - 验证算法：有效地验证给定密钥和标签的消息的真实性。 也就是说，当消息和标签没有被篡改或伪造时，返回被接受，否则返回被拒绝。
 
 针对消息验证码，NIST 先后提出了 HMAC，CMAC 和 GMAC。
-2002年，HMAC 通过认证为[NIST FIPS 198-1](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.198-1.pdf)，基于单向散列函数实现，可以检查消息的完整性，但无法确保来源的可靠性。
+2002年，HMAC 通过认证为[NIST FIPS 198-1](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.198-1.pdf)，基于单向散列函数实现，可以检查消息的完整性，但无法确保来源的可靠性。其中 ipad 是 0x36 的重复值，opad 是 0x5c 的重复值。
+![HMAC](HMAC.png)
+
 2005年，CMAC 标准化为[NIST SP800-38B](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38b.pdf)，基于分组密码实现，基于共享密钥派生出两个中间密钥，并进行两次哈希计算得到。
+![CMAC](CMAC.png)
+$L = CIPH_k(0^b)；K_1 = L \otimes \alpha；K_2 = L \otimes \alpha^2；128位的生成元=x^7+x^2+x+1$
+
 2007年，GMAC 标准化为[NIST SP800-38D](nistspecialpublication800-38d.pdf)，基于伽罗华域乘法实现，可以看做对称加密算法和消息认证码的结合。
 
 ## 二、基本流程
