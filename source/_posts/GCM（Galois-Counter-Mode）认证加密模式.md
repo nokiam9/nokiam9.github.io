@@ -15,11 +15,15 @@ tags:
 - 签名算法：有效地返回给定密钥和消息的标签。
 - 验证算法：有效地验证给定密钥和标签的消息的真实性。 也就是说，当消息和标签没有被篡改或伪造时，返回被接受，否则返回被拒绝。
 
-针对消息验证码，NIST 提出了 HMAC，CMAC 和 GMAC。HMAC 在2002年通过了认证，CMAC 在2005年通过，GMAC 则在2007年被标准化。
+针对消息验证码，NIST 先后提出了 HMAC，CMAC 和 GMAC。
+2002年，HMAC 通过认证为[NIST FIPS 198-1](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.198-1.pdf)，基于单向散列函数实现，可以检查消息的完整性，但无法确保来源的可靠性。其中 ipad 是 0x36 的重复值，opad 是 0x5c 的重复值。
+![HMAC](HMAC.png)
 
-- HMAC 基于单向散列函数实现，可以检查消息的完整性，但无法确保来源的可靠性
-- CMAC 基于分组密码实现，基于共享密钥派生出两个中间密钥，并进行两次哈希计算得到
-- GMAC 基于伽罗华域乘法实现，可以看做对称加密算法和消息认证码的结合
+2005年，CMAC 标准化为[NIST SP800-38B](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38b.pdf)，基于分组密码实现，基于共享密钥派生出两个中间密钥，并进行两次哈希计算得到。
+![CMAC](CMAC.png)
+$L = CIPH_k(0^b)；K_1 = L \otimes \alpha；K_2 = L \otimes \alpha^2；128位的生成元=x^7+x^2+x+1$
+
+2007年，GMAC 标准化为[NIST SP800-38D](nistspecialpublication800-38d.pdf)，基于伽罗华域乘法实现，可以看做对称加密算法和消息认证码的结合。
 
 ## 二、基本流程
 
@@ -98,7 +102,7 @@ $Y=(X_1 \otimes H^m) \oplus (X_2 \otimes H^{m-1}) \oplus ... \oplus (X_{m-1} \ot
 
 先决条件：底层的128位分组密码算法$CIPH$；密钥$K$；标签长度$t$
 输入参数：初始化向量$IV$；密文$C$；附加认证数据$A$；标签$T$
-输出结果：明文$P，或者 FAIL
+输出结果：明文$P$，或者 FAIL
 核心逻辑：
 
 1. 调用 GCTR 生成明文P
