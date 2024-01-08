@@ -26,27 +26,148 @@ Apple 将上述两种版本的技术统称为 **Legacy FileVault** ，其存在�
 
 2010年，Mac OS X Lion (狮子，10.7) 发布了 FileVault 2，推出一个重新设计的 FDE 方案。
 
-![密钥层次架构](arch.png)
-
-1. 启动卷宗的分区改为一个 CoreStorage 管理的加密卷，终于可以全盘加密了！
-2. 增加了一个 Recovery HD 分区卷，但仍然是 HFS+ 文件系统；
-3. 加密标准改为 NIST 推荐的 AES-XTS，分组长度为128位，密钥长度为256位；
-4. 支持**用户登录密码**作为加密因子；
-
-CoreStorage 是 Apple 开发的 LVM（Logic Volume Manager，逻辑卷管理器），类似于赛门铁克的 Veritas Volume Manager 和 OSF LVM。
-
-LVM 作为磁盘和文件系统之间的虚拟化层，增加了操作系统存储分配的灵活性，因为现代计算机系统需要保持一致的文件系统映像，即使存储设备发生变化也是如此。
-Apple 引入了一个新概念 LVF（logical volume family，逻辑卷系列），用于指定将由它所包含的逻辑卷继承的属性（目前只有 FileVault ），但以后可能用于新的性能特征。
-现在，当使用 FileVault 2 加密时，MacOS 会自动将已有数据卷转换为 CoreStorage 卷，并将分区封装为 PV，将其导入 LVG，并设置 LVF 和 LV 以包含新的文件系统。
+1. 启动卷宗的分区改为一个 CoreStorage 管理的加密卷，并增加了一个 Recovery HD 分区卷；
+2. 加密标准改为 NIST 推荐的 AES-XTS，分组长度为128位，密钥长度为256位；
+3. 支持**用户登录密码**作为加密因子；
 
 ![LVF](lvf.jpg)
 
+CoreStorage 是 Apple 开发的 LVM（Logic Volume Manager，逻辑卷管理器），作为磁盘和文件系统之间的虚拟化层，增加了操作系统存储分配的灵活性，类似于赛门铁克的 Veritas Volume Manager 和 OSF LVM，但底层文件系统仍然是 HFS+。
+Apple 还引入了一个新概念 LVF（logical volume family，逻辑卷系列），用于指定将由它所包含的逻辑卷继承的属性（目前只有 FileVault），但以后可能用于新的性能特征。
+现在，当使用 FileVault 2 加密时，MacOS 会自动将已有数据卷转换为 CoreStorage 卷，并将分区封装为 PV，将其导入 LVG，并设置 LVF 和 LV 以包含新的文件系统。
 对于支持 AES 指令集的 CPU（如Intel Broadwell 架构），AES-128-XTS 加密模式只有 3% 左右的性能损耗，但对于不支持该指令集的 CPU（如早期的酷睿CPU）会有明显的性能下降。
+
+### AES-XTS的密钥层次架构
+
+FileValut 2 设计了多个不同类型的密钥。
+![密钥层次架构](arch.png)
+
+#### 1. Volume Master Key（VMK）- 分组密钥 key1
+
+密钥长度：128位
+构造方式：**随机生成**
+存储位置：Recovery HD -> `EncryptedRoot.plist` -> `KEKWrappedVolumeKeyStruct`字段加密存储
+
+#### 2. Volume tweak key - 可调整密钥 key2
+
+密钥长度：128位
+构造方式：$trunc_{128}(SHA256(VolumeMasterKey || LogicVolumeFamilyIdentifier))$
+
+#### 3. EncryptedRoot.plist.wipekey - 密钥文件
+
+在逻辑卷 Recovery HD 中，有一个加密文件包含了提取 VMK 所需的全部信息，路径是`com.apple.boot.X/System/Library/Caches/com.apple.corestorage/EncryptedRoot.plist.wipekey`
+
+这个文件本身也是基于 AES-XTS 加密的，可调整密钥设置为 128位的全零，分组密钥保存在 CoreStorage header 的`Physical Volume Identifier`字段中，请参见[Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary](2012-374.pdf)论文附录（第13页）的 Table 2。
+
+plist文件解密成功后，其内容示例见下：
+
+```xml
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>ConversionInfo</key>
+        <dict>
+                <key>ConversionStatus</key>
+                <string>Complete</string>
+                <key>TargetContext</key>
+                <integer>1</integer>
+        </dict>
+        <key>CryptoUsers</key>
+        <array>
+                <dict>
+                        ...
+                        <key>PassphraseWrappedKEKStruct</key>
+                        <data>
+                        ...
+                        </data>
+                        ...
+                </dict>
+                <dict>
+                ...
+                </dict>
+        </array>
+        <key>LastUpdateTime</key>
+        <integer>1323243315</integer>
+        <key>WrappedVolumeKeys</key>
+        <array>
+                <dict>
+                        <key>BlockAlgorithm</key>
+                        <string>None</string>
+                        <key>KEKWrappedVolumeKeyStruct</key>
+                        <data>
+                        </data>
+                        ...
+                </dict>
+                <dict>
+                        <key>BlockAlgorithm</key>
+                        <string>AES-XTS</string>
+                        <key>KEKWrappedVolumeKeyStruct</key>
+                        <data>
+                        ...
+                        </data>
+                        ...
+                </dict>
+        </array>
+</dict>
+</plist>
+```
+
+其中的关键字段如下，注意实际存储格式是 base64 编码：
+
+- PassphraseWrappedKEKStruct(1)：284 位的 recovery password
+- PassphraseWrappedKEKStruct(2)：284 位的 user password
+- KEKWrappedVolumeKeyStruct(1)：未使用！标记为 None
+- KEKWrappedVolumeKeyStruct(2)：VMK 的包裹信息，标记为 AES-XTS
+
+上述 struct 的结构定义，请参见[Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary](2012-374.pdf)论文附录（第13页）的 Table 3 和 Table 4
+
+#### 4. Recovery key - 恢复密钥
+
+启用 FileVault 时，系统自动生成并要求用户保存`Recovery key`，此密钥可以用来解封 VMK。
+![RE](recovery-key.png)
+使用 PBKDF2 算法恢复 VMK（注意恢复密钥是字符串格式，包括数字之间的破折号）：
+
+``` c
+PK = PBKDF2( PRF=SHA256, password=Recovery key,
+    salt=PassphraseWrappedKEKStruct.salt,
+    iters=41000, dk_len=128)
+KEK = AES_Unwrap(PassphraseWrappedKEKStruc.AES-wrapped-volume-KEK, PK)
+VMK = AES_Unwrap(KEKWrappedVolumeKeyStruct.AES-wrapped-volume-key, KEK)
+```
+
+迭代次数存储在`PassphraseWrappedKEKStruct`中，但对于 Mac OS 10.7 似乎始终为 41000。
+
+#### 5. User Key - 用户密码
+
+对于 Mac OS 系统上的每个用户，FileVault 使用各自的用户密码（目前仅包含 ASCII 字符）来计算用户密钥，并解锁加密数据。
+每个用户都有其自己关联的 PassphraseWrappedKEKStruct，按照与恢复密钥相同的方式计算并使用相应的用户密钥来获取卷主密钥。
+
+#### 6. 小结
+
+上述过程以伪代码表示如下：
+
+```c
+p = get_user_password()
+salt = get_salt_from_PassphraseWrappedKEK()
+iterations = 41000
+pk = pbkdf2(p, salt, iterations, HMAC-SHA256)
+kek_wrapped = get_kek_from_PassphraseWrappedKEK()
+kek = aes_unwrap(kek_wrapped, pk)
+vmk_wrapped = get_vmk_from_KEKWrappedVolumeKey()
+vmk = aes_unwrap(vmk_wrapped, kek)
+```
 
 ## 三、基于 APFS 的 FileVault
 
-2017年，MacOS High Sierra（内华达脊岭，10.13） 发布了 APFS（Apple FileSystem），用于替代古老的 HFS+，并整合了基于 CoreStorage 的 FileValut 2。
-APFS 引入了 container（容器）的概念，单一容器内部包含多个 Volume，这些逻辑卷共享物理存储容量，并可以相互读取数据，但是不能与其他容器共享数据。
+2017年，MacOS High Sierra（内华达脊岭，10.13） 发布了 APFS（Apple FileSystem），用于替代古老的 HFS+，并完全整合了 CoreStorage，实现了原生的 FileVault。
+
+APFS 引入了 container（容器）的概念，使用 GPT 分区方案，单一容器内部包含多个 Volume，这些逻辑卷共享物理存储容量，并可以相互读取数据，但是不能与其他容器共享数据。
+
+- GPT 方案中有一个或多个 APFS 容器
+- 每个容器内都有一个或多个 APFS 卷，所有这些卷共享分配给容器的空间，并且每个卷都可以具有 APFS 卷的角色
+- MacOS 10.15 Catalina 引入了 APFS Volume Group，在 Finder 中显示为单个卷
+- MacOS 10.15 Catalina 中，系统卷角色（通常名为“Macintosh HD”）设为只读，而在 MacOS 11 Big Sur 中，它变为签名系统卷 (SSV)，并且仅挂载卷快照。
+- 数据卷角色（通常称为 Macintosh HD - 数据）用作系统卷的覆盖或影子，其中系统卷和数据卷属于同一卷组，并且在 Finder 中被视为一个卷
 
 ![a](apfs.png)
 
@@ -65,7 +186,7 @@ map auto_home    0Bi    0Bi    0Bi   100%       0          0  100%   /System/Vol
 
 通过`diskutil apfs list`，可以查看容器 disk1 及 物理设备 disk0s2 的详细信息，依次包括：
 
-- Volume disk1s5(System)：挂载点位于`/`，FileVault = Yes (Unlocked)
+- Volume disk1s5(System)：系统主启动卷，挂载点位于`/`，FileVault = Yes (Unlocked)；后续版本还有 snapshot 快照功能
 - volume disk1s1(**Data**)：加密的用户数据，挂载点位于`/System/Volumes/Data`，FileVault = Yes (Unlocked)
 - Volume disk1s4(VM)：保存休眠状态，挂载点位于`/private/var/vm`，FileVault = No
 - Volume disk1s3(Revovery)：进入macOS的recovery模式，可以用来清除用户密码，挂载点位于`/Volumes/Recovery`，FileVault = No
@@ -130,7 +251,7 @@ APFS Container (1 found)
 
 > 如果 FileVault 未启用，FileVault = No (Encrypted at rest)
 
-进一步，可以通过`diskutil apfs listusers $ID`，查看当前有效的用户密钥信息。
+进一步，可以通过`diskutil apfs listusers $Volume_ID`，查看当前有效的用户密钥信息。
 
 ```console
 sj@JiandeiMac /Volumes % diskutil apfs listusers 925F8706-12D2-305B-B8E0-14201AF1D027
@@ -146,93 +267,6 @@ Cryptographic users for disk1s1 (3 found)
     Type: iCloud Recovery External Key
 ```
 
-
----
-
-## 附录一：离线解密方法
-
-系统运行时执行 FileVault2，电脑会创建一个**恢复密钥**，并在屏幕上显示出来，提示用户保管，并且提供了一个将密钥上传至 Apple 的可选项。
-恢复密钥共有120位，由全部英文字母和数字 1-9 组成，系统会调用`/dev/random`的随机数生成器生成整枚密钥。
-
-除非重新加密整个卷宗，否则将无法修改恢复密钥。
-
-![Volume Main Key](vmk.png)
-
-在了解了 FileVault2 加密的流程之后，可以根据具体方 法得到相对应的解密流程。将加密后的磁盘用外部工具加 载观察，从磁盘结构来看，加密后的硬盘与加密前硬盘发 生了重大的变化。通过对加密数据研究和相关资料文献的阅读，得 知加密卷的卷头存储了解密所需的各种相关参数 [4]。图 2 为 FileVault2 解密流程。
-
-根据对加密卷数据分析可得加密卷的头部主要包含有 如下信息 :
-卷头部签名、块大小、卷大小、元数据大小、第一个 元数据块块号、第二个元数据块块号、第三个元数据块块号、 第四个元数据块块号、加密方法、逻辑卷 ID(用于解密加 密的密钥文件)、物理卷 ID[5]。
-解密步骤如下 :
-1)识别到 FileVault2 加密卷和存储的需要提取的用户 密码生成的主密钥信息或者恢复令牌的 EncryptedRoot.plist. wipekey 文件 ;
-2)解密通过文件系统解析获得的 EncryptedRoot.plist. wipekey 文件后，提取存储的密钥信息 ;
-3)输入用户登录密码或者恢复密钥，验证步骤 2)中 提取到的密钥信息是否正确 ;
-4)验证正确后根据用户密码或者恢复密钥及加密的 EncryptedRoot.plist.wipekey 文件中存储的密钥信息生成主 密钥和 tweak key ;
-5)用生成的两个解密密钥信息(key1 和 key2)及加密 卷数据进行解密，生成解密数据即完成解密。
-用取证工具或其他可以解析 HFSPlus 文件系统的工具 对解密数据进行解析，可以验证解密结果是否正确。
-
-
-
-
-
-### VEK - Volume Encryption Key，卷宗封装密钥
-
----
-
-关键文件：EncryptedRoot.plist
-
-Once decrypted, the file EncryptedRoot.plist has an XML structure with the following important entries:
-• PassphraseWrappedKEKStruct(1)
-– 284 byte structure for recovery password.
-• PassphraseWrappedKEKStruct(2)
-– 284 byte structure for user password.
-• KEKWrappedVolumeKeyStruct(1) – unused.
-• KEKWrappedVolumeKeyStruct(2)
-– contains wrapped volume master key.
-
-
-``` c
-p = get_user_password()                                 // 用户输入password 
-salt = get_salt_from_PassphraseWrappedKEK()
-iterations = 41000
-pk = pbkdf2(p, salt, iterations, HMAC-SHA256)           // 计算PDK
-kek_wrapped = get_kek_from_PassphraseWrappedKEK()           
-kek = aes_unwrap(kek_wrapped, pk)                       // 获得
-vmk_wrapped = get_vmk_from_KEKWrappedVolumeKey()
-vmk = aes_unwrap(vmk_wrapped, kek)
-```
-
-## Android 的 FDE 历程
-
-FDE加密又是怎么一回事呢，看看google怎么定义的吧（以下部分内容引用网络某大神的解释）：
-
-- 安卓会通过一个随机生成的128位设备加密密钥 (Device Encryption Key, DEK) 来加密设备的文件系统。
-- 安卓使用用户的PIN或者密码来加密DEK，并将它存储在设备加密过的文件系统上。从物理上来讲，它也在设备的闪存芯片中。当你输入正确的PIN或密码时，设备可以解锁DEK，并使用密钥来解锁文件系统。
-
-- 实际上，DEK是使用用户的PIN或密码，外加一个被称为KeyMaster Key Blob的加密数据块来进行加密的。这个数据块包含一个由KeyMaster程序生成的2048位RSA密钥，它运行在设备处理器上的一个安全区域上。KeyMaster会创建RSA密钥，将其存储在数据块中，并为安卓系统创建一份加密过的拷贝版本。
-    安卓系统和你的移动应用运行在处理器的非安全区域上。安卓没有访问KeyMaster的安全世界的权限，因此它无法知晓数据块里的RSA密钥。安卓只能获得这个数据块的加密版本，而只有KeyMaster能够解密它。
-
-- 当你输入PIN或密码时，安卓拿到加密过的数据块，并将它和使用scrypt处理过的PIN或密码一起，传回运行在处理器安全区域上的KeyMaster。KeyMaster将私密地使用处理器中带有的私钥来对数据块进行解密，获得长RSA密钥。然后，它将私密地使用scrypt处理过的PIN或密码，外加长RSA密钥，来制造一个RSA签名，并将签名发回给安卓。之后安卓使用一系列算法来处理这一签名，并最终解密DEK，解锁设备。
-
-因此，全部流程都基于KeyMaster的数据块。数据块包含解密DEK所需的长RSA密钥。安卓只拥有加密后的数据块，而只有用户才有PIN或密码。此外，只有KeyMaster才能解密加密过的数据块。
-
-### Google 的版本历史
-
-- Android 4：首次引入 FDE 的 beta版本，由于 CPU 普遍不支持硬件加密严重影响速度，并未普遍应用
-- Android 5: Google 推出 5.0 强制采用 FDE 加密，由于终端厂商的普遍抵制又推出 5.1 版本，改为用户自行设置是否启用
-- Android 6: 高通发布骁龙810支持硬件加密，6.0 版本终于强制采用 FDE 加密
-
-### 5.0中的加密 磁盘加密密钥 的实现逻辑
-
-1. 产生随机16 Bytes DEK(disk encryption key--磁盘加密用的密钥)及16 Bytes SALT；
-2. 对(用户密码+SALT)使用scrypt算法产生32 Bytes HASH 作为IK1(intermediate key 1);
-3. 将IK1填充到硬件产生的私钥规格大小(目前看到是RSA算法，256Bytes), 具体是: 
-00 || IK1 || 00..00  ## one zero byte, 32 IK1 bytes, 223 zero bytes.
-4. 使用硬件私钥 HBK 对 IK1 进行签名，生成256 Bytes签名数据作为IK2；
-5. 对(IK2+SALT)使用scrypt算法(与第二步中的SALT相同)产生出32 Bytes HASH 作为IK3；
-6. 使用IK3前16 Bytes作为KEK(用来加密主密钥DEK的KEY)，后16 Bytes作为算法IV(初始化向量)；
-7. 使用AES_CBC算法，采用KEK作为密钥，IV作为初始化向量来加密用户的主密钥DEK，生成加密后的主密钥，存入分区尾部数据结构中；
-
-
 ---
 
 ## 参考文献
@@ -243,14 +277,10 @@ FDE加密又是怎么一回事呢，看看google怎么定义的吧（以下部�
 - [Working with APFS Volume Groups](https://bombich.com/kb/ccc5/working-apfs-volume-groups)
 - [APFS 科普贴](https://www.jianshu.com/p/c401d546cebf)
 - [APFS Structure](https://www.ntfs.com/apfs-structure.htm)
+- [FileVault Drive Encryption 代码库 - Github](https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc)
 
 ### 文档下载
 
 - [FileVault2加密分区离线解密技术及其取证应用 - 蓝朝祥](FileVault2加密分区离线解密技术及其取证应用_蓝朝祥.pdf)
 - [Security Analysis and Decryption of FileVault 2 - Omar Choudary](slides_fv2_ifip_2013.pdf)
 - [Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary](2012-374.pdf)
-
----
-
-- [你的安卓手机究竟是FDE加密还是FBE加密？](https://page.om.qq.com/page/O3yauEIx2l-9WrUkHgQgRUBw0)
-- [android FDE功能介绍](https://blog.csdn.net/bob_fly1984/article/details/80369900)
