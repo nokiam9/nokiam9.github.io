@@ -1,6 +1,6 @@
 ---
-title: Apple数据保护技术专题之三：代码实现
-date: 2022-11-13 14:34:30
+title: iPhone4 数据破解的技术分析
+date: 2024-01-10 01:40:38
 tags:
 ---
 
@@ -375,14 +375,9 @@ PROTECTION_CLASSES={
 
 ## 参考文献
 
+- [iphone-dataprotection 工具包 - Github](https://github.com/nabla-c0d3/iphone-dataprotection)
 - [Linux文件系统简介](https://www.cnblogs.com/xumenger/p/4491425.html)
 - [ATS-Key-Wrap 算法的 RFC 3394 规范](https://rfc2cn.com/rfc3394.html)
 - [解密iPhone的固件](https://blog.csdn.net/XiNGRZ/article/details/5332915)
 - [通过侧信道分析加强对iPhone用户身份验证的暴力破解攻击](https://www.anquanke.com/post/id/237769)
-
-### Apple官方文档
-
-- [Apple 平台安全白皮书 - 2022年英文版](apple-platform-security-guide.pdf)
-- [Apple 平台安全白皮书 - 2021年中文版](apple平台安全白皮书-2021中文版.pdf)
-- [Apple T2 安全芯片概览](Apple_T2_Security_Chip_Overview.pdf)
-- [APFS 文件系统参考手册](Apple-File-System-Reference.pdf)
+- [你的安卓手机究竟是FDE加密还是FBE加密？](https://page.om.qq.com/page/O3yauEIx2l-9WrUkHgQgRUBw0)
