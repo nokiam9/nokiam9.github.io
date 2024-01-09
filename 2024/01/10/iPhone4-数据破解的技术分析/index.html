@@ -21,31 +21,31 @@
 
     <meta name="description" content="Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。  1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Apple数据保护技术专题之三：代码实现">
-<meta property="og:url" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/index.html">
+<meta property="og:title" content="iPhone4 数据破解的技术分析">
+<meta property="og:url" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
 <meta property="og:description" content="Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。  1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/plog.png">
-<meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/daemon.png">
-<meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/keybag.png">
-<meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/unlock2.png">
-<meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/unlock.png">
-<meta property="article:published_time" content="2022-11-13T06:34:30.000Z">
-<meta property="article:modified_time" content="2023-10-15T15:01:42.849Z">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/plog.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/daemon.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/keybag.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/unlock2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/unlock.png">
+<meta property="article:published_time" content="2024-01-09T17:40:38.000Z">
+<meta property="article:modified_time" content="2024-01-09T17:49:36.782Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/plog.png">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/plog.png">
 
 
-<link rel="canonical" href="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/">
+<link rel="canonical" href="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/","path":"2022/11/13/Apple数据保护技术专题之三：代码实现/","title":"Apple数据保护技术专题之三：代码实现"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/","path":"2024/01/10/iPhone4-数据破解的技术分析/","title":"iPhone4 数据破解的技术分析"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Apple数据保护技术专题之三：代码实现 | Alex的技术博客</title>
+<title>iPhone4 数据破解的技术分析 | Alex的技术博客</title>
   
 
 
@@ -144,7 +144,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE-metadata"><span class="nav-text">一、文件系统的元数据 - metadata</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-inode-%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">1. inode 的数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-cprotect-%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">2. cprotect 的数据结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E5%AF%86%E9%92%A5%E6%8F%90%E5%8F%96"><span class="nav-text">二、核心密钥提取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%AE%BE%E5%A4%87%E5%AF%86%E9%92%A5%E5%8C%85-Device-Bag"><span class="nav-text">三、设备密钥包 - Device Bag</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Device-Bag-%E7%9A%84%E6%96%87%E4%BB%B6%E7%BA%A7%E8%A7%A3%E5%AF%86"><span class="nav-text">1. Device Bag 的文件级解密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Class-Key-%E7%9A%84%E8%A7%A3%E5%B0%81"><span class="nav-text">2. Class Key 的解封</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="nav-text">四、遗留问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BC%81%E4%B8%9A%E4%BF%A1%E6%81%AF"><span class="nav-text">附录：有意思的一些企业信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Apple%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-text">Apple官方文档</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE-metadata"><span class="nav-text">一、文件系统的元数据 - metadata</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-inode-%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">1. inode 的数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-cprotect-%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">2. cprotect 的数据结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E5%AF%86%E9%92%A5%E6%8F%90%E5%8F%96"><span class="nav-text">二、核心密钥提取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%AE%BE%E5%A4%87%E5%AF%86%E9%92%A5%E5%8C%85-Device-Bag"><span class="nav-text">三、设备密钥包 - Device Bag</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Device-Bag-%E7%9A%84%E6%96%87%E4%BB%B6%E7%BA%A7%E8%A7%A3%E5%AF%86"><span class="nav-text">1. Device Bag 的文件级解密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Class-Key-%E7%9A%84%E8%A7%A3%E5%B0%81"><span class="nav-text">2. Class Key 的解封</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="nav-text">四、遗留问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BC%81%E4%B8%9A%E4%BF%A1%E6%81%AF"><span class="nav-text">附录：有意思的一些企业信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -157,7 +157,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">91</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -195,7 +195,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -208,12 +208,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Apple数据保护技术专题之三：代码实现 | Alex的技术博客">
+      <meta itemprop="name" content="iPhone4 数据破解的技术分析 | Alex的技术博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Apple数据保护技术专题之三：代码实现
+          iPhone4 数据破解的技术分析
         </h1>
 
         <div class="post-meta-container">
@@ -223,15 +223,9 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
+      
 
-      <time title="创建时间：2022-11-13 14:34:30" itemprop="dateCreated datePublished" datetime="2022-11-13T14:34:30+08:00">2022-11-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-15 23:01:42" itemprop="dateModified" datetime="2023-10-15T23:01:42+08:00">2023-10-15</time>
+      <time title="创建时间：2024-01-10 01:40:38 / 修改时间：01:49:36" itemprop="dateCreated datePublished" datetime="2024-01-10T01:40:38+08:00">2024-01-10</time>
     </span>
 
   
@@ -297,16 +291,16 @@
 <figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line">Dkey = <span class="number">0x446B6579</span></span><br><span class="line">EMF = <span class="number">0x454D4621</span></span><br><span class="line">BAG1 = <span class="number">0x42414731</span></span><br><span class="line">DONE = <span class="number">0x444f4e45</span>   <span class="comment">#locker sentinel</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Effaceable Stroge 的数据结构</span></span><br><span class="line"><span class="comment"># MAGIC (kL) | LEN (2bytes) | TAG (4) | DATA (LEN)</span></span><br><span class="line">Locker = Struct(<span class="string">&quot;Locker&quot;</span>,</span><br><span class="line">                String(<span class="string">&quot;magic&quot;</span>,<span class="number">2</span>),</span><br><span class="line">                ULInt16(<span class="string">&quot;length&quot;</span>),</span><br><span class="line">                <span class="type">Union</span>(<span class="string">&quot;tag&quot;</span>,</span><br><span class="line">                      ULInt32(<span class="string">&quot;int&quot;</span>),</span><br><span class="line">                      String(<span class="string">&quot;tag&quot;</span>,<span class="number">4</span>))</span><br><span class="line">                ,</span><br><span class="line">                String(<span class="string">&quot;data&quot;</span>, <span class="keyword">lambda</span> ctx: ctx[<span class="string">&quot;length&quot;</span>])</span><br><span class="line">                )</span><br><span class="line"></span><br><span class="line">Lockers = RepeatUntil(<span class="keyword">lambda</span> obj, ctx: obj.tag.<span class="built_in">int</span> == DONE, Locker)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EffaceableLockers</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, data</span>):</span><br><span class="line">        self.lockers = &#123;&#125;</span><br><span class="line">        <span class="keyword">for</span> l <span class="keyword">in</span> Lockers.parse(data):</span><br><span class="line">            tag = l.tag.<span class="built_in">int</span> &amp; ~<span class="number">0x80000000</span></span><br><span class="line">            tag = struct.pack(<span class="string">&quot;&lt;L&quot;</span>, tag)[::-<span class="number">1</span>]</span><br><span class="line">            self.lockers[tag] = l.data</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 获取 DKey，使用 AESUnwrap 算法解包</span></span><br><span class="line">    <span class="comment"># 注意！ Python 的 AESUnwrap 函数的入参顺序与 RFC 3394 规范正好相反</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_DKey</span>(<span class="params">self, k835</span>):</span><br><span class="line">        <span class="keyword">if</span> self.lockers.has_key(<span class="string">&quot;Dkey&quot;</span>):        </span><br><span class="line">            <span class="keyword">return</span> AESUnwrap(k835, self.lockers[<span class="string">&quot;Dkey&quot;</span>])</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 获取 EMF，很明显兼容了 LwVM，使用 AESdecryptCBC 算法解密</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">get_EMF</span>(<span class="params">self, k89b</span>):</span><br><span class="line">        <span class="keyword">if</span> self.lockers.has_key(<span class="string">&quot;LwVM&quot;</span>):</span><br><span class="line">            lwvm = AESdecryptCBC(self.lockers[<span class="string">&quot;LwVM&quot;</span>], k89b)</span><br><span class="line">            <span class="keyword">return</span> lwvm[-<span class="number">32</span>:]</span><br><span class="line">        <span class="keyword">elif</span> self.lockers.has_key(<span class="string">&quot;EMF!&quot;</span>):</span><br><span class="line">            <span class="keyword">return</span> AESdecryptCBC(self.lockers[<span class="string">&quot;EMF!&quot;</span>][<span class="number">4</span>:], k89b)</span><br></pre></td></tr></table></figure>
 
 <p>下图是 Effaceable Stroge 的数据示例，但是由于版本不同，与上面的 Python 代码并不一致。<br>浅蓝色是 length ，红色是 tag 标记，注意HFS 是大端字节顺序。<br>第一个标记：0x42414731 &#x3D; <code>BAG1</code>，长度 0x0034 &#x3D; 52 个字节<br>第二个标记：0xC46B6579 &#x3D; <code>key</code>，长度 0x0028 &#x3D; 40 个字节<br>第三个标记：0xC54D4621 &#x3D; <code>EMF!</code>，长度 0x0024 &#x3D; 36 个字节<br>第四个标记：0x444F4E45 &#x3D; <code>DONE</code>，长度 0x0000，这就是结束了！</p>
-<p><img src="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/plog.png" alt="plog"></p>
+<p><img src="/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/plog.png" alt="plog"></p>
 <h2 id="三、设备密钥包-Device-Bag"><a href="#三、设备密钥包-Device-Bag" class="headerlink" title="三、设备密钥包 - Device Bag"></a>三、设备密钥包 - Device Bag</h2><p>系统密钥包是一个加密的 <code>plist</code> 格式的二进制文件，存储了所有类密钥的数据，Apple 系统的数据解密实现方式见下图。</p>
-<p><img src="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/daemon.png" alt="Daemon"></p>
+<p><img src="/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/daemon.png" alt="Daemon"></p>
 <p>基于上面的取证工具包，找到了一个读取设备密钥包的小工具。<br>请参见<a target="_blank" rel="noopener" href="https://github.com/russtone/systembag.kb">https://github.com/russtone/systembag.kb</a> 。</p>
 <h3 id="1-Device-Bag-的文件级解密"><a href="#1-Device-Bag-的文件级解密" class="headerlink" title="1. Device Bag 的文件级解密"></a>1. Device Bag 的文件级解密</h3><p>系统密钥包的默认存储路径是 <code>/private/var/keybags/systembag.kb</code>，如果是U盘引导启动，可能位于<code>/mnt/keybags/systembag.kb</code>。<br>参考其操作步骤，Device Bag 文件解封的处理流程是：</p>
 <ol>
 <li>安全隔区从<code>Effaceable Storage</code> 区域提取 <code>BAG1</code> ，以获得 key 和 iv 初始向量</li>
 <li>系统进程<code>MKBPayload</code>读取 <code>systembag.kb</code> 文件内容并进行解密，获得所有类密钥的密文<code>Class Key!</code></li>
 </ol>
-<p><img src="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/keybag.png" alt="二进制文件参考"></p>
+<p><img src="/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/keybag.png" alt="二进制文件参考"></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">get_bag1</span></span><br><span class="line">iv = e859f45ec0a3ab208ec61477b74e92f0</span><br><span class="line">key = 71ebb0dd387647d7b1c4d10161f5f0b622937867ffe437e41a02ccaacfe8ffb2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./decrypt_systembag.py -k 71ebb0dd387647d7b1c4d10161f5f0b622937867ffe437e41a02ccaacfe8ffb2 -i e859f45ec0a3ab208ec61477b74e92f0 -o example/keybag example/systembag.kb</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./parse_keybag.py example/keybag</span></span><br><span class="line">HEADER</span><br><span class="line">  VERS = 4      // 2- iOS 4.3 ，3 - iOS 5</span><br><span class="line">  TYPE = 0      // 0 - System，1 - Backup，3 - Escrow</span><br><span class="line">  UUID = cf7591b3dfc64ce8b4c36018fba96374</span><br><span class="line">  HMCK = e0d8a575d2af7d15bcb26de7688d7c84eb9a4711a845b3c5d56b49c94bdc4216f165ecb4ea97ec18   // HMAC 校验值</span><br><span class="line">  WRAP = 1      // 1 - UID 保护</span><br><span class="line">  SALT = a358808b695d260c8a21ec801ce43db3efafecda       // 用于 Passcode KDF 的参数？</span><br><span class="line">  ITER = 50000                                          // 用于 Passcode KDF 的参数？</span><br><span class="line">  TKMT = 0</span><br><span class="line">  SART = 98</span><br><span class="line">  UUID = 9ab835423fe14b8c99b4be0ae6b066a3</span><br><span class="line">KEYS</span><br><span class="line">  0:</span><br><span class="line">    CLAS = 1    // NSFileProtectionComplete 类</span><br><span class="line">    WRAP = 3    // 3 - UID &amp; Passcode Key 保护</span><br><span class="line">    KTYP = 0</span><br><span class="line">    WPKY = 150dd562e3c6a441a879e154617d758af77553121c2b70114e32f6ad87a5819b375c724adee094ee // 该类密钥的密文</span><br><span class="line">    UUID = 9d4e1c3567cc41058b3d2ee381aaa48b</span><br><span class="line">  1:</span><br><span class="line">    CLAS = 2    // NSFileProtectionCompleteUnlessOpen 类</span><br><span class="line">    WRAP = 3</span><br><span class="line">    KTYP = 1</span><br><span class="line">    WPKY = 0df35185f13495d49596531f38d7114e77134a91c16915a14f2531241a78afc0ae4deeaefd2d5933 // 类密钥，就是静态私钥！</span><br><span class="line">    PBKY = 0252ce8f8acc7068e4ca64cab9227035460ed5cef0661818b382e88609b1a908       // 额外存储了静态公钥！</span><br><span class="line">  2:</span><br><span class="line">    UUID = 6f537c62fd22484095c2836b227a38eb</span><br><span class="line">    CLAS = 3    // NSFileProtectionCompleteUntilFirstUserAuthentication 类</span><br><span class="line">    WRAP = 3</span><br><span class="line">    KTYP = 0</span><br><span class="line">    WPKY = 055c81e0fbc7eac3eee65e92a64c53178a95a48df6b0fa0d0ed24f3eb6b2cac9105772f6cb32c391</span><br><span class="line">  3:</span><br><span class="line">    UUID = 9136f182f33b46c29499cc253c94a564</span><br><span class="line">    CLAS = 5    // NSFileProtectionRecovery 类，保留未启用！</span><br><span class="line">    WRAP = 3</span><br><span class="line">    KTYP = 0</span><br><span class="line">    WPKY = c5867706ef5cc9d03b7f098a9f1f583e58397a984a17173e8d8e685fc9d2ecbc8bb3c9d76ed89c71</span><br><span class="line">  4:</span><br><span class="line">    UUID = 4703951420ef4ceca92d3d6e35aceb02</span><br><span class="line">    CLAS = 6</span><br><span class="line">    WRAP = 3</span><br><span class="line">    KTYP = 0</span><br><span class="line">    WPKY = acb3be303c103526aee718633a1bd946720dd128460bf54bcee99408f9ffe281a96cf352eaf5c710</span><br><span class="line">  5:</span><br><span class="line">    UUID = e42e8612890b48c8bee12f7c3f5510f2</span><br><span class="line">    CLAS = 7</span><br><span class="line">    WRAP = 3</span><br><span class="line">    KTYP = 0</span><br><span class="line">    WPKY = 52a6d7f05a62ccf906ce449f26325f518ad468e6d53a98bff309ac89eba088983148bada67e29a36</span><br><span class="line">  6:</span><br><span class="line">    UUID = 34addd5fffcb4b619d377301e49b16d5</span><br><span class="line">    CLAS = 8</span><br><span class="line">    WRAP = 1</span><br><span class="line">    KTYP = 0</span><br><span class="line">    WPKY = 9f2ddbeeb002c9897f1486244cfa5cb948cd13c23d7c480513b8be36f46a11d1</span><br><span class="line">  7:</span><br><span class="line">    UUID = c703f8b157b44418acbb3de1d5f35178</span><br><span class="line">    CLAS = 9</span><br><span class="line">    WRAP = 3</span><br><span class="line">    KTYP = 0</span><br><span class="line">    WPKY = a777da0779ee752fb9d7f0651ed83c7c16945af3723f30d8d82afc26eb076b99220ebffeebf1b53c</span><br><span class="line">  8:</span><br><span class="line">    UUID = a72aa7d9d1ea4ab6ab6a27c89961d4d4</span><br><span class="line">    CLAS = 10</span><br><span class="line">    WRAP = 3</span><br><span class="line">    KTYP = 0</span><br><span class="line">    WPKY = b7ac60ea56917249d094fd21c44728cd77621f566e7ea6538c3475a2b3d43c6061b0fbc320eb7376</span><br><span class="line">  9:</span><br><span class="line">    UUID = 568dfdd2f8ae4edd9ae7f22bba3c9ce2</span><br><span class="line">    CLAS = 11</span><br><span class="line">    WRAP = 1</span><br><span class="line">    KTYP = 0</span><br><span class="line">    WPKY = 44389e92846f2c7bf1294be2fcaf88153638a881197590df03e0303b1af6ac47</span><br></pre></td></tr></table></figure>
 
 <p>请注意：</p>
@@ -316,13 +310,13 @@
 </ul>
 <figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">PROTECTION_CLASSES=&#123;</span><br><span class="line">    <span class="comment"># 文件保护类型的定义</span></span><br><span class="line">    <span class="number">1</span>:<span class="string">&quot;NSFileProtectionComplete&quot;</span>,</span><br><span class="line">    <span class="number">2</span>:<span class="string">&quot;NSFileProtectionCompleteUnlessOpen&quot;</span>,</span><br><span class="line">    <span class="number">3</span>:<span class="string">&quot;NSFileProtectionCompleteUntilFirstUserAuthentication&quot;</span>,</span><br><span class="line">    <span class="number">4</span>:<span class="string">&quot;NSFileProtectionNone&quot;</span>,       <span class="comment"># 已废弃，DKey 的存储位置改为 Effaceable Storage</span></span><br><span class="line">    <span class="number">5</span>:<span class="string">&quot;NSFileProtectionRecovery?&quot;</span>,  <span class="comment"># 未使用</span></span><br><span class="line">    <span class="comment"># 钥匙串类型的定义</span></span><br><span class="line">    <span class="number">6</span>: <span class="string">&quot;kSecAttrAccessibleWhenUnlocked&quot;</span>,</span><br><span class="line">    <span class="number">7</span>: <span class="string">&quot;kSecAttrAccessibleAfterFirstUnlock&quot;</span>,</span><br><span class="line">    <span class="number">8</span>: <span class="string">&quot;kSecAttrAccessibleAlways&quot;</span>,</span><br><span class="line">    <span class="number">9</span>: <span class="string">&quot;kSecAttrAccessibleWhenUnlockedThisDeviceOnly&quot;</span>,</span><br><span class="line">    <span class="number">10</span>: <span class="string">&quot;kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly&quot;</span>,</span><br><span class="line">    <span class="number">11</span>: <span class="string">&quot;kSecAttrAccessibleAlwaysThisDeviceOnly&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="2-Class-Key-的解封"><a href="#2-Class-Key-的解封" class="headerlink" title="2. Class Key 的解封"></a>2. Class Key 的解封</h3><p><img src="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/unlock2.png" alt="核心流程"><br>对于这些 <code>Class Key!</code>, 有3种解密方式：</p>
+<h3 id="2-Class-Key-的解封"><a href="#2-Class-Key-的解封" class="headerlink" title="2. Class Key 的解封"></a>2. Class Key 的解封</h3><p><img src="/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/unlock2.png" alt="核心流程"><br>对于这些 <code>Class Key!</code>, 有3种解密方式：</p>
 <ul>
 <li>WRAP &#x3D; 1 ：只有 Device Key 保护，通过 AES_Decrypt 算法解密</li>
 <li>WRAP &#x3D; 2 ：只有 Passcode Key 保护，通过 AES_Unwrap 算法解封</li>
 <li>WRAP &#x3D; 3 ：模式1 + 模式2，首先使用 Passcode Key 解封，再使用 Device Key 解密</li>
 </ul>
-<p>更加具体的算法描述，请参见下图。<br><img src="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0/unlock.png" alt="unlock"></p>
+<p>更加具体的算法描述，请参见下图。<br><img src="/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/unlock.png" alt="unlock"></p>
 <ol>
 <li>用户（开机时）必须手工输入 passcode</li>
 <li>安全隔区提取 Salt 盐值和 Iter 迭代次数，再次计算 Passcode Key<br> <code>Passcode Key = PBKDF2(passcode, salt, iter, outputLength=32)</code></li>
@@ -367,16 +361,12 @@
 </ol>
 <hr>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/nabla-c0d3/iphone-dataprotection">iphone-dataprotection 工具包 - Github</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xumenger/p/4491425.html">Linux文件系统简介</a></li>
 <li><a target="_blank" rel="noopener" href="https://rfc2cn.com/rfc3394.html">ATS-Key-Wrap 算法的 RFC 3394 规范</a></li>
 <li><a target="_blank" rel="noopener" href="https://blog.csdn.net/XiNGRZ/article/details/5332915">解密iPhone的固件</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/237769">通过侧信道分析加强对iPhone用户身份验证的暴力破解攻击</a></li>
-</ul>
-<h3 id="Apple官方文档"><a href="#Apple官方文档" class="headerlink" title="Apple官方文档"></a>Apple官方文档</h3><ul>
-<li><a href="apple-platform-security-guide.pdf">Apple 平台安全白皮书 - 2022年英文版</a></li>
-<li><a href="apple%E5%B9%B3%E5%8F%B0%E5%AE%89%E5%85%A8%E7%99%BD%E7%9A%AE%E4%B9%A6-2021%E4%B8%AD%E6%96%87%E7%89%88.pdf">Apple 平台安全白皮书 - 2021年中文版</a></li>
-<li><a href="Apple_T2_Security_Chip_Overview.pdf">Apple T2 安全芯片概览</a></li>
-<li><a href="Apple-File-System-Reference.pdf">APFS 文件系统参考手册</a></li>
+<li><a target="_blank" rel="noopener" href="https://page.om.qq.com/page/O3yauEIx2l-9WrUkHgQgRUBw0">你的安卓手机究竟是FDE加密还是FBE加密？</a></li>
 </ul>
 
     </div>
@@ -391,14 +381,11 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%BA%8C%EF%BC%9A%E5%AF%86%E9%92%A5%E5%B1%82%E7%BA%A7/" rel="prev" title="Apple数据保护技术专题之二：密钥层级">
-                  <i class="fa fa-angle-left"></i> Apple数据保护技术专题之二：密钥层级
+                <a href="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" rel="prev" title="Apple FileVault的技术分析">
+                  <i class="fa fa-angle-left"></i> Apple FileVault的技术分析
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/" rel="next" title="基于椭圆曲线的ECC非对称密码系统">
-                  基于椭圆曲线的ECC非对称密码系统 <i class="fa fa-angle-right"></i>
-                </a>
             </div>
           </div>
     </footer>
@@ -430,14 +417,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">207k</span>
+    <span title="站点总字数">204k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:33</span>
+    <span title="站点阅读时长">12:23</span>
   </span>
 </div>
 <div class="busuanzi-count">
