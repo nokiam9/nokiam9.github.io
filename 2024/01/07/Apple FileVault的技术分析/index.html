@@ -27,11 +27,12 @@
 <meta property="og:description" content="FileVault 的意思是文件保管箱，是 Apple 公司为 Mac 电脑提供的、基于 MacOS 的加密技术方案，其本质归类于 FDE（Full Disk Encryption，全盘加密）。 注意！与之对应的，为 iPhone 提供的、基于 iOS 的 DataProtect （数据保护）加密技术方案，其本质归类于 FBE（File Based Encryption，文件加密）。  一、Leg">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/lvf.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/apfs_concepts.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/recovery-key.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/apfs.png">
 <meta property="article:published_time" content="2024-01-07T08:07:04.000Z">
-<meta property="article:modified_time" content="2024-01-08T18:29:01.127Z">
+<meta property="article:modified_time" content="2024-01-09T17:14:46.253Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/lvf.jpg">
@@ -143,7 +144,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Legacy-FileVault"><span class="nav-text">一、Legacy FileVault</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E4%BA%8E-CoreStorage-%E7%9A%84-FileVault-2"><span class="nav-text">二、基于 CoreStorage 的 FileVault 2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AES-XTS%E7%9A%84%E5%AF%86%E9%92%A5%E5%B1%82%E6%AC%A1%E6%9E%B6%E6%9E%84"><span class="nav-text">AES-XTS的密钥层次架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Volume-Master-Key%EF%BC%88VMK%EF%BC%89-%E5%88%86%E7%BB%84%E5%AF%86%E9%92%A5-key1"><span class="nav-text">1. Volume Master Key（VMK）- 分组密钥 key1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Volume-tweak-key-%E5%8F%AF%E8%B0%83%E6%95%B4%E5%AF%86%E9%92%A5-key2"><span class="nav-text">2. Volume tweak key - 可调整密钥 key2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-EncryptedRoot-plist-wipekey-%E5%AF%86%E9%92%A5%E6%96%87%E4%BB%B6"><span class="nav-text">3. EncryptedRoot.plist.wipekey - 密钥文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-Recovery-key-%E6%81%A2%E5%A4%8D%E5%AF%86%E9%92%A5"><span class="nav-text">4. Recovery key - 恢复密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-User-Key-%E7%94%A8%E6%88%B7%E5%AF%86%E7%A0%81"><span class="nav-text">5. User Key - 用户密码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E5%B0%8F%E7%BB%93"><span class="nav-text">6. 小结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%9F%BA%E4%BA%8E-APFS-%E7%9A%84-FileVault"><span class="nav-text">三、基于 APFS 的 FileVault</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Legacy-FileVault"><span class="nav-text">一、Legacy FileVault</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E4%BA%8E-CoreStorage-%E7%9A%84-FileVault-2"><span class="nav-text">二、基于 CoreStorage 的 FileVault 2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%BB%E8%BE%91%E5%8D%B7%E7%AE%A1%E7%90%86%E5%99%A8-CoreStorage"><span class="nav-text">逻辑卷管理器 CoreStorage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FDE-%E5%8A%A0%E5%AF%86"><span class="nav-text">FDE 加密</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%9F%BA%E4%BA%8E-APFS-%E7%9A%84-FileVault"><span class="nav-text">三、基于 APFS 的 FileVault</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Container-%E5%AE%B9%E5%99%A8"><span class="nav-text">Container 容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FDE%E5%8A%A0%E5%AF%86-FBE%E5%8A%A0%E5%AF%86"><span class="nav-text">FDE加密 + FBE加密</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9A%E6%96%87%E4%BB%B6%E5%AF%86%E9%92%A5%E7%9A%84%E5%B1%82%E7%BA%A7%E7%BB%93%E6%9E%84"><span class="nav-text">附录一：文件密钥的层级结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E6%B5%81%E7%A8%8B"><span class="nav-text">工作流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9AFileValut-2-%E7%9A%84%E8%A7%A3%E5%AF%86%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="nav-text">附录二：FileValut 2 的解密代码实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Volume-Master-Key%EF%BC%88VMK%EF%BC%89-%E5%88%86%E7%BB%84%E5%AF%86%E9%92%A5-key1"><span class="nav-text">Volume Master Key（VMK）- 分组密钥 key1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Volume-tweak-key-%E5%8F%AF%E8%B0%83%E6%95%B4%E5%AF%86%E9%92%A5-key2"><span class="nav-text">Volume tweak key - 可调整密钥 key2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#EncryptedRoot-plist-wipekey-%E5%AF%86%E9%92%A5%E6%96%87%E4%BB%B6"><span class="nav-text">EncryptedRoot.plist.wipekey - 密钥文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-Recovery-key-%E6%81%A2%E5%A4%8D%E5%AF%86%E9%92%A5"><span class="nav-text">4. Recovery key - 恢复密钥</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%89%EF%BC%9A%E9%80%9A%E8%BF%87-diskutil-%E5%91%BD%E4%BB%A4%E6%9F%A5%E7%9C%8B-APFS-%E7%B3%BB%E7%BB%9F%E4%BF%A1%E6%81%AF"><span class="nav-text">附录三：通过 diskutil 命令查看 APFS 系统信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -230,7 +231,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-01-09 02:29:01" itemprop="dateModified" datetime="2024-01-09T02:29:01+08:00">2024-01-09</time>
+      <time title="修改时间：2024-01-10 01:14:46" itemprop="dateModified" datetime="2024-01-10T01:14:46+08:00">2024-01-10</time>
     </span>
 
   
@@ -247,14 +248,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.5k</span>
+      <span>3.6k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>9 分钟</span>
+      <span>13 分钟</span>
     </span>
 </div>
 
@@ -275,18 +276,53 @@
 <li>MacOS 置于睡眠模式时，内存写入<code>/var/vm/sleepimage</code>，存在密钥泄露风险</li>
 </ul>
 <p>这些问题的根源，还是由于底层文件系统 HFS+ 不支持 FDE 加密，只能基于“应用软件模拟 + 专用磁盘镜像”的替代方式实现，导致功能受限而且效率低下。</p>
-<h2 id="二、基于-CoreStorage-的-FileVault-2"><a href="#二、基于-CoreStorage-的-FileVault-2" class="headerlink" title="二、基于 CoreStorage 的 FileVault 2"></a>二、基于 CoreStorage 的 FileVault 2</h2><p>2010年，Mac OS X Lion (狮子，10.7) 发布了 FileVault 2，推出一个重新设计的 FDE 方案。</p>
-<ol>
-<li>启动卷宗的分区改为一个 CoreStorage 管理的加密卷，并增加了一个 Recovery HD 分区卷；</li>
-<li>加密标准改为 NIST 推荐的 AES-XTS，分组长度为128位，密钥长度为256位；</li>
-<li>支持<strong>用户登录密码</strong>作为加密因子；</li>
-</ol>
+<h2 id="二、基于-CoreStorage-的-FileVault-2"><a href="#二、基于-CoreStorage-的-FileVault-2" class="headerlink" title="二、基于 CoreStorage 的 FileVault 2"></a>二、基于 CoreStorage 的 FileVault 2</h2><p>2010年，Mac OS X Lion (狮子，10.7) 发布了 FileVault 2，基于 CoreStorage 虚拟化技术推出一个重新设计的 FDE 方案。</p>
+<h3 id="逻辑卷管理器-CoreStorage"><a href="#逻辑卷管理器-CoreStorage" class="headerlink" title="逻辑卷管理器 CoreStorage"></a>逻辑卷管理器 CoreStorage</h3><p>CoreStorage 是 Apple 开发的 LVM（Logic Volume Manager，逻辑卷管理器），作为磁盘和文件系统之间的虚拟化层，增加了操作系统存储分配的灵活性，类似于赛门铁克的 Veritas Volume Manager 和 OSF LVM，但底层文件系统仍然是 HFS+。<br>Apple 还引入了一个新概念 LVF（logical volume family，逻辑卷系列），用于指定将由它所包含的逻辑卷继承的属性（目前只有 FileVault），但以后可能用于新的性能特征。</p>
+<p>现在，当使用 FileVault 2 加密时，MacOS 会自动将已有数据卷转换为 CoreStorage 卷，并将分区封装为 PV，将其导入 LVG，并设置 LVF 和 LV 以包含新的文件系统。启动卷宗的分区改为一个 CoreStorage 管理的加密卷，并增加了一个 Recovery HD 分区卷。</p>
 <p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/lvf.jpg" alt="LVF"></p>
-<p>CoreStorage 是 Apple 开发的 LVM（Logic Volume Manager，逻辑卷管理器），作为磁盘和文件系统之间的虚拟化层，增加了操作系统存储分配的灵活性，类似于赛门铁克的 Veritas Volume Manager 和 OSF LVM，但底层文件系统仍然是 HFS+。<br>Apple 还引入了一个新概念 LVF（logical volume family，逻辑卷系列），用于指定将由它所包含的逻辑卷继承的属性（目前只有 FileVault），但以后可能用于新的性能特征。<br>现在，当使用 FileVault 2 加密时，MacOS 会自动将已有数据卷转换为 CoreStorage 卷，并将分区封装为 PV，将其导入 LVG，并设置 LVF 和 LV 以包含新的文件系统。<br>对于支持 AES 指令集的 CPU（如Intel Broadwell 架构），AES-128-XTS 加密模式只有 3% 左右的性能损耗，但对于不支持该指令集的 CPU（如早期的酷睿CPU）会有明显的性能下降。</p>
-<h3 id="AES-XTS的密钥层次架构"><a href="#AES-XTS的密钥层次架构" class="headerlink" title="AES-XTS的密钥层次架构"></a>AES-XTS的密钥层次架构</h3><p>FileValut 2 设计了多个不同类型的密钥。<br><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch.png" alt="密钥层次架构"></p>
-<h4 id="1-Volume-Master-Key（VMK）-分组密钥-key1"><a href="#1-Volume-Master-Key（VMK）-分组密钥-key1" class="headerlink" title="1. Volume Master Key（VMK）- 分组密钥 key1"></a>1. Volume Master Key（VMK）- 分组密钥 key1</h4><p>密钥长度：128位<br>构造方式：<strong>随机生成</strong><br>存储位置：Recovery HD -&gt; <code>EncryptedRoot.plist</code> -&gt; <code>KEKWrappedVolumeKeyStruct</code>字段加密存储</p>
-<h4 id="2-Volume-tweak-key-可调整密钥-key2"><a href="#2-Volume-tweak-key-可调整密钥-key2" class="headerlink" title="2. Volume tweak key - 可调整密钥 key2"></a>2. Volume tweak key - 可调整密钥 key2</h4><p>密钥长度：128位<br>构造方式：$trunc_{128}(SHA256(VolumeMasterKey || LogicVolumeFamilyIdentifier))$</p>
-<h4 id="3-EncryptedRoot-plist-wipekey-密钥文件"><a href="#3-EncryptedRoot-plist-wipekey-密钥文件" class="headerlink" title="3. EncryptedRoot.plist.wipekey - 密钥文件"></a>3. EncryptedRoot.plist.wipekey - 密钥文件</h4><p>在逻辑卷 Recovery HD 中，有一个加密文件包含了提取 VMK 所需的全部信息，路径是<code>com.apple.boot.X/System/Library/Caches/com.apple.corestorage/EncryptedRoot.plist.wipekey</code></p>
+<h3 id="FDE-加密"><a href="#FDE-加密" class="headerlink" title="FDE 加密"></a>FDE 加密</h3><p>随着 NIST 技术标准的演进，FileVault 从 AES-CBC 全面采用了 AES-XTS 磁盘加密模式，分组长度为128位，密钥长度为256位。<br>对于支持 AES 指令集的 CPU（如Intel Broadwell 架构），AES-128-XTS 加密模式只有 3% 左右的性能损耗，但对于不支持该指令集的 CPU（如早期的酷睿CPU）会有明显的性能下降。</p>
+<p>FileVault 2 支持将<strong>用户登录口令</strong>作为加密因子，而且对于 MacOS 系统上的每个用户，FileVault 使用各自的用户密码（目前仅包含 ASCII 字符）来计算用户密钥，并解锁加密数据。这些改进对用户隐私保护发挥了非常积极的作用！</p>
+<p>具体技术实现方案，请参见附录二。</p>
+<h2 id="三、基于-APFS-的-FileVault"><a href="#三、基于-APFS-的-FileVault" class="headerlink" title="三、基于 APFS 的 FileVault"></a>三、基于 APFS 的 FileVault</h2><p>2017年，MacOS High Sierra（内华达脊岭，10.13） 正式启用了 APFS（Apple FileSystem），用于替代古老的 HFS+。<br>作为新一代的文件系统，APFS 专门针对闪存&#x2F;SSD进行优化（但依然可用于传统机械硬盘），提供了更强大的加密、写入时复制元数据、空间分享、文件和目录克隆、快照、目录大小快速调整、原子级安全存储基元，以及改进的文件系统底层技术，将全面应用于该公司旗下 MacOS、iOS、iPadOS、tvOS、watchOS等所有设备中。其突出特点包括：</p>
+<ul>
+<li>inode编码长度提高到64位，单一Volume的文件数量大大增加；时间戳精度提高到纳秒，有助于实现原子性和原子事务；目录大小是单独存储的，无需每次实时计算目录容量；文件和文件夹名称被规范化，完全支持Unicode</li>
+<li>支持COW（Copy On Write，写入时复制）：几乎立即复制文件或目录，元数据多次存在于文件结构中，但共享相同的数据存储空间；修改克隆时，文件系统仅记录数据更改</li>
+<li>支持快照（Snapshot）：支持创建特点时间点、文件系统只读实例的快照</li>
+<li>支持空间共享：容器中的所有卷共享相同的底层空间，实际上整合了 CoreStorage 的LVM</li>
+</ul>
+<h3 id="Container-容器"><a href="#Container-容器" class="headerlink" title="Container 容器"></a>Container 容器</h3><p>APFS 引入了 container（容器）的概念，使用 GPT 分区方案，单一容器内部包含多个 Volume，这些逻辑卷共享物理存储容量，并可以相互读取数据，但是不能与其他容器共享数据。<br><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/apfs_concepts.png" alt="AFPS"></p>
+<ul>
+<li>GPT 方案中有一个或多个 APFS 容器</li>
+<li>每个容器内都有一个或多个 APFS 卷，所有这些卷共享分配给容器的空间，并且每个卷都可以具有 APFS 卷的角色</li>
+<li>MacOS 10.15 Catalina 引入了 APFS Volume Group，在 Finder 中显示为单个卷</li>
+<li>MacOS 10.15 Catalina 中，系统卷角色（通常名为“Macintosh HD”）设为只读，而在 MacOS 11 Big Sur 中，它变为签名系统卷 (SSV)，并且仅挂载卷快照。</li>
+<li>数据卷角色（通常称为 Macintosh HD - 数据）用作系统卷的覆盖或影子，其中系统卷和数据卷属于同一卷组，并且在 Finder 中被视为一个卷</li>
+</ul>
+<h3 id="FDE加密-FBE加密"><a href="#FDE加密-FBE加密" class="headerlink" title="FDE加密 + FBE加密"></a>FDE加密 + FBE加密</h3><p>关于加密功能，APFS完全实现了文件系统层级的内置，包括：</p>
+<ol>
+<li>支持对容器、卷和文件使用的数据结构进行加密。当一个volume是加密的，它的文件系统树和该卷中的文件内容都是加密的</li>
+<li>支持三种加密模型：不加密、单密钥加密、多密钥加密。也就是统一实现了 FDE 和 FBE，但 MacOS 目前似乎仅支持 FDE 模式？</li>
+<li>支持硬件加密和软件加密。<br> 硬件加密适用于Apple提供的内置存储（例如带有T2安全芯片的 MacOS 和 iOS 设备）；<br> 软件加密适用于用于外部存储，以及不支持硬件加密的设备上的内部存储；<br> 使用硬件加密时，只有操作系统内核可以与内部存储交互；<br> 根据硬件的不同，可以使用 AES-XTS 或 AES-CBC 加密模式。</li>
+</ol>
+<hr>
+<h2 id="附录一：文件密钥的层级结构"><a href="#附录一：文件密钥的层级结构" class="headerlink" title="附录一：文件密钥的层级结构"></a>附录一：文件密钥的层级结构</h2><p>用于访问文件数据的密钥需要在磁盘上持久化存储，当然必须是加密状态。<br>以 FDE 磁盘级加密为例，FileValut 2 称为 VMK（Volume Master Key），APFS 称为 VEK（Volume Encryption Key）。</p>
+<p>用于加密或打开文件密钥的保护密钥称为 KEK（Key Encryption Key）。<br>一般来说，如果采用对称加密算法，称为密钥包裹（Key wrapping）；如果采用非对称算法，称为密钥封装（Key encapsulation）。</p>
+<h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><p>Apple公司定义了几种获得 KEK 的方式：</p>
+<ul>
+<li>用户口令（User password）：系统登录时用户输入口令。为保证必要的安全强度，系统实际使用的密钥必须经过密钥拉伸</li>
+<li>个人恢复密钥（Personal recovery key）：在格式化驱动器时生成的，并由用户保存在纸上或打印输出，系统或厂商并不留存</li>
+<li>机构恢复密钥（Institutional recovery key）：允许相应的公司获得 KEK，需要用户设置后生效，或者厂商偷偷强制设置！</li>
+<li>远程恢复密钥（iCloud recovery key）：用户在Apple公司的远程支持下进行系统恢复</li>
+</ul>
+<p>为支持不同的场景，keyBag 将同时存储多个 KEK 的副本，例如用户口令采用密钥包裹方式存储，而 iCloud 恢复密钥采用非对称的公钥加密存储，不同场景使用不同的包裹密钥，这也体现了多层级密钥管理的价值所在。</p>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><p>上述多个密钥组成了一个链条，形成密钥的层次结构，以伪代码描述其工作流程：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 基于用户口令进行密钥拉伸获得 passcode key</span></span><br><span class="line">p = get_user_password()</span><br><span class="line">salt = get_salt_from_PassphraseWrappedKEK()</span><br><span class="line">iterations = <span class="number">41000</span></span><br><span class="line">pk = pbkdf2(p, salt, iterations, HMAC-SHA256)</span><br><span class="line"><span class="comment">// 基于passcode key 获得 KEK</span></span><br><span class="line">kek_wrapped = get_kek_from_PassphraseWrappedKEK()</span><br><span class="line">kek = aes_unwrap(kek_wrapped, pk)</span><br><span class="line"><span class="comment">// 基于 KEK 获得 VMK</span></span><br><span class="line">vmk_wrapped = get_vmk_from_KEKWrappedVolumeKey()</span><br><span class="line">vmk = aes_unwrap(vmk_wrapped, kek)</span><br><span class="line"><span class="comment">// 基于 VMK 解密文件系统B+树，并访问文件数据</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="附录二：FileValut-2-的解密代码实例"><a href="#附录二：FileValut-2-的解密代码实例" class="headerlink" title="附录二：FileValut 2 的解密代码实例"></a>附录二：FileValut 2 的解密代码实例</h2><p>基于 AES-XTS磁盘加密模式， FileValut 2 的密钥层级结构如下图。<br>参考<a target="_blank" rel="noopener" href="https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc">FVDE工具包</a>，可以掌握 FileVault 2的技术实现细节。</p>
+<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch.png" alt="密钥层次架构"></p>
+<h3 id="Volume-Master-Key（VMK）-分组密钥-key1"><a href="#Volume-Master-Key（VMK）-分组密钥-key1" class="headerlink" title="Volume Master Key（VMK）- 分组密钥 key1"></a>Volume Master Key（VMK）- 分组密钥 key1</h3><p>密钥长度：128位<br>构造方式：<strong>随机生成</strong><br>存储位置：Recovery HD -&gt; <code>EncryptedRoot.plist</code> -&gt; <code>KEKWrappedVolumeKeyStruct</code>字段加密存储</p>
+<h3 id="Volume-tweak-key-可调整密钥-key2"><a href="#Volume-tweak-key-可调整密钥-key2" class="headerlink" title="Volume tweak key - 可调整密钥 key2"></a>Volume tweak key - 可调整密钥 key2</h3><p>密钥长度：128位<br>构造方式：$trunc_{128}(SHA256(VolumeMasterKey || LogicVolumeFamilyIdentifier))$</p>
+<h3 id="EncryptedRoot-plist-wipekey-密钥文件"><a href="#EncryptedRoot-plist-wipekey-密钥文件" class="headerlink" title="EncryptedRoot.plist.wipekey - 密钥文件"></a>EncryptedRoot.plist.wipekey - 密钥文件</h3><p>在逻辑卷 Recovery HD 中，有一个加密文件包含了提取 VMK 所需的全部信息，路径是<code>com.apple.boot.X/System/Library/Caches/com.apple.corestorage/EncryptedRoot.plist.wipekey</code></p>
 <p>这个文件本身也是基于 AES-XTS 加密的，可调整密钥设置为 128位的全零，分组密钥保存在 CoreStorage header 的<code>Physical Volume Identifier</code>字段中，请参见<a href="2012-374.pdf">Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary</a>论文附录（第13页）的 Table 2。</p>
 <p>plist文件解密成功后，其内容示例见下：</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">plist</span> <span class="keyword">PUBLIC</span> <span class="string">&quot;-//Apple//DTD PLIST 1.0//EN&quot;</span> <span class="string">&quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">plist</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>ConversionInfo<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">key</span>&gt;</span>ConversionStatus<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">string</span>&gt;</span>Complete<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">key</span>&gt;</span>TargetContext<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">integer</span>&gt;</span>1<span class="tag">&lt;/<span class="name">integer</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>CryptoUsers<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>PassphraseWrappedKEKStruct<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                        <span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                ...</span><br><span class="line">                <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>LastUpdateTime<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">integer</span>&gt;</span>1323243315<span class="tag">&lt;/<span class="name">integer</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>WrappedVolumeKeys<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>BlockAlgorithm<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">string</span>&gt;</span>None<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>KEKWrappedVolumeKeyStruct<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>BlockAlgorithm<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">string</span>&gt;</span>AES-XTS<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>KEKWrappedVolumeKeyStruct<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                        <span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plist</span>&gt;</span></span><br></pre></td></tr></table></figure>
@@ -298,25 +334,16 @@
 <li>KEKWrappedVolumeKeyStruct(1)：未使用！标记为 None</li>
 <li>KEKWrappedVolumeKeyStruct(2)：VMK 的包裹信息，标记为 AES-XTS</li>
 </ul>
-<p>上述 struct 的结构定义，请参见<a href="2012-374.pdf">Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary</a>论文附录（第13页）的 Table 3 和 Table 4</p>
-<h4 id="4-Recovery-key-恢复密钥"><a href="#4-Recovery-key-恢复密钥" class="headerlink" title="4. Recovery key - 恢复密钥"></a>4. Recovery key - 恢复密钥</h4><p>启用 FileVault 时，系统自动生成并要求用户保存<code>Recovery key</code>，此密钥可以用来解封 VMK。<br><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/recovery-key.png" alt="RE"><br>使用 PBKDF2 算法恢复 VMK（注意恢复密钥是字符串格式，包括数字之间的破折号）：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">PK = PBKDF2( PRF=SHA256, password=Recovery key,</span><br><span class="line">    salt=PassphraseWrappedKEKStruct.salt,</span><br><span class="line">    iters=<span class="number">41000</span>, dk_len=<span class="number">128</span>)</span><br><span class="line">KEK = AES_Unwrap(PassphraseWrappedKEKStruc.AES-wrapped-volume-KEK, PK)</span><br><span class="line">VMK = AES_Unwrap(KEKWrappedVolumeKeyStruct.AES-wrapped-volume-key, KEK)</span><br></pre></td></tr></table></figure>
+<p>上述 struct 的结构定义，请参见<a href="2012-374.pdf">Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary</a>论文附录（第13页）的 Table 3 和 Table 4。<br>注意！MacOS 的每个用户都有其自己关联的 PassphraseWrappedKEKStruct，按照与恢复密钥相同的方式计算并使用相应的用户密钥来获取卷主密钥。</p>
+<h4 id="4-Recovery-key-恢复密钥"><a href="#4-Recovery-key-恢复密钥" class="headerlink" title="4. Recovery key - 恢复密钥"></a>4. Recovery key - 恢复密钥</h4><p>启用 FileVault 时，系统自动生成并要求用户保存<code>Recovery password</code>，可以用来解封 VMK。</p>
+<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/recovery-key.png" alt="RE"></p>
+<p>使用 PBKDF2 算法恢复 VMK（注意恢复密钥是字符串格式，包括数字之间的破折号）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Recovery key = PBKDF2( PRF=SHA256, password=Recovery password,</span><br><span class="line">    salt=PassphraseWrappedKEKStruct.salt,</span><br><span class="line">    iters=<span class="number">41000</span>, dk_len=<span class="number">128</span>)</span><br><span class="line">KEK = AES_Unwrap(PassphraseWrappedKEKStruc.AES-wrapped-volume-KEK, Recovery key)</span><br><span class="line">VMK = AES_Unwrap(KEKWrappedVolumeKeyStruct.AES-wrapped-volume-key, KEK)</span><br></pre></td></tr></table></figure>
 
-<p>迭代次数存储在<code>PassphraseWrappedKEKStruct</code>中，但对于 Mac OS 10.7 似乎始终为 41000。</p>
-<h4 id="5-User-Key-用户密码"><a href="#5-User-Key-用户密码" class="headerlink" title="5. User Key - 用户密码"></a>5. User Key - 用户密码</h4><p>对于 Mac OS 系统上的每个用户，FileVault 使用各自的用户密码（目前仅包含 ASCII 字符）来计算用户密钥，并解锁加密数据。<br>每个用户都有其自己关联的 PassphraseWrappedKEKStruct，按照与恢复密钥相同的方式计算并使用相应的用户密钥来获取卷主密钥。</p>
-<h4 id="6-小结"><a href="#6-小结" class="headerlink" title="6. 小结"></a>6. 小结</h4><p>上述过程以伪代码表示如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">p = get_user_password()</span><br><span class="line">salt = get_salt_from_PassphraseWrappedKEK()</span><br><span class="line">iterations = <span class="number">41000</span></span><br><span class="line">pk = pbkdf2(p, salt, iterations, HMAC-SHA256)</span><br><span class="line">kek_wrapped = get_kek_from_PassphraseWrappedKEK()</span><br><span class="line">kek = aes_unwrap(kek_wrapped, pk)</span><br><span class="line">vmk_wrapped = get_vmk_from_KEKWrappedVolumeKey()</span><br><span class="line">vmk = aes_unwrap(vmk_wrapped, kek)</span><br></pre></td></tr></table></figure>
-
-<h2 id="三、基于-APFS-的-FileVault"><a href="#三、基于-APFS-的-FileVault" class="headerlink" title="三、基于 APFS 的 FileVault"></a>三、基于 APFS 的 FileVault</h2><p>2017年，MacOS High Sierra（内华达脊岭，10.13） 发布了 APFS（Apple FileSystem），用于替代古老的 HFS+，并完全整合了 CoreStorage，实现了原生的 FileVault。</p>
-<p>APFS 引入了 container（容器）的概念，使用 GPT 分区方案，单一容器内部包含多个 Volume，这些逻辑卷共享物理存储容量，并可以相互读取数据，但是不能与其他容器共享数据。</p>
-<ul>
-<li>GPT 方案中有一个或多个 APFS 容器</li>
-<li>每个容器内都有一个或多个 APFS 卷，所有这些卷共享分配给容器的空间，并且每个卷都可以具有 APFS 卷的角色</li>
-<li>MacOS 10.15 Catalina 引入了 APFS Volume Group，在 Finder 中显示为单个卷</li>
-<li>MacOS 10.15 Catalina 中，系统卷角色（通常名为“Macintosh HD”）设为只读，而在 MacOS 11 Big Sur 中，它变为签名系统卷 (SSV)，并且仅挂载卷快照。</li>
-<li>数据卷角色（通常称为 Macintosh HD - 数据）用作系统卷的覆盖或影子，其中系统卷和数据卷属于同一卷组，并且在 Finder 中被视为一个卷</li>
-</ul>
-<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/apfs.png" alt="a"></p>
+<blockquote>
+<p>注意！Recovery password 需要通过密钥拉伸转化为 Recovery key。<br>迭代次数存储在<code>PassphraseWrappedKEKStruct</code>中，但对于 Mac OS 10.7 似乎始终为 41000。</p>
+</blockquote>
+<h2 id="附录三：通过-diskutil-命令查看-APFS-系统信息"><a href="#附录三：通过-diskutil-命令查看-APFS-系统信息" class="headerlink" title="附录三：通过 diskutil 命令查看 APFS 系统信息"></a>附录三：通过 diskutil 命令查看 APFS 系统信息</h2><p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/apfs.png" alt="a"></p>
 <p>命令行<code>df -h</code>查看文件系统</p>
 <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sj@JiandeiMac ~ % df -h</span><br><span class="line">Filesystem      Size   Used  Avail Capacity iused      ifree %iused  Mounted on</span><br><span class="line">/dev/disk1s5   234Gi   10Gi   29Gi    27%  488433 2448636927    0%   /</span><br><span class="line">devfs          190Ki  190Ki    0Bi   100%     659          0  100%   /dev</span><br><span class="line">/dev/disk1s1   234Gi  191Gi   29Gi    87% 3218923 2445906437    0%   /System/Volumes/Data</span><br><span class="line">/dev/disk1s4   234Gi  2.0Gi   29Gi     7%       2 2449125358    0%   /private/var/vm</span><br><span class="line">map auto_home    0Bi    0Bi    0Bi   100%       0          0  100%   /System/Volumes/Data/home</span><br><span class="line">/dev/disk1s3   234Gi  505Mi   29Gi     2%      50 2449125310    0%   /Volumes/Recovery</span><br></pre></td></tr></table></figure>
 
@@ -344,12 +371,14 @@
 <li><a target="_blank" rel="noopener" href="https://bombich.com/kb/ccc5/working-apfs-volume-groups">Working with APFS Volume Groups</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/c401d546cebf">APFS 科普贴</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.ntfs.com/apfs-structure.htm">APFS Structure</a></li>
+<li><a target="_blank" rel="noopener" href="https://eclecticlight.co/2021/01/14/m1-macs-radically-change-boot-and-recovery/">M1 Macs radically change boot and recovery</a></li>
 <li><a target="_blank" rel="noopener" href="https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc">FileVault Drive Encryption 代码库 - Github</a></li>
 </ul>
 <h3 id="文档下载"><a href="#文档下载" class="headerlink" title="文档下载"></a>文档下载</h3><ul>
 <li><a href="FileVault2%E5%8A%A0%E5%AF%86%E5%88%86%E5%8C%BA%E7%A6%BB%E7%BA%BF%E8%A7%A3%E5%AF%86%E6%8A%80%E6%9C%AF%E5%8F%8A%E5%85%B6%E5%8F%96%E8%AF%81%E5%BA%94%E7%94%A8_%E8%93%9D%E6%9C%9D%E7%A5%A5.pdf">FileVault2加密分区离线解密技术及其取证应用 - 蓝朝祥</a></li>
 <li><a href="slides_fv2_ifip_2013.pdf">Security Analysis and Decryption of FileVault 2 - Omar Choudary</a></li>
 <li><a href="2012-374.pdf">Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary</a></li>
+<li><a href="Apple-File-System-Reference.pdf">APFS技术白皮书</a></li>
 </ul>
 
     </div>
@@ -400,14 +429,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">206k</span>
+    <span title="站点总字数">207k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:29</span>
+    <span title="站点阅读时长">12:33</span>
   </span>
 </div>
 <div class="busuanzi-count">
