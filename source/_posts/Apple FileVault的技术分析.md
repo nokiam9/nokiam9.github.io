@@ -42,7 +42,9 @@ Apple 还引入了一个新概念 LVF（logical volume family，逻辑卷系列�
 
 FileVault 2 支持将**用户登录口令**作为加密因子，而且对于 MacOS 系统上的每个用户，FileVault 使用各自的用户密码（目前仅包含 ASCII 字符）来计算用户密钥，并解锁加密数据。这些改进对用户隐私保护发挥了非常积极的作用！
 
-具体技术实现方案，请参见附录二。
+用户启用 FileVault 时，系统自动生成并要求用户保存`Recovery password`。
+
+![RE](recovery-key.png)
 
 ## 三、基于 APFS 的 FileVault
 
@@ -105,17 +107,7 @@ SSV 具有的内核机制会在运行时验证系统内容的完整性，并拒�
 3. 在 macOS 10.15 Catalina中，这是第一个仅支持 64 位应用程序的 macOS 版本！引入了 Bootstrap Token 功能，也就是为密钥层级增加了 SKP 保护层，并为后续签名系统卷宗 SSV 提供了技术基础。
 4. 在 macOS 11 Big Sur 中，系统宗卷通过签名系统宗卷 SSV 功能进行保护（实际上仅提供操作系统的快照），而数据宗卷仍通过加密进行保护。
 
----
-
-## 附录一：KEK - 密钥保护密钥
-
-用于访问文件数据的密钥需要在磁盘上持久化存储，当然必须是加密状态。
-以 FDE 磁盘级加密为例，FileValut 2 称为 VMK（Volume Master Key），APFS 称为 VEK（Volume Encryption Key）。
-
-用于加密或打开文件密钥的保护密钥称为 KEK（Key Encryption Key）。
-一般来说，如果采用对称加密算法，称为密钥包裹（Key wrapping）；如果采用非对称算法，称为密钥封装（Key encapsulation）。
-
-### 使用场景
+### KEK的多个副本
 
 Apple公司定义了几种获得 KEK 的方式：
 
@@ -126,50 +118,22 @@ Apple公司定义了几种获得 KEK 的方式：
 
 为支持不同的场景，keyBag 将同时存储多个 KEK 的副本，例如用户口令采用密钥包裹方式存储，而 iCloud 恢复密钥采用非对称的公钥加密存储，不同场景使用不同的包裹密钥，这也体现了多层级密钥管理的价值所在。
 
-### 工作流程
+## 五、FileValut 2 的解密代码实例
 
-上述多个密钥组成了一个链条，形成密钥的层次结构，以伪代码描述其工作流程：
-
-```c
-// 基于用户口令进行密钥拉伸获得 passcode key
-p = get_user_password()
-salt = get_salt_from_PassphraseWrappedKEK()
-iterations = 41000
-pk = pbkdf2(p, salt, iterations, HMAC-SHA256)
-// 基于passcode key 获得 KEK
-kek_wrapped = get_kek_from_PassphraseWrappedKEK()
-kek = aes_unwrap(kek_wrapped, pk)
-// 基于 KEK 获得 VMK
-vmk_wrapped = get_vmk_from_KEKWrappedVolumeKey()
-vmk = aes_unwrap(vmk_wrapped, kek)
-// 基于 VMK 解密文件系统B+树，并访问文件数据
-```
-
-## 附录二：FileValut 2 的解密代码实例
-
-基于 AES-XTS磁盘加密模式， FileValut 2 的密钥层级结构如下图。
-参考[FVDE工具包](https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc)，可以掌握 FileVault 2的技术实现细节。
+根据[Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary](2012-374.pdf)，密钥层次如下图。
+参考[FVDE工具包](https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc)，可以查看实现代码。
 
 ![密钥层次架构](arch.png)
 
-### Volume Master Key（VMK）- 分组密钥 key1
+### 1. CoreStorage Header
 
-密钥长度：128位
-构造方式：**随机生成**
-存储位置：Recovery HD -> `EncryptedRoot.plist` -> `KEKWrappedVolumeKeyStruct`字段加密存储
+在 CoreStorage 加密卷的 Header，存储了核心的加密信息，包括：卷头部签名、块大小、卷大小、元数据大小、第一个元数据块块号、第二个元数据块块号、第三个元数据块块号、第四个元数据块块号、加密方法、Physical Volume UUID（用于解密加密的密钥文件）、Logiccal Volume Group UUID 等。
+![CS](CS-Header.png)
 
-### Volume tweak key - 可调整密钥 key2
+### 2. EncryptedRoot.plist
 
-密钥长度：128位
-构造方式：$trunc_{128}(SHA256(VolumeMasterKey || LogicVolumeFamilyIdentifier))$
-
-### EncryptedRoot.plist.wipekey - 密钥文件
-
-在逻辑卷 Recovery HD 中，有一个加密文件包含了提取 VMK 所需的全部信息，路径是`com.apple.boot.X/System/Library/Caches/com.apple.corestorage/EncryptedRoot.plist.wipekey`
-
-这个文件本身也是基于 AES-XTS 加密的，可调整密钥设置为 128位的全零，分组密钥保存在 CoreStorage header 的`Physical Volume Identifier`字段中，请参见[Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary](2012-374.pdf)论文附录（第13页）的 Table 2。
-
-plist文件解密成功后，其内容示例见下：
+在恢复数据卷 Recovery HD，有一个加密文件包含了提取 VMK 所需的全部信息，路径是：`com.apple.boot.X/System/Library/Caches/com.apple.corestorage/EncryptedRoot.plist.wipekey`
+这个文件本身也是基于 AES-XTS 加密的，分组密钥就是 CoreStorage 头部存储的`AES-XTS key1`，可调整密钥是 128 位的全零，解密成功后的内容实例：
 
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -222,36 +186,68 @@ plist文件解密成功后，其内容示例见下：
 </plist>
 ```
 
-其中的关键字段如下，注意实际存储格式是 base64 编码：
+### 3. Volume Master Key
 
-- PassphraseWrappedKEKStruct(1)：284 位的 recovery password
-- PassphraseWrappedKEKStruct(2)：284 位的 user password
-- KEKWrappedVolumeKeyStruct(1)：未使用！标记为 None
-- KEKWrappedVolumeKeyStruct(2)：VMK 的包裹信息，标记为 AES-XTS
+解密后的 plist 文件是一个 XML 文件，其中的关键字段如下，注意实际存储格式是 base64 编码：
 
-上述 struct 的结构定义，请参见[Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary](2012-374.pdf)论文附录（第13页）的 Table 3 和 Table 4。
-注意！MacOS 的每个用户都有其自己关联的 PassphraseWrappedKEKStruct，按照与恢复密钥相同的方式计算并使用相应的用户密钥来获取卷主密钥。
+#### PassphraseWrappedKEKStruct
 
-#### 4. Recovery key - 恢复密钥
+KEK（Key Encryption Key，密钥保护密钥）的构造体：AES包裹的KEK，PBKDF2算法的盐。
+包含了 2 个 284 位 的数据块，分别用于 recovery password 和 user password。
 
-启用 FileVault 时，系统自动生成并要求用户保存`Recovery password`，可以用来解封 VMK。
+![CS3](CS3.png)
 
-![RE](recovery-key.png)
+> 注意！MacOS 的每个用户都有其自己关联的 PassphraseWrappedKEKStruct
+> APFS 称之为 VEK（Volume Encryption Key）
 
-使用 PBKDF2 算法恢复 VMK（注意恢复密钥是字符串格式，包括数字之间的破折号）：
+#### KEKWrappedVolumeKeyStruct
+
+VMK（Volume Master Key，卷宗主密钥）的构造体。
+数组有多个成员，其中标记为`AES-XTS`的就是 KEK 包裹的 VMK。
+![CS2](CS2.png)
+
+#### KeyWrappedKEK
+
+如果用户开启了 icloud 远程备份，plist 文件将包含该字段，其数据块结构如下：
+![CS4](CS4.png)
+> 注意！icloud 恢复是另一个基于非对称密钥算法 RSA 封装的 KEK
+
+#### 伪代码实例
+
+无论基于 recovery password，还是 user password，都需要通过 PBKDF2 算法进行密钥拉伸。
+> 注意！recovery password 是字符串格式，包括数字之间的破折号。
+
+![VMK](VMK.png)
 
 ``` c
-Recovery key = PBKDF2( PRF=SHA256, password=Recovery password,
-    salt=PassphraseWrappedKEKStruct.salt,
-    iters=41000, dk_len=128)
-KEK = AES_Unwrap(PassphraseWrappedKEKStruc.AES-wrapped-volume-KEK, Recovery key)
-VMK = AES_Unwrap(KEKWrappedVolumeKeyStruct.AES-wrapped-volume-key, KEK)
+p = get_user_password()
+salt = get_salt_from_PassphraseWrappedKEK()
+iterations = 41000
+pk = pbkdf2(p, salt, iterations, HMAC-SHA256)
+kek_wrapped = get_kek_from_PassphraseWrappedKEK()
+kek = aes_unwrap(kek_wrapped, pk)
+vmk_wrapped = get_vmk_from_KEKWrappedVolumeKey()
+vmk = aes_unwrap(vmk_wrapped, kek)
 ```
 
-> 注意！Recovery password 需要通过密钥拉伸转化为 Recovery key。
-> 迭代次数存储在`PassphraseWrappedKEKStruct`中，但对于 Mac OS 10.7 似乎始终为 41000。
+### 4. Volume Tweak Key
 
-## 附录三：通过 diskutil 命令查看 APFS 系统信息
+用户数据 AES-XTS 加密模式的 tweak key 也是128位，构造方式是：$trunc_{128}(SHA256(VolumeMasterKey || LogicVolumeFamilyIdentifier))$
+
+上个流程已经找到 VMK，那么如何找到 LV Family UUID 呢？
+
+- 在 CoreStorage Header 中，第104字节提供了字节偏移量，就是 Disk Label Metadata 的存储位置
+- 在 Disk Label 中，第220字节提供了字节偏移量，就是 Encrypted Metadata 的存储位置
+    即：$offset = DiskLabel[DiskLabel[220] +32]$
+- Encrypted Metadata 基于 AES-XTS 加密，分组密钥也是 CoreStorage Header 的 AES-XTS Key1，可调整密钥是 CoreStorage Header 的 PV UUID
+- 解密后的 Encrypted Metadata，第280字节提供了字节偏移量，就是 XML Metadata 的存储位置
+    ![CS6](CS6.png)
+- 有3个 XML 文件，包含了许多UUID，其中第1和第3个 XML 文件包含了 Logical Volume Family UUID，就是下图中蓝色字段
+    ![CS7](CS7.png)
+
+---
+
+## 附录：通过 diskutil 命令查看 APFS 系统信息
 
 ### Intel CPU 的构造方式
 
