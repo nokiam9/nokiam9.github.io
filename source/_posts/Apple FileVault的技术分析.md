@@ -18,33 +18,83 @@ Apple 将上述两种版本的技术统称为 **Legacy FileVault** ，其存在�
 - 仅加密用户目录`$home`是远远不够的，`/tmp`和`/var/log`等目录怎么办？
 - 主密钥存储在磁盘镜像文件的头部，密钥包裹算法 3DES-EDE 存在破解风险；恢复密钥的包裹算法是 1024-bit RSA，加密强度不高，也存在破解风险
 - 文件内容加密采用 AES-128 + CBC 工作模式，但初始向量 IV 没有随机性，设置算法被破解：$IV=trunc_{128}(HMACSHA1(hmac-key||trunkno))$
-- MacOS 置于睡眠模式时，内存写入`/var/vm/sleepimage`，存在密钥泄露风险
+- MacOS 置于睡眠模式时，内存数据直接写入磁盘文件`/var/vm/sleepimage`，缺乏加密保护存在密钥泄露风险
 
 这些问题的根源，还是由于底层文件系统 HFS+ 不支持 FDE 加密，只能基于“应用软件模拟 + 专用磁盘镜像”的替代方式实现，导致功能受限而且效率低下。
 
 ## 二、基于 CoreStorage 的 FileVault 2
 
-2010年，Mac OS X Lion (狮子，10.7) 发布了 FileVault 2，基于 CoreStorage 虚拟化技术推出一个重新设计的 FDE 方案。
+2010年，Mac OS X Lion (狮子，10.7) 发布了 FileVault 2，基于 CoreStorage 虚拟化技术推出一个重新设计的 FDE 方案，主要改造点包括：
 
-### 逻辑卷管理器 CoreStorage
+- 随着 NIST 技术标准的演进，将 AES-CBC 替换为 AES-XTS 磁盘加密模式，分组长度为128位，密钥长度为256位，并支持基于 AES 指令集的硬件解密（如Intel Broadwell 架构的CPU，加密模式只有3%的性能损耗）。
+- 在磁盘和文件系统之间增加了一个虚拟化层，也就是命名为 CoreStorage 的 LVM （Logic Volume Manager，逻辑卷管理器），类似于 Veritas Volume Manager 和 OSF LVM，但底层文件系统仍然是 HFS+。
+- 支持将**User Password**作为加密因子，而且支持 MacOS 的每个用户使用各自的用户密码来计算用户密钥，并解锁加密数据，非常有利于用户隐私保护！
 
-CoreStorage 是 Apple 开发的 LVM（Logic Volume Manager，逻辑卷管理器），作为磁盘和文件系统之间的虚拟化层，增加了操作系统存储分配的灵活性，类似于赛门铁克的 Veritas Volume Manager 和 OSF LVM，但底层文件系统仍然是 HFS+。
-Apple 还引入了一个新概念 LVF（logical volume family，逻辑卷系列），用于指定将由它所包含的逻辑卷继承的属性（目前只有 FileVault），但以后可能用于新的性能特征。
+### 1. 启用方式
 
-现在，当使用 FileVault 2 加密时，MacOS 会自动将已有数据卷转换为 CoreStorage 卷，并将分区封装为 PV，将其导入 LVG，并设置 LVF 和 LV 以包含新的文件系统。启动卷宗的分区改为一个 CoreStorage 管理的加密卷，并增加了一个 Recovery HD 分区卷。
+当用户启用 FileVault 时，主要任务包括：
 
-![LVF](lvf.jpg)
+1. 系统自动生成并要求用户保存`Recovery password`
+    ![RE](recovery-key.png)
+2. 自动将已有数据卷转换为 CoreStorage 加密卷，并将分区封装为 PV，将其导入 LVG，并设置 LVF 和 LV 以包含新的文件系统。
+3. 新建一个 Recovery HD 分区卷，并将 CoreStorage 加密卷设置为启动分区。
 
-### FDE 加密
+```console
+Mikes-MacBook-Pro-3:~ mikej$ diskutil list
+/dev/disk0 (internal, physical):
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:      GUID_partition_scheme                        *251.0 GB   disk0
+   1:                        EFI EFI                     209.7 MB   disk0s1
+   2:          Apple_CoreStorage Mike HD                 250.1 GB   disk0s2
+   3:                 Apple_Boot Recovery HD             650.1 MB   disk0s3
+```
 
-随着 NIST 技术标准的演进，FileVault 从 AES-CBC 全面采用了 AES-XTS 磁盘加密模式，分组长度为128位，密钥长度为256位。
-对于支持 AES 指令集的 CPU（如Intel Broadwell 架构），AES-128-XTS 加密模式只有 3% 左右的性能损耗，但对于不支持该指令集的 CPU（如早期的酷睿CPU）会有明显的性能下降。
+### 2. 技术实现
 
-FileVault 2 支持将**用户登录口令**作为加密因子，而且对于 MacOS 系统上的每个用户，FileVault 使用各自的用户密码（目前仅包含 ASCII 字符）来计算用户密钥，并解锁加密数据。这些改进对用户隐私保护发挥了非常积极的作用！
+通过`diskutil corestorage list`命令，可以查看 CoreStorage 的层级结构为:
+**Physical Volume -> Logical Volume Group -> Logical Volume Family -> Logical Volume**
 
-用户启用 FileVault 时，系统自动生成并要求用户保存`Recovery password`。
+```console
+CoreStorage logical volume groups (1 found)
+|
++-- Logical Volume Group 5D6504C7-6C94-498E-B50C-64E3E4950AE0
+|   =========================================================
+|   Name:         Macintosh HD
+|   Status:       Online
+|   Size:         125318770688 B (125.3 GB)
+|   Free Space:   0 B (0 B)
+|   |
+|   +-< Physical Volume 499AA4FC-31C1-47A3-8364-89A0C836125C        # 上层PV
+|   |   ----------------------------------------------------
+|   |   Index:    0
+|   |   Disk:     disk0s2
+|   |   Status:   Online
+|   |   Size:     125318770688 B (125.3 GB)
+|   |
+|   +-> Logical Volume Family 163A0B82-4315-4C68-8403-52B5A918C57C  # 下层LVF
+|       ----------------------------------------------------------
+|       Encryption Status:       Unlocked
+|       Encryption Type:         AES-XTS
+|       Conversion Status:       Complete
+|       Conversion Direction:    -none-
+|       Has Encrypted Extents:   Yes
+|       Fully Secure:            Yes
+|       Passphrase Required:     Yes
+|       |
+|       +-> Logical Volume 264CFBDC-8103-47E0-978E-738789320980     # 再下层LV
+|           ---------------------------------------------------
+|           Disk:                  disk1
+|           Status:                Online
+|           Size (Total):          124999999488 B (125.0 GB)
+|           Conversion Progress:   -none-
+|           Revertible:            Yes (unlock and decryption required)
+|           LV Name:               Macintosh HD
+|           Volume Name:           Macintosh HD
+|           Content Hint:          Apple_HFS
+```
 
-![RE](recovery-key.png)
+LVF- logical volume family 是 Apple 自定义的层级，用于 LV 逻辑卷特定属性的继承。
+系统变量`com.apple.corestorage.lv.familyUUID`用于构造 AES-XTS 的 Tweak key 的加密因子。
 
 ## 三、基于 APFS 的 FileVault
 
@@ -54,25 +104,252 @@ FileVault 2 支持将**用户登录口令**作为加密因子，而且对于 Mac
 - inode编码长度提高到64位，单一Volume的文件数量大大增加；时间戳精度提高到纳秒，有助于实现原子性和原子事务；目录大小是单独存储的，无需每次实时计算目录容量；文件和文件夹名称被规范化，完全支持Unicode
 - 支持COW（Copy On Write，写入时复制）：几乎立即复制文件或目录，元数据多次存在于文件结构中，但共享相同的数据存储空间；修改克隆时，文件系统仅记录数据更改
 - 支持快照（Snapshot）：支持创建特点时间点、文件系统只读实例的快照
-- 支持空间共享：整合了 CoreStorage 的 LVM，引入了 container（容器）的概念，使用 GPT 分区方案，单一容器内部包含多个 Volume 共享物理存储容量，并可以相互访问，但不与其他容器共享数据
+- 支持空间共享：使用 GPT 分区方案，单一容器内部包含多个 Volume 共享物理存储容量，并可以相互访问，但不与其他容器共享数据
 
-关于加密功能，APFS完全实现了文件系统层级的原生技术实现，包括：
+![a](apfs.png)
+
+关于加密功能，APFS 引入 container（容器）并整合了 CoreStorage 技术，完全实现了文件系统层级的原生实现，包括：
 
 1. 支持对容器、卷和文件使用的数据结构进行加密。当一个volume是加密的，它的文件系统树和该卷中的文件内容都是加密的
-2. 支持三种加密模型：不加密、单密钥加密、多密钥加密。也就是统一实现了 FDE 和 FBE，但 MacOS 目前似乎仅支持 FDE 模式？
+2. 统一实现了 FDE 和 FBE，支持三种加密模型：不加密、单密钥加密、多密钥加密，但**MacOS 目前似乎仅支持 FDE 模式**
 3. 支持硬件加密和软件加密。
-        硬件加密适用于Apple提供的内置存储（例如带有T2安全芯片的 MacOS 和 iOS 设备）；
-        软件加密适用于用于外部存储，以及不支持硬件加密的设备上的内部存储；
-        使用硬件加密时，只有操作系统内核可以与内部存储交互；
-        根据硬件的不同，可以使用 AES-XTS 或 AES-CBC 加密模式。
+    硬件加密适用于Apple提供的内置存储（例如带有T2安全芯片的 MacOS 和 iOS 设备）；
+    软件加密适用于用于外部存储，以及不支持硬件加密的设备上的内部存储；
+    使用硬件加密时，只有操作系统内核可以与内部存储交互；
+    根据硬件的不同，可以使用 AES-XTS 或 AES-CBC 加密模式。
 
-### 后续版本演进
+层级结构也调整为：**Physical Store -> Contianer -> （Volume Group） -> Volume**
 
-在 MacOS 10.15 Catalina 中，引入了 APFS Volume Group，系统卷和数据卷属于同一卷组，并且在 Finder 中被视为一个卷；引入了只读系统宗卷，这是一个专用于系统内容（通常名为“Macintosh HD”）的独立宗卷。
+### 1. 技术分析（Intel CPU）
+
+示例是一台 Intel CPU 的 iMac 设备，因此并没有安全隔区等 Apple 专用 Soc 设备。
+命令行`df -h`查看文件系统
+
+```console
+sj@JiandeiMac ~ % df -h
+Filesystem      Size   Used  Avail Capacity iused      ifree %iused  Mounted on
+/dev/disk1s5   234Gi   10Gi   29Gi    27%  488433 2448636927    0%   /
+devfs          190Ki  190Ki    0Bi   100%     659          0  100%   /dev
+/dev/disk1s1   234Gi  191Gi   29Gi    87% 3218923 2445906437    0%   /System/Volumes/Data
+/dev/disk1s4   234Gi  2.0Gi   29Gi     7%       2 2449125358    0%   /private/var/vm
+map auto_home    0Bi    0Bi    0Bi   100%       0          0  100%   /System/Volumes/Data/home
+/dev/disk1s3   234Gi  505Mi   29Gi     2%      50 2449125310    0%   /Volumes/Recovery
+```
+
+通过`diskutil list`，可以看到物理硬盘`disk0`包含了2个分区，分别是EFI启动分区`disk0-s1`和APFS分区`disk0-s2`，并将后者同步映射到`disk1`。
+
+```console
+j@JiandeiMac ~ % diskutil list
+/dev/disk0 (internal, physical):
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:      GUID_partition_scheme                        *251.0 GB   disk0
+   1:                        EFI EFI                     209.7 MB   disk0s1
+   2:                 Apple_APFS Container disk1         250.8 GB   disk0s2
+
+/dev/disk1 (synthesized):
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:      APFS Container Scheme -                      +250.8 GB   disk1
+                                 Physical Store disk0s2
+   1:                APFS Volume 未命名 - 数据           205.4 GB   disk1s1
+   2:                APFS Volume Preboot                 81.4 MB    disk1s2
+   3:                APFS Volume Recovery                530.0 MB   disk1s3
+   4:                APFS Volume VM                      5.4 GB     disk1s4
+   5:                APFS Volume 未命名                  11.2 GB    disk1s5
+```
+
 ![AFPS](apfs_concepts.png)
+用于启动 Mac 的 APFS 容器必须包含至少五个宗卷，其中前三个宗卷对用户隐藏 ：
 
-在 MacOS 11 Big Sur 中，只读系统宗卷升级为签名系统卷 (SSV，Sealed & Signed System Volume)，进一步增加了操作系统的签名保护，甚至现在启动系统的都不是真实的 System 卷宗，而是启动时创建的一个快照。
+- Preboot Volume：包含启动容器中每个系统宗卷所需的数据
+- VM Volume：MacOS 用于交换文件储存
+- Recovery Volume：包含 recoveryOS，进入Recovery模式可以清除用户密码
+- System Volume：包含用于启动 Mac 的所有必要文件、macOS 原生安装的所有 App
+- Data Volume：包含用户文件夹中的任何数据、用户安装的 App、第三方 App、用户拥有且能够写入的其他位置
+
+每增加一个系统宗卷， 便会创建一个数据宗卷。3个隐藏宗卷全为共享宗卷且无法复制。
+通过`diskutil apfs list`，可以查看容器 disk1 的详细信息。
+
+```console
+sj@JiandeiMac ~ % diskutil apfs list
+APFS Container (1 found)
+|
++-- Container disk1 0B311DB5-B224-4F51-AA7C-1211E5A2A994
+    ====================================================
+    APFS Container Reference:     disk1
+    Size (Capacity Ceiling):      250790436864 B (250.8 GB)
+    Capacity In Use By Volumes:   219201548288 B (219.2 GB) (87.4% used)
+    Capacity Not Allocated:       31588888576 B (31.6 GB) (12.6% free)
+    |
+    +-< Physical Store disk0s2 4024090C-7938-4238-9772-192071FEDE07     # 上层物理设备
+    |   -----------------------------------------------------------
+    |   APFS Physical Store Disk:   disk0s2
+    |   Size:                       250790436864 B (250.8 GB)
+    |
+    +-> Volume disk1s1 925F8706-12D2-305B-B8E0-14201AF1D027             # 数据Volume
+    |   ---------------------------------------------------
+    |   APFS Volume Disk (Role):   disk1s1 (Data)
+    |   Name:                      未命名 - 数据 (Case-insensitive)
+    |   Mount Point:               /System/Volumes/Data                 # 加载用户数据目录
+    |   Capacity Consumed:         205089447936 B (205.1 GB)
+    |   FileVault:                 Yes (Unlocked)                       # 加密状态：已解锁
+    |
+    +-> Volume disk1s2 35818BF3-204E-4024-A049-FE5D61D96B74             # 预启动Volume
+    |   ---------------------------------------------------
+    |   APFS Volume Disk (Role):   disk1s2 (Preboot)
+    |   Name:                      Preboot (Case-insensitive)
+    |   Mount Point:               Not Mounted
+    |   Capacity Consumed:         81448960 B (81.4 MB)
+    |   FileVault:                 No
+    |
+    +-> Volume disk1s3 3873B186-B246-4F1D-8E7B-4E2515E4B838
+    |   ---------------------------------------------------
+    |   APFS Volume Disk (Role):   disk1s3 (Recovery)                   # 恢复Volume
+    |   Name:                      Recovery (Case-insensitive)
+    |   Mount Point:               /Volumes/Recovery
+    |   Capacity Consumed:         529969152 B (530.0 MB)
+    |   FileVault:                 No
+    |
+    +-> Volume disk1s4 F1A4B4C8-0360-4F92-8687-9BCE3F2F9134             # 虚拟内存Volume
+    |   ---------------------------------------------------
+    |   APFS Volume Disk (Role):   disk1s4 (VM)
+    |   Name:                      VM (Case-insensitive)
+    |   Mount Point:               /private/var/vm
+    |   Capacity Consumed:         2148556800 B (2.1 GB)
+    |   FileVault:                 No
+    |
+    +-> Volume disk1s5 7B89960E-7BBB-4012-BD70-27E4DE0A5ADC             # 系统Volume
+        ---------------------------------------------------
+        APFS Volume Disk (Role):   disk1s5 (System)
+        Name:                      未命名 (Case-insensitive)
+        Mount Point:               /                                    # 加载系统根目录
+        Capacity Consumed:         11213705216 B (11.2 GB)
+        FileVault:                 Yes (Unlocked)                       #加密状态：已解锁
+```
+
+通过`diskutil apfs listusers $Volume_ID`，查看当前有效的用户密钥信息，即有几个 KEK 副本。
+
+```console
+sj@JiandeiMac /Volumes % diskutil apfs listusers 925F8706-12D2-305B-B8E0-14201AF1D027
+Cryptographic users for disk1s1 (3 found)
+|
++-- FBD4D606-E5F2-4FC5-B6C0-70E11D1A3FB1
+|   Type: Local Open Directory User
+|
++-- EC1C2AD9-B618-4ED6-BD8D-50F361C27507
+|   Type: iCloud Recovery User
+|
++-- 64C0C6EB-0000-11AA-AA11-00306543ECAC
+    Type: iCloud Recovery External Key
+```
+
+### 2. 签名系统卷（M1 CPU）
+
+MacOS 10.15 Catalina 引入了 APFS Volume Group，系统卷和数据卷属于同一卷组，并且在 Finder 中被视为一个卷；引入了只读系统宗卷，这是一个专用于系统内容（通常名为“Macintosh HD”）的独立宗卷，默认不能写入数据，甚至 Apple 系统进程也不能。
+MacOS 11 Big Sur 将只读系统宗卷升级为签名系统卷 (SSV，Sealed & Signed System Volume)，进一步增加了操作系统的签名保护，甚至现在启动系统的都不是真实的 System 卷宗，而是启动时创建的一个快照。
 SSV 具有的内核机制会在运行时验证系统内容的完整性，并拒绝不含来自 Apple 的有效加密签名的任何代码和非代码数据。此外，还有一个附带的优势，在进行操作系统更新时如果发生意外无法执行， 无需重新安装即可恢复到旧系统版本。
+> SSV 签名系统卷依赖于 SKP 密钥（Sealed Key Prtection，密封密钥保护，也称为操作系统绑定密钥），也就是依赖于 Apple 安全隔区硬件，因此 Intel CPU 不适用。
+
+通过 `diskutil list`，可以看到物理硬盘`disk0`包含了3个容器：
+
+- Apple_APFS_ISC 容器：ISC（iBoot System Container）容器负责在早期引导过程中支持 iBoot 固件，并为 M1 SoC 中的 Secure Enclave 提供可信存储。
+    iSCPreboot 卷是指定的引导程序，空的 Recovery 卷用于恢复。xART 卷提供可信存储，Hardware 卷包含与硬件相关的文件。
+- Apple_APFS_Recovery 容器：专用于提供 1TR，存储在其 Recovery 卷上。包括 iBoot 的第二部分以及 M1 的完整恢复模式所需的所有内容。
+    该 Recovery 卷被指定用于恢复，但此该容器没有单独的引导程序卷。
+- Apple_APFS 容器：M1 的引导容器 Apple_APFS 也与 Intel Mac 上的引导容器不太一样：一个细微但显著的区别是数据卷不是命名为“Macintosh HD - Data”，而是简单的“Data”。如果使用依赖于按名称查找数据卷的代码，则要重新检查它代码是否仍然有效。
+    尽管此容器仍有一个 Recovery 卷，但该 Recovery 卷已经受到了一些限制，比如无法访问安全策略等，在引导到恢复模式时也没有使用该 Recovery 卷。
+
+```console
+sj@SunJiandeMacBook-Air ~ % diskutil list     
+/dev/disk0 (internal, physical):
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:      GUID_partition_scheme                        *1.0 TB     disk0
+   1:             Apple_APFS_ISC Container disk1         524.3 MB   disk0s1
+   2:                 Apple_APFS Container disk3         994.7 GB   disk0s2
+   3:        Apple_APFS_Recovery Container disk2         5.4 GB     disk0s3
+
+/dev/disk3 (synthesized):
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:      APFS Container Scheme -                      +994.7 GB   disk3
+                                 Physical Store disk0s2
+   1:                APFS Volume Untitled - Data         397.7 GB   disk3s1
+   2:                APFS Volume Untitled                12.0 GB    disk3s3
+   3:              APFS Snapshot com.apple.os.update-... 12.0 GB    disk3s3s1
+   4:                APFS Volume Preboot                 10.0 GB    disk3s4
+   5:                APFS Volume Recovery                1.7 GB     disk3s5
+   6:                APFS Volume VM                      20.5 KB    disk3s6
+```
+
+![M1](m1.jpg)
+
+通过`diskutil apfs list`，可以发现增加了一个签名系统卷`disk3-s3`，隐藏了一个系统卷`disks3-s2`，实际指向了 SSV 的快照`disks3-s3-s1`。
+
+```console
+sj@SunJiandeMacBook-Air ~ % diskutil apfs list
+APFS Containers (3 found)
+|
++-- Container disk3 F2E4F923-BAEF-4844-8720-A1E3C4A91D68
+    ====================================================
+    APFS Container Reference:     disk3
+    Size (Capacity Ceiling):      994662584320 B (994.7 GB)
+    Capacity In Use By Volumes:   422349295616 B (422.3 GB) (42.5% used)
+    Capacity Not Allocated:       572313288704 B (572.3 GB) (57.5% free)
+    |
+    +-< Physical Store disk0s2 03B7C267-30AE-414D-93B3-82B5E6A7D794
+    |   -----------------------------------------------------------
+    |   APFS Physical Store Disk:   disk0s2
+    |   Size:                       994662584320 B (994.7 GB)
+    |
+    +-> Volume disk3s1 4C4F95CE-27C8-4CC8-9287-0746D8B6F445
+    |   ---------------------------------------------------
+    |   APFS Volume Disk (Role):   disk3s1 (Data)
+    |   Name:                      Untitled - Data (Case-insensitive)
+    |   Mount Point:               /System/Volumes/Data
+    |   Capacity Consumed:         397743120384 B (397.7 GB)
+    |   Sealed:                    No
+    |   FileVault:                 Yes (Unlocked)
+    |
+    +-> Volume disk3s3 2F5B627D-273D-43E1-B33D-11A51F2DD616
+    |   ---------------------------------------------------
+    |   APFS Volume Disk (Role):   disk3s3 (System)                         # SSV卷宗
+    |   Name:                      Untitled (Case-insensitive)
+    |   Mount Point:               /System/Volumes/Update/mnt1
+    |   Capacity Consumed:         12000673792 B (12.0 GB)
+    |   Sealed:                    Broken
+    |   FileVault:                 Yes (Unlocked)
+    |   Encrypted:                 No
+    |   |
+    |   Snapshot:                  888DEA8C-D791-4F5B-BC62-26E2D6A436E4     # 快照卷宗
+    |   Snapshot Disk:             disk3s3s1
+    |   Snapshot Mount Point:      /
+    |   Snapshot Sealed:           Yes                                      # 认证通过
+    |
+    +-> Volume disk3s4 C828BF80-F6B2-4370-8C12-5DC67A144D2A
+    |   ---------------------------------------------------
+    |   APFS Volume Disk (Role):   disk3s4 (Preboot)
+    |   Name:                      Preboot (Case-insensitive)
+    |   Mount Point:               /System/Volumes/Preboot
+    |   Capacity Consumed:         10008113152 B (10.0 GB)
+    |   Sealed:                    No
+    |   FileVault:                 No
+    |
+    +-> Volume disk3s5 48782923-A22F-45A8-A688-E4F72065E32B
+    |   ---------------------------------------------------
+    |   APFS Volume Disk (Role):   disk3s5 (Recovery)
+    |   Name:                      Recovery (Case-insensitive)
+    |   Mount Point:               Not Mounted
+    |   Capacity Consumed:         1675984896 B (1.7 GB)
+    |   Sealed:                    No
+    |   FileVault:                 No
+    |
+    +-> Volume disk3s6 1793DE3F-A7B8-4103-A03A-91113BF324E7
+        ---------------------------------------------------
+        APFS Volume Disk (Role):   disk3s6 (VM)
+        Name:                      VM (Case-insensitive)
+        Mount Point:               /System/Volumes/VM
+        Capacity Consumed:         20480 B (20.5 KB)
+        Sealed:                    No
+        FileVault:                 No
+```
 
 ## 四、FileVault的密钥层级
 
@@ -97,17 +374,17 @@ SSV 具有的内核机制会在运行时验证系统内容的完整性，并拒�
 
 可移除储存设备的加密不使用安全隔区的安全性功能，而是采用与基于 Intel 的 Mac (不搭载 T2 芯片) 相同的方式执行加密。
 
-### 版本演进
+### 1. 版本演进
 
-1. 在 macOS 10.7 Lion 中，引入了 CoreStorage 管理卷，并规定 VEK 密钥的创建点是用户在 Mac 上**启用FileVault**的过程中。
-2. 在 macOS 10.13 High Sierra 中，引入了 AFPS 文件系统，VEK 密钥的创建点调整为：**用户创建过程中**、 设定首位用户的密码或 Mac 用户首次登录过程中。换句话说，无论用户是否启用 FileVault，卷宗数据都会被加密，其区别仅在于：
-   - 如果没有启用 FileVault 功能，宗卷加密密钥仅由安全隔区中的硬件 UID 保护
+- 在 macOS 10.7 Lion 中，引入了 CoreStorage 管理卷，并规定 VEK 密钥的创建点是用户在 Mac 上**启用FileVault**的过程中。
+- 在 macOS 10.13 High Sierra 中，引入了 AFPS 文件系统，VEK 密钥的创建点调整为：**用户创建过程中**、 设定首位用户的密码或 Mac 用户首次登录过程中。换句话说，无论用户是否启用 FileVault，卷宗数据都会被加密，其区别仅在于：
+  - 如果没有启用 FileVault 功能，宗卷加密密钥仅由安全隔区中的硬件 UID 保护
          ![SKP](filevault-off.png)
-   - 如果稍后启用了文件保险箱 (由于数据已加密，该过程可快速完成)，反重放机制会帮助阻止旧密钥 (仅基于硬件 UID) 被用于解密宗卷，然后宗卷将受用户密码和硬件 UID 共同保护
-3. 在 macOS 10.15 Catalina中，这是第一个仅支持 64 位应用程序的 macOS 版本！引入了 Bootstrap Token 功能，也就是为密钥层级增加了 SKP 保护层，并为后续签名系统卷宗 SSV 提供了技术基础。
-4. 在 macOS 11 Big Sur 中，系统宗卷通过签名系统宗卷 SSV 功能进行保护（实际上仅提供操作系统的快照），而数据宗卷仍通过加密进行保护。
+  - 如果稍后启用了文件保险箱 (由于数据已加密，该过程可快速完成)，反重放机制会帮助阻止旧密钥 (仅基于硬件 UID) 被用于解密宗卷，然后宗卷将受用户密码和硬件 UID 共同保护
+- 在 macOS 10.15 Catalina中，这是第一个仅支持 64 位应用程序的 macOS 版本！引入了 Bootstrap Token 功能，也就是为密钥层级增加了 SKP 保护层，并为后续签名系统卷宗 SSV 提供了技术基础。
+- 在 macOS 11 Big Sur 中，系统宗卷通过签名系统宗卷 SSV 功能进行保护（实际上仅提供操作系统的快照），而数据宗卷仍通过加密进行保护。
 
-### KEK的多个副本
+### 2. KEK的多副本
 
 Apple公司定义了几种获得 KEK 的方式：
 
@@ -244,231 +521,6 @@ vmk = aes_unwrap(vmk_wrapped, kek)
     ![CS6](CS6.png)
 - 有3个 XML 文件，包含了许多UUID，其中第1和第3个 XML 文件包含了 Logical Volume Family UUID，就是下图中蓝色字段
     ![CS7](CS7.png)
-
----
-
-## 附录：通过 diskutil 命令查看 APFS 系统信息
-
-### Intel CPU 的构造方式
-
-示例是一台 Intel CPU 的 iMac 设备，因此并没有安全隔区等 Apple 专用 Soc 设备。
-![Intel](intel.jpg)
-
-![a](apfs.png)
-
-命令行`df -h`查看文件系统
-
-```console
-sj@JiandeiMac ~ % df -h
-Filesystem      Size   Used  Avail Capacity iused      ifree %iused  Mounted on
-/dev/disk1s5   234Gi   10Gi   29Gi    27%  488433 2448636927    0%   /
-devfs          190Ki  190Ki    0Bi   100%     659          0  100%   /dev
-/dev/disk1s1   234Gi  191Gi   29Gi    87% 3218923 2445906437    0%   /System/Volumes/Data
-/dev/disk1s4   234Gi  2.0Gi   29Gi     7%       2 2449125358    0%   /private/var/vm
-map auto_home    0Bi    0Bi    0Bi   100%       0          0  100%   /System/Volumes/Data/home
-/dev/disk1s3   234Gi  505Mi   29Gi     2%      50 2449125310    0%   /Volumes/Recovery
-```
-
-通过`diskutil list`，可以看到物理硬盘`disk0`包含了2个分区，分别是EFI启动分区`disk0-s1`和APFS分区`disk0-s2`。
-
-```console
-j@JiandeiMac ~ % diskutil list
-/dev/disk0 (internal, physical):
-   #:                       TYPE NAME                    SIZE       IDENTIFIER
-   0:      GUID_partition_scheme                        *251.0 GB   disk0
-   1:                        EFI EFI                     209.7 MB   disk0s1
-   2:                 Apple_APFS Container disk1         250.8 GB   disk0s2
-
-/dev/disk1 (synthesized):
-   #:                       TYPE NAME                    SIZE       IDENTIFIER
-   0:      APFS Container Scheme -                      +250.8 GB   disk1
-                                 Physical Store disk0s2
-   1:                APFS Volume 未命名 - 数据           205.4 GB   disk1s1
-   2:                APFS Volume Preboot                 81.4 MB    disk1s2
-   3:                APFS Volume Recovery                530.0 MB   disk1s3
-   4:                APFS Volume VM                      5.4 GB     disk1s4
-   5:                APFS Volume 未命名                  11.2 GB    disk1s5
-```
-
-通过`diskutil apfs list`，可以查看容器 disk1 及 物理设备 disk0s2 的详细信息，依次包括：
-
-- Volume disk1s5(System)：系统主启动卷，挂载点位于`/`，FileVault = Yes (Unlocked)；后续版本还有 snapshot 快照功能
-- volume disk1s1(**Data**)：加密的用户数据，挂载点位于`/System/Volumes/Data`，FileVault = Yes (Unlocked)
-- Volume disk1s4(VM)：保存休眠状态，挂载点位于`/private/var/vm`，FileVault = No
-- Volume disk1s3(Revovery)：进入macOS的recovery模式，可以用来清除用户密码，挂载点位于`/Volumes/Recovery`，FileVault = No
-- Volume disk1s2(PreBoot)：如果启用了FileVault加密会通过这个分区启动系统，**当前未挂载**，FileVault = No
-
-```console
-sj@JiandeiMac ~ % diskutil apfs list
-APFS Container (1 found)
-|
-+-- Container disk1 0B311DB5-B224-4F51-AA7C-1211E5A2A994
-    ====================================================
-    APFS Container Reference:     disk1
-    Size (Capacity Ceiling):      250790436864 B (250.8 GB)
-    Capacity In Use By Volumes:   219201548288 B (219.2 GB) (87.4% used)
-    Capacity Not Allocated:       31588888576 B (31.6 GB) (12.6% free)
-    |
-    +-< Physical Store disk0s2 4024090C-7938-4238-9772-192071FEDE07
-    |   -----------------------------------------------------------
-    |   APFS Physical Store Disk:   disk0s2
-    |   Size:                       250790436864 B (250.8 GB)
-    |
-    +-> Volume disk1s1 925F8706-12D2-305B-B8E0-14201AF1D027
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk1s1 (Data)
-    |   Name:                      未命名 - 数据 (Case-insensitive)
-    |   Mount Point:               /System/Volumes/Data
-    |   Capacity Consumed:         205089447936 B (205.1 GB)
-    |   FileVault:                 Yes (Unlocked)
-    |
-    +-> Volume disk1s2 35818BF3-204E-4024-A049-FE5D61D96B74
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk1s2 (Preboot)
-    |   Name:                      Preboot (Case-insensitive)
-    |   Mount Point:               Not Mounted
-    |   Capacity Consumed:         81448960 B (81.4 MB)
-    |   FileVault:                 No
-    |
-    +-> Volume disk1s3 3873B186-B246-4F1D-8E7B-4E2515E4B838
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk1s3 (Recovery)
-    |   Name:                      Recovery (Case-insensitive)
-    |   Mount Point:               /Volumes/Recovery
-    |   Capacity Consumed:         529969152 B (530.0 MB)
-    |   FileVault:                 No
-    |
-    +-> Volume disk1s4 F1A4B4C8-0360-4F92-8687-9BCE3F2F9134
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk1s4 (VM)
-    |   Name:                      VM (Case-insensitive)
-    |   Mount Point:               /private/var/vm
-    |   Capacity Consumed:         2148556800 B (2.1 GB)
-    |   FileVault:                 No
-    |
-    +-> Volume disk1s5 7B89960E-7BBB-4012-BD70-27E4DE0A5ADC
-        ---------------------------------------------------
-        APFS Volume Disk (Role):   disk1s5 (System)
-        Name:                      未命名 (Case-insensitive)
-        Mount Point:               /
-        Capacity Consumed:         11213705216 B (11.2 GB)
-        FileVault:                 Yes (Unlocked)
-```
-
-> 如果 FileVault 未启用，FileVault = No (Encrypted at rest)
-
-进一步，可以通过`diskutil apfs listusers $Volume_ID`，查看当前有效的用户密钥信息。
-
-```console
-sj@JiandeiMac /Volumes % diskutil apfs listusers 925F8706-12D2-305B-B8E0-14201AF1D027
-Cryptographic users for disk1s1 (3 found)
-|
-+-- FBD4D606-E5F2-4FC5-B6C0-70E11D1A3FB1
-|   Type: Local Open Directory User
-|
-+-- EC1C2AD9-B618-4ED6-BD8D-50F361C27507
-|   Type: iCloud Recovery User
-|
-+-- 64C0C6EB-0000-11AA-AA11-00306543ECAC
-    Type: iCloud Recovery External Key
-```
-
-### M1 CPU 的 构造方式
-
-通过 `diskutil list`，可以看到物理硬盘`disk0`包含了3个分区，分别是APFS_ISC启动分区`disk0-s1`，APFS分区`disk0-s2`，和APFS_Recovery恢复分区`disk0-s3`。
-
-![M1](m1.jpg)
-
-```console
-sj@SunJiandeMacBook-Air ~ % diskutil list     
-/dev/disk0 (internal, physical):
-   #:                       TYPE NAME                    SIZE       IDENTIFIER
-   0:      GUID_partition_scheme                        *1.0 TB     disk0
-   1:             Apple_APFS_ISC Container disk1         524.3 MB   disk0s1
-   2:                 Apple_APFS Container disk3         994.7 GB   disk0s2
-   3:        Apple_APFS_Recovery Container disk2         5.4 GB     disk0s3
-
-/dev/disk3 (synthesized):
-   #:                       TYPE NAME                    SIZE       IDENTIFIER
-   0:      APFS Container Scheme -                      +994.7 GB   disk3
-                                 Physical Store disk0s2
-   1:                APFS Volume Untitled - Data         397.7 GB   disk3s1
-   2:                APFS Volume Untitled                12.0 GB    disk3s3
-   3:              APFS Snapshot com.apple.os.update-... 12.0 GB    disk3s3s1
-   4:                APFS Volume Preboot                 10.0 GB    disk3s4
-   5:                APFS Volume Recovery                1.7 GB     disk3s5
-   6:                APFS Volume VM                      20.5 KB    disk3s6
-```
-
-通过`diskutil apfs list`，可以发现增加了一个签名系统卷`disk3-s3`，隐藏了一个系统卷`disks3-s2`，实际指向了 SSV 的快照`disks3-s3-s1`。
-
-```console
-sj@SunJiandeMacBook-Air ~ % diskutil apfs list
-APFS Containers (3 found)
-|
-+-- Container disk3 F2E4F923-BAEF-4844-8720-A1E3C4A91D68
-    ====================================================
-    APFS Container Reference:     disk3
-    Size (Capacity Ceiling):      994662584320 B (994.7 GB)
-    Capacity In Use By Volumes:   422349295616 B (422.3 GB) (42.5% used)
-    Capacity Not Allocated:       572313288704 B (572.3 GB) (57.5% free)
-    |
-    +-< Physical Store disk0s2 03B7C267-30AE-414D-93B3-82B5E6A7D794
-    |   -----------------------------------------------------------
-    |   APFS Physical Store Disk:   disk0s2
-    |   Size:                       994662584320 B (994.7 GB)
-    |
-    +-> Volume disk3s1 4C4F95CE-27C8-4CC8-9287-0746D8B6F445
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk3s1 (Data)
-    |   Name:                      Untitled - Data (Case-insensitive)
-    |   Mount Point:               /System/Volumes/Data
-    |   Capacity Consumed:         397743120384 B (397.7 GB)
-    |   Sealed:                    No
-    |   FileVault:                 Yes (Unlocked)
-    |
-    +-> Volume disk3s3 2F5B627D-273D-43E1-B33D-11A51F2DD616
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk3s3 (System)
-    |   Name:                      Untitled (Case-insensitive)
-    |   Mount Point:               /System/Volumes/Update/mnt1
-    |   Capacity Consumed:         12000673792 B (12.0 GB)
-    |   Sealed:                    Broken
-    |   FileVault:                 Yes (Unlocked)
-    |   Encrypted:                 No
-    |   |
-    |   Snapshot:                  888DEA8C-D791-4F5B-BC62-26E2D6A436E4
-    |   Snapshot Disk:             disk3s3s1
-    |   Snapshot Mount Point:      /
-    |   Snapshot Sealed:           Yes
-    |
-    +-> Volume disk3s4 C828BF80-F6B2-4370-8C12-5DC67A144D2A
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk3s4 (Preboot)
-    |   Name:                      Preboot (Case-insensitive)
-    |   Mount Point:               /System/Volumes/Preboot
-    |   Capacity Consumed:         10008113152 B (10.0 GB)
-    |   Sealed:                    No
-    |   FileVault:                 No
-    |
-    +-> Volume disk3s5 48782923-A22F-45A8-A688-E4F72065E32B
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk3s5 (Recovery)
-    |   Name:                      Recovery (Case-insensitive)
-    |   Mount Point:               Not Mounted
-    |   Capacity Consumed:         1675984896 B (1.7 GB)
-    |   Sealed:                    No
-    |   FileVault:                 No
-    |
-    +-> Volume disk3s6 1793DE3F-A7B8-4103-A03A-91113BF324E7
-        ---------------------------------------------------
-        APFS Volume Disk (Role):   disk3s6 (VM)
-        Name:                      VM (Case-insensitive)
-        Mount Point:               /System/Volumes/VM
-        Capacity Consumed:         20480 B (20.5 KB)
-        Sealed:                    No
-        FileVault:                 No
-```
 
 ---
 
