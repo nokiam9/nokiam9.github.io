@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">90</span>
+          <span class="site-state-item-count">89</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -174,6 +174,227 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/08/29/Systemd%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E7%AE%80%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/08/29/Systemd%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E7%AE%80%E6%9E%90/" class="post-title-link" itemprop="url">Systemd系统服务简析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-08-29 22:06:52" itemprop="dateCreated datePublished" datetime="2023-08-29T22:06:52+08:00">2023-08-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-15 23:01:43" itemprop="dateModified" datetime="2023-10-15T23:01:43+08:00">2023-10-15</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>13 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          一、概述
+Systemd 是 Linux 系统中一个重要的系统和服务管理器，最早是为了代替传统的 SysV 初始化系统（init）而开发的，相较于传统 init，systemd 具有许多优势。例如支持并行启动，可同时启动多个服务，提高系统启动速度；引入了单一进程（PID 1）和 cgroups 技术，可以更好地管理系统和服务进程。目前，许多主流 Linux 发行版都采用了 systemd 作为其默认的初始化系统，包括 Ubuntu、Debian、Fedora、CentOS、Arch Linux 等。
+
+Systemd 是一系列工具的集合，其作用也远远不仅是启动操作系统，它还接管了后台服务、结束
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/08/29/Systemd%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E7%AE%80%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/08/19/Centos%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86%E8%A6%81%E7%82%B9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/08/19/Centos%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86%E8%A6%81%E7%82%B9/" class="post-title-link" itemprop="url">Centos网络管理要点</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-08-19 10:58:31" itemprop="dateCreated datePublished" datetime="2023-08-19T10:58:31+08:00">2023-08-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-15 23:01:43" itemprop="dateModified" datetime="2023-10-15T23:01:43+08:00">2023-10-15</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>14 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          一、 网络接口设备
+Linux2.6 内核引入了一个基于内存的文件系统 sysfs ，用于向用户空间导出内核设备资源并且进行读写操作，挂载点位于/sys 。
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+
+
+[root@MiWiFi-RA70-srv ~]# tree /sys -L 1
+/sys
+├── block           已废弃。记录当前被发现的所有块设备，已迁移到 /sys/class/block
+├── bus             已注册在操作系统内核的总线类型，每种类型均包括 devices 和 drivers
+├── class           
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/08/19/Centos%E7%BD%91%E7%BB%9C%E7%AE%A1%E7%90%86%E8%A6%81%E7%82%B9/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -825,211 +1046,6 @@ Curve25519
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%BA%8C%EF%BC%9A%E5%AF%86%E9%92%A5%E5%B1%82%E7%BA%A7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%BA%8C%EF%BC%9A%E5%AF%86%E9%92%A5%E5%B1%82%E7%BA%A7/" class="post-title-link" itemprop="url">Apple数据保护技术专题之二：密钥层级</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-11-13 14:34:19" itemprop="dateCreated datePublished" datetime="2022-11-13T14:34:19+08:00">2022-11-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-01-27 23:51:27" itemprop="dateModified" datetime="2024-01-27T23:51:27+08:00">2024-01-27</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>9 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          EMF Key = file-system master encryption key
-
-四、Dkey 密钥的演进分析
-根据 iOS 的初期设计，Class D是所有用户数据文件的默认类型，其类密钥就是 DKey，即大多数文件的per-file key都通过 Dkey 进行封装。
-此时 DKey 的存储路径就是systembag.kb文件的 Class 4 字段，当然受到了基于 UID 的 Key 0x835 的保护。
-
-由于 DKey 直接保存在一个普通的数据文件中，任何具有 root 级别访问权限的用户都可以轻松地获得并展开暴力破解，这显然是非常危险的。
-从 iOS 5 开始，苹果公司将 
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%BA%8C%EF%BC%9A%E5%AF%86%E9%92%A5%E5%B1%82%E7%BA%A7/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/" class="post-title-link" itemprop="url">Apple数据保护技术专题之一：基础架构</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-11-13 14:34:06" itemprop="dateCreated datePublished" datetime="2022-11-13T14:34:06+08:00">2022-11-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-01-27 23:55:37" itemprop="dateModified" datetime="2024-01-27T23:55:37+08:00">2024-01-27</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.7k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>17 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          长期以来 Apple 公司有两条数据安全的技术演进路线，iPhone 和 iPad 等智能终端设备使用称为数据保护（Data Protection）的文件加密方法，基于Intel的Mac设备通过文件保险箱（FileVault）的宗卷加密技术。
-
-MacOS 和 iOS 都是基于 FreeBSD 发展而来，基础架构是一个多用户的操作系统，但 iPhone 等作为个人化（无需支持多用户）的终端设备，存储了通信录、照片等非常敏感的隐私数据，对数据保护的要求更高；其次，App Store 和 iCloud等云服务大量出现，在网络开放环境下既要支持便利的后台服务管理，又要解决数据迁移过程中的数据保护，对
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1139,7 +1155,7 @@ derivedKey = keyDerivationFunction(or
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -1157,7 +1173,7 @@ derivedKey = keyDerivationFunction(or
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">Apple数据保护技术分析</a>
+          <a href="/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/" class="post-title-link" itemprop="url">随机数生成技术概述</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1168,14 +1184,14 @@ derivedKey = keyDerivationFunction(or
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-10-08 20:05:45" itemprop="dateCreated datePublished" datetime="2022-10-08T20:05:45+08:00">2022-10-08</time>
+      <time title="创建时间：2022-10-05 22:02:34" itemprop="dateCreated datePublished" datetime="2022-10-05T22:02:34+08:00">2022-10-05</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-01-27 23:55:57" itemprop="dateModified" datetime="2024-01-27T23:55:57+08:00">2024-01-27</time>
+      <time title="修改时间：2023-12-02 21:20:28" itemprop="dateModified" datetime="2023-12-02T21:20:28+08:00">2023-12-02</time>
     </span>
 
   
@@ -1185,14 +1201,14 @@ derivedKey = keyDerivationFunction(or
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>5.5k</span>
+      <span>2.7k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>20 分钟</span>
+      <span>10 分钟</span>
     </span>
 </div>
 
@@ -1203,17 +1219,18 @@ derivedKey = keyDerivationFunction(or
     
     
     <div class="post-body" itemprop="articleBody">
-          花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。
+          在密码学中，熵（entropy，指不可预测的随机性）扮演了一个非常重要的角色，许多算法都要求使用一个不可预测的随机数，只有在生成的随机数不可预测时，这些算法才能保证其安全性，典型应用包括：
 
-根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为融合的基石。
-任何技术都有路径依赖，虽然 HFS+ 被认为是业界最烂的文件系统，但其许多重要的核心功能仍然需要 AFPS 继承下来，当然也为后续发展打下基础。
+ * 密钥生成
+ * 生成初始化向量，IV，用于分组密码的 CBC，CFB，OFB 模式
+ * 某些签名方案中的盐，如 ECDSA， RSASSA-PSS
 
-
-
- * 每个文件创建时会生成一个P
+一、伪随机数生成器 - PRNG
+PRNG（Pseudo-Random Number Generators）是一种数字序列的生成算法，它生成出的数字序列的统计学属性跟真正的随机数序列非常相似，但它生成的伪随机数序列并不是真正的随机数序列！
+换句话说，
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2022/10/08/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
+              <a class="btn" href="/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

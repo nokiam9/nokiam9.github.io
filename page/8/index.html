@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">90</span>
+          <span class="site-state-item-count">89</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -174,109 +174,6 @@
     </div>
 
     <div class="main-inner index posts-expand">
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">基于ssh加密隧道的三种端口转发模式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-06-13 14:17:30" itemprop="dateCreated datePublished" datetime="2020-06-13T14:17:30+08:00">2020-06-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-15 23:01:44" itemprop="dateModified" datetime="2023-10-15T23:01:44+08:00">2023-10-15</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>8 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          去年购入的腾讯云ECS服务器虽然只有1vCpu、1G内存、40G硬盘，但是Linux服务器的效率就是高，跑个小网站那是杠杠的，不过XunSearch中文索引的磁盘消耗比较大，存储利用率超过95%，需要考虑扩容了。
-
-本着可劲折腾的原则，最近入手了一台Intel NUC主机，开始琢磨把Linux服务器搬到自己家里的宽带上，ECS只保留一个公网入口（家里宽带都是运营商的浮动私网IP地址，需要保留公网入口作为跳板机），为此潜心研究基于ssh加密隧道实现端口转发。
-
-实际在咸鱼上剁手了两台NUC，新的八代i3作为开发机，二手五代i3作为生产机
-另外，感谢LP赞助了一台Huawei AR111 Acce
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
 
     
 
@@ -1225,6 +1122,116 @@ ECS开放了80和443端口提供http和https服务，维护用的ssh端口22也�
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2019/05/04/%E4%B8%BAECS%E8%AE%BE%E7%BD%AEssh%E5%AF%86%E9%92%A5%E7%99%BB%E5%BD%95%E7%9A%84%E6%96%B9%E6%B3%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/" class="post-title-link" itemprop="url">ECS遭遇安全攻击的一次经历</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-05-04 20:11:03" itemprop="dateCreated datePublished" datetime="2019-05-04T20:11:03+08:00">2019-05-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-15 23:01:43" itemprop="dateModified" datetime="2023-10-15T23:01:43+08:00">2023-10-15</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！
+
+服务器的问题表现
+ * 登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中/tmp/vThHH严重消耗资源，确认中招了！
+
+ * 服务器的root口令没有变化，但登录成功时提示有几百个failed login attempts，说明SSH口令已经被暴力破解
+
+系统检查的主要工作
+主要从以下几个方面入手：
+
+ 1. 检查网络服务
+    
+     使用netstat -nlp，发现除了22，80，443端口，还对外暴露了可
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>

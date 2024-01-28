@@ -21,29 +21,28 @@
 
     <meta name="description" content="长期以来 Apple 公司有两条数据安全的技术演进路线，iPhone 和 iPad 等智能终端设备使用称为数据保护（Data Protection）的文件加密方法，基于Intel的Mac设备通过文件保险箱（FileVault）的宗卷加密技术。  MacOS 和 iOS 都是基于 FreeBSD 发展而来，基础架构是一个多用户的操作系统，但 iPhone 等作为个人化（无需支持多用户）的终端设备，存">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Apple数据保护技术专题之一：基础架构">
-<meta property="og:url" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/index.html">
+<meta property="og:title" content="Apple Data Protection的功能概览">
+<meta property="og:url" content="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
 <meta property="og:description" content="长期以来 Apple 公司有两条数据安全的技术演进路线，iPhone 和 iPad 等智能终端设备使用称为数据保护（Data Protection）的文件加密方法，基于Intel的Mac设备通过文件保险箱（FileVault）的宗卷加密技术。  MacOS 和 iOS 都是基于 FreeBSD 发展而来，基础架构是一个多用户的操作系统，但 iPhone 等作为个人化（无需支持多用户）的终端设备，存">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/KEY-ARCH.jpg">
-<meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/daemon.png">
-<meta property="og:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/mac-boot.png">
-<meta property="article:published_time" content="2022-11-13T06:34:06.000Z">
-<meta property="article:modified_time" content="2024-01-27T15:55:37.397Z">
+<meta property="og:image" content="https://nokiam9.github.io/KEY-ARCH.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/daemon.png">
+<meta property="article:published_time" content="2024-01-27T06:34:06.000Z">
+<meta property="article:modified_time" content="2024-01-28T14:11:55.549Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/KEY-ARCH.jpg">
+<meta name="twitter:image" content="https://nokiam9.github.io/KEY-ARCH.jpg">
 
 
-<link rel="canonical" href="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/">
+<link rel="canonical" href="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/","path":"2022/11/13/Apple数据保护技术专题之一：基础架构/","title":"Apple数据保护技术专题之一：基础架构"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/","path":"2024/01/27/Apple Data Protection的功能概览/","title":"Apple Data Protection的功能概览"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Apple数据保护技术专题之一：基础架构 | Alex的技术博客</title>
+<title>Apple Data Protection的功能概览 | Alex的技术博客</title>
   
 
 
@@ -142,7 +141,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%96%87%E4%BB%B6%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4"><span class="nav-text">一、文件数据保护</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E7%AD%89%E7%BA%A7"><span class="nav-text">二、数据保护等级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#A%E7%B1%BB%EF%BC%9A%E5%AE%8C%E5%85%A8%E4%BF%9D%E6%8A%A4%EF%BC%8CComplete-Protection"><span class="nav-text">A类：完全保护，Complete Protection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B%E7%B1%BB%EF%BC%9A%E6%9C%AA%E6%89%93%E5%BC%80%E6%96%87%E4%BB%B6%E4%BF%9D%E6%8A%A4%EF%BC%8CProtected-Unless-Open"><span class="nav-text">B类：未打开文件保护，Protected Unless Open</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#C%E7%B1%BB%EF%BC%9A%E9%A6%96%E6%AC%A1%E7%94%A8%E6%88%B7%E8%AE%A4%E8%AF%81%E5%89%8D%E4%BF%9D%E6%8A%A4%EF%BC%8CProtected-Until-First-User-Authentication"><span class="nav-text">C类：首次用户认证前保护，Protected Until First User Authentication</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#D%E7%B1%BB%EF%BC%9A%E6%97%A0%E4%BF%9D%E6%8A%A4%EF%BC%8CNo-Protection"><span class="nav-text">D类：无保护，No Protection</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E9%92%A5%E5%8C%99%E5%8C%85%EF%BC%88keyBag%EF%BC%89%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4"><span class="nav-text">三、钥匙包（keyBag）数据保护</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%94%A8%E6%88%B7%E5%AF%86%E9%92%A5%E5%8C%85-User-keyBag"><span class="nav-text">1. 用户密钥包(User keyBag)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%AE%BE%E5%A4%87%E5%AF%86%E9%92%A5%E5%8C%85-Device-keyBag"><span class="nav-text">2. 设备密钥包 (Device keyBag)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%A4%87%E4%BB%BD%E5%AF%86%E9%92%A5%E5%8C%85%EF%BC%88Backup-keyBag%EF%BC%89"><span class="nav-text">3. 备份密钥包（Backup keyBag）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%89%98%E7%AE%A1%E5%AF%86%E9%92%A5%E5%8C%85%EF%BC%88Escrow-keybag%EF%BC%89"><span class="nav-text">4. 托管密钥包（Escrow keybag）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E4%BA%91%E5%A4%87%E4%BB%BD%E5%AF%86%E9%92%A5%E5%8C%85%EF%BC%88iCloud-Backup-keybag%EF%BC%89"><span class="nav-text">5.云备份密钥包（iCloud Backup keybag）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E9%92%A5%E5%8C%99%E4%B8%B2-Key-Chain-%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4"><span class="nav-text">四、钥匙串 (Key Chain)数据保护</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%B1%BB%E5%9E%8B%E5%AE%9A%E4%B9%89"><span class="nav-text">1. 类型定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%85%B8%E5%9E%8B%E5%9C%BA%E6%99%AF"><span class="nav-text">2. 典型场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">六、技术分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-SKP-%E5%AF%86%E5%B0%81%E5%AF%86%E9%92%A5%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF"><span class="nav-text">1. SKP 密封密钥保护技术</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Apple%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-text">Apple官方文档</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%96%87%E4%BB%B6%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4"><span class="nav-text">一、文件数据保护</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E7%AD%89%E7%BA%A7"><span class="nav-text">二、数据保护等级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#A%E7%B1%BB%EF%BC%9A%E5%AE%8C%E5%85%A8%E4%BF%9D%E6%8A%A4%EF%BC%8CComplete-Protection"><span class="nav-text">A类：完全保护，Complete Protection</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B%E7%B1%BB%EF%BC%9A%E6%9C%AA%E6%89%93%E5%BC%80%E6%96%87%E4%BB%B6%E4%BF%9D%E6%8A%A4%EF%BC%8CProtected-Unless-Open"><span class="nav-text">B类：未打开文件保护，Protected Unless Open</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#C%E7%B1%BB%EF%BC%9A%E9%A6%96%E6%AC%A1%E7%94%A8%E6%88%B7%E8%AE%A4%E8%AF%81%E5%89%8D%E4%BF%9D%E6%8A%A4%EF%BC%8CProtected-Until-First-User-Authentication"><span class="nav-text">C类：首次用户认证前保护，Protected Until First User Authentication</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#D%E7%B1%BB%EF%BC%9A%E6%97%A0%E4%BF%9D%E6%8A%A4%EF%BC%8CNo-Protection"><span class="nav-text">D类：无保护，No Protection</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E9%92%A5%E5%8C%99%E5%8C%85%EF%BC%88keyBag%EF%BC%89%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4"><span class="nav-text">三、钥匙包（keyBag）数据保护</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%94%A8%E6%88%B7%E5%AF%86%E9%92%A5%E5%8C%85-User-keyBag"><span class="nav-text">1. 用户密钥包(User keyBag)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%AE%BE%E5%A4%87%E5%AF%86%E9%92%A5%E5%8C%85-Device-keyBag"><span class="nav-text">2. 设备密钥包 (Device keyBag)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%A4%87%E4%BB%BD%E5%AF%86%E9%92%A5%E5%8C%85%EF%BC%88Backup-keyBag%EF%BC%89"><span class="nav-text">3. 备份密钥包（Backup keyBag）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%89%98%E7%AE%A1%E5%AF%86%E9%92%A5%E5%8C%85%EF%BC%88Escrow-keybag%EF%BC%89"><span class="nav-text">4. 托管密钥包（Escrow keybag）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E4%BA%91%E5%A4%87%E4%BB%BD%E5%AF%86%E9%92%A5%E5%8C%85%EF%BC%88iCloud-Backup-keybag%EF%BC%89"><span class="nav-text">5.云备份密钥包（iCloud Backup keybag）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E9%92%A5%E5%8C%99%E4%B8%B2-Key-Chain-%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4"><span class="nav-text">四、钥匙串 (Key Chain)数据保护</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%B1%BB%E5%9E%8B%E5%AE%9A%E4%B9%89"><span class="nav-text">1. 类型定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%85%B8%E5%9E%8B%E5%9C%BA%E6%99%AF"><span class="nav-text">2. 典型场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Apple%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-text">Apple官方文档</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -155,7 +154,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">90</span>
+          <span class="site-state-item-count">89</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -193,7 +192,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -206,12 +205,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Apple数据保护技术专题之一：基础架构 | Alex的技术博客">
+      <meta itemprop="name" content="Apple Data Protection的功能概览 | Alex的技术博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Apple数据保护技术专题之一：基础架构
+          Apple Data Protection的功能概览
         </h1>
 
         <div class="post-meta-container">
@@ -222,14 +221,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-11-13 14:34:06" itemprop="dateCreated datePublished" datetime="2022-11-13T14:34:06+08:00">2022-11-13</time>
+      <time title="创建时间：2024-01-27 14:34:06" itemprop="dateCreated datePublished" datetime="2024-01-27T14:34:06+08:00">2024-01-27</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-01-27 23:55:37" itemprop="dateModified" datetime="2024-01-27T23:55:37+08:00">2024-01-27</time>
+      <time title="修改时间：2024-01-28 22:11:55" itemprop="dateModified" datetime="2024-01-28T22:11:55+08:00">2024-01-28</time>
     </span>
 
   
@@ -246,14 +245,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>4.7k</span>
+      <span>4.2k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>17 分钟</span>
+      <span>15 分钟</span>
     </span>
 </div>
 
@@ -281,7 +280,7 @@
 <li><code>Class Key</code>和<code>Filesystem Key</code>都被硬件密钥<code>UID</code>保护</li>
 <li><code>Class Key</code>还被用户密码<code>Passcode</code>保护</li>
 </ul>
-<p><img src="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/KEY-ARCH.jpg" alt="key"></p>
+<p><img src="/KEY-ARCH.jpg" alt="key"></p>
 <blockquote>
 <p>EMF Key 就是加密封装的 Filesystem Key，存储在闪存的可擦除区域，只允许安全隔区访问<br>Class Key 通过多层加密封装，持久化存储在 keybag（系统密钥包）之中</p>
 </blockquote>
@@ -318,7 +317,7 @@
 <p>The contents of a file may be encrypted with one or more per-file (or per-extent) keys that are wrapped with a class key and stored in a file‘s metadata, which in turn is encrypted with the file system key. The class key is protected with the hardware UID and, for some classes, the user’s passcode. This hierarchy provides both flexibility and performance. For example, <strong>changing a file‘s class only requires rewrapping its per-file key, and a change of passcode just rewraps the class key</strong>。</p>
 </blockquote>
 <h2 id="三、钥匙包（keyBag）数据保护"><a href="#三、钥匙包（keyBag）数据保护" class="headerlink" title="三、钥匙包（keyBag）数据保护"></a>三、钥匙包（keyBag）数据保护</h2><p>系统密钥包是一个加密的 <code>plist</code> 格式的二进制文件，存储了所有类密钥的数据，Apple 系统的数据解密实现方式见下图。</p>
-<p><img src="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/daemon.png" alt="Daemon"></p>
+<p><img src="/daemon.png" alt="Daemon"></p>
 <p>有五种不同类型的钥匙包，但数据格式完全相同，包括：</p>
 <h3 id="1-用户密钥包-User-keyBag"><a href="#1-用户密钥包-User-keyBag" class="headerlink" title="1. 用户密钥包(User keyBag)"></a>1. 用户密钥包(User keyBag)</h3><p>用户密钥包是设备常规操作中使用的封装类密钥的储存位置。例如，输入密码后，<code>NSFileProtectionComplete</code>会从用户密钥包中载入并解封。它是储存在“无保护”类中的二进制属性列表 (.plist) 文件。<br>对于搭载 A9 之前的 SoC 的设备，该 .plist 文件的内容通过保存在可擦除存储器中的密钥（Bag1 Key）加密。为了给密钥包提供前向安全性，用户每次更改密码时，系统都会擦除并重新生成此密钥。<br>对于搭载 A9 或后续型号 SoC 的设备，该 .plist 文件包含一个密钥，表示密钥包储存在受反重放随机数（由安全隔区控制）保护的有锁储存库中。</p>
 <h3 id="2-设备密钥包-Device-keyBag"><a href="#2-设备密钥包-Device-keyBag" class="headerlink" title="2. 设备密钥包 (Device keyBag)"></a>2. 设备密钥包 (Device keyBag)</h3><p>设备密钥包用来储存用于涉及设备特定操作数据的封装类密钥。 配置为共用的 iPadOS 设备有时需要在用户登录前访问凭证，因此需要一个不受用户密码保护的密钥包。<br>iOS 和 iPadOS 不支持对用户独有的文件系统内容进行单独加密，这就意味着系统使用来自设备密钥包的类密钥，对文件独有密钥进行封装，而钥匙串则使用来自用户密钥包中的类密钥来保护用户钥匙串中的项目。<br>在配置为单用户使用 (默认配置) 的 iOS 和 iPadOS 设备中， 设备密钥包和用户密钥包是同一个， 并受用户的密码保护。</p>
@@ -388,14 +387,6 @@
 <td align="center">AlwaysThisDeviceOnly</td>
 </tr>
 </tbody></table>
-<h2 id="六、技术分析"><a href="#六、技术分析" class="headerlink" title="六、技术分析"></a>六、技术分析</h2><h3 id="1-SKP-密封密钥保护技术"><a href="#1-SKP-密封密钥保护技术" class="headerlink" title="1. SKP 密封密钥保护技术"></a>1. SKP 密封密钥保护技术</h3><p>LLB - Low Level Bootloader，底层引导载入程序</p>
-<p>在具有两步启动架构的 Mac 电脑上，LLB 包含由 Boot ROM 调用的代码，该代码随后会载入 iBoot，成为安全启动链的一环。</p>
-<p><img src="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/mac-boot.png" alt="搭载 Apple 芯片的 Mac 开机时的启动过程步骤"></p>
-<p>如果攻击者能够意外地更改任何上述测量的固件、 软件或安全性配置组件， 则也会修改储存在硬件寄存器中的测量值。 测量值的修改会导致从加密硬件派生的系统测量根密钥 (SMRK) 派生出不同的值， 从而有效破坏密钥层 级的封章。 这将导致无法访问系统测量设备密钥 (SMDK)， 从而导致无法访问 KEK， 因此也无法访问数据。</p>
-<p>但是， 系统在未受到攻击时， 必须容纳合法的软件更新， 这些更新会更改固件测量值和 LocalPolicy 中的 nsih 字段， 以指向新的 macOS 测量值。 在其他尝试整合固件测量值但没有已知真实来源的系统中， 用 户将被要求停用安全性， 更新固件后重新启用安全性， 以便捕获新的测量基线。 这大大增加了攻击者在软件 更新期间篡改固件的风险。 Image4 清单包含所需的所有测量值， 这对系统很有帮助。 正常启动期间如果测 量值匹配， 使用 SMRK 解密 SMDK 的硬件也可以将 SMDK 加密为所建议的将来的 SMRK。 通过指定软 件更新后预期的测量值， 硬件可以加密在当前操作系统中可访问的 SMDK， 以便在将来的操作系统中仍可 访问。 同样地， 当客户在 LocalPolicy 中合法更改其安全性设置时， 必须根据 LLB 下次重新启动时计算的 LocalPolicy 测量值， 将 SMDK 加密为将来的 SMRK。</p>
-<blockquote>
-<p>Image4 是经 ASN.1（抽象语法标记一）DER 编码的数据结构格式，用于描述 Apple 平台上有关安全启动链对象的信息。</p>
-</blockquote>
 <hr>
 <h2 id="Apple官方文档"><a href="#Apple官方文档" class="headerlink" title="Apple官方文档"></a>Apple官方文档</h2><ul>
 <li><a href="apple-platform-security-guide.pdf">Apple 平台安全白皮书 - 2022年英文版</a></li>
@@ -417,13 +408,13 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/" rel="prev" title="密钥派生函数（KDF）概述">
-                  <i class="fa fa-angle-left"></i> 密钥派生函数（KDF）概述
+                <a href="/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" rel="prev" title="iPhone4 数据破解的技术分析">
+                  <i class="fa fa-angle-left"></i> iPhone4 数据破解的技术分析
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2022/11/13/Apple%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%BA%8C%EF%BC%9A%E5%AF%86%E9%92%A5%E5%B1%82%E7%BA%A7/" rel="next" title="Apple数据保护技术专题之二：密钥层级">
-                  Apple数据保护技术专题之二：密钥层级 <i class="fa fa-angle-right"></i>
+                <a href="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/" rel="next" title="Apple Data Protection的深度分析">
+                  Apple Data Protection的深度分析 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
