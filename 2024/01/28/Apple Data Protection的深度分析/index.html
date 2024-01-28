@@ -19,17 +19,18 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。  根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成">
+    <meta name="description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。  一、FDE 和 FBE 的技术路线 根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secur">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Apple Data Protection的深度分析">
 <meta property="og:url" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。  根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成">
+<meta property="og:description" content="花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。  一、FDE 和 FBE 的技术路线 根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secur">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/ES.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/keys.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/passcode-key.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch3.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch2.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/SKP.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/SKP-C.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/FileVault.png">
@@ -38,10 +39,10 @@
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/mac-boot.png">
 <meta property="og:image" content="https://nokiam9.github.io/arch0.jpg">
 <meta property="article:published_time" content="2024-01-28T12:05:45.000Z">
-<meta property="article:modified_time" content="2024-01-28T14:13:49.392Z">
+<meta property="article:modified_time" content="2024-01-28T17:09:30.770Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch2.png">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/ES.png">
 
 
 <link rel="canonical" href="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/">
@@ -150,7 +151,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E6%9C%89%E9%82%A3%E4%BA%9B%E5%86%85%E7%BD%AE%E7%9A%84%E6%A0%B8%E5%BF%83%E5%AF%86%E9%92%A5%EF%BC%9F"><span class="nav-text">一. 安全隔区有那些内置的核心密钥？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-UID-GID"><span class="nav-text">1. UID &amp; GID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B4%BE%E7%94%9F%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AF%86%E9%92%A5"><span class="nav-text">派生的硬件密钥</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Passcode-Passcode-Key-KEK"><span class="nav-text">2. Passcode &amp; Passcode Key &#x3D; KEK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-xART-key"><span class="nav-text">3. xART key</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E8%AE%BF%E9%97%AE%E7%9A%84Secure-Nonvolatile-Storage%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">二. 安全隔区访问的Secure Nonvolatile Storage是什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-EMF-key-LwVM-VEK"><span class="nav-text">1. EMF key &#x3D; LwVM &#x3D; VEK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Dkey"><span class="nav-text">2. Dkey</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-BAG1-system-bag"><span class="nav-text">3. BAG1: system bag</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-NAND-Key"><span class="nav-text">4. NAND Key</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%B3%BB%E7%BB%9F%E5%AF%86%E9%92%A5%E5%8C%85%EF%BC%88System-Bag%EF%BC%89%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">三、系统密钥包（System Bag）的工作原理是什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ios-4"><span class="nav-text">ios 4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ios-Storage"><span class="nav-text">ios Storage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-EMF-key"><span class="nav-text">2. EMF key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Passcode-Key"><span class="nav-text">Passcode Key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FileSystem-Key%EF%BC%9A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AF%86%E9%92%A5"><span class="nav-text">FileSystem Key：文件系统密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metadata-Key%EF%BC%9A%E5%85%83%E6%95%B0%E6%8D%AE%E5%AF%86%E9%92%A5"><span class="nav-text">Metadata Key：元数据密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="nav-text">4. 遗留问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%85%B3%E4%BA%8E-iOS-%E7%9A%84%E6%96%87%E4%BB%B6%E4%BF%9D%E6%8A%A4%E7%B1%BB%E5%9E%8B"><span class="nav-text">2. 关于 iOS 的文件保护类型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">六、技术分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-SKP-%E5%AF%86%E5%B0%81%E5%AF%86%E9%92%A5%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF"><span class="nav-text">1. SKP 密封密钥保护技术</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Dkey-%E5%AF%86%E9%92%A5%E7%9A%84%E6%BC%94%E8%BF%9B%E5%88%86%E6%9E%90"><span class="nav-text">四、Dkey 密钥的演进分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Effaceable-lockers"><span class="nav-text">Effaceable lockers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E7%9A%84%E5%86%85%E7%BD%AE%E6%A0%B8%E5%BF%83%E5%AF%86%E9%92%A5"><span class="nav-text">一、安全隔区的内置核心密钥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-UID-%E6%B4%BE%E7%94%9F%E5%AF%86%E9%92%A5"><span class="nav-text">3. UID 派生密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-UID-GID-1"><span class="nav-text">1. UID &amp; GID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Class-Key-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-text">3. Class Key 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E5%8A%A8%E9%94%81%E5%B1%8F-%E8%B6%85%E6%97%B6%E9%94%81%E5%B1%8F"><span class="nav-text">主动锁屏 &amp; 超时锁屏</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E9%87%8D%E8%AE%BE-passcode"><span class="nav-text">用户重设 passcode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%93%A6%E9%99%A4-NAND-%E6%95%B0%E6%8D%AE"><span class="nav-text">用户擦除 NAND 数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E9%87%8D%E5%90%AF"><span class="nav-text">设备重启</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%B4%E8%A7%A3Passcode-Key%E7%9A%84%E6%89%8B%E6%AE%B5"><span class="nav-text">破解Passcode Key的手段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-text">名词解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Effaceable-Storage%EF%BC%8C%E5%8F%AF%E6%93%A6%E9%99%A4%E5%8C%BA%E5%9F%9F"><span class="nav-text">Effaceable Storage，可擦除区域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#xART-eXtended-Anti-Replay-Technology%EF%BC%8C%E5%8F%8D%E9%87%8D%E6%94%BE%E6%8A%80%E6%9C%AF"><span class="nav-text">xART - eXtended Anti-Replay Technology，反重放技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UID-unique-ID%EF%BC%8C%E5%94%AF%E4%B8%80ID"><span class="nav-text">UID - unique ID，唯一ID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PDK-Passcode-Derived-Key%EF%BC%8C%E5%AF%86%E7%A0%81%E6%B4%BE%E7%94%9F%E5%AF%86%E9%92%A5"><span class="nav-text">PDK - Passcode-Derived Key，密码派生密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#per-file-key%EF%BC%8C%E6%96%87%E4%BB%B6%E7%8B%AC%E6%9C%89%E5%AF%86%E9%92%A5"><span class="nav-text">per-file key，文件独有密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#filesystem-key%EF%BC%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AF%86%E9%92%A5"><span class="nav-text">filesystem key，文件系统密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Volume-Key%EF%BC%8C%E5%8D%B7%E5%AE%97%E5%AF%86%E9%92%A5"><span class="nav-text">Volume Key，卷宗密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KEK-Key-Encryption-Key%EF%BC%8C%E5%AF%86%E9%92%A5%E5%B0%81%E8%A3%85%E5%AF%86%E9%92%A5"><span class="nav-text">KEK - Key Encryption Key，密钥封装密钥</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B2%BE%E5%93%81%E8%B5%84%E6%96%99"><span class="nav-text">精品资料</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">技术分析</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81FDE-%E5%92%8C-FBE-%E7%9A%84%E6%8A%80%E6%9C%AF%E8%B7%AF%E7%BA%BF"><span class="nav-text">一、FDE 和 FBE 的技术路线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E8%AE%BF%E9%97%AE%E7%9A%84Secure-Nonvolatile-Storage%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">二. 安全隔区访问的Secure Nonvolatile Storage是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81Secure-Encalve-%E5%AD%98%E5%82%A8%E7%9A%84%E5%AF%86%E9%92%A5"><span class="nav-text">三、Secure Encalve 存储的密钥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-UID-GID"><span class="nav-text">1. UID &amp; GID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B4%BE%E7%94%9F%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AF%86%E9%92%A5"><span class="nav-text">派生的硬件密钥</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Passcode-Passcode-Key-KEK"><span class="nav-text">2. Passcode &amp; Passcode Key &#x3D; KEK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-xART-key"><span class="nav-text">3. xART key</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Effaceable-Storage-%E4%B8%AD%E7%9A%84%E5%AF%86%E9%92%A5"><span class="nav-text">四、Effaceable Storage 中的密钥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-EMF-key-LwVM-VEK"><span class="nav-text">1. EMF key &#x3D; LwVM &#x3D; VEK</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Dkey"><span class="nav-text">2. Dkey</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-BAG1-system-bag"><span class="nav-text">3. BAG1: system bag</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-NAND-Key"><span class="nav-text">4. NAND Key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%85%B3%E4%BA%8E-iOS-%E7%9A%84%E6%96%87%E4%BB%B6%E4%BF%9D%E6%8A%A4%E7%B1%BB%E5%9E%8B"><span class="nav-text">2. 关于 iOS 的文件保护类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dkey-%E5%AF%86%E9%92%A5%E7%9A%84%E6%BC%94%E8%BF%9B"><span class="nav-text">Dkey 密钥的演进</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81File-System-%E4%B8%AD%E7%9A%84%E5%AF%86%E9%92%A5"><span class="nav-text">五、File System 中的密钥</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E6%9C%89%E9%82%A3%E4%BA%9B%E5%86%85%E7%BD%AE%E7%9A%84%E6%A0%B8%E5%BF%83%E5%AF%86%E9%92%A5%EF%BC%9F"><span class="nav-text">一. 安全隔区有那些内置的核心密钥？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%B3%BB%E7%BB%9F%E5%AF%86%E9%92%A5%E5%8C%85%EF%BC%88System-Bag%EF%BC%89%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">三、系统密钥包（System Bag）的工作原理是什么？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ios-4"><span class="nav-text">ios 4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ios-Storage"><span class="nav-text">ios Storage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-EMF-key"><span class="nav-text">2. EMF key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Passcode-Key"><span class="nav-text">Passcode Key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FileSystem-Key%EF%BC%9A%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AF%86%E9%92%A5"><span class="nav-text">FileSystem Key：文件系统密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metadata-Key%EF%BC%9A%E5%85%83%E6%95%B0%E6%8D%AE%E5%AF%86%E9%92%A5"><span class="nav-text">Metadata Key：元数据密钥</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">六、技术分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-SKP-%E5%AF%86%E5%B0%81%E5%AF%86%E9%92%A5%E4%BF%9D%E6%8A%A4%E6%8A%80%E6%9C%AF"><span class="nav-text">1. SKP 密封密钥保护技术</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E7%9A%84%E5%86%85%E7%BD%AE%E6%A0%B8%E5%BF%83%E5%AF%86%E9%92%A5"><span class="nav-text">一、安全隔区的内置核心密钥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-UID-%E6%B4%BE%E7%94%9F%E5%AF%86%E9%92%A5"><span class="nav-text">3. UID 派生密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-UID-GID-1"><span class="nav-text">1. UID &amp; GID</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Class-Key-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-text">3. Class Key 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E5%8A%A8%E9%94%81%E5%B1%8F-%E8%B6%85%E6%97%B6%E9%94%81%E5%B1%8F"><span class="nav-text">主动锁屏 &amp; 超时锁屏</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E9%87%8D%E8%AE%BE-passcode"><span class="nav-text">用户重设 passcode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%93%A6%E9%99%A4-NAND-%E6%95%B0%E6%8D%AE"><span class="nav-text">用户擦除 NAND 数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E9%87%8D%E5%90%AF"><span class="nav-text">设备重启</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%B4%E8%A7%A3Passcode-Key%E7%9A%84%E6%89%8B%E6%AE%B5"><span class="nav-text">破解Passcode Key的手段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-text">名词解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#xART-eXtended-Anti-Replay-Technology%EF%BC%8C%E5%8F%8D%E9%87%8D%E6%94%BE%E6%8A%80%E6%9C%AF"><span class="nav-text">xART - eXtended Anti-Replay Technology，反重放技术</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UID-unique-ID%EF%BC%8C%E5%94%AF%E4%B8%80ID"><span class="nav-text">UID - unique ID，唯一ID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PDK-Passcode-Derived-Key%EF%BC%8C%E5%AF%86%E7%A0%81%E6%B4%BE%E7%94%9F%E5%AF%86%E9%92%A5"><span class="nav-text">PDK - Passcode-Derived Key，密码派生密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#per-file-key%EF%BC%8C%E6%96%87%E4%BB%B6%E7%8B%AC%E6%9C%89%E5%AF%86%E9%92%A5"><span class="nav-text">per-file key，文件独有密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#filesystem-key%EF%BC%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AF%86%E9%92%A5"><span class="nav-text">filesystem key，文件系统密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Volume-Key%EF%BC%8C%E5%8D%B7%E5%AE%97%E5%AF%86%E9%92%A5"><span class="nav-text">Volume Key，卷宗密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KEK-Key-Encryption-Key%EF%BC%8C%E5%AF%86%E9%92%A5%E5%B0%81%E8%A3%85%E5%AF%86%E9%92%A5"><span class="nav-text">KEK - Key Encryption Key，密钥封装密钥</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="nav-text">4. 遗留问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B2%BE%E5%93%81%E8%B5%84%E6%96%99"><span class="nav-text">精品资料</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">技术分析</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -229,9 +230,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-01-28 20:05:45 / 修改时间：22:13:49" itemprop="dateCreated datePublished" datetime="2024-01-28T20:05:45+08:00">2024-01-28</time>
+      <time title="创建时间：2024-01-28 20:05:45" itemprop="dateCreated datePublished" datetime="2024-01-28T20:05:45+08:00">2024-01-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-01-29 01:09:30" itemprop="dateModified" datetime="2024-01-29T01:09:30+08:00">2024-01-29</time>
     </span>
 
   
@@ -248,14 +255,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>8.6k</span>
+      <span>8.1k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>31 分钟</span>
+      <span>30 分钟</span>
     </span>
 </div>
 
@@ -266,21 +273,15 @@
     
     
     <div class="post-body" itemprop="articleBody"><p>花了好长时间，才明白Apple公司数据保护（Data Protection）的核心。</p>
-<p>根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为融合的基石。<br>任何技术都有路径依赖，虽然 HFS+ 被认为是业界最烂的文件系统，但其许多重要的核心功能仍然需要 AFPS 继承下来，当然也为后续发展打下基础。</p>
-<p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch2.png" alt="更细架构"></p>
-<ul>
-<li>每个文件创建时会生成一个<code>Per-file Key</code>，在文件写入闪存时通过硬件用<code>AES-XTS</code>算法加密</li>
-<li><code>Per-file Key</code>存储在文件元数据 Metadata 中，被<code>Class Key</code>和<code>Filesystem Key</code>加密</li>
-<li><code>Class Key</code>和<code>Filesystem Key</code>都被硬件密钥<code>UID</code>保护</li>
-<li><code>Class Key</code>还被用户密码<code>Passcode</code>保护</li>
-</ul>
-<p>实际上，Apple就是在 HFS+ 文件系统的 inode 中增加了一个<code>cprotect</code> 字段：</p>
-<ul>
-<li>如果数据保护级别是 A &#x2F; B &#x2F; C，存储以<code>Class Key</code>加密的<code>Per-file Key</code></li>
-<li>如果数据保护级别是 D，存储加密后的<code>DKey</code>(Device Key，正好也是D)</li>
-<li>如果设置为<code>discarded</code>，则意味着密码失效，文件就永远无法打开，也是数据被抹去了…</li>
-</ul>
-<h2 id="一-安全隔区有那些内置的核心密钥？"><a href="#一-安全隔区有那些内置的核心密钥？" class="headerlink" title="一. 安全隔区有那些内置的核心密钥？"></a>一. 安全隔区有那些内置的核心密钥？</h2><p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/keys.png" alt="密钥关系图"></p>
+<h2 id="一、FDE-和-FBE-的技术路线"><a href="#一、FDE-和-FBE-的技术路线" class="headerlink" title="一、FDE 和 FBE 的技术路线"></a>一、FDE 和 FBE 的技术路线</h2><p>根据Apple安全白皮书的官方文档，数据保护实际上有两条路径，一是面向智能终端的 iOS 发展来的 Data Protection，二是面向个人电脑的 MacOS 发展来的数据保险箱，由于依赖Intel CPU，数据安全就是各种打补丁。M1 发布后两条路径开始融合，Secure Encalve 和 AFPS 成为融合的基石。<br>任何技术都有路径依赖，虽然 HFS+ 被认为是业界最烂的文件系统，但其许多重要的核心功能仍然需要 AFPS 继承下来，当然也为后续发展打下基础。</p>
+<h2 id="二-安全隔区访问的Secure-Nonvolatile-Storage是什么？"><a href="#二-安全隔区访问的Secure-Nonvolatile-Storage是什么？" class="headerlink" title="二. 安全隔区访问的Secure Nonvolatile Storage是什么？"></a>二. 安全隔区访问的<code>Secure Nonvolatile Storage</code>是什么？</h2><p>CPU都是通用的，许多关键密钥都是个人化数据，必须有一个固定的物理空间提供持久化存储，秘密就藏在 NAND 闪存的<code>Block 1</code>！</p>
+<p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/ES.png" alt="ES"></p>
+<p>从iPhone 3GS开始，iPhone 内置的闪存芯片都最前面的16个block和最后的15个block保留给Apple，并将<code>Block 1</code>作为 Effaceable Storage（可擦除区域），用于储存加密密钥的专用区域，可被直接寻址和安全擦除，这就是 Secure Nonvolatile Storage（非易失性存储）。<br>尽管当攻击者实际占有设备时，可擦除存储器无法提供保护，但其中存储的密钥可用作密钥层级的一部分，用于实现快速擦除和前向安全性。</p>
+<blockquote>
+<p>Effaceable Storage：accesses the underlying storage technology (for example, NAND) to directly address and erase a small number of blocks at a very low level.</p>
+</blockquote>
+<p>当然，Apple官方文档说安全隔区通过专用 I2C 总线连接，但 NAND 闪存不太可能再增加一个物理接口，也许是复用吧。</p>
+<h2 id="三、Secure-Encalve-存储的密钥"><a href="#三、Secure-Encalve-存储的密钥" class="headerlink" title="三、Secure Encalve 存储的密钥"></a>三、Secure Encalve 存储的密钥</h2><p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/keys.png" alt="密钥关系图"></p>
 <h3 id="1-UID-GID"><a href="#1-UID-GID" class="headerlink" title="1. UID &amp; GID"></a>1. UID &amp; GID</h3><ul>
 <li>UID 是一个AES 256 位密钥，在 SOC 制造过程中写入一次性的<strong>熔丝</strong>，每个设备唯一且无法更改</li>
 <li>UID 不能被固件或软件读取，只能由处理器的硬件 AES 引擎使用</li>
@@ -305,12 +306,8 @@
 </blockquote>
 <p>Passcode-derived key (PDK) The encryption key derived from the entangling of the user password with the long-term SKP key and the UID of the Secure Enclave.</p>
 <h3 id="3-xART-key"><a href="#3-xART-key" class="headerlink" title="3. xART key"></a>3. xART key</h3><p>扩展反重放技术的密钥（eXtended Anti-Replay Technology key），就是第二代安全存储组件的<strong>唯一加密密钥</strong>.<br>后续苹果为了封堵各种暴力猜测Passcode的方法，在64位设备的Secure Enclave中增加了定时器，针对尝试密码的错误次数，增加尝试的延时，即使断电重启也无法解决。</p>
-<h2 id="二-安全隔区访问的Secure-Nonvolatile-Storage是什么？"><a href="#二-安全隔区访问的Secure-Nonvolatile-Storage是什么？" class="headerlink" title="二. 安全隔区访问的Secure Nonvolatile Storage是什么？"></a>二. 安全隔区访问的<code>Secure Nonvolatile Storage</code>是什么？</h2><p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch3.jpg" alt="基本结构"></p>
-<p>CPU都是通用的，这些关键密钥都是个性化数据，必须有一个存储设备提供数据持久化！<br>秘密就藏在 NAND 闪存的1号扇区，Apple 将它作为隐藏的可安全擦除区域(Effaceable Storage)，就是安全隔区的技术架构中的<code>Secure nonvolatile storage</code>。</p>
-<blockquote>
-<p>Effaceable Storage：accesses the underlying storage technology (for example, NAND) to directly address and erase a small number of blocks at a very low level.</p>
-</blockquote>
-<p>当然，Apple官方文档说安全隔区通过专用 I2C 总线连接，但 NAND 闪存不太可能再增加一个物理接口，也许是复用吧。<br>这个隐藏存储区域的容量是 960 Bytes，存储了3个关键数据。</p>
+<h2 id="四、Effaceable-Storage-中的密钥"><a href="#四、Effaceable-Storage-中的密钥" class="headerlink" title="四、Effaceable Storage 中的密钥"></a>四、Effaceable Storage 中的密钥</h2><p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch3.jpg" alt="基本结构"></p>
+<p>EMF!<br>• Data partition encryption key, encrypted with key 0x89B<br>• Format: length (0x20) + AES(key89B, emfkey)<br>Dkey<br>• NSProtectionNone class key, wrapped with key 0x835<br>• Format: AESWRAP(key835, Dkey)<br>BAG1<br>• System keybag payload key<br>• Format : magic (BAG1) + IV + Key<br>• Read from userland by keybagd to decrypt systembag.kb<br>• Erased at each passcode change to prevent attacks on previous keybag</p>
 <h3 id="1-EMF-key-LwVM-VEK"><a href="#1-EMF-key-LwVM-VEK" class="headerlink" title="1. EMF key &#x3D; LwVM &#x3D; VEK"></a>1. EMF key &#x3D; LwVM &#x3D; VEK</h3><p>在首次系统安装时创建的原生随机数 <code>FileSystem Key</code>，以 <code>key 0x89B</code> 包裹形成密文 <code>EMF Key</code>，并持久化存储在 NAND 的可擦除分区。<br>EMF Key 负责数据分区（Data Partition）的加密，也称为卷宗加密密钥 VEK（Volume Encryptition Key）<br>在iOS 5之后也被称为 <code>LwVM</code>（Lightweight Volume Manager）</p>
 <ul>
 <li>功能描述：<strong>数据分区</strong>（data partition）的加密密钥，</li>
@@ -339,7 +336,25 @@
 </ul>
 <p>系统密钥包有效负载密钥 （+初始化向量）。未加密地存储在可擦除区域。</p>
 <h3 id="4-NAND-Key"><a href="#4-NAND-Key" class="headerlink" title="4. NAND Key"></a>4. NAND Key</h3><p>负责加密GPT分区表和系统分区表，也被称为媒体密钥（media key）</p>
-<h2 id="三、系统密钥包（System-Bag）的工作原理是什么？"><a href="#三、系统密钥包（System-Bag）的工作原理是什么？" class="headerlink" title="三、系统密钥包（System Bag）的工作原理是什么？"></a>三、系统密钥包（System Bag）的工作原理是什么？</h2><ul>
+<h3 id="2-关于-iOS-的文件保护类型"><a href="#2-关于-iOS-的文件保护类型" class="headerlink" title="2. 关于 iOS 的文件保护类型"></a>2. 关于 iOS 的文件保护类型</h3><p>Class A 主要适用于日历、信息、邮件、照片、通讯录和健康数据等个人敏感信息，其特点是一旦锁屏事件发生（延迟10秒），将丢弃内存中的类密钥，结果是无法访问数据文件了；只有用户重新输入 passcode 解锁屏幕后，再重新计算类密钥，才可以继续提供数据文件访问。</p>
+<p>Class B 的设计目标是解决远程下载等互联网服务的后台权限问题，方法是采用 ECC 非对称密码系统，代价是文件元数据需要额外存储一个临时公钥（类密钥就是静态私钥）</p>
+<h3 id="Dkey-密钥的演进"><a href="#Dkey-密钥的演进" class="headerlink" title="Dkey 密钥的演进"></a>Dkey 密钥的演进</h3><p>根据 iOS 的初期设计，<code>Class D</code>是所有用户数据文件的默认类型，其类密钥就是 DKey，即大多数文件的<code>per-file key</code>都通过 Dkey 进行封装，存储位置就是<code>systembag.kb</code>文件的 <code>Class 4</code> 字段。<br>但是，由于 DKey 并未将 Passcode 作为加密因子（仅由基于 UID 的 Key 0x835 提供保护），因此其加密强度难以抵抗暴力破解；进一步的，系统钥匙包仅仅是一个普通的数据文件，任何具有 root 级别访问权限的用户都可以轻松地获得并展开暴力破解，这显然是非常危险的。</p>
+<p>从 iOS 5 开始，Apple 将 DKey 从设备密钥包中取出，存储位置转移到安全隔区专用的<code>Effaceable Storage</code>之中。</p>
+<p>从 iOS 8 开始，为了应对 GrayKey 密码破解设备，Apple 决定将 Class C 作为默认类型，即在设备开机时，校验用户输入的 passcode，成功后即可自由访问（即使发生了锁屏事件，仍然可以访问数据文件）；但是如果设备关机，就必须在开机之后重新校验 passcode。<br>目前，Class D类的文件已经大为减少，这些文件在设备开机后就一直保持可访问状态。</p>
+<h2 id="五、File-System-中的密钥"><a href="#五、File-System-中的密钥" class="headerlink" title="五、File System 中的密钥"></a>五、File System 中的密钥</h2><p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch2.png" alt="更细架构"></p>
+<ul>
+<li>每个文件创建时会生成一个<code>Per-file Key</code>，在文件写入闪存时通过硬件用<code>AES-XTS</code>算法加密</li>
+<li><code>Per-file Key</code>存储在文件元数据 Metadata 中，被<code>Class Key</code>和<code>Filesystem Key</code>加密</li>
+<li><code>Class Key</code>和<code>Filesystem Key</code>都被硬件密钥<code>UID</code>保护</li>
+<li><code>Class Key</code>还被用户密码<code>Passcode</code>保护</li>
+</ul>
+<p>实际上，Apple就是在 HFS+ 文件系统的 inode 中增加了一个<code>cprotect</code> 字段：</p>
+<ul>
+<li>如果数据保护级别是 A &#x2F; B &#x2F; C，存储以<code>Class Key</code>加密的<code>Per-file Key</code></li>
+<li>如果数据保护级别是 D，存储加密后的<code>DKey</code>(Device Key，正好也是D)</li>
+<li>如果设置为<code>discarded</code>，则意味着密码失效，文件就永远无法打开，也是数据被抹去了…</li>
+</ul>
+<h2 id="一-安全隔区有那些内置的核心密钥？"><a href="#一-安全隔区有那些内置的核心密钥？" class="headerlink" title="一. 安全隔区有那些内置的核心密钥？"></a>一. 安全隔区有那些内置的核心密钥？</h2><h2 id="三、系统密钥包（System-Bag）的工作原理是什么？"><a href="#三、系统密钥包（System-Bag）的工作原理是什么？" class="headerlink" title="三、系统密钥包（System Bag）的工作原理是什么？"></a>三、系统密钥包（System Bag）的工作原理是什么？</h2><ul>
 <li>文件内容被加密，每个文件都有独立的文件密钥<code>Per-file Key</code></li>
 <li><code>Per-file Key</code>被<code>Class Key</code>加密，存储位置：该文件的元数据 Meatadata 的<code>cprotect</code>字段</li>
 </ul>
@@ -438,35 +453,9 @@
 <p>有密碼保護與無密碼保護的iTunes備份最大的差異是在Keybag是否被UID Key加密的狀態下儲存於iTunes備份擋內。若iTunes備份檔沒有密碼保護，Keybag會被UID的金鑰加密後儲存於備份檔內(Keychain也是)，這代表這個備份檔案是無法恢復到其他的iOS裝置，僅能恢復到原有備份出來的裝置(因為每個iOS的UID皆不同)。若iTunes備份檔有密碼保護，則Keybag會用iTunes設定的密碼採PBKDF2加密函式反覆運算1千萬次來保護 Keybag ，因Keybag未與UID綁定，當升級新的iOS裝置時就必須採用密碼保護的iTunes備份檔才可進行資料移轉。</p>
 <p>有一个特定的储物柜叫做BAGI，它包含一个加密密钥，用来加密所谓的系统密钥包。密钥包包含许多加密“类密钥”，最终保护文件系统中的文件;它们在不同的时间被锁定和解锁，这取决于用户的活动。这让开发人员可以选择在设备被锁定时是否锁定文件，或者在输入密码后保持解锁，等等。文件系统上的每个文件都有自己的随机文件密钥，该密钥使用密钥包中的类密钥进行加密。密钥包的密钥是由BAGI储物柜中的密钥和用户的PIN的组合加密的。</p>
 <p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch1.png" alt="基本结构"><br><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch0.jpeg" alt="简化架构"></p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable constant_">HEADER</span></span><br><span class="line">  <span class="variable constant_">VERS</span> = <span class="number">4</span></span><br><span class="line">  <span class="variable constant_">TYPE</span> = <span class="number">0</span></span><br><span class="line">  <span class="variable constant_">UUID</span> = <span class="number">32</span> <span class="variable constant_">HEX</span></span><br><span class="line">  <span class="variable constant_">HMCK</span> = <span class="number">80</span> <span class="variable constant_">HEX</span></span><br><span class="line">  <span class="variable constant_">WRAP</span> = <span class="number">1</span></span><br><span class="line">  <span class="variable constant_">SALT</span> = <span class="number">40</span> <span class="title class_">Hex</span></span><br><span class="line">  <span class="variable constant_">ITER</span> = <span class="number">50000</span></span><br><span class="line">  <span class="variable constant_">TKMT</span> = <span class="number">0</span></span><br><span class="line">  <span class="variable constant_">SART</span> = <span class="number">98</span></span><br><span class="line">  <span class="variable constant_">UUID</span> = <span class="number">32</span> <span class="variable constant_">HEX</span></span><br><span class="line"><span class="variable constant_">KEYS</span></span><br><span class="line">  <span class="number">0</span>:</span><br><span class="line">    <span class="variable constant_">CLAS</span> = <span class="number">1</span></span><br><span class="line">    <span class="variable constant_">WRAP</span> = <span class="number">3</span></span><br><span class="line">    <span class="variable constant_">KTYP</span> = <span class="number">0</span></span><br><span class="line">    <span class="variable constant_">WPKY</span> = <span class="number">80</span> <span class="variable constant_">HEX</span></span><br><span class="line">    <span class="variable constant_">UUID</span> = <span class="number">32</span> <span class="variable constant_">HEX</span></span><br><span class="line"></span><br><span class="line">... up to</span><br><span class="line">  <span class="number">9</span>:</span><br></pre></td></tr></table></figure>
-
-<p>Hierarchical File System,分层文件系统</p>
 <hr>
-<p>[<a target="_blank" rel="noopener" href="https://www.adeleda.com/ios-forensics-en.html]">https://www.adeleda.com/ios-forensics-en.html]</a></p>
-<p>从iPhone 3GS开始，iDevices包含一个加密芯片，可以对文件系统进行硬件加密。 NAND芯片是按如下方式组织的闪存：</p>
-<ul>
-<li>块 0：包含 LLB</li>
-<li>块 1：包含以下加密密钥：<ul>
-<li>EMF：用于加密文件系统</li>
-<li>Dkey：用于加密保护类“NSFileProtectionNone”的主密钥（大多数文件）</li>
-<li>BAG1：与密码一起使用，为其他主密钥生成加密密钥（对于邮件等文件…</li>
-</ul>
-</li>
-<li>块 16 到 （END-15） 块：包含 HFS+ 文件系统</li>
-<li>最后 15 个区块：保留给 Apple 用于其他用途。</li>
-</ul>
+<p>Data Wipe，数据擦除的工作步骤<br>Operation<br>• mobile_obliterator daemon<br>• Erase DKey by calling MKBDeviceObliterateClassDKey<br>• Erase EMF key by calling selector 0x14C39 in EffacingMediaFilter service<br>• Reformat data partition<br>• Generate new system keybag<br>• High level of confidence that erased data cannot be recovered</p>
 <hr>
-<p>Effaceable lockers<br>EMF!<br>• Data partition encryption key, encrypted with key 0x89B<br>• Format: length (0x20) + AES(key89B, emfkey)<br>Dkey<br>• NSProtectionNone class key, wrapped with key 0x835<br>• Format: AESWRAP(key835, Dkey)<br>BAG1<br>• System keybag payload key<br>• Format : magic (BAG1) + IV + Key<br>• Read from userland by keybagd to decrypt systembag.kb<br>• Erased at each passcode change to prevent attacks on previous keybag</p>
-<hr>
-<p>Data Wipe<br>Operation<br>• mobile_obliterator daemon<br>• Erase DKey by calling MKBDeviceObliterateClassDKey<br>• Erase EMF key by calling selector 0x14C39 in EffacingMediaFilter service<br>• Reformat data partition<br>• Generate new system keybag<br>• High level of confidence that erased data cannot be recovered</p>
-<hr>
-<h3 id="4-遗留问题"><a href="#4-遗留问题" class="headerlink" title="4. 遗留问题"></a>4. 遗留问题</h3><ol>
-<li>用户修改passcode后，需要重新封装metadata中所有的per-file key，似乎计算量也不小啊！</li>
-</ol>
-<h3 id="2-关于-iOS-的文件保护类型"><a href="#2-关于-iOS-的文件保护类型" class="headerlink" title="2. 关于 iOS 的文件保护类型"></a>2. 关于 iOS 的文件保护类型</h3><p>对于早期的 iOS 系统，Class D 是用户数据文件的默认类型，其类密钥是 DKey。也就是说，尽管每个文件都有 per-file key，但是这些文件专有密钥的包裹密钥都是 DKey，而 DKey 并未将 Passcode 作为加密因子（仅由基于 UID 的 Key 0x835 提供保护），因此其加密强度难以抵抗暴力破解。</p>
-<p>从 iOS 5 开始，Apple 决定将 Class C 作为默认类型，即在设备开机时，校验用户输入的 passcode，成功后即可自由访问（即使发生了锁屏事件，仍然可以访问数据文件）；但是如果设备关机，就必须在开机之后重新校验 passcode。</p>
-<p>Class A 主要适用于日历、信息、邮件、照片、通讯录和健康数据等个人敏感信息，其特点是一旦锁屏事件发生（延迟10秒），将丢弃内存中的类密钥，结果是无法访问数据文件了；只有用户重新输入 passcode 解锁屏幕后，再重新计算类密钥，才可以继续提供数据文件访问。</p>
-<p>Class B 的设计目标是解决远程下载等互联网服务的后台权限问题，方法是采用 ECC 非对称密码系统，代价是文件元数据需要额外存储一个临时公钥（类密钥就是静态私钥）</p>
 <hr>
 <h2 id="六、技术分析"><a href="#六、技术分析" class="headerlink" title="六、技术分析"></a>六、技术分析</h2><h3 id="1-SKP-密封密钥保护技术"><a href="#1-SKP-密封密钥保护技术" class="headerlink" title="1. SKP 密封密钥保护技术"></a>1. SKP 密封密钥保护技术</h3><p>LLB - Low Level Bootloader，底层引导载入程序</p>
 <p>在具有两步启动架构的 Mac 电脑上，LLB 包含由 Boot ROM 调用的代码，该代码随后会载入 iBoot，成为安全启动链的一环。</p>
@@ -478,18 +467,6 @@
 </blockquote>
 <hr>
 <p>EMF Key &#x3D; file-system master encryption key</p>
-<h2 id="四、Dkey-密钥的演进分析"><a href="#四、Dkey-密钥的演进分析" class="headerlink" title="四、Dkey 密钥的演进分析"></a>四、Dkey 密钥的演进分析</h2><p>根据 iOS 的初期设计，<code>Class D</code>是所有用户数据文件的默认类型，其类密钥就是 DKey，即大多数文件的<code>per-file key</code>都通过 Dkey 进行封装。<br>此时 DKey 的存储路径就是<code>systembag.kb</code>文件的 <code>Class 4</code> 字段，当然受到了基于 UID 的 Key 0x835 的保护。</p>
-<p>由于 DKey 直接保存在一个普通的数据文件中，任何具有 root 级别访问权限的用户都可以轻松地获得并展开暴力破解，这显然是非常危险的。<br>从 iOS 5 开始，苹果公司将 DKey 从设备密钥包中取出，存储路径转移到安全隔区专用的<code>Effaceable Storage</code>之中。<br>从 iOS 8 开始，为了应对 GrayKey 密码破解设备破解苹果公司又开发了</p>
-<p>由于 DKey 仅受 UID 的保护，，从而解密绝大多数文件</p>
-<blockquote>
-<p>iOS 8 之后，苹果公司将文件系统的默认类型调整为<code>Class C</code>，目的就是将类密钥纳入 Passcode 的保护范围，因此目前 NSFileProtectionNone 类型的文件已经大为减少，这些文件在设备开机后就一直保持可访问状态</p>
-</blockquote>
-<h2 id="Effaceable-lockers"><a href="#Effaceable-lockers" class="headerlink" title="Effaceable lockers"></a>Effaceable lockers</h2><ul>
-<li>EMF!<br>  • Data partition encryption key, encrypted with key 0x89B<br>  • Format: length (0x20) + AES(key89B, emfkey)</li>
-<li>Dkey<br>  • NSProtectionNone class key, wrapped with key 0x835<br>  • Format: AESWRAP(key835, Dkey)</li>
-<li>BAG1<br>  • System keybag payload key<br>  • Format : magic (BAG1) + IV + Key<br>  • Read from userland by keybagd to decrypt systembag.kb<br>  • Erased at each passcode change to prevent attacks on previous keybag</li>
-</ul>
-<p>AppleEffaceableStorage IOKit userland interface<br>Selector Description Comment<br>0 getCapacity 960 bytes<br>1 getBytes requires PE_i_can_has_debugger<br>2 setBytes requires PE_i_can_has_debugger<br>3 isFormatted<br>4 format<br>5 getLocker input : locker tag, output : data<br>6 setLocker input : locker tag, data<br>7 effaceLocker scalar input : locker tag<br>8 lockerSpace ?</p>
 <h2 id="一、安全隔区的内置核心密钥"><a href="#一、安全隔区的内置核心密钥" class="headerlink" title="一、安全隔区的内置核心密钥"></a>一、安全隔区的内置核心密钥</h2><p><img src="/arch0.jpg" alt="Arch0"></p>
 <h3 id="3-UID-派生密钥"><a href="#3-UID-派生密钥" class="headerlink" title="3. UID 派生密钥"></a>3. UID 派生密钥</h3><ul>
 <li>根据不同用途使用各自的派生密钥，而不是直接使用 UID，可以有效减少 UID 被泄露的风险</li>
@@ -531,14 +508,17 @@
 <p>在FBI这个案例中，由于嫌犯可能开启了输错10次密码自动擦除设备的选项，一旦暴力猜测程序连续10次输入错误的密码，设备上的所有内容就会擦除掉。一旦触发数据擦除，苹果会首先对可安全擦除区域进行擦除，物理方式上即使能够恢复大部分加密数据，但是却无法恢复可安全擦除区域中的数据，因为大部分的解密密钥都保存在这个区域中，例如能够解开系统密钥包的二进制数据的BAG1 Key。</p>
 <p>后续苹果为了封堵各种暴力猜测Passcode的方法，在64位设备的Secure Enclave中增加了定时器，针对尝试密码的错误次数，增加尝试的延时，即使断电重启也无法解决。</p>
 <hr>
-<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><h3 id="Effaceable-Storage，可擦除区域"><a href="#Effaceable-Storage，可擦除区域" class="headerlink" title="Effaceable Storage，可擦除区域"></a>Effaceable Storage，可擦除区域</h3><p>可擦除存储器 NAND 存储器中一个用于储存加密密钥的专用区域，可被直接寻址和安全擦除。尽管当攻击者实际占有设备时，可擦除存储器无法提供保护，但其中存储的密钥可用作密钥层级的一部分，用于实现快速擦 除和前向安全性。</p>
-<h3 id="xART-eXtended-Anti-Replay-Technology，反重放技术"><a href="#xART-eXtended-Anti-Replay-Technology，反重放技术" class="headerlink" title="xART - eXtended Anti-Replay Technology，反重放技术"></a>xART - eXtended Anti-Replay Technology，反重放技术</h3><p>一组为具有反重放功能 (基于物理储存架构) 的安全隔区提供加密且经认证的永久储存区的服务。</p>
+<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><h3 id="xART-eXtended-Anti-Replay-Technology，反重放技术"><a href="#xART-eXtended-Anti-Replay-Technology，反重放技术" class="headerlink" title="xART - eXtended Anti-Replay Technology，反重放技术"></a>xART - eXtended Anti-Replay Technology，反重放技术</h3><p>一组为具有反重放功能 (基于物理储存架构) 的安全隔区提供加密且经认证的永久储存区的服务。</p>
 <h3 id="UID-unique-ID，唯一ID"><a href="#UID-unique-ID，唯一ID" class="headerlink" title="UID - unique ID，唯一ID"></a>UID - unique ID，唯一ID</h3><p>UID 是一个 256 位的 AES 密钥，在设备制造过程中刻录在每个处理器上。<br>这种密钥无法由固件或软件读取，只能由处理器的硬件 AES 引擎使用。 若要获取实际密钥，攻击者必须对处理器的芯片发起极为复杂且代价高昂的物理攻击。 UID 与设备上的任何其他标识符均无关，包括但不限于 UDID。</p>
 <h4 id="PDK-Passcode-Derived-Key，密码派生密钥"><a href="#PDK-Passcode-Derived-Key，密码派生密钥" class="headerlink" title="PDK - Passcode-Derived Key，密码派生密钥"></a>PDK - Passcode-Derived Key，密码派生密钥</h4><p>用户密码与长期 SKP 密钥和安全隔区的 UID 配合使用，由此派生加密密钥。</p>
 <h4 id="per-file-key，文件独有密钥"><a href="#per-file-key，文件独有密钥" class="headerlink" title="per-file key，文件独有密钥"></a>per-file key，文件独有密钥</h4><p>数据保护用于在文件系统上加密文件的密钥。文件独有密钥使用类密钥封装，储存在文件的元数据 metadata 中。</p>
 <h4 id="filesystem-key，文件系统密钥"><a href="#filesystem-key，文件系统密钥" class="headerlink" title="filesystem key，文件系统密钥"></a>filesystem key，文件系统密钥</h4><p>用于加密每个文件的元数据的密钥，包括其类密钥。存储在可擦除存储器中，用于实现快速擦除，并非用于保密目的。</p>
 <h4 id="Volume-Key，卷宗密钥"><a href="#Volume-Key，卷宗密钥" class="headerlink" title="Volume Key，卷宗密钥"></a>Volume Key，卷宗密钥</h4><p>数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥（Volume Key）进行加密，该密钥在首次安装操作系统或用户擦除设备时创建。</p>
 <h4 id="KEK-Key-Encryption-Key，密钥封装密钥"><a href="#KEK-Key-Encryption-Key，密钥封装密钥" class="headerlink" title="KEK - Key Encryption Key，密钥封装密钥"></a>KEK - Key Encryption Key，密钥封装密钥</h4><p>宗卷密钥密钥由密钥封装密钥（Key Encryption Key）加密和封装，密钥封装密钥由安全隔区长期储存，只在安全隔区中可见。每次用户抹掉设备时，它都会发生变化。在 A9（及后续型号） SoC 上，安全隔区依靠由反重放系统支持的熵来实现可擦除性，以及保护其他资源中的密钥封装密钥。</p>
+<hr>
+<h2 id="4-遗留问题"><a href="#4-遗留问题" class="headerlink" title="4. 遗留问题"></a>4. 遗留问题</h2><ol>
+<li>用户修改passcode后，需要重新封装metadata中所有的per-file key，似乎计算量也不小啊！</li>
+</ol>
 <hr>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><h3 id="精品资料"><a href="#精品资料" class="headerlink" title="精品资料"></a>精品资料</h3><ul>
 <li><a target="_blank" rel="noopener" href="https://cryptobook.nakov.com/mac-and-key-derivation/kdf-deriving-key-from-password">面向开发人员的实用密码学 - Svetlin Nako</a></li>
@@ -618,14 +598,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">205k</span>
+    <span title="站点总字数">204k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:24</span>
+    <span title="站点阅读时长">12:22</span>
   </span>
 </div>
 <div class="busuanzi-count">

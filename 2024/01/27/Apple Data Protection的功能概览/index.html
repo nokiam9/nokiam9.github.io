@@ -26,13 +26,13 @@
 <meta property="og:site_name" content="Alex的技术博客">
 <meta property="og:description" content="长期以来 Apple 公司有两条数据安全的技术演进路线，iPhone 和 iPad 等智能终端设备使用称为数据保护（Data Protection）的文件加密方法，基于Intel的Mac设备通过文件保险箱（FileVault）的宗卷加密技术。  MacOS 和 iOS 都是基于 FreeBSD 发展而来，基础架构是一个多用户的操作系统，但 iPhone 等作为个人化（无需支持多用户）的终端设备，存">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://nokiam9.github.io/KEY-ARCH.jpg">
-<meta property="og:image" content="https://nokiam9.github.io/daemon.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/KEY-ARCH.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/daemon.png">
 <meta property="article:published_time" content="2024-01-27T06:34:06.000Z">
 <meta property="article:modified_time" content="2024-01-28T14:11:55.549Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://nokiam9.github.io/KEY-ARCH.jpg">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/KEY-ARCH.jpg">
 
 
 <link rel="canonical" href="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/">
@@ -280,7 +280,7 @@
 <li><code>Class Key</code>和<code>Filesystem Key</code>都被硬件密钥<code>UID</code>保护</li>
 <li><code>Class Key</code>还被用户密码<code>Passcode</code>保护</li>
 </ul>
-<p><img src="/KEY-ARCH.jpg" alt="key"></p>
+<p><img src="/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/KEY-ARCH.jpg" alt="key"></p>
 <blockquote>
 <p>EMF Key 就是加密封装的 Filesystem Key，存储在闪存的可擦除区域，只允许安全隔区访问<br>Class Key 通过多层加密封装，持久化存储在 keybag（系统密钥包）之中</p>
 </blockquote>
@@ -317,7 +317,7 @@
 <p>The contents of a file may be encrypted with one or more per-file (or per-extent) keys that are wrapped with a class key and stored in a file‘s metadata, which in turn is encrypted with the file system key. The class key is protected with the hardware UID and, for some classes, the user’s passcode. This hierarchy provides both flexibility and performance. For example, <strong>changing a file‘s class only requires rewrapping its per-file key, and a change of passcode just rewraps the class key</strong>。</p>
 </blockquote>
 <h2 id="三、钥匙包（keyBag）数据保护"><a href="#三、钥匙包（keyBag）数据保护" class="headerlink" title="三、钥匙包（keyBag）数据保护"></a>三、钥匙包（keyBag）数据保护</h2><p>系统密钥包是一个加密的 <code>plist</code> 格式的二进制文件，存储了所有类密钥的数据，Apple 系统的数据解密实现方式见下图。</p>
-<p><img src="/daemon.png" alt="Daemon"></p>
+<p><img src="/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/daemon.png" alt="Daemon"></p>
 <p>有五种不同类型的钥匙包，但数据格式完全相同，包括：</p>
 <h3 id="1-用户密钥包-User-keyBag"><a href="#1-用户密钥包-User-keyBag" class="headerlink" title="1. 用户密钥包(User keyBag)"></a>1. 用户密钥包(User keyBag)</h3><p>用户密钥包是设备常规操作中使用的封装类密钥的储存位置。例如，输入密码后，<code>NSFileProtectionComplete</code>会从用户密钥包中载入并解封。它是储存在“无保护”类中的二进制属性列表 (.plist) 文件。<br>对于搭载 A9 之前的 SoC 的设备，该 .plist 文件的内容通过保存在可擦除存储器中的密钥（Bag1 Key）加密。为了给密钥包提供前向安全性，用户每次更改密码时，系统都会擦除并重新生成此密钥。<br>对于搭载 A9 或后续型号 SoC 的设备，该 .plist 文件包含一个密钥，表示密钥包储存在受反重放随机数（由安全隔区控制）保护的有锁储存库中。</p>
 <h3 id="2-设备密钥包-Device-keyBag"><a href="#2-设备密钥包-Device-keyBag" class="headerlink" title="2. 设备密钥包 (Device keyBag)"></a>2. 设备密钥包 (Device keyBag)</h3><p>设备密钥包用来储存用于涉及设备特定操作数据的封装类密钥。 配置为共用的 iPadOS 设备有时需要在用户登录前访问凭证，因此需要一个不受用户密码保护的密钥包。<br>iOS 和 iPadOS 不支持对用户独有的文件系统内容进行单独加密，这就意味着系统使用来自设备密钥包的类密钥，对文件独有密钥进行封装，而钥匙串则使用来自用户密钥包中的类密钥来保护用户钥匙串中的项目。<br>在配置为单用户使用 (默认配置) 的 iOS 和 iPadOS 设备中， 设备密钥包和用户密钥包是同一个， 并受用户的密码保护。</p>
@@ -447,14 +447,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">205k</span>
+    <span title="站点总字数">204k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:24</span>
+    <span title="站点阅读时长">12:22</span>
   </span>
 </div>
 <div class="busuanzi-count">
