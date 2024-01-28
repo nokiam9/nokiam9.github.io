@@ -334,22 +334,17 @@ PROTECTION_CLASSES={
 
 ## 四、遗留问题
 
-1. systembag.kb 文件头部包含的 Salt 和 HMCK 字段，是否已经转移到安全隔区的第二代存储组件了呢？
+## 1. systembag.kb 文件头部包含的 Salt 和 HMCK 字段，是否已经转移到安全隔区的第二代存储组件了呢？
 
-- 标头（Header）:
-  - VRES：版本号，例如 3 = iOS 5
-  - TYPE：钥匙包类型 ，0 = system, 1 = backup, 3 = escrow, 2 = iCloud Backup
-  - UUID：Apple 规定的应用级 UID
-  - HMCK：可选，用于数据校验，如果密钥包已签名
-  - WRAP：包裹类型，1 = UID保护， 2 = PBKDF2保护
-  - 其它字段：可能有 ITER（随机盐），ITER（迭代次数）等
+正确！
+Apple 第二代安全储存组件增加了计数器加密箱，包括：
 
-- 类密钥列表（List of class keys）:
-  - UUID：Apple 规定的应用级 UID
-  - CLAS：文件保护类型（A-D），或者钥匙串保护类型
-  - WRAP：包裹类型，1 = 仅UID派生，2 = passcode key，3 = 1&2
-  - WPKY：类密钥包裹后的密文
-  - 其它字段：可能有非对称的公钥等
+- 1个128位盐：就是 Salt 字段
+- 1个128位密码验证器：就是 HMCK 字段，存储了 HMAC 校验值
+- 1个8位计数器
+- 1个 8 位最大尝试值
+
+也就是说，最核心的加密材料从 REE 环境的 keybag 中转移到 TEE 环境的安全隔区中。
 
 ---
 
