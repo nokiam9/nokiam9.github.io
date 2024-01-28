@@ -1,6 +1,6 @@
 ---
-title: Apple数据保护技术专题之一：基础架构
-date: 2022-11-13 14:34:06
+title: Apple Data Protection的功能概览
+date: 2024-01-27 14:34:06
 tags:
 ---
 
@@ -152,25 +152,6 @@ Apple 根据所保护信息的类型以及 iOS 和 iPadOS 需要这些信息的�
 |LDAP/CalDAV/CardDAV accounts       |Always|
 |iTunes backup password             |WhenUnlockedThisDeviceOnly|
 |Device certificate & private key   |AlwaysThisDeviceOnly|
-
-
-## 六、技术分析
-
-### 1. SKP 密封密钥保护技术
-
-LLB - Low Level Bootloader，底层引导载入程序
-
-在具有两步启动架构的 Mac 电脑上，LLB 包含由 Boot ROM 调用的代码，该代码随后会载入 iBoot，成为安全启动链的一环。
-
-![搭载 Apple 芯片的 Mac 开机时的启动过程步骤](mac-boot.png)
-
-如果攻击者能够意外地更改任何上述测量的固件、 软件或安全性配置组件， 则也会修改储存在硬件寄存器中的测量值。 测量值的修改会导致从加密硬件派生的系统测量根密钥 (SMRK) 派生出不同的值， 从而有效破坏密钥层 级的封章。 这将导致无法访问系统测量设备密钥 (SMDK)， 从而导致无法访问 KEK， 因此也无法访问数据。
-
-但是， 系统在未受到攻击时， 必须容纳合法的软件更新， 这些更新会更改固件测量值和 LocalPolicy 中的 nsih 字段， 以指向新的 macOS 测量值。 在其他尝试整合固件测量值但没有已知真实来源的系统中， 用 户将被要求停用安全性， 更新固件后重新启用安全性， 以便捕获新的测量基线。 这大大增加了攻击者在软件 更新期间篡改固件的风险。 Image4 清单包含所需的所有测量值， 这对系统很有帮助。 正常启动期间如果测 量值匹配， 使用 SMRK 解密 SMDK 的硬件也可以将 SMDK 加密为所建议的将来的 SMRK。 通过指定软 件更新后预期的测量值， 硬件可以加密在当前操作系统中可访问的 SMDK， 以便在将来的操作系统中仍可 访问。 同样地， 当客户在 LocalPolicy 中合法更改其安全性设置时， 必须根据 LLB 下次重新启动时计算的 LocalPolicy 测量值， 将 SMDK 加密为将来的 SMRK。
-
-> Image4 是经 ASN.1（抽象语法标记一）DER 编码的数据结构格式，用于描述 Apple 平台上有关安全启动链对象的信息。
-
-
 
 ---
 
