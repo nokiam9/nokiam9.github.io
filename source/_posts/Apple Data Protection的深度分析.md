@@ -24,7 +24,7 @@ CPU都是通用的，许多关键密钥都是个人化数据，必须有一个�
 
 ## 三、Secure Encalve 中的密钥
 
-![密钥关系图](keys.png)
+![安全隔区](soc.png)
 
 ### 1. UID & GID
 
@@ -64,6 +64,8 @@ Apple Encalve 启动时派生（很可能是一次性计算）出多个子密钥
 ![passcode-key-kdf](passcode-key.png)
 
 - Filevault 2 的 KEK 也基于 Passcode Key 包裹，但其采用的 PBKDF2 算法基于 HMAC-SHA256，迭代次数为41000，加密因子不包含 UID！
+  
+![密钥关系图](keys.png)
 
 ## 四、Effaceable Storage 中的密钥
 
@@ -168,6 +170,9 @@ per-file key是实际用来加密文件的，那它也得被保护啊。这就�
 后续苹果为了封堵各种暴力猜测Passcode的方法，在64位设备的Secure Enclave中增加了定时器，针对尝试密码的错误次数，增加尝试的延时，即使断电重启也无法解决。
 
 ## 七、SKP Key
+
+> 由用户密码与长期 SKP 密钥和硬件密钥 1（安全隔区的 UID） 配合使用而生成的密钥称为密码派生密钥。
+> 此密钥用于保护用户密钥包 （在所有支持的平台上） 和 KEK （仅限在 macOS 上）， 然后启用生物识别解锁或使用其他设备 （如 Apple Watch） 自动解锁。
 
 在支持数据保护的 Apple 设备上， 密钥加密密钥 (KEK) 既受系统上软件测量值的保护 （或密封）， 又与只能从安全隔区获得的 UID 绑定。 在搭载 Apple 芯片的 Mac 上， 对 KEK 的保护通过整合有关系统安全性策略的信息进一步得到了加强， 因为 macOS 支持其他平台不支持的关键安全性策略更改 （例如， 停用安全启动或 SIP）。 在搭载 Apple 芯片的 Mac 上， 由于文件保险箱的实施使用数据保护 （C 类）， 此保护涵盖文件保险箱密钥。
 On Apple devices that support Data Protection, the key encryption key (KEK) is protected (or sealed) with measurements of the software on the system, as well as being tied to the UID available only from the Secure Enclave.

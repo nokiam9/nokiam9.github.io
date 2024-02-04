@@ -199,7 +199,13 @@ Secure Enclave 虽然是安全世界，但要正常工作就必须与外部世�
 
 ![List](list.png)
 
-## 附录二：Apple自研芯片的分类
+## 附录二：安全隔区的演进
+
+2018年，安全隔区的技术架构是这样的！
+
+![安全隔区的老框架](soc-old.jpg)
+
+## 附录三：Apple自研芯片的分类
 
 ### 1、主处理器芯片
 
@@ -213,7 +219,7 @@ Secure Enclave 虽然是安全世界，但要正常工作就必须与外部世�
 - U系列：定位芯片，用于UWB（ultra-wide band）精确定位的芯片，替代已被放弃的基于低功耗蓝牙BLE的iBeacons技术，2019年首次出现在iPhone 11，AirTag标签也使用U1
 - T系列：已下线。用于基于Intel芯片的Mac电脑的安全芯片，包括T1和T2，该系列已停止并整合进M系列
 
-## 附录三：第二代安全存储组件的计数器加密箱的工作原理
+## 附录四：第二代安全存储组件的计数器加密箱的工作原理（ToDO）
 
 2020年10月，苹果突然发布了第二代安全存储组件，并紧急升级 A12、A13 以及 S5 芯片，据认为 GrayKey 密码破解设备有关系，其采用暴力破解方式实现iPhone解锁。
 
@@ -286,6 +292,7 @@ Secure Enclave 虽然是安全世界，但要正常工作就必须与外部世�
 - [Apple平台安全白皮书 - 2022英文版](apple-platform-security-guide.pdf)
 - [Apple平台安全白皮书 - 2021中文版](apple平台安全白皮书-2021中文版.pdf)
 - [iOS安全白皮书 - 2018英文版](iOS安全白皮书-2018英文版.pdf)
+- [Apple安全密钥存储加密模块 - 2018英文版](Apple-Secure-Key-Store-Cryptographic-Module.pdf)
 
 ### 技术分析
 
