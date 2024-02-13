@@ -24,6 +24,8 @@ APFS 在概念上分为两层，容器层（Container Layer）和文件系统层
 
 所有数据结构采用**小端顺序**存储在磁盘，但设计思路有一些不同。容器对象以 block 为单位，并且包含填充字段使得数据长度是64的倍数，以避免内存访问的性能损失；而文件系统对象以 byte 为单位，并且尽量最小化所使用的空间。
 
+![ARCG](arch.png)
+
 ### 1. 容器层 - Container Layer
 
 一个 APFS 分区有一个单独的容器，容器可以包含多个 volume（也称为 filesystem），每个卷都包含一个目录结构，用于管理 file 和 folder。
@@ -81,11 +83,6 @@ Directory 对象可能有如下类型的记录：
 - APFS_TYPE_DIR_STATS
 - APFS_TYPE_XATTR
 
-Symbolic Links 对象可能有如下类型的记录：
-
-- APFS_TYPE_INODE：必须的
-- APFS_TYPE_XATTR：必须的
-
 ## 三、数据结构
 
 ### 1. Container Superblock
@@ -113,7 +110,7 @@ struct nx_superblock {
     uint32_t nx_xp_data_index; 
     uint32_t nx_xp_data_len; 
     oid_t nx_spaceman_oid; 
-    oid_t nx_omap_oid;
+    oid_t nx_omap_oid;                      // 容器对象的映射
     oid_t nx_reaper_oid; 
     uint32_t nx_test_type; 
     uint32_t nx_max_file_systems; 
@@ -124,7 +121,7 @@ struct nx_superblock {
     uint64_t nx_flags; 
     paddr_t nx_efi_jumpstart; 
     uuid_t nx_fusion_uuid; 
-    prange_t nx_keylocker;      // 容器密钥包的物理位置
+    prange_t nx_keylocker;                  // 容器密钥包的物理位置
     uint64_t nx_ephemeral_info[NX_EPH_INFO_COUNT]; 
     oid_t nx_test_oid; 
     oid_t nx_fusion_mt_oid; 
@@ -141,7 +138,7 @@ struct nx_superblock {
 struct apfs_superblock { 
     obj_phys_t  apfs_o;
     uint32_t apfs_magic;        // ='BSPA'
-    uint32_t apfs_fs_index;     // 容器超级快.nx_fs_oid数组的序号
+    uint32_t apfs_fs_index;     // 在容器超级块卷宗列表的序号
     uint64_t apfs_features;
     uint64_t apfs_readonly_compatible_features;
     uint64_t apfs_incompatible_features;
@@ -153,7 +150,7 @@ struct apfs_superblock {
     uint32_t apfs_root_tree_type;
     uint32_t apfs_extentref_tree_type;
     uint32_t apfs_snap_meta_tree_type;
-    oid_t apfs_omap_oid;                // The physical object identifier of the volumeʼs object map
+    oid_t apfs_omap_oid;                // 卷宗对象的映射
     oid_t apfs_root_tree_oid;           // B树的入口
     oid_t apfs_extentref_tree_oid;
     oid_t apfs_snap_meta_tree_oid;
@@ -250,7 +247,7 @@ enum {
 };
 ```
 
-### 4. Directory Objects
+### 4. FileSystem Objects
 
 使用 APFS 格式运行的设备可能支持文件克隆 (使用写入时拷贝技术的零损耗拷贝)。如果文件被克隆，克隆的每一半都会得到一个新的密钥以接受传入的数据写入，这样新数据会使用新密钥写入介质。久而久之，文件可能会由不同的范围（或片段）组成，每个映射到不同的密钥。
 
@@ -359,4 +356,6 @@ struct wrapped_crypto_state {
 
 ## 参考文献
 
+- [APFS 技术白皮书 - ERNW.de](https://static.ernw.de/whitepaper/ERNW_Whitepaper65_APFS-forensics_signed.pdf)
+- [ApFS Structure - NTFS.com](https://www.ntfs.com/apfs-structure.htm)
 - [RFC 3394 - AES密钥包裹算法](https://www.rfc-editor.org/rfc/rfc3394)
