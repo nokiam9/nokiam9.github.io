@@ -50,10 +50,139 @@ APFS 的对象（Object）都有一个用于查找的唯一标识符`oid`，有�
 文件系统层负责存储文件结构信息，如目录结构、文件元数据和文件内容。
 文件系统对象由若干条记录组成，每条记录都是 B-tree 的一个键值对。例如，一个典型的 directory 对象包含由一个 inode 记录、几个目录入口记录和一个扩展属性记录。
 
-![B-Tree](btree.png)
+
 
 Key 和 Value 从 B-tree 存储区域的首端和尾端开始分别存储，两者之间是共享的自由空间。
 Key 和 Value 的位置以 offset 的形式存储，这比存储完整位置使用更少的磁盘空间。
+
+
+
+
+### 3. B-Tree
+
+B树（B-tree）是一种泛化的二叉搜索树（binary search tree），特点是每个节点具有两个以上的子节点，从而增加了键/值对的数量，减少定位记录时所经历的中间过程，从而加快访问速度；此外，B-树具备自平衡性，可以自动调整其结构以保持特定的平衡因子，从而保证在对数时间内进行操作，因此广泛应用于读写相对较大的数据块的存储系统。
+
+HFS+ 是基于 B-树 设计的，APFS 也继承下来，其系统组件大量采用 B-树，例如 Filesystem、OMAP 和 snapshot 等。在 APFS 中，B-树 的节点对象称为 Node，分为根节点、中间节点和叶子节点，根节点 Root 是遍历整个树的起点。
+Node 的内部存储空间分为3个部分：TOC（table of content，表空间）、key area 和 vaule area，其中表空间保存了每个键值对的位置信息。根节点尾部增加了统计信息`btree_info_t`，为此可用存储空间少了 0x28 个字节。
+
+![B-Tree](btree.png)
+
+```c
+/* B-树的定位信息 */
+typedef struct nloc {
+    uint16_t off;                   // 偏移量（字节单位）
+    uint16_t len;                   // 长度（字节单位）
+} nloc_t;  
+
+/* 普通 Node 的定义 */
+struct btree_node_phys {
+    obj_phys_t  btn_o;              // 节点对象的头部
+    uint16_t    btn_flags;          // 标识位，区分 ROOT 或 LEAF
+    uint16_t    btn_level;          // 节点的等级
+    uint32_t    btn_nkeys;          // 存储了几个键值对
+    nloc_t      btn_table_space;    // 有数据区域的空间大小   
+    nloc_t      btn_free_space;     // 空闲区域的空间大小
+    nloc_t      btn_key_free_list;  // Key 的可用空间列表
+    nloc_t      btn_val_free_list;  // Vaule 的可用空间列表
+    uint64_t    btn_data[];         // 节点内部的存储空间
+};
+typedef struct btree_node_phys btree_node_phys_t;
+
+/* 仅 Root Node */
+struct btree_info { 
+    btree_info_fixed_t  bt_fixed;           // 配置信息，如 Node、Key和Value的长度等
+    uint32_t            bt_longest_key;     // 最大 Key 的长度（字节单位）
+    uint32_t            bt_longest_val;     // 最大 Value 的长度（字节单位）
+    uint64_t            bt_key_count;       // Key 的总数量
+    uint64_t            bt_node_count;      // node 的总数量
+};
+typedef struct btree_info btree_info_t;
+```
+
+> B+树是一个变种，区别是内部节点不存储任何指向记录的指针，这些指针仅存储在叶子节点，因此节点容量更大，树也更浅
+
+### 4. OMAP
+
+在 APFS 中，OMAP（Object Maps，对象映射）扮演两个重要角色。一是负责根据 oid（虚拟对象标识符）和 xid（事务标识符）找到磁盘物理地址，二是提供快照功能，可以立即将虚拟对象集回滚到较早的时间点。
+
+容器和每个卷都维护自己独立的 OAMP，每个 OMAP 都有自己的虚拟地址空间。
+OMAP 使用 B-树 存储映射关系，Snapshot 也是一个 B-树。
+
+```c
+struct omap_phys {
+    obj_phys_t  om_o;
+    uint32_t    om_flags;
+    uint32_t    om_snap_count;
+    uint32_t    om_tree_type;
+    uint32_t    om_snapshot_tree_type;
+    oid_t       om_tree_oid;
+    oid_t       om_snapshot_tree_oid;
+    xid_t       om_most_recent_snap;
+    xid_t       om_pending_revert_min;
+    xid_t       om_pending_revert_max; 
+};
+typedef struct omap_phys omap_phys_t;
+
+/* Key & Vaolue定义 */
+struct omap_key {
+    oid_t ok_oid;       // 映射对象的虚拟对象标识符
+    xid_t ok_xid;       // 映射对象的事务标识符
+};
+typedef struct omap_key omap_key_t;
+
+struct omap_val { 
+    uint32_t ov_flags;  // 标记位，见下表
+    uint32_t ov_size;   // 映射对象的大小（字节单位）
+    paddr_t ov_paddr;   // 映射对象起点的物理地址
+};
+typedef struct omap_val omap_val_t;
+
+
+
+```
+
+|Name|Value||
+|:---:|:---:|:---|
+|OMAP_VAL_DELETED|0x00000001|对象映射已从映射中删除，这是一个占位符|
+|OMAP_VAL_SAVED|0x00000002|更新对象时，不应替换此对象映射。（目前未使用)|
+|OMAP_VAL_ENCRYPTED|0x00000004|映射对象已加密|
+|OMAP_VAL_NOHEADER|0x00000008|映射对象具有零对象标头|
+|OMAP_VAL_CRYPTO_GENERATION|0x00000010|加密更改标记|
+
+，因此在取消引用虚拟对象时，必须了解如何使用该对象来了解要查询的对象映射。
+
+磁盘结构
+OMAP 对象具有相对简单的磁盘结构。除了一些次要元数据外，OMAP 对象的主要用途是存储其树的物理地址。（可选）它们还会将地址存储到快照树中。两棵树的结构都为 B 树对象。
+
+
+```c
+/* Key & Vaolue定义 */
+struct omap_snapshot { 
+    uint32_t oms_flags; 
+    uint32_t oms_pad; 
+    oid_t oms_oid;
+};
+typedef struct omap_snapshot omap_snapshot_t;
+
+struct j_snap_metadata_key { 
+    j_key_t hdr;
+} __attribute__((packed));
+typedef struct j_snap_metadata_key j_snap_metadata_key_t;
+
+struct j_snap_metadata_val {
+    oid_t       extentref_tree_oid;
+    oid_t       sblock_oid;
+    uint64_t    create_time;
+    uint64_t    change_time;
+    uint64_t    inum;
+    uint32_t    extentref_tree_type;
+    uint32_t    flags;
+    uint16_t    name_len;
+    uint8_t     name[0];
+} __attribute__((packed));
+typedef struct j_snap_metadata_val j_snap_metadata_val_t;
+```
+
 
 ## 二、Contianer Layer
 
@@ -124,10 +253,10 @@ struct apfs_superblock {
     uint32_t apfs_root_tree_type;
     uint32_t apfs_extentref_tree_type;
     uint32_t apfs_snap_meta_tree_type;
-    oid_t apfs_omap_oid;                // 卷宗对象的映射
-    oid_t apfs_root_tree_oid;           // B树的入口
-    oid_t apfs_extentref_tree_oid;
-    oid_t apfs_snap_meta_tree_oid;
+    oid_t apfs_omap_oid;                // Volume专用的对象映射入口
+    oid_t apfs_root_tree_oid;           // Root文件系统的入口
+    oid_t apfs_extentref_tree_oid;      //  
+    oid_t apfs_snap_meta_tree_oid;      // 快照元数据的入口
     xid_t apfs_revert_to_xid;
     oid_t apfs_revert_to_sblock_oid;
     uint64_t apfs_next_obj_id;
@@ -249,7 +378,7 @@ inode 负责管理最核心的元数据，例如时间戳、类型、所有者�
 ```c
 /* inode 数据结构 */
 struct j_inode_key { 
-    j_key_t hdr;
+    j_key_t hdr;                                // = header, key & value
 } __attribute__((packed));
 
 struct j_inode_val { 
