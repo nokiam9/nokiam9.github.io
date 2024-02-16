@@ -4,8 +4,6 @@ date: 2024-02-11 18:44:09
 tags:
 ---
 
-## 一、概述
-
 AFPS（Apple File System）是 Apple 平台上使用的默认文件格式。APFS 继承自 HFS+，因此其设计的某些方面有意遵循 HFS+ 以便于历史数据的迁移。
 
 Apple File System 支持对容器、卷和文件使用的数据结构进行加密。当一个卷被加密时，它的文件系统树和该卷中的文件内容都被加密。根据设备的能力，苹果文件系统使用硬件或软件加密：
@@ -18,22 +16,12 @@ Apple File System 支持对容器、卷和文件使用的数据结构进行加�
 
 大多数应用程序可以使用 Apple 提供的高级接口与文件系统交互，无需自行处理加密和解密，但为了支持跨操作系统的应用（如磁盘备份恢复、Linux系统读取APFS磁盘数据），Apple 提供了[Apple File System Reference](Apple-File-System-Reference.pdf)，公开了技术实现细节，开发者可以自行实现加密和解密处理。
 
-## 二、总体架构
+## 一、总体架构
 
 APFS 在概念上分为两层，容器层（Container Layer）和文件系统层（Filesystem Layer）。
 ![ARCG](arch.png)
 
-APFS 的对象（Object）都有一个用于查找的唯一标识符`oid`，有三种不同的存储方法：
-
-- Phycial Object（物理对象）：存储在磁盘上的一个特定的物理块地址
-- Ephemeral object（临时对象）：容器挂载后存储在内存中，未挂载时存储在 checkpoint
-- Virtual Object（虚拟对象）：存储在磁盘上的一个位置，您可以在对象映射表中查找。
-
-> `oid`是 object 的唯一标识，`xid` 是 transaction 的唯一标识
-
-所有数据采用**小端顺序**存储在磁盘，但设计思路有一些不同。容器对象以 block 为单位，并且包含填充字段使得数据长度是64的倍数，以避免内存访问对齐的性能损失；而文件系统对象以 byte 为单位，并且尽量最小化所使用的空间。
-
-### 容器层 - Container Layer
+### 1. 容器层 - Container Layer
 
 一个 APFS 分区有一个单独的容器，容器可以包含多个 volume（也称为 filesystem），每个卷都包含一个目录结构，用于管理 file 和 folder。
 
@@ -45,148 +33,7 @@ APFS 的对象（Object）都有一个用于查找的唯一标识符`oid`，有�
 - OMAP（Object Map）：基于B-树管理虚拟对象标识符和事务标识符的物理地址映射
 - Reaper：一种允许在跨越多个事务的时间段内删除大型对象的机制，单一容器内唯一实例
 
-### 文件系统层 - Filesystem Layer
-
-文件系统层负责存储文件结构信息，如目录结构、文件元数据和文件内容。
-文件系统对象由若干条记录组成，每条记录都是 B-tree 的一个键值对。例如，一个典型的 directory 对象包含由一个 inode 记录、几个目录入口记录和一个扩展属性记录。
-
-
-
-Key 和 Value 从 B-tree 存储区域的首端和尾端开始分别存储，两者之间是共享的自由空间。
-Key 和 Value 的位置以 offset 的形式存储，这比存储完整位置使用更少的磁盘空间。
-
-
-
-
-### 3. B-Tree
-
-B树（B-tree）是一种泛化的二叉搜索树（binary search tree），特点是每个节点具有两个以上的子节点，从而增加了键/值对的数量，减少定位记录时所经历的中间过程，从而加快访问速度；此外，B-树具备自平衡性，可以自动调整其结构以保持特定的平衡因子，从而保证在对数时间内进行操作，因此广泛应用于读写相对较大的数据块的存储系统。
-
-HFS+ 是基于 B-树 设计的，APFS 也继承下来，其系统组件大量采用 B-树，例如 Filesystem、OMAP 和 snapshot 等。在 APFS 中，B-树 的节点对象称为 Node，分为根节点、中间节点和叶子节点，根节点 Root 是遍历整个树的起点。
-Node 的内部存储空间分为3个部分：TOC（table of content，表空间）、key area 和 vaule area，其中表空间保存了每个键值对的位置信息。根节点尾部增加了统计信息`btree_info_t`，为此可用存储空间少了 0x28 个字节。
-
-![B-Tree](btree.png)
-
-```c
-/* B-树的定位信息 */
-typedef struct nloc {
-    uint16_t off;                   // 偏移量（字节单位）
-    uint16_t len;                   // 长度（字节单位）
-} nloc_t;  
-
-/* 普通 Node 的定义 */
-struct btree_node_phys {
-    obj_phys_t  btn_o;              // 节点对象的头部
-    uint16_t    btn_flags;          // 标识位，区分 ROOT 或 LEAF
-    uint16_t    btn_level;          // 节点的等级
-    uint32_t    btn_nkeys;          // 存储了几个键值对
-    nloc_t      btn_table_space;    // 有数据区域的空间大小   
-    nloc_t      btn_free_space;     // 空闲区域的空间大小
-    nloc_t      btn_key_free_list;  // Key 的可用空间列表
-    nloc_t      btn_val_free_list;  // Vaule 的可用空间列表
-    uint64_t    btn_data[];         // 节点内部的存储空间
-};
-typedef struct btree_node_phys btree_node_phys_t;
-
-/* 仅 Root Node */
-struct btree_info { 
-    btree_info_fixed_t  bt_fixed;           // 配置信息，如 Node、Key和Value的长度等
-    uint32_t            bt_longest_key;     // 最大 Key 的长度（字节单位）
-    uint32_t            bt_longest_val;     // 最大 Value 的长度（字节单位）
-    uint64_t            bt_key_count;       // Key 的总数量
-    uint64_t            bt_node_count;      // node 的总数量
-};
-typedef struct btree_info btree_info_t;
-```
-
-> B+树是一个变种，区别是内部节点不存储任何指向记录的指针，这些指针仅存储在叶子节点，因此节点容量更大，树也更浅
-
-### 4. OMAP
-
-在 APFS 中，OMAP（Object Maps，对象映射）扮演两个重要角色。一是负责根据 oid（虚拟对象标识符）和 xid（事务标识符）找到磁盘物理地址，二是提供快照功能，可以立即将虚拟对象集回滚到较早的时间点。
-
-容器和每个卷都维护自己独立的 OAMP，每个 OMAP 都有自己的虚拟地址空间。
-OMAP 使用 B-树 存储映射关系，Snapshot 也是一个 B-树。
-
-```c
-struct omap_phys {
-    obj_phys_t  om_o;
-    uint32_t    om_flags;
-    uint32_t    om_snap_count;
-    uint32_t    om_tree_type;
-    uint32_t    om_snapshot_tree_type;
-    oid_t       om_tree_oid;
-    oid_t       om_snapshot_tree_oid;
-    xid_t       om_most_recent_snap;
-    xid_t       om_pending_revert_min;
-    xid_t       om_pending_revert_max; 
-};
-typedef struct omap_phys omap_phys_t;
-
-/* Key & Vaolue定义 */
-struct omap_key {
-    oid_t ok_oid;       // 映射对象的虚拟对象标识符
-    xid_t ok_xid;       // 映射对象的事务标识符
-};
-typedef struct omap_key omap_key_t;
-
-struct omap_val { 
-    uint32_t ov_flags;  // 标记位，见下表
-    uint32_t ov_size;   // 映射对象的大小（字节单位）
-    paddr_t ov_paddr;   // 映射对象起点的物理地址
-};
-typedef struct omap_val omap_val_t;
-
-
-
-```
-
-|Name|Value||
-|:---:|:---:|:---|
-|OMAP_VAL_DELETED|0x00000001|对象映射已从映射中删除，这是一个占位符|
-|OMAP_VAL_SAVED|0x00000002|更新对象时，不应替换此对象映射。（目前未使用)|
-|OMAP_VAL_ENCRYPTED|0x00000004|映射对象已加密|
-|OMAP_VAL_NOHEADER|0x00000008|映射对象具有零对象标头|
-|OMAP_VAL_CRYPTO_GENERATION|0x00000010|加密更改标记|
-
-，因此在取消引用虚拟对象时，必须了解如何使用该对象来了解要查询的对象映射。
-
-磁盘结构
-OMAP 对象具有相对简单的磁盘结构。除了一些次要元数据外，OMAP 对象的主要用途是存储其树的物理地址。（可选）它们还会将地址存储到快照树中。两棵树的结构都为 B 树对象。
-
-
-```c
-/* Key & Vaolue定义 */
-struct omap_snapshot { 
-    uint32_t oms_flags; 
-    uint32_t oms_pad; 
-    oid_t oms_oid;
-};
-typedef struct omap_snapshot omap_snapshot_t;
-
-struct j_snap_metadata_key { 
-    j_key_t hdr;
-} __attribute__((packed));
-typedef struct j_snap_metadata_key j_snap_metadata_key_t;
-
-struct j_snap_metadata_val {
-    oid_t       extentref_tree_oid;
-    oid_t       sblock_oid;
-    uint64_t    create_time;
-    uint64_t    change_time;
-    uint64_t    inum;
-    uint32_t    extentref_tree_type;
-    uint32_t    flags;
-    uint16_t    name_len;
-    uint8_t     name[0];
-} __attribute__((packed));
-typedef struct j_snap_metadata_val j_snap_metadata_val_t;
-```
-
-
-## 二、Contianer Layer
-
-### 1. Container Superblock
+#### Container Superblock
 
 ```c
 struct nx_superblock { 
@@ -233,9 +80,17 @@ struct nx_superblock {
 };
 ```
 
-## 三、FileSystem（AFPS）Layer
+### 2. 卷宗层 - Volume Layer
 
-### 1. Volume Superblock
+Volume 是真正存储数据的，每个卷宗都有一个文件系统，核心组件包括：
+
+- Superblock：负责管理 volume 自己的一些配置信息，包含了各个组件的入口
+- Root Directory：负责以 B-树 方式存储文件结构信息，如目录结构、文件元数据和文件内容
+- OMAP：卷宗的大部分数据都是基于对象存储，因此每个卷宗都需要自己管理 OMAP
+- SNAP META Tree：负责管理快照的元数据，也是一个 B-树
+- Extentref Tree：负责管理快照扩展数据，还是一个 B-树
+
+#### Volume Superblock
 
 ```c
 struct apfs_superblock { 
@@ -290,36 +145,139 @@ struct apfs_superblock {
 };
 ```
 
-### 2. Volume Role
+## 二、通用基础技术
+
+### 1. Object - 对象
+
+APFS 的对象（Object）都有一个用于查找的唯一标识符`oid`，有三种不同的存储方法：
+
+- Ephemeral object（临时对象）：当一个容器被加载后，临时对象存储在内存中。临时对象通常用于一些很少更新的数据，出于性能考虑允许在内存中修改，并在 checkpoint 时被持久化存储
+- Phycial Object（物理对象）：存储在磁盘上的一个已知的物理块地址。物理对象被修改时，一个新副本将写入磁盘上的新位置，并携带一个不同的`oid`
+- Virtual Object（虚拟对象）：同样存储在磁盘上的一个物理块地址。虚拟对象被修改时，一个新副本也将写入磁盘上的新位置，但是`oid`保持一致；通过 OMAP 可以查询虚拟对象，但必须提供一个事务标识符`xid`以指定您想要的时间点。
 
 ```c
-// Define Volume Roles
-#define APFS_VOL_ROLE_NONE 0x0000
-
-#define APFS_VOL_ROLE_SYSTEM 0x0001
-#define APFS_VOL_ROLE_USER 0x0002
-#define APFS_VOL_ROLE_RECOVERY 0x0004
-#define APFS_VOL_ROLE_VM 0x0008
-#define APFS_VOL_ROLE_PREBOOT 0x0010
-#define APFS_VOL_ROLE_INSTALLER 0x0020
-
-/* macOS 10.15、iOS 13 重新定义了 Volume 角色 */
-#define APFS_VOL_ROLE_DATA (1 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_BASEBAND (2 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_UPDATE (3 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_XART  (4 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_HARDWARE (5 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_BACKUP (6 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_RESERVED_7 (7 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_RESERVED_8 (8 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_ENTERPRISE (9 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_RESERVED_10 (10 << APFS_VOLUME_ENUM_SHIFT)
-#define APFS_VOL_ROLE_PRELOGIN (11 << APFS_VOLUME_ENUM_SHIFT)
-
-#define APFS_VOLUME_ENUM_SHIFT 6
+/* 所有对象的 header 定义 */
+struct obj_phys { 
+    uint8_t     o_cksum[MAX_CKSUM_SIZE];    // 对象的64位弗莱彻校验值，类似 CRC 校验
+    oid_t       o_oid;
+    xid_t       o_xid;
+    uint32_t    o_type;                     // 分成两部分，低16位是对象类型，高16位是存储方法
+    uint32_t    o_subtype;                  // 对象在 B-树 的节点类型，借用 Object Types 定义
+};
+typedef struct obj_phys obj_phys_t;
 ```
 
-## 四、File System Tree - 文件系统树
+当对象存储在磁盘上时，APFS 规定统一采用**小端字节顺序**，但设计思路有一些不同。容器对象以 block 为单位，并且包含填充字段使得数据长度是64的倍数，以避免内存访问对齐的性能损失；而文件系统对象以 byte 为单位，并且尽量最小化所使用的空间，因此很多 struct 定义都有`__attribute__((aligned(8),packed))`的编译标识。
+
+### 2. B-Tree
+
+B树（B-tree）是一种泛化的二叉搜索树（binary search tree），特点是每个节点具有两个以上的子节点，从而增加了键/值对的数量，减少定位记录时所经历的中间过程，从而加快访问速度；此外，B-树具备自平衡性，可以自动调整其结构以保持特定的平衡因子，从而保证在对数时间内进行操作，因此广泛应用于读写相对较大的数据块的存储系统。
+
+HFS+ 是基于 B-树 设计的，APFS 也继承下来，其系统组件大量采用 B-树，例如 Filesystem、OMAP 和 snapshot 等。在 APFS 中，B-树 的节点对象称为 Node，分为根节点、中间节点和叶子节点，根节点 Root 是遍历整个树的起点。
+
+Node 的内部存储空间分为3个部分：TOC（table of content，表空间）、key area 和 vaule area，其中表空间保存了每个键值对的位置信息，Key 和 Value 从节点内部存储区域的首端和尾端开始分别存储，两者之间是共享的自由空间，这种以 offset 的形式存储，比存储完整位置使用更少的磁盘空间。
+
+> root 节点尾部增加了统计信息`btree_info_t`，为此可用存储空间少了 0x28 个字节。
+
+![B-Tree](btree.png)
+
+```c
+/* B-树的定位信息 */
+typedef struct nloc {
+    uint16_t off;                   // 偏移量（字节单位）
+    uint16_t len;                   // 长度（字节单位）
+} nloc_t;  
+
+/* 普通 Node 的定义 */
+struct btree_node_phys {
+    obj_phys_t  btn_o;              // 节点对象的头部
+    uint16_t    btn_flags;          // 标识位，区分 ROOT 或 LEAF
+    uint16_t    btn_level;          // 节点的等级
+    uint32_t    btn_nkeys;          // 存储了几个键值对
+    nloc_t      btn_table_space;    // 有数据区域的空间大小   
+    nloc_t      btn_free_space;     // 空闲区域的空间大小
+    nloc_t      btn_key_free_list;  // Key 的可用空间列表
+    nloc_t      btn_val_free_list;  // Vaule 的可用空间列表
+    uint64_t    btn_data[];         // 节点内部的存储空间
+};
+typedef struct btree_node_phys btree_node_phys_t;
+
+/* 仅 Root Node */
+struct btree_info { 
+    btree_info_fixed_t  bt_fixed;           // 配置信息，如 Node、Key和Value的长度等
+    uint32_t            bt_longest_key;     // 最大 Key 的长度（字节单位）
+    uint32_t            bt_longest_val;     // 最大 Value 的长度（字节单位）
+    uint64_t            bt_key_count;       // Key 的总数量
+    uint64_t            bt_node_count;      // node 的总数量
+};
+typedef struct btree_info btree_info_t;
+```
+
+> B+树是一个变种，区别是内部节点不存储任何指向记录的指针，这些指针仅存储在叶子节点，因此节点容量更大，树也更浅
+
+## 三、 OMAP
+
+在 APFS 中，OMAP（Object Maps，对象映射）扮演两个重要角色。一是负责根据 oid（虚拟对象标识符）和 xid（事务标识符）找到磁盘物理地址，二是提供快照功能，可以立即将虚拟对象回滚到较早的时间点。
+Object Map 的定义如下：
+
+```c
+struct omap_phys {                      
+    obj_phys_t  om_o;                       // 标头
+    uint32_t    om_flags;                   // OMAP 标识，见附表。注意对象内容可能被加密！
+    uint32_t    om_snap_count;              // 快照数量
+    uint32_t    om_tree_type;               // 目前是B-树
+    uint32_t    om_snapshot_tree_type;      // 目前是B-树
+    oid_t       om_tree_oid;                // 当前使用的 OMAP B-树的 （root）oid
+    oid_t       om_snapshot_tree_oid;       // 当前使用的 快照 B-树的 （root）oid
+    xid_t       om_most_recent_snap;        // 最新快照的 xid
+    xid_t       om_pending_revert_min;      // 正在回滚事务的 min xid
+    xid_t       om_pending_revert_max;      // 正在回滚事务的 max xid
+};
+typedef struct omap_phys omap_phys_t;
+```
+
+容器和每个卷都维护自己的 OAMP，每个 OMAP 都有自己的虚拟地址空间，因此对象定义要明确归属哪一个 B-Tree ！
+OMAP 使用 B-树 存储映射关系，其 Key / Value 的定义如下：
+
+```c
+struct omap_key {
+    oid_t ok_oid;       // 映射对象的虚拟对象标识符
+    xid_t ok_xid;       // 映射对象的事务标识符
+};
+typedef struct omap_key omap_key_t;
+
+struct omap_val { 
+    uint32_t ov_flags;  // 标记位，见附录。注意物理存储可能被加密！！！
+    uint32_t ov_size;   // 映射对象的大小（字节单位）
+    paddr_t ov_paddr;   // 映射对象起点的物理地址
+};
+typedef struct omap_val omap_val_t;
+```
+
+有意思的是，OMAP 本身也有一个快照，定义如下：
+
+```c
+struct omap_snapshot { 
+    uint32_t oms_flags;     // OMAP_SNAPSHOT_DELETED or OMAP_SNAPSHOT_REVERTED
+    uint32_t oms_pad; 
+    oid_t oms_oid;
+};
+typedef struct omap_snapshot omap_snapshot_t;
+```
+
+### OMAP 的查询流程
+
+使用 OMAP 访问虚拟对象时，应遵循如下流程：
+
+1. 确定对象映射的入口。
+    volume 的对象使用该卷宗的 OMAP，入口是`apfs_superblock_t`的`apfs_omap_oid`字段；
+    否则，所有其他对象应使用容器的 OMAP，入口是`nx_superblock_t`的`nx_omap_oid`字段
+2. 读取`omap_phys_t`的`om_tree_oid`字段用于定位对象映射的 B-树
+3. 在 B-树 中搜索`ok_oid` == 期望的`oid`，而且`ok_xid` <= 期望的`xid` 的 key。如果有多个 key 满足要求，则使用具有最大`xid`的 key
+4. 使用 Node 节点的 TOC，读取这个 key 对应的 value，其中包含物理地址`ov_addr`和`ov_size`
+5. 从磁盘的物理地址获得对象数据
+
+## 四、File System
 
 每个 APFS 卷宗（Volume）都有一个文件系统（Filesystem）。
 与其他 APFS 对象（Object）不同，文件系统对象由一个或多个文件系统记录（Record）组成，这些记录存储在 Volume 的 FileSystem Tree 上，每条记录都存储有关 file 或 directory 的特定信息。
@@ -526,7 +484,6 @@ typedef struct j_xattr_val j_xattr_val_t;
 
 请注意！本文讨论的是软件加密，也就是单一密钥的 FDE，并不需要管理每个文件的 AES-XTS的主密钥，但 APFS 的设计目标是原生支持 FBE（当然前提是采用硬件加密），因此数据结构的设计目标就是每个文件都有独立的 per-file key，就保存在`APFS_TYPE_CRYPTO_STATE`记录。
 
-
 ```c
 struct j_crypto_key { 
     j_key_t hdr;
@@ -601,7 +558,7 @@ typedef struct j_file_extent_val j_file_extent_val_t;
 > 在搭载 A14 和 M1 的设备上， 加密在 XTS 模式中使用 AES-256， 其中 256 位文件独有密钥通过密钥派生功能 (NIST Special Publication 800-108) 派生出一个 256 位 tweak 密钥和一个 256 位 cipher 密钥。
 > 采用 A9 到 A13、 S5 和 S6 的每一代硬件在 XTS 模式中使用 AES-128， 其中 256 位文件独有密钥会被拆分， 以提供一个 128 位 tweak 密钥和一个 128 位 cipher 密钥。
 
-## 五、Keybag - 密钥包
+## 五、Keybag
 
 APFS 的设计原生支持加密，不再需要 HFS+ 上叠加的 CoreStorge 虚拟存储层，但具体加密方式取决于硬件设备的功能。硬件加密用于具备 Secure Encalve 安全隔区的内部存储设备，软件加密用于不支持硬件加密的外部和内部存储设备。需要注意的是，当使用硬件加密时，数据无法在任何其他设备上解密，安全芯片必须代理所有解密操作。
 
@@ -814,14 +771,109 @@ typedef struct omap_val {
 
 > TODO: 第四步来自 APFS白皮书，似乎 FDE 模式不需要？
 
+## 六、Snapshot
+
+快照（Snapshot）是现代文件系统的重要功能，可以在给定时间点获得一个稳定的、只读的文件系统副本，例如用于硬盘的增量备份。快照的设计目标是可以快速而且低成本的创建，但付出的代价是删除快照需要更多的工作。
+
+### 1. Snapshot Metadata Record
+
+快照也是一个基于 B-树 的应用，鉴于快照的数据量可能较大，因此又建立了一个名为`Extent Reference`的 B-树 用于保存实际的内容数据，而在 snapshot 记录中仅保存其元数据 metadata ，定义如下：
+
+```c
+struct j_snap_metadata_key { 
+    j_key_t hdr;                        // 就是这个快照对应的 xid
+} __attribute__((packed));
+typedef struct j_snap_metadata_key j_snap_metadata_key_t;
+
+struct j_snap_metadata_val {
+    oid_t       extentref_tree_oid;     // 内容数据的 oid，保存在 ExtentRef tree
+    oid_t       sblock_oid;             // 快照为卷宗超级块建立副本，这是超级块的 oid
+    uint64_t    create_time;
+    uint64_t    change_time;
+    uint64_t    inum;
+    uint32_t    extentref_tree_type;    // 默认就是 B-树
+    uint32_t    flags;
+    uint16_t    name_len;
+    uint8_t     name[0];                // 快照名称，UTF-8编码
+} __attribute__((packed));
+typedef struct j_snap_metadata_val j_snap_metadata_val_t;
+```
+
+### 2. Snapshot Name Records
+
+快照名称记录用于将快照名称映射到其事务标识符。
+
+```c
+struct j_snap_name_key { 
+    j_key_t hdr;
+    uint16_t name_len;
+    uint8_t name[0];
+} __attribute__((packed));
+typedef struct j_snap_name_key j_snap_name_key_t;
+
+struct j_snap_name_val { 
+    xid_t snap_xid;                     // 快照中最后一个事务的 xid
+} __attribute__((packed));
+typedef struct j_snap_name_val j_snap_name_val_t;
+```
+
+### 3. Snapshot Extended Reference Metadata Object
+
+每个快照都有一个虚拟对象，用于保存快照扩展信息的元数据，其 oid 保存在该卷宗超级块的`apfs_snap_meta_ext_oid`字段中，映射关系记录在该卷宗的 OMAP 上。快照的虚拟对象有多个版本，其事务标识符 xid 对应每个版本。
+
+> Each snapshot has a virtual Snapshot Extended Metadata Object in the volume’s Object Map. The virtual object identifier of this object is stored in the apfs_snap_meta_ext_oid field of the Volume Superblock. There are multiple versions of this object whose transaction identifiers correspond to each snapshot.
+
+```c
+struct snap_meta_ext_obj_phys { 
+    obj_phys_t      smeop_o; 
+    snap_meta_ext_t smeop_sme;      // 具体结构在下面
+}
+typedef struct snap_meta_ext_obj_phys_t;
+
+typedef struct snap_meta_ext {
+    uint32_t    sme_version;        // 当前版本号=1
+    uint32_t    sme_flags;
+    xid_t       sme_snap_xid;       // 快照对应的 xid
+    uuid_t      sme_uuid;           // 快照的 UUID
+    uint64_t    sme_token;
+} __attribute__((packed))
+typedef struct snap_meta_ext snap_meta_ext_t;
+```
+
 ---
 
-## 遗留问题
+## 七、遗留问题
 
-### 1. `APFS_TYPE_EXTENT`记录的内容是什么？
+### 1. AFPS 白皮书中介绍的 media_keybag 是什么？
 
-APFS 的超级块中，有一个`apfs_extentref_tree_oid`，说明框架中有一个 extent reference 的B-Tree，看起来是存储文件系统树 inode 的 Extent 信息。
-另外，文件系统树有一种记录类型是`APFS_TYPE_EXTENT`，其数据如下：
+```c
+struct media_keybag {
+    obj_phys_t mk_obj;
+    kb_locker_t mk_locker;          // 密钥包入口，结构见下！
+}
+```
+
+### 2. ExtentRef Tree 是什么？
+
+在 APFS 架构图中，每个 volume 有一个 ExtentRef Tree。
+在 Object Type 定义中，也有一个 OBJECT_TYPE_EXTENT_LIST_TREE
+volume flag 的定义中，有一个 APFS_FS_ALWAYS_CHECK_EXTENTREF
+
+在 APFS 超级块的结构中，有2个字段 apfs_extentref_tree_type，apfs_extentref_tree_oid
+在 j_snap_metadata_val_t 的结构中，也有上面2个字段，描述是：
+
+extentref_tree_oid : oid_t
+The physical object identifier of the B-tree that stores extents information.
+
+extentref_tree_type : uint32_t
+The type of the B-tree that stores extents information.
+
+APFS 白皮书的注释说明:
+Corrected the discussion of object identifiers in j_snap_metadata_val_t. The extentref_tree_oid and sblock_oid fields contain a physical object identifier, not a virtual object identifier.
+
+参考[错误报告](https://apple.stackexchange.com/questions/359775/interpreting-various-first-aid-error-messages)，这个东西就是和快照的关系密切！
+
+还有一点，文件系统树有一种记录类型是`APFS_TYPE_EXTENT`，这个和 ExtentRef 的关系未知，其数据如下：
 
 ```c
 struct j_phys_ext_key { 
@@ -841,16 +893,11 @@ typedef struct j_phys_ext_val j_phys_ext_val_t;
 #define PEXT_KIND_SHIFT 60
 ```
 
-### 2. AFPS 白皮书中介绍的 media_keybag 是什么？
+---
 
-```c
-struct media_keybag {
-    obj_phys_t mk_obj;
-    kb_locker_t mk_locker;          // 密钥包入口，结构见下！
-}
-```
+## 附录一：一些重要的类型定义
 
-### 3. AFPS Object Type
+### 1. Object Type 的定义
 
 ```c
 #define OBJECT_TYPE_NX_SUPERBLOCK       0x00000001  // Container superblock
@@ -868,7 +915,7 @@ struct media_keybag {
 #define OBJECT_TYPE_OMAP                0x0000000b  // Object Map, B-Tree
 #define OBJECT_TYPE_CHECKPOINT_MAP      0x0000000c  // Checkpoint
 
-#define OBJECT_TYPE_FS                  0x0000000d  // Volume superblock
+#define OBJECT_TYPE_FS                  0x0000000d  
 #define OBJECT_TYPE_FSTREE              0x0000000e
 #define OBJECT_TYPE_BLOCKREFTREE        0x0000000f
 #define OBJECT_TYPE_SNAPMETATREE        0x00000010
@@ -898,9 +945,47 @@ struct media_keybag {
 #define OBJECT_TYPE_MEDIA_KEYBAG        'mkey'
 ```
 
-This value is stored in the type bits of a j_key_t structureʼs obj_id_and_type field.
+### 2. Object Flag 的定义
 
+区分存储方式，即：虚拟对象、物理对象、或临时对象
 
+```c
+#define OBJ_VIRTUAL         0x00000000
+#define OBJ_EPHEMERAL       0x80000000
+#define OBJ_PHYSICAL        0x40000000
+
+#define OBJ_NOHEADER        0x20000000
+#define OBJ_ENCRYPTED       0x10000000
+#define OBJ_NONPERSISTENT   0x08000000   
+```
+
+### 3. Volume Role 的定义
+
+```c
+#define APFS_VOL_ROLE_NONE 0x0000
+
+#define APFS_VOL_ROLE_SYSTEM 0x0001
+#define APFS_VOL_ROLE_USER 0x0002
+#define APFS_VOL_ROLE_RECOVERY 0x0004
+#define APFS_VOL_ROLE_VM 0x0008
+#define APFS_VOL_ROLE_PREBOOT 0x0010
+#define APFS_VOL_ROLE_INSTALLER 0x0020
+
+/* macOS 10.15、iOS 13 重新定义了 Volume 角色 */
+#define APFS_VOL_ROLE_DATA (1 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_BASEBAND (2 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_UPDATE (3 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_XART  (4 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_HARDWARE (5 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_BACKUP (6 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_RESERVED_7 (7 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_RESERVED_8 (8 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_ENTERPRISE (9 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_RESERVED_10 (10 << APFS_VOLUME_ENUM_SHIFT)
+#define APFS_VOL_ROLE_PRELOGIN (11 << APFS_VOLUME_ENUM_SHIFT)
+
+#define APFS_VOLUME_ENUM_SHIFT 6
+```
 
 ---
 
@@ -921,4 +1006,3 @@ This value is stored in the type bits of a j_key_t structureʼs obj_id_and_type 
 
 - [libfsapfs 源代码的技术文档 - Github](https://github.com/libyal/libfsapfs/blob/main/documentation/Apple%20File%20System%20(APFS).asciidoc)
 - [apfsprogs：Experimental APFS tools for linux - Github](https://github.com/linux-apfs/apfsprogs)
-

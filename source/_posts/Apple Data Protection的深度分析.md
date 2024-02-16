@@ -29,7 +29,7 @@ CPU都是通用的，许多关键密钥都是个人化数据，必须有一个�
 ### 1. UID & GID
 
 UID 是一个AES 256 位密钥，在 SOC 制造过程中写入，每个设备唯一且无法更改。
-随机生成的 UID 在制造过程中便被固化到 SoC 中。从 A9 SoC 开始，UID 在制造过程中由安全隔区TRNG 生成，并使用完全在安全隔区中运行的软件进程写入到一次性的**熔丝**熔丝中。 
+随机生成的 UID 在制造过程中便被固化到 SoC 中。从 A9 SoC 开始，UID 在制造过程中由安全隔区TRNG 生成，并使用完全在安全隔区中运行的软件进程写入到一次性的**熔丝**熔丝中。
 UID 不能被固件或软件读取，只能由安全隔区的硬件 AES 引擎使用，Apple 或其供应商都不会存储 UID。
 
 安全隔区还长期存储 GID（Group ID，设备组 ID），它是使用特定 SoC 的所有设备共用的 ID（例如，所有使用 Apple A14 SoC 的设备共用同一个 GID）。
@@ -144,7 +144,6 @@ per-file key是实际用来加密文件的，那它也得被保护啊。这就�
 加密的文件系统密钥还会使用储存在可擦除存储器中的“可擦除密钥”( an “effaceable key”) 封装，或者使用受安全隔区反重放机制保护的媒介密钥封装密钥（a media key-wrapping key）进行封装。
 > the Secure Storage Component’s unique cryptographic key
 此密钥不会提供数据的额外机密性。 相反，它可以根据需要快速抹掉。
-
 > 数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥(a random volume key)进行加密， 该密钥在首次安装操作系统或用户擦除设备时创建。
 > 此密钥由密钥封装密钥(a key wrapping key)加密和封装， 密钥封装密钥由安全隔区长期储存， 只在安全隔区中可见。 每次用户抹掉设备时， 它都会发生变化。
 > 在 A9 （及后续型号） SoC 上， 安全隔区依靠由反重放系统支持的熵来实现可擦除性， 以及保护其他资源中的密钥封装密钥。 有关更多信息， 请参阅安全非易失性存储器。
@@ -222,9 +221,6 @@ Operation
 • Generate new system keybag
 • High level of confidence that erased data cannot be recovered
 
-
-
-
 ### 3. Class Key 的使用
 
 用户开机成功后，类密钥就保留在内存中，后续将根据不同事件触发相应的处理流程。
@@ -234,7 +230,7 @@ Operation
 • FileProtectionComplete key removed from RAM
 • All Complete protection files now unreadable
 • Other keys remain present
-• Allows connection to Wi-Fi 
+• Allows connection to Wi-Fi
 • Lets you see contact information when phone rings
 • [I once found an edge case where this doesn’t happen…]
 
@@ -247,7 +243,7 @@ Operation
 #### 用户重设 passcode
 
 • The system keybag is duplicated
-• Class keys wrapped using new passcode key (encrypted 
+• Class keys wrapped using new passcode key (encrypted
 with 0x835 key, wrapped with passcode)
 • New BAG key created and stored in effaceable storage
 • Old BAG key thrown away
@@ -274,7 +270,6 @@ Effaceable storage is wiped, destroying:
 • Only “File Protection: None” files are readable
 • And then only by the OS on the device
 • Because FDE
-
 
 ## 破解Passcode Key的手段
 
