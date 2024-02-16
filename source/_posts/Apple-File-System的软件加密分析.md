@@ -853,6 +853,13 @@ struct media_keybag {
 }
 ```
 
+2020年6月，增加定义：`#define OBJECT_TYPE_MEDIA_KEYBAG 'mkey'`
+APFS 的描述：A keybag, wrapped up as a container-layer object.
+nx_mkb_locker : Wrapped media key.
+
+KB_TAG_WRAPPING_M_KEY:
+The key data stores a key thatʼs used to wrap a media key.
+
 ### 2. ExtentRef Tree 是什么？
 
 在 APFS 架构图中，每个 volume 有一个 ExtentRef Tree。
