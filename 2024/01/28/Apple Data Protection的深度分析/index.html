@@ -39,7 +39,7 @@
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/UDID.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/FileVault.png">
 <meta property="article:published_time" content="2024-01-28T12:05:45.000Z">
-<meta property="article:modified_time" content="2024-02-04T04:33:12.018Z">
+<meta property="article:modified_time" content="2024-02-17T10:47:33.318Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/ES.png">
@@ -164,7 +164,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">89</span>
+          <span class="site-state-item-count">90</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -238,7 +238,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-04 12:33:12" itemprop="dateModified" datetime="2024-02-04T12:33:12+08:00">2024-02-04</time>
+      <time title="修改时间：2024-02-17 18:47:33" itemprop="dateModified" datetime="2024-02-17T18:47:33+08:00">2024-02-17</time>
     </span>
 
   
@@ -343,10 +343,7 @@
 <p>有一个特定的储物柜叫做BAGI，它包含一个加密密钥，用来加密所谓的系统密钥包。密钥包包含许多加密“类密钥”，最终保护文件系统中的文件;它们在不同的时间被锁定和解锁，这取决于用户的活动。这让开发人员可以选择在设备被锁定时是否锁定文件，或者在输入密码后保持解锁，等等。文件系统上的每个文件都有自己的随机文件密钥，该密钥使用密钥包中的类密钥进行加密。密钥包的密钥是由BAGI储物柜中的密钥和用户的PIN的组合加密的。</p>
 <p>系统会使用文件系统密钥(the file system key)解密文件的元数据， 以显露出封装的文件独有密钥和表示它受哪个类保护的记号<br>用于加密每个文件的元数据的密钥， 包括其类密钥。 存储在可擦除存储器中， 用于实现快速擦除， 并非用于保密目的。<br>加密的文件系统密钥还会使用储存在可擦除存储器中的“可擦除密钥”( an “effaceable key”) 封装，或者使用受安全隔区反重放机制保护的媒介密钥封装密钥（a media key-wrapping key）进行封装。</p>
 <blockquote>
-<p>the Secure Storage Component’s unique cryptographic key<br>此密钥不会提供数据的额外机密性。 相反，它可以根据需要快速抹掉。</p>
-</blockquote>
-<blockquote>
-<p>数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥(a random volume key)进行加密， 该密钥在首次安装操作系统或用户擦除设备时创建。<br>此密钥由密钥封装密钥(a key wrapping key)加密和封装， 密钥封装密钥由安全隔区长期储存， 只在安全隔区中可见。 每次用户抹掉设备时， 它都会发生变化。<br>在 A9 （及后续型号） SoC 上， 安全隔区依靠由反重放系统支持的熵来实现可擦除性， 以及保护其他资源中的密钥封装密钥。 有关更多信息， 请参阅安全非易失性存储器。</p>
+<p>the Secure Storage Component’s unique cryptographic key<br>此密钥不会提供数据的额外机密性。 相反，它可以根据需要快速抹掉。<br>数据宗卷文件系统中所有文件的元数据都使用随机宗卷密钥(a random volume key)进行加密， 该密钥在首次安装操作系统或用户擦除设备时创建。<br>此密钥由密钥封装密钥(a key wrapping key)加密和封装， 密钥封装密钥由安全隔区长期储存， 只在安全隔区中可见。 每次用户抹掉设备时， 它都会发生变化。<br>在 A9 （及后续型号） SoC 上， 安全隔区依靠由反重放系统支持的熵来实现可擦除性， 以及保护其他资源中的密钥封装密钥。 有关更多信息， 请参阅安全非易失性存储器。</p>
 </blockquote>
 <p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch2.png" alt="更细架构"></p>
 <ul>
@@ -461,6 +458,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/" rel="next" title="Apple File System的软件加密分析">
+                  Apple File System的软件加密分析 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
@@ -492,14 +492,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">202k</span>
+    <span title="站点总字数">211k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:16</span>
+    <span title="站点阅读时长">12:49</span>
   </span>
 </div>
 <div class="busuanzi-count">
