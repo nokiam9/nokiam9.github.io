@@ -39,14 +39,14 @@ APFS 在概念上分为两层，容器层（Container Layer）和文件系统层
 struct nx_superblock { 
     obj_phys_t nx_o; 
     uint32_t nx_magic;                      // magic ‘NXSB’
-    uint32_t nx_block_size; 
-    uint64_t nx_block_count; 
-    uint64_t nx_features; 
+    uint32_t nx_block_size;                 // 容器的已使用的逻辑块数量
+    uint64_t nx_block_count;                // 容器的逻辑块总数
+    uint64_t nx_features;                   // 标记位，0x00000004 = NX_CRYPTO_SW，软件加密
     uint64_t nx_readonly_compatible_features; 
     uint64_t nx_incompatible_features; 
     uuid_t nx_uuid;                         // 容器 UUID
-    oid_t nx_next_oid; 
-    xid_t nx_next_xid; 
+    oid_t nx_next_oid;                      // 下一个要使用的 oid
+    xid_t nx_next_xid;                      // 下一个要使用的 xid
     uint32_t nx_xp_desc_blocks; 
     uint32_t nx_xp_data_blocks; 
     paddr_t nx_xp_desc_base; 
@@ -57,12 +57,12 @@ struct nx_superblock {
     uint32_t nx_xp_desc_len; 
     uint32_t nx_xp_data_index; 
     uint32_t nx_xp_data_len; 
-    oid_t nx_spaceman_oid;                  // 指向 Space Manager
-    oid_t nx_omap_oid;                      // 指向 Object Map
-    oid_t nx_reaper_oid;                    // 指向 Reaper
+    oid_t nx_spaceman_oid;                  // 空间管理器（临时对象） 的 oid
+    oid_t nx_omap_oid;                      // 对象映射（物理对象）的 oid
+    oid_t nx_reaper_oid;                    // 收割机（临时对象）的 oid
     uint32_t nx_test_type; 
     uint32_t nx_max_file_systems; 
-    oid_t nx_fs_oid[NX_MAX_FILE_SYSTEMS];   // volume列表
+    oid_t nx_fs_oid[NX_MAX_FILE_SYSTEMS];   // Filesystem superblock （虚拟对象）oid 数组
     uint64_t nx_counters[NX_NUM_COUNTERS]; 
     prange_t nx_blocked_out_prange; 
     oid_t nx_evict_mapping_tree_oid; 
@@ -96,7 +96,7 @@ Volume 是真正存储数据的，每个卷宗都有一个文件系统，核心�
 struct apfs_superblock { 
     obj_phys_t  apfs_o;
     uint32_t apfs_magic;                // magic 'BSPA'
-    uint32_t apfs_fs_index;             // 在容器超级块卷宗列表的序号
+    uint32_t apfs_fs_index;             // container Superblock 的 nx_fs_oid 数组的序号
     uint64_t apfs_features;
     uint64_t apfs_readonly_compatible_features;
     uint64_t apfs_incompatible_features;
@@ -108,18 +108,18 @@ struct apfs_superblock {
     uint32_t apfs_root_tree_type;
     uint32_t apfs_extentref_tree_type;
     uint32_t apfs_snap_meta_tree_type;
-    oid_t apfs_omap_oid;                // Volume专用的对象映射入口
-    oid_t apfs_root_tree_oid;           // Root文件系统的入口
-    oid_t apfs_extentref_tree_oid;      //  
-    oid_t apfs_snap_meta_tree_oid;      // 快照元数据的入口
-    xid_t apfs_revert_to_xid;
-    oid_t apfs_revert_to_sblock_oid;
-    uint64_t apfs_next_obj_id;
-    uint64_t apfs_num_files;
-    uint64_t apfs_num_directories;
-    uint64_t apfs_num_symlinks;
-    uint64_t apfs_num_other_fsobjects;
-    uint64_t apfs_num_snapshots;
+    oid_t apfs_omap_oid;                // 对象映射（物理对象）oid
+    oid_t apfs_root_tree_oid;           // Root 文件系统树（虚拟对象）oid
+    oid_t apfs_extentref_tree_oid;      // ？扩展参考树（物理对象）的 oid 
+    oid_t apfs_snap_meta_tree_oid;      // 快照元数据树（物理对象）的 oid
+    xid_t apfs_revert_to_xid;           // 将要恢复到快照的 xid
+    oid_t apfs_revert_to_sblock_oid;    // 将要恢复到快照的超级块副本的 oid
+    uint64_t apfs_next_obj_id;          // 下一个要分配的对象 oid
+    uint64_t apfs_num_files;            // 此卷宗的普通文件总数
+    uint64_t apfs_num_directories;      // 此卷宗的目录总数
+    uint64_t apfs_num_symlinks;         // 此卷宗的符号链接件总数
+    uint64_t apfs_num_other_fsobjects;  // 此卷宗的其他类型文件总数
+    uint64_t apfs_num_snapshots;        // 此卷宗的快照件总数
     uint64_t apfs_total_blocks_alloced;
     uint64_t apfs_total_blocks_freed;
     uuid_t apfs_vol_uuid;               // Volume UUID
@@ -131,21 +131,42 @@ struct apfs_superblock {
     uint32_t apfs_next_doc_id;
     uint16_t apfs_role;                 // volume角色，定义见下
     uint16_t reserved;
-    xid_t apfs_root_to_xid;
+    xid_t apfs_root_to_xid;             // 快照的事务标识符，通常为零
     oid_t apfs_er_state_oid;
-    uint64_t apfs_cloneinfo_id_epoch;
+    uint64_t apfs_cloneinfo_id_epoch;   // MacOS 10.13.3 之后，用于卷宗克隆
     uint64_t apfs_cloneinfo_xid;
-    oid_t apfs_snap_meta_ext_oid;
-    uuid_t apfs_volume_group_id;
-    oid_t apfs_integrity_meta_oid;
-    oid_t apfs_fext_tree_oid;
+    oid_t apfs_snap_meta_ext_oid;       // 快照元数据扩展（虚拟对象）的 oid
+    uuid_t apfs_volume_group_id;        // 归属 Volume Group 的 id
+    oid_t apfs_integrity_meta_oid;      // 完整性元数据（虚拟对象）的 oid，MacOS 11 之后，用于 Sealed Volume
+    oid_t apfs_fext_tree_oid;           // FILE EXTENT 树（虚拟对象）的 oid
     uint32_t apfs_fext_tree_type;
     uint32_t reserved_type;
     oid_t reserved_oid;
 };
 ```
 
-## 二、通用基础技术
+> 至少有 4 个物理对象的 B-树 ：ROOT DIRECTORY、EXTENT REFRENCE、SNAP METADATA、FILE EXTENT；还有一个虚拟对象的 OMAP B-树。
+
+#### 关于 ExtentRef Tree 的讨论
+
+此问题已解决。**ExtentRef Tree（范围参照树是）一个物理对象，就是当前正在构建的快照！**
+APFS 技术白皮书指出：
+
+> When a snapshot is created, the current extent-reference tree is moved to the snapshot.
+> A new, empty, extent-reference tree is created and its object identifier becomes the new value of this field.
+
+当一个快照被创建时，当前的范围参照树就被移动到这个快照；同时，一个新的、空的范围参照树被创建，并将 volume superblock 的`apfs_extentref_tree_oid`置为这个新的 oid。
+
+- Object Type 定义 extent-reference tree 为`OBJECT_TYPE_EXTENT_LIST_TREE`
+- Volume Flag 的定义中，也有一个标记`APFS_FS_ALWAYS_CHECK_EXTENTREF`
+- j_snap_metadata_val_t 的结构中，包含`extentref_tree_oid` 和 `extentref_tree_type` 字段
+- volume superblock 的结构中，包含`extentref_tree_oid` 和 `extentref_tree_type` 字段
+
+此外，APFS 白皮书还有一个勘误信息。
+> Corrected the discussion of object identifiers in j_snap_metadata_val_t.
+> The extentref_tree_oid and sblock_oid fields contain a physical object identifier, not a virtual object identifier.
+
+## 二、通用组件
 
 ### 1. Object - 对象
 
@@ -860,45 +881,19 @@ nx_mkb_locker : Wrapped media key.
 KB_TAG_WRAPPING_M_KEY:
 The key data stores a key thatʼs used to wrap a media key.
 
-### 2. ExtentRef Tree 是什么？
+初步分析，media key 应该是 2020年 Apple 版本升级的产物，负责封装数据宗卷上的元数据。
 
-在 APFS 架构图中，每个 volume 有一个 ExtentRef Tree。
-在 Object Type 定义中，也有一个 OBJECT_TYPE_EXTENT_LIST_TREE
-volume flag 的定义中，有一个 APFS_FS_ALWAYS_CHECK_EXTENTREF
+Apple 安全白皮书介绍：
 
-在 APFS 超级块的结构中，有2个字段 apfs_extentref_tree_type，apfs_extentref_tree_oid
-在 j_snap_metadata_val_t 的结构中，也有上面2个字段，描述是：
-
-extentref_tree_oid : oid_t
-The physical object identifier of the B-tree that stores extents information.
-
-extentref_tree_type : uint32_t
-The type of the B-tree that stores extents information.
-
-APFS 白皮书的注释说明:
-Corrected the discussion of object identifiers in j_snap_metadata_val_t. The extentref_tree_oid and sblock_oid fields contain a physical object identifier, not a virtual object identifier.
-
-参考[错误报告](https://apple.stackexchange.com/questions/359775/interpreting-various-first-aid-error-messages)，这个东西就是和快照的关系密切！
-
-还有一点，文件系统树有一种记录类型是`APFS_TYPE_EXTENT`，这个和 ExtentRef 的关系未知，其数据如下：
-
-```c
-struct j_phys_ext_key { 
-    j_key_t hdr;
-} __attribute__((packed));
-typedef struct j_phys_ext_key j_phys_ext_key_t;
-
-struct j_phys_ext_val { 
-    uint64_t len_and_kind; 
-    uint64_t owning_obj_id; 
-    int32_t refcnt;
-} __attribute__((packed));
-typedef struct j_phys_ext_val j_phys_ext_val_t;
-
-#define PEXT_LEN_MASK   0x0fffffffffffffffULL
-#define PEXT_KIND_MASK  0xf000000000000000ULL
-#define PEXT_KIND_SHIFT 60
-```
+> When deleting a volume, its volume encryption key is securely deleted by the Secure Enclave.
+> This helps prevent future access with this key even by the Secure Enclave.
+> In addition, all volume encryption keys are wrapped with a media key.
+> The media key doesn’t provide additional confidentiality of data; instead, it’s designed to enable swift and secure deletion of data because without it decryption is impossible.
+> On a Mac with Apple silicon and those with the T2 chip, the media key is guaranteed to be erased by the Secure Enclave supported technology—for example by remote MDM commands.
+> Erasing the media key in this manner renders the volume cryptographically inaccessible.
+> media key Part of the encryption key hierarchy that helps provide for a secure and instant wipe. 
+> In iOS, iPadOS, tvOS, and watchOS, the media key wraps the metadata on the data volume (and thus without it access to all per-file keys is impossible, rendering files protected with Data Protection inaccessible). 
+> In macOS, the media key wraps the keying material, all metadata, and data on the FileVault protected volume. In either case, wipe of the media key renders encrypted data inaccessible.
 
 ---
 
@@ -966,7 +961,34 @@ typedef struct j_phys_ext_val j_phys_ext_val_t;
 #define OBJ_NONPERSISTENT   0x08000000   
 ```
 
-### 3. Volume Role 的定义
+### 3. Volume Flag 的定义
+
+```c
+#define APFS_FS_UNENCRYPTED                 0x00000001LL
+#define APFS_FS_RESERVED_2                  0x00000002LL
+#define APFS_FS_RESERVED_4                  0x00000004LL
+#define APFS_FS_ONEKEY                      0x00000008LL
+#define APFS_FS_SPILLEDOVER                 0x00000010LL
+#define APFS_FS_RUN_SPILLOVER_CLEANER       0x00000020LL
+#define APFS_FS_ALWAYS_CHECK_EXTENTREF      0x00000040LL
+#define APFS_FS_RESERVED_80                 0x00000080LL
+#define APFS_FS_RESERVED_100                0x00000100LL
+
+#define APFS_FS_FLAGS_VALID_MASK            (APFS_FS_UNENCRYPTED \
+                                            | APFS_FS_RESERVED_2 \
+                                            | APFS_FS_RESERVED_4 \
+                                            | APFS_FS_ONEKEY \
+                                            | APFS_FS_SPILLEDOVER \
+                                            | APFS_FS_RUN_SPILLOVER_CLEANER \
+                                            | APFS_FS_ALWAYS_CHECK_EXTENTREF \
+                                            | APFS_FS_RESERVED_80 \
+                                            | APFS_FS_RESERVED_100)
+
+#define APFS_FS_CRYPTOFLAGS                 (APFS_FS_UNENCRYPTED \
+                                            | APFS_FS_ONEKEY)
+```
+
+### 4. Volume Role 的定义
 
 ```c
 #define APFS_VOL_ROLE_NONE 0x0000
