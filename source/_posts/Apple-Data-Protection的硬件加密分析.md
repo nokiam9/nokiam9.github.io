@@ -35,10 +35,13 @@ Cocoa包含三个主要的Objective-C对象库，称为“框架”。框架的�
 
 ---
 
-## 附录一：FIPS 140-2
+## 附录一：FIPS 140-2 技术标准
 
 FIPS 140 是 NIST（国家标准与技术研究院，美国）制定的一项技术标准，描述了用于敏感但非保密 (SBU) 用途的 IT 产品所需满足的加密和相关安全要求。
+
 1994年发布了 FIPS 140-1，2001年发布了 FIPS 140-2 为**现行标准**，2009年发布了一份 FIPS 140-3 的草案，但目前没有任何产品通过验证。
+
+### 安全等级
 
 FIPS 140-2 定义了 4 个安全等级，包括：
 
@@ -47,9 +50,18 @@ FIPS 140-2 定义了 4 个安全等级，包括：
 - L3：要求提供**基于身份的认证**，并提供物理篡改预防措施，防止拆卸或修改，如果检测到篡改，设备必须能够擦除关键安全参数，要求私钥只能以加密形式进入或离开等。
 - L4：专用于缺少物理保护的环境，要求提供高级篡改保护，如果检测到各种形式的环境攻击，则擦除设备的内容。
 
-美国和加拿大的法律规定，政府采购项目必须使用 FIPS 140-2 2 级验证产品，NIST 提供所有可用于商业的[FIPS 140-2 认证产品清单](https://csrc.nist.gov/projects/cryptographic-module-validation-program)。
+### 认证体系
 
-> CAVP （通用）密码算法验证体系 + CMVP （产品）密码模块验证体系 = FIPS 140-2
+CAVP（Cryptographic Algorithm Validation Program，加密算法验证计划）由 NIST 于 1995 年 7 月建立，旨在根据 FIPS/NIST/CSE 推荐的加密算法及算法组件展开验证测评，验证测试包括分组密码、分组密码模式、数字签名、密钥管理、信息验证、随机数列生成、安全散列等。
+加密算法验证是加密模块验证程序(CMVP)下的 FIPS140-2 验证的先决条件。
+
+CMVP（Cryptographic Module Validation Program，加密模块验证计划）由美国 NIST 和加拿大政府的通讯安全组织(Communications security establishment, CSE)于 1995 年共同建立，其目标是提供一份可供采购使用的 IT 安全产品列表，列表上的产品已成功通过 FIPS 140-2 标准验证。
+
+所有基于 CMVP 的评测由第三方的授权实验室展开，这些实验室被 NVLAP（National Voluntary Laboratory Accreditation Program，国家实验室自愿认可体系）授权为 CST （Cryptographic and Security Testing，密码和安全测评）实验室，对验证测试感兴趣的供应商可以选择 21 个实验室中的任何一个。
+
+![FIPS 140-2](FIPS140-2.jpg)
+
+美国和加拿大的法律规定，政府采购项目必须使用 FIPS 140-2 2 级验证产品，NIST 提供所有可用于商业的[FIPS 140-2 认证产品清单](https://csrc.nist.gov/projects/cryptographic-module-validation-program)。
 
 ## 附录二：国际 CC 信息安全认证体系
 
@@ -57,7 +69,7 @@ FIPS 140-2 定义了 4 个安全等级，包括：
 
 ![历史](CC-his.png)
 
-### TOE & PP & ST
+### 核心概念
 
 CC 相当于一个标准化的安全需求目录，它并非针对具体的产品，具有较大的灵活性。
 
@@ -67,7 +79,7 @@ CC 相当于一个标准化的安全需求目录，它并非针对具体的产�
 
 总的来说，PP 相当于行业的一个规范或标准，它是对标整个行业的，表达“要求产品做成什么样子”；ST 是针对具体厂商 而言的，表达“产品想做成什么样子”，相当于产品的安全功能说明书；TOE 则是某个厂商的具体产品。
 
-### EAL 1 - 7
+### 评估保护等级 EAL
 
 EAL（Evaluation Assurance Level，评估保护等级）描述了评估深度和严谨程度的数字评级，每级 EAL 都定义了 6 项SAR（Security Assurance Requirements，安全保证要求），包括：ST 的评估准则、TOE 的开发、生命周期支持、指导性文件、测试、脆弱性评定。
 
