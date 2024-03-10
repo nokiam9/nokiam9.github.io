@@ -35,38 +35,4 @@ Cocoa包含三个主要的Objective-C对象库，称为“框架”。框架的�
 
 ---
 
-## 附录一：FIPS 140-2 技术标准
-
-FIPS 140 是 NIST（国家标准与技术研究院，美国）制定的一项技术标准，描述了用于敏感但非保密 (SBU) 用途的 IT 产品所需满足的加密和相关安全要求。
-
-1994年发布了 FIPS 140-1，2001年发布了 FIPS 140-2 为**现行标准**，2009年发布了一份 FIPS 140-3 的草案，但目前没有任何产品通过验证。
-
-### 安全等级
-
-FIPS 140-2 定义了 4 个安全等级，包括：
-
-- L1：通常用于仅软件加密产品。要求验证至少一个已批准的加密演算法或安全功能，并确保所有组件符合生产级评估要素。
-- L2：要求提供**基于角色的验证**，并具有通过使用物理锁定或防篡改签章识别物理篡改的能力。
-- L3：要求提供**基于身份的认证**，并提供物理篡改预防措施，防止拆卸或修改，如果检测到篡改，设备必须能够擦除关键安全参数，要求私钥只能以加密形式进入或离开等。
-- L4：专用于缺少物理保护的环境，要求提供高级篡改保护，如果检测到各种形式的环境攻击，则擦除设备的内容。
-
-### 认证体系
-
-CAVP（Cryptographic Algorithm Validation Program，加密算法验证计划）由 NIST 于 1995 年 7 月建立，旨在根据 FIPS/NIST/CSE 推荐的加密算法及算法组件展开验证测评，验证测试包括分组密码、分组密码模式、数字签名、密钥管理、信息验证、随机数列生成、安全散列等。
-加密算法验证是加密模块验证程序(CMVP)下的 FIPS140-2 验证的先决条件。
-
-CMVP（Cryptographic Module Validation Program，加密模块验证计划）由美国 NIST 和加拿大政府的通讯安全组织(Communications security establishment, CSE)于 1995 年共同建立，其目标是提供一份可供采购使用的 IT 安全产品列表，列表上的产品已成功通过 FIPS 140-2 标准验证。
-
-所有基于 CMVP 的评测由第三方的授权实验室展开，这些实验室被 NVLAP（National Voluntary Laboratory Accreditation Program，国家实验室自愿认可体系）授权为 CST （Cryptographic and Security Testing，密码和安全测评）实验室，对验证测试感兴趣的供应商可以选择 21 个实验室中的任何一个。
-
-![FIPS 140-2](FIPS140-2.jpg)
-
-美国和加拿大的法律规定，政府采购项目必须使用 FIPS 140-2 2 级验证产品，NIST 提供所有可用于商业的[FIPS 140-2 认证产品清单](https://csrc.nist.gov/projects/cryptographic-module-validation-program)。
-
----
-
 ## 参考文献
-
-- [Apple安全密钥存储的加密模块](Apple-Secure-Key-Store-Cryptographic-Module.pdf#12)
-
-### 文档下载
