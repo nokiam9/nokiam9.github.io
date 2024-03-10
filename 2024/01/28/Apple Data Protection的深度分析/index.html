@@ -38,8 +38,10 @@
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/arch0.jpeg">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/UDID.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/FileVault.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/TOC-phy.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/TOC-key.png">
 <meta property="article:published_time" content="2024-01-28T12:05:45.000Z">
-<meta property="article:modified_time" content="2024-02-17T10:47:33.318Z">
+<meta property="article:modified_time" content="2024-02-19T13:01:39.813Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/ES.png">
@@ -151,7 +153,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81FDE-Vs-FBE"><span class="nav-text">一、FDE Vs FBE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-Secure-Nonvolatile-Storage"><span class="nav-text">二. Secure Nonvolatile Storage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81Secure-Encalve-%E4%B8%AD%E7%9A%84%E5%AF%86%E9%92%A5"><span class="nav-text">三、Secure Encalve 中的密钥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-UID-GID"><span class="nav-text">1. UID &amp; GID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%B4%BE%E7%94%9F%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AF%86%E9%92%A5"><span class="nav-text">2. 派生的硬件密钥</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Passcode-Key"><span class="nav-text">3. Passcode Key</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Effaceable-Storage-%E4%B8%AD%E7%9A%84%E5%AF%86%E9%92%A5"><span class="nav-text">四、Effaceable Storage 中的密钥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-EMF-LwVm"><span class="nav-text">1. EMF &#x3D; LwVm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-DKey"><span class="nav-text">2. DKey</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Bag1"><span class="nav-text">3. Bag1</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81File-System-%E4%B8%AD%E7%9A%84%E5%AF%86%E9%92%A5"><span class="nav-text">五、File System 中的密钥</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81xART-key"><span class="nav-text">六、xART key</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81SKP-Key"><span class="nav-text">七、SKP Key</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Class-Key-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-text">3. Class Key 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E5%8A%A8%E9%94%81%E5%B1%8F-%E8%B6%85%E6%97%B6%E9%94%81%E5%B1%8F"><span class="nav-text">主动锁屏 &amp; 超时锁屏</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E9%87%8D%E8%AE%BE-passcode"><span class="nav-text">用户重设 passcode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%93%A6%E9%99%A4-NAND-%E6%95%B0%E6%8D%AE"><span class="nav-text">用户擦除 NAND 数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E9%87%8D%E5%90%AF"><span class="nav-text">设备重启</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%B4%E8%A7%A3Passcode-Key%E7%9A%84%E6%89%8B%E6%AE%B5"><span class="nav-text">破解Passcode Key的手段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9A%E4%B8%80%E4%BA%9B%E6%9C%89%E8%B6%A3%E7%9A%84%E7%9F%A5%E8%AF%86"><span class="nav-text">附录一：一些有趣的知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UDID-Unique-Device-Identifier%EF%BC%8CApple%E8%AE%BE%E5%A4%87%E7%9A%84%E5%94%AF%E4%B8%80%E8%AF%86%E5%88%AB%E5%8F%B7"><span class="nav-text">UDID - Unique Device Identifier，Apple设备的唯一识别号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="nav-text">2. 遗留问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B2%BE%E5%93%81%E8%B5%84%E6%96%99"><span class="nav-text">精品资料</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">技术分析</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81FDE-Vs-FBE"><span class="nav-text">一、FDE Vs FBE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-Secure-Nonvolatile-Storage"><span class="nav-text">二. Secure Nonvolatile Storage</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81Secure-Encalve-%E4%B8%AD%E7%9A%84%E5%AF%86%E9%92%A5"><span class="nav-text">三、Secure Encalve 中的密钥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-UID-GID"><span class="nav-text">1. UID &amp; GID</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%B4%BE%E7%94%9F%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AF%86%E9%92%A5"><span class="nav-text">2. 派生的硬件密钥</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Passcode-Key"><span class="nav-text">3. Passcode Key</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Effaceable-Storage-%E4%B8%AD%E7%9A%84%E5%AF%86%E9%92%A5"><span class="nav-text">四、Effaceable Storage 中的密钥</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-EMF-LwVm"><span class="nav-text">1. EMF &#x3D; LwVm</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-DKey"><span class="nav-text">2. DKey</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Bag1"><span class="nav-text">3. Bag1</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81File-System-%E4%B8%AD%E7%9A%84%E5%AF%86%E9%92%A5"><span class="nav-text">五、File System 中的密钥</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81xART-key"><span class="nav-text">六、xART key</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81SKP-Key"><span class="nav-text">七、SKP Key</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Class-Key-%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-text">3. Class Key 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BB%E5%8A%A8%E9%94%81%E5%B1%8F-%E8%B6%85%E6%97%B6%E9%94%81%E5%B1%8F"><span class="nav-text">主动锁屏 &amp; 超时锁屏</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E9%87%8D%E8%AE%BE-passcode"><span class="nav-text">用户重设 passcode</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%93%A6%E9%99%A4-NAND-%E6%95%B0%E6%8D%AE"><span class="nav-text">用户擦除 NAND 数据</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E9%87%8D%E5%90%AF"><span class="nav-text">设备重启</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A0%B4%E8%A7%A3Passcode-Key%E7%9A%84%E6%89%8B%E6%AE%B5"><span class="nav-text">破解Passcode Key的手段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9A%E4%B8%80%E4%BA%9B%E6%9C%89%E8%B6%A3%E7%9A%84%E7%9F%A5%E8%AF%86"><span class="nav-text">附录一：一些有趣的知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UDID-Unique-Device-Identifier%EF%BC%8CApple%E8%AE%BE%E5%A4%87%E7%9A%84%E5%94%AF%E4%B8%80%E8%AF%86%E5%88%AB%E5%8F%B7"><span class="nav-text">UDID - Unique Device Identifier，Apple设备的唯一识别号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="nav-text">2. 遗留问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B2%BE%E5%93%81%E8%B5%84%E6%96%99"><span class="nav-text">精品资料</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">技术分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E6%AC%A1-TOE%EF%BC%88Target-of-Evaluation%EF%BC%89-%E5%90%AF%E5%8A%A8%E6%97%B6%EF%BC%8C%E6%89%A7%E8%A1%8C%E5%A6%82%E4%B8%8B%E6%93%8D%E4%BD%9C"><span class="nav-text">每次 TOE（Target of Evaluation） 启动时，执行如下操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E8%A7%A3%E8%AF%BB"><span class="nav-text">官方文档解读</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -164,7 +166,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">90</span>
+          <span class="site-state-item-count">93</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -238,7 +240,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-02-17 18:47:33" itemprop="dateModified" datetime="2024-02-17T18:47:33+08:00">2024-02-17</time>
+      <time title="修改时间：2024-02-19 21:01:39" itemprop="dateModified" datetime="2024-02-19T21:01:39+08:00">2024-02-19</time>
     </span>
 
   
@@ -255,14 +257,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>6.3k</span>
+      <span>8.9k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>23 分钟</span>
+      <span>32 分钟</span>
     </span>
 </div>
 
@@ -440,6 +442,64 @@
 <li><a target="_blank" rel="noopener" href="https://www.pmbonneau.com/multiboot/dataprotection_basics.php">iOS 数据保护基础知识</a></li>
 <li><a target="_blank" rel="noopener" href="http://securityhorror.blogspot.com/2013/09/the-hackers-guide-to-dismantling-iphone_5697.html">拆解 iPhone 的黑客指南（第 3 部分</a></li>
 </ul>
+<hr>
+<p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/TOC-phy.png" alt="PHY"></p>
+<h3 id="每次-TOE（Target-of-Evaluation）-启动时，执行如下操作"><a href="#每次-TOE（Target-of-Evaluation）-启动时，执行如下操作" class="headerlink" title="每次 TOE（Target of Evaluation） 启动时，执行如下操作"></a>每次 TOE（Target of Evaluation） 启动时，执行如下操作</h3><ol>
+<li>使用安全隔区的 TRNG 在 SEP 中创建一个 256 位的临时 AES 密钥（姑且称为<code>DMA0</code>）</li>
+<li>TOE OS kernel 从 effaceable storage 读取 <code>wrapped DKey</code> 和 <code>wrapped EMF</code>，并发送给 SEP</li>
+<li>SEP 持有<code>Key 0x89B</code>，据此解封获得<code>Dkey</code> ；持有<code>Key 0x835</code>，据此解封获得<code>EMF</code></li>
+<li>SEP 使用第一步生成的临时密钥<code>DMA0</code>封装<code>Dkey</code> &#x2F;&#x2F; TODO：有啥用呢？</li>
+<li>SEP（通过专用线路）将临时密钥<code>DMA0</code>发送给 AES 引擎（与存储控制器连接，这个区域是TOE OS内核无法访问的）</li>
+</ol>
+<p><img src="/2024/01/28/Apple%20Data%20Protection%E7%9A%84%E6%B7%B1%E5%BA%A6%E5%88%86%E6%9E%90/TOC-key.png" alt="PHY"></p>
+<ol>
+<li>TOE OS kernel 提取某个文件的元数据，并将其发送给 SEP</li>
+<li>SEP 持有<code>EMF</code>密钥，据此解密文件元数据，并将其发送回 TOE OS kernel</li>
+<li>TOE OS kernel 解析文件元数据，解析数据保护等级标记，并将<code>wrapped per-file key</code>发送给 SEP<blockquote>
+<p> class key 用Dkey包装，或者用Dkey和Passcode key的异或包装</p>
+</blockquote>
+</li>
+<li>SEP 持有<code>class key</code>，据此解封<code>per-file key</code>，使用用临时密钥<code>DMA0</code>再次封装为<code>wrapped per-file key2</code>，并返回给 TOE OS kernel</li>
+<li>TOE OS kernel 将文件访问请求(读或写)和<code>wrapped per-file key2</code>一并发送给存储控制器</li>
+<li>AES 引擎持有临时密钥<code>DMA0</code>，据此解封获得<code>per-file key</code>，然后在存储控制器的数据传输过程中完成加密&#x2F;解密</li>
+</ol>
+<p>The TOE OS kernel first extracts the file metadata (which are encrypted with the EMF key) and sends them to the SEP.<br>The SEP decrypts the file metadata and sends it back to the TOE OS kernel.<br>The TOE OS kernel determines which class key to use and sends the class key (which is wrapped with the Dkey, or with the XOR of the Dkey and the Passcode Key) and the file key (which is wrapped with the class key) to the SEP.<br>● The SEP unwraps the file key and re-wraps it with the ephemeral key and sends this wrapped key back to the TOE OS kernel.<br>The TOE OS kernel sends the file access request (read or write) together with the wrapped file key to the storage controller.<br>The storage controller uses its internal implementation of AES, decrypts the file key, and then decrypts (when the operation is read) or encrypts (when the operation is write) the data during its transfer from&#x2F;to the flash memory.</p>
+<hr>
+<h2 id="官方文档解读"><a href="#官方文档解读" class="headerlink" title="官方文档解读"></a>官方文档解读</h2><p>数据保护通过构建和管理密钥层级来实施，并建立在 Apple 设备内建的硬件加密技术基础上。它通过将某个类分配给每个文件来实现对文件的逐个控制； 可访问性根据该类密钥是否已解锁确定。APFS （Apple 文件系统）使文件系统可进一步以各个范围为基础对密钥进行细分（文件的各个部分可以拥有不同的密钥）。</p>
+<p>每次在数据宗卷中创建文件时，数据保护都会创建一个新的 256 位<strong>文件独有密钥（per-file key）</strong>，并将其提供给硬件 AES 引擎，此引擎会使用该密钥在文件写入闪存时对其进行加密。在搭载 A14 和 M1 的设备上，加密在 XTS 模式中使用 AES-256，其中 256 位文件独有密钥通过密钥派生功能<a target="_blank" rel="noopener" href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-108r1.pdf">NIST Special Publication 800-108</a> 派生出一个 256 位 tweak 密钥和一个 256 位 cipher 密钥。采用 A9 到 A13、 S5 和 S6 的每一代硬件在 XTS 模式中使用 AES-128，其中 256 位文件独有密钥会被拆分，以提供一个 128 位 tweak 密钥和一个 128 位 cipher 密钥。</p>
+<blockquote>
+<p>APFS 的文件系统元数据定义了<code>FILE_EXTENT</code> 记录类型，其中<code>crypto_id</code>字段的描述为：The encryption key or the encryption tweak used in this extent。<br>iOS 等采用 FBE 加密模式的设备，根据 AES 加密强度的不同，per-file key 的使用方法有差异</p>
+</blockquote>
+<p>在搭载 Apple 芯片的 Mac 上，数据保护默认为 C 类（请参阅数据保护类），但使用<strong>宗卷密钥（Volume Encryption Key，VEK）</strong>，而非范围独有密钥或文件独有密钥，可为用户数据高效重建 FileVault 安全模型。用户仍须选择使用 FileVault，以获得加密密钥层级搭配用户密码的全面保护。开发者也可以选择使用文件独有密钥或范围独有密钥的更高保护类。</p>
+<blockquote>
+<p>MacOS 由于采用 FDE 加密模式，<code>crypto_id</code>仅存储 Tweak key，因为 Ciper key 都是 VEK</p>
+</blockquote>
+<p>在支持数据保护的 Apple 设备上，每个文件通过唯一的<strong>文件独有密钥（per-file key）或范围独有密钥（per-extent key）</strong>进行保护。该密钥使用 NIST AED 密钥封装算法封装，之后会进一步使用多个<strong>类密钥（Class key）</strong>中的一个进行封装，具体取决于计划如何访问该文件。 随后封装的文件独有密钥储存在文件的元数据中。</p>
+<blockquote>
+<p>APFS 的文件系统元数据定义了<code>CRYPTO_STATE</code>记录类型，其中<code>state.persistent_class</code>字段的描述为：The protection class associated with the key；<code>state.persistent_key</code>字段的描述为：The wrapped key data.</p>
+</blockquote>
+<p>使用 APFS 格式运行的设备可能支持文件克隆（使用写入时拷贝技术的零损耗拷贝）。如果文件被克隆，克隆的每一半都会得到一个新的密钥以接受传入的数据写入，这样新数据会使用新密钥写入媒介。久而久之，文件可能会由不同的范围（或片段）组成，每个映射到不同的密钥。但是，组成文件的所有范围受同一类密钥保护。</p>
+<blockquote>
+<p>APFS 采用 Copy On Write 的快照模式（快照卷存储原始数据，源卷存放更新数据），因此一个文件在写入时可能被分成多个 Extent，即一个文件系统节点可能包含多个<code>FILE_EXTENT</code>记录，每条记录的<code>crypto_id</code>字段各不相同，但<code>CRYPTO_STATE</code>记录只有一条，数据保护等级不会改变</p>
+</blockquote>
+<p>当打开一个文件时，系统会使用<strong>文件系统密钥（Volume Key，就是 EMF 或 LwVm）</strong>解密文件的元数据，以显露出封装的文件独有密钥和表示它受哪个类保护的记号。文件独有或范围独有密钥使用类密钥解封，然后提供给硬件 AES 引擎，该引擎会在从闪存中读取文件时对文件进行解密。所有封装文件密钥的处理发生在安全隔区中；文件密钥绝不会直接透露给应用程序处理器。启动时，安全隔区与 AES 引擎协商得到一个临时密钥。当安全隔区解开文件密钥时， 它们又通过该临时密钥再次封装，然后发送回应用程序处理器。</p>
+<blockquote>
+<p>SEP 启动时生成临时封装密钥，通过专用线路传送给 AES 引擎，内存掉电时被清除</p>
+</blockquote>
+<p>数据宗卷文件系统中所有文件的元数据都使用<strong>随机宗卷密钥（就是上述的 EMF）</strong>进行加密，该密钥在首次安装操作系统或用户擦除设备时创建。此密钥由<strong>密钥封装密钥（就是 Key 0x89B，由 UID 固定衍生）</strong>加密和封装，密钥封装密钥由安全隔区长期储存，只在安全隔区中可见。每次用户抹掉设备时，它都会发生变化。在 A9（及后续型号）SoC 上，安全隔区依靠由反重放系统支持的熵来实现可擦除性，以及保护其他资源中的密钥封装密钥。有关更多信息，请参阅<strong>安全非易失性存储器（Secure Nonvolatile Storage）</strong>。</p>
+<blockquote>
+<p>iPhone 改造了内置的闪存芯片，最前面的 Block 1 用于储存加密密钥的专用区域，安全隔区通过专用 I2C 总线与之相连，可被直接寻址和安全擦除</p>
+</blockquote>
+<p>正如文件独有密钥或范围独有密钥一样，数据宗卷的元数据密钥绝不会直接透露给应用程序处理器；相反，<em>安全隔区会提供一个临时的启动独有的版本</em>。储存后，加密的文件系统密钥还会使用储存在可擦除存储器中的“<strong>可擦除密钥（即 BAG1，A9之前的Soc设备适用）</strong>” 封装或者使用受安全隔区反重放机制保护的<strong>媒介密钥封装密钥（即 media key，A9之后的Soc设备适用）</strong>进行封装。此密钥不会提供数据的额外机密性。相反，它可以根据需要快速抹掉（由用户使用 “抹掉所有内容和设置” 选项来抹掉，或者由用户或管理员通过从移动设备管理 (MDM) 解决方案、Microsoft Exchange ActiveSync 或 iCloud 发出远程擦除命令来抹掉）。以这种方式抹掉密钥将导致所有文件因存在加密而不可访问。</p>
+<blockquote>
+<p>Apple Secure Key Store 白皮书指出，可擦除区域有一个原生密钥，就是这个 media key。<br>描述为：AES Keys as part of module-managed keybags。<br>实际上，A9之后的Soc设备增加了第二代安全存储组件，User Keybag 不再是一个加密的 .plist 文件，而是转移到<br>注意！media key 不适用于 MacOS，FileVault 的密钥层级就是 KEK + VEK</p>
+</blockquote>
+<p>对于搭载 A9 之前的 SoC 的设备， 该 .plist 文件的内容通过保存在可擦除存储器中的密钥加密。 为了给密钥<br>包提供前向安全性， 用户每次更改密码时， 系统都会擦除并重新生成此密钥。<br>对于搭载 A9 或后续型号 SoC 的设备， 该 .plist 文件包含一个密钥， 表示密钥包储存在受反重放随机数<br>（由安全隔区控制） 保护的有锁储存库中。</p>
+<p>在任何一种情况下，擦除媒体密钥都会使加密数据无法访问。</p>
+<p>文件的内容可能使用文件独有（或范围独有）的一个或多个密钥进行加密，密钥使用类密钥封装并储存在文件的元数据中，文件元数据又使用文件系统密钥进行加密。类密钥通过硬件 UID 获得保护，而某些类的类密钥则通过用户密码获得保护。此层次结构既可提供灵活性，又可保证性能。例如，更改文件的类只需重新封装其文件独有密钥，更改密码只需重新封装类密钥。</p>
+<blockquote>
+<p>asd </p>
+</blockquote>
 
     </div>
 
@@ -492,14 +552,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">211k</span>
+    <span title="站点总字数">218k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">12:49</span>
+    <span title="站点阅读时长">13:13</span>
   </span>
 </div>
 <div class="busuanzi-count">
