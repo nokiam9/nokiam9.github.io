@@ -34,9 +34,17 @@ FIPS 140-2 定义了 4 个安全等级，包括：
 
 美国和加拿大的法律规定，政府采购项目必须使用 FIPS 140-2 2 级验证产品，NIST 提供所有可用于商业的[FIPS 140-2 认证产品清单](https://csrc.nist.gov/projects/cryptographic-module-validation-program)。
 
+## 四、简要分析
+
+FIPS 140 和 CC 标准是两个互补、但不同的安全标准。 FIPS 140 主要提供**加密功能验证**，而 CC 标准的评估范围包含了 IT 产品中更广泛的安全功能选择。 CC 标准评估可能依赖于 FIPS 140 验证来保证基本加密功能已正确实现。
+
 ---
 
-## 文档下载
+## 参考文献
+
+- [从美国FIPS产品体系浅窥我国密码发展趋势](https://www.secrss.com/articles/7687)
+
+### 文档下载
 
 - [NIST FIPS 140-2 加密模块的安全要求，2001年](NIST.FIPS.140-2.pdf)
 - [NIST FIPS 140-3 加密模块的安全要求，2019年](NIST.FIPS.140-3.pdf)
