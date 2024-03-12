@@ -8,6 +8,112 @@ tags:
 此外，Apple 也符合通用标准 (CC) 认证，并委托知名评估机构 [ATSEC 公司](https://www.atsec.com)出具了[iOS 16 安全评估报告 TOE - Target of Evaluation](https://www.niap-ccevs.org/MMO/Product/st_vid11349-st.pdf)，当前版本是 v1.1。
 本文就是依据上述公开信息的研究分析。
 
+---
+
+|Key / Persistent Secret|Purpose|Storage (for all devices)|
+|---|---|---|
+|UID|REK for device Key，entanglement|SEP|
+|Salt (128 bits) |Additional input to one- way functions|AES encrypted in the system keybag|
+|Key 0x89B|Wrapping of EMF key Wrapping of Dkey|SEP. Block 0 of the flash memory. (Effaceable storage.)|
+|Key 0x835|Used for the encryption of file system metadata|SEP. Block 0 of the flash memory. (Effaceable storage.)|
+|EMF key|Writing files while the device is locked|Stored in wrapped form in persistent storage|
+|NSFileProtectionCompleteUnlessOpen devicewide asymmetric key pair|Writing files while the device is locked|Stored in wrapped form in persistent storage|
+|CompleteUntilFirstUserAuthentication||Stored in wrapped form in persistent storage|
+|NSFileProtectionCompleteUnlessOpen|Writing files while the device is locked: KDF static public keys|Stored in wrapped form in persistent storage|
+|AfterFirstUnlock||Stored in wrapped form in persistent storage|
+|AfterFirstUnlockThisDeviceOnly||Stored in wrapped form in persistent storage|
+|WhenUnlocked||Stored in wrapped form in persistent storage|
+
+---
+
+### 保护类型对应关系
+
+|Keychain的数据保护类型|File的数据保护类型|适用场景|
+|:---:|:---:|:---:|
+|kSecAttrAccessibleWhenUnlocked|NSFileProtectionComplete|未锁定状态|
+|N/A |NSFileProtectionCompleteUnlessOpen|锁定状态|
+|kSecAttrAccessibleAfterFirstUnlock|NSFileProtectionCompleteUntilFirstUserAuthentication |首次解锁后|
+|kSecAttrAccessibleAlways|NSFileProtectionNone|始终|
+
+- 使用后台刷新服务的 App 可将`kSecAttrAccessibleAfterFirstUnlock`用于后台更新过程中需要访问的钥匙串项。
+- 上述三钟钥匙串类都有对应的`ThisDeviceOnly`项目，后者在备份期间从设备拷贝时始终通过 UID 加以保护，因此如果恢复至其他设备将无法使用，例如 VPN 证书不适合迁移至另一台设备。
+- `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`与`kSecAttrAccessibleWhenUnlocked`的行为方式相同，但前者仅当设备配置了密码时可用。此类仅存在于系统密钥包中， 且它们不同步到 iCloud 钥匙串、不会备份、不包括在托管密钥包中。
+
+### asd
+
+- 本节中讨论的密钥由 SEP 管理和维护。OS 和 SEP 使用 mailbox 进行数据交互
+- 所有的文件系统 item 和所有的钥匙串 item 仅以加密形式存储
+- 使用 EMF 密钥对文件系统 meatdata 进行加密
+- 文件和钥匙串的 item 使用独立密钥进行加密。这些键与项所属的类、文件或钥匙串的类键一起包装。
+- 属于`NSFileProtectionNone`类的文件，和属于`Always`或`AlwaysThisDeviceOnly`类的钥匙串项，仅使用 `Dkey`包裹的密钥进行加密。在对用户进行身份验证之前，可以访问（解密）这些项目
+  对于所有其他类，`passcode key`用于生成用于这些类的包裹密钥，因此，只有当用户正确输入 passcode 时，才能解密这些项目
+- 所有解密错误均按照 [SP800-56B-Rev1] 进行处理
+- 发出擦除命令时，将通过擦除**顶级 KEK** 来擦除受保护的数据。由于所有静态数据都使用其中一个密钥进行加密，因此会擦除设备
+
+>- The keys discussed in this section are managed by and/or maintained in the SEP. The TOE OS and SEP interact with each other using a mailbox system detailed in Section 7.1.1.1.
+>- All file system items and all keychain items are stored in encrypted form only.
+>- File system metadata is encrypted using the EMF key.
+>- Files and keychain items are encrypted with individual keys. Those keys are wrapped with the class key of the class, the file, or the Keychain to which the item belongs.
+>- Files and keychain items belonging to the classes 'NSFileProtectionNone' (files) and 'Always' or 'AlwaysThisDeviceOnly' are encrypted with keys that are wrapped with the Dkey only. Those items can be accessed (decrypted) before the user is authenticated. For all other classes, the passcode key (which is derived from the user's passcode) is used in the generation of the wrapping key used for those classes, and therefore, decrypting those items is only possible when the user has correctly entered their passphrase.
+>- All decryption errors are handled in compliance with [SP800-56B-Rev1].
+>- When a wipe command is issued, protected data is wiped by erasing the top-level KEKs. Since all data at rest is encrypted with one of those keys, the device is wiped.
+
+### TOE 启动流程
+
+1. 使用安全隔区的 TRNG 在 SEP 中创建一个 256 位的`临时封装密钥`
+2. OS 内核从 Effaceable Stroage 读取**包裹状态**的 `Dkey` 和 `EMF key`，并发送至 SEP
+3. SEP 持有`Key 0x835`解封`Dkey` ，持有`Key 0x89B`解封 `EMF key`
+4. SEP 持有 Step 1 生成的`临时封装密钥`包裹`Dkey` #TODO:
+5. SEP 通过专用线路（I2C协议）将`临时封装密钥`传输到 AES 引擎。OS 内核无法访问此区域。
+
+>- An ephemeral AES key (256-bit) is created in the SEP using the random bit generator of the Secure Enclave.
+>- The (wrapped) Dkey and (wrapped) EMF key (both 256-bit keys) are loaded by the TOE OS kernel from the effaceable storage and sent to the SEP.
+>- The SEP unwraps the Dkey and the EMF key.
+>- The SEP wraps the Dkey with the newly generated ephemeral key.
+>- The SEP stores the ephemeral key in the storage controller. This area is not accessible by the TOE OS kernel.
+
+### TOE OS 读取文件流程
+
+1. OS 内核首先提取**加密状态**的文件 meatdata 并将其发送到 SEP
+2. SEP 持有`EMF Key`解密文件 meatdata，并将其发送回 OS 内核
+3. OS 内核分析文件 meatdata 确定数据保护类别，并将**包裹状态**的`Class Key` 和`per-file key`一起发送到 SEP
+    - Class D 的类密钥基于`Dkey`包裹，其他类密钥基于`Dkey XOR Passcode Key`包裹
+    - `per-file key`基于指定的`Class Key`包裹
+4. SEP 持有`Dkey`和`Passcode Key`解封`per-file key`，使用`临时封装密钥`重新包裹它，并发送回 OS 内核
+5. OS 内核将文件访问请求（读取或写入）和**重新包裹状态**的`per-file key`一起发送到存储控制器
+6. 存储控制器使用 AES 引擎持有的`临时封装密钥`解封`per-file key`，然后在数据从闪存传输/传入闪存期间解密（读取操作时）或加密（写入操作时）
+
+>- The TOE OS kernel first extracts the file metadata (which are encrypted with the EMF key) and sends them to the SEP.
+>- The SEP decrypts the file metadata and sends it back to the TOE OS kernel.
+>- The TOE OS kernel determines which class key to use and sends the class key (which is wrapped with the Dkey, or with the XOR of the Dkey and the Passcode Key) and the file key (which is wrapped with the class key) to the SEP.
+>- The SEP unwraps the file key and re-wraps it with the ephemeral key and sends this wrapped key back to the TOE OS kernel.
+>- The TOE OS kernel sends the file access request (read or write) together with the wrapped file key to the storage controller.
+>- The storage controller uses its internal implementation of AES, decrypts the file key, and then decrypts (when the operation is read) or encrypts (when the operation is write) the data during its transfer from/to the flash memory.
+
+### 密钥包
+
+文件和钥匙串数据保护类的密钥均在密钥包中收集和管理。 TOE 操作系统使用以下密钥包：系统（也称为用户和设备密钥包）、备份、托管和 iCloudBackup。 密钥存储在系统密钥袋中，部分密钥存储在托管密钥袋中。 托管密钥包用于设备更新和 MDM，这都是 [MDF]☝ 中定义的相关功能。
+
+系统密钥包是存储设备正常操作中使用的包装类密钥的位置。 例如，当输入密码或生物识别身份验证因素时，将从系统密钥包加载 NSFileProtectionComplete 密钥并解开包装。 它是存储在无保护类中的二进制 plist，但其内容使用可擦除存储中保存的密钥（`Dkey`）进行加密。 为了给密钥包提供前向安全性，每次用户更改密码时都会擦除并重新生成该密钥。
+
+**AppleKeyStore 内核扩展管理系统密钥包**，并且可以查询设备的锁定状态。 它报告说，只有当系统密钥包中的所有类密钥都可以访问并且已成功解开包装时，设备才会解锁。
+
+### 分析
+
+- UID 存储在 SEP 固件中，位于 SEP 或应用处理器中任何程序都无法访问的部分。SEP 只能用于使用 UID 作为密钥来加密和解密数据（使用 AES-256）。
+- `Key 0x89B`和`Key 0x835`存储在 SEP 中（估计是在 SEP 启动时一次性计算产生）
+- `EMF Key`、`Dkey` 和**类密钥（？BAG1）**存储在 Effaceable Stroage 中，全部仅以包裹状态存储。如前所述，它们在应用处理器系统中永远不会以明文形式提供。
+- 文件密钥和钥匙串项密钥存储在内部非易失性存储器（NAND）中，但仅以包裹状态存储。如前所述，它们在应用处理器系统中永远不会以明文形式提供。
+- 系统和应用程序可以将私钥存储在钥匙串项中。它们受钥匙串项加密的保护。
+- 用于 TLS、HTTPS 或 Wi-Fi 会话的对称密钥仅保存在 RAM 中。同样，用于 TLS 和 HTTPS 的 ECDH 非对称密钥仅保存在 RAM 中。它们使用两个库之一生成和管理，即`Apple corecrypto 模块 v13.0 [Apple ARM、用户、软件、SL1]`和`Apple corecrypto 模块 v13.0 [Apple ARM、内核、软件、SL1]`，或由 Wi-Fi 芯片中的 AES 实现。这些库的函数，比如 `memset（0）`，也会在使用后清除这些密钥。
+
+>- The UID is stored in the firmware of the SEP in a section not accessible by any program in the SEP or the application processor. The SEP can only be used to encrypt and decrypt data (with AES-256) using the UID as the key.
+>- "Key 0x89B" and "Key 0x835" are stored in the SEP.
+>- The EMF key, Dkey, and the class keys are stored in the effaceable area, all in wrapped form only. As explained, they are never available in plaintext in the application processor system.
+>- File keys and Keychain item keys are stored in internal, non-volatile memory, but in wrapped form only. As explained, they are never available in plaintext in the application processor system.
+>- The system and the applications can store private keys in Keychain items. They are protected by the encryption of the Keychain item.
+>- Symmetric keys used for TLS, HTTPS, or Wi-Fi sessions are held in RAM only. Similarly, ECDH asymmetric keys used for TLS and HTTPS are held in RAM only. They are generated and managed using one of the two libraries, Apple corecrypto Module v13.0 [Apple ARM, User, Software, SL1] and Apple corecrypto Module v13.0 [Apple ARM, Kernel, Software, SL1], or by the AES implementation within the Wi-Fi chip. The functions of those libraries, such as memset(0), also perform the clearing of those keys after use.
+
 ## 一、整体架构
 
 Cocoa 是苹果公司为 macOS 所创建的原生面向对象的应用程序接口，是 Mac OS X 上五大 AP 之一（其它四个是Carbon、POSIX、X11和Java）。
@@ -132,6 +238,5 @@ NSFileProtectionNone: This class key is protected only with the UID, and is kept
 |A11|加密,认证,反重放| EEPROM|DPA保护、可锁定的种子位|操作系统绑定密钥||
 |A12|加密,认证,反重放|安全储存组件(第一、二代)| DPA保护、可锁定的种子位| 操作系统绑定密钥|2020年秋季升级|
 |A13|加密,认证,反重放|安全储存组件(第一、二代)|DPA 保护、可锁定的种子位|操作系统绑定密钥和启动监视器|2020年秋季升级|
-
 
 ## 参考文献
