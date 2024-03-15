@@ -10,6 +10,42 @@ tags:
 
 ---
 
+> KEK 都是针对 Macos Filevault 的描述？
+
+### 无保护文件（Class D）系统服务
+
+加密/解密对象：Class D key，per-file key
+包裹密钥：UID、Class D key，passcode key
+文件系统密钥：DMF
+存储控制器密钥：KEK
+
+Class D File System Services
+Encryption and Decryption of:
+
+- Class D key
+- File System keys
+
+Key wrapping:               UID, AES Key used to wrap Class D Key, Class D Key
+File system keys:           DEK
+Storage controller key:     KEK
+
+### 2. User Keybag Service
+
+加密/解密对象：用户密钥包（密文）、
+关键加密因子：AES引擎的临时封装密钥、
+
+User Keybag Services
+Encryption and Decryption of:
+
+- Device OS file system object storage keys：VMK
+- User Keybag
+- User File system keys：
+
+Keybag wrapping:    AES Key shared with NVM Storage Controller
+Keybag content:     KEK
+
+---
+
 |Key / Persistent Secret|Purpose|Storage (for all devices)|
 |---|---|---|
 |UID|REK for device Key，entanglement|SEP|
@@ -239,4 +275,38 @@ NSFileProtectionNone: This class key is protected only with the UID, and is kept
 |A12|加密,认证,反重放|安全储存组件(第一、二代)| DPA保护、可锁定的种子位| 操作系统绑定密钥|2020年秋季升级|
 |A13|加密,认证,反重放|安全储存组件(第一、二代)|DPA 保护、可锁定的种子位|操作系统绑定密钥和启动监视器|2020年秋季升级|
 
+---
+
+安全储存组件：芯片设计为使用不可更改的 RO 代码、 硬件随机数生成器、 加密引擎和物理篡改检测。 在支持的设备上， 安全隔区与用于储存反重放随机数的安全储存组件配对。 为了读取和更新随机数， 安全隔区和储存芯片采用安全协议来帮助确保对随机数的排他访问。 此技术已更迭多代， 提供了不同的安全性保证。
+
+可擦除存储器 NAND 存储器中一个用于储存加密密钥的专用区域， 可被直接寻址和安全擦除。 尽管当攻击者实际占有设备时， 可擦除存储器无法提供保护， 但其中存储的密钥可用作密钥层级的一部分， 用于实现快速擦除和前向安全性。
+
+媒介密钥 加密密钥层次的一部分， 可帮助实现安全的立即擦除。
+
+在 iOS、 iPadOS、 Apple tvOS 和 watchOS 中， 媒介密钥会封装数据宗卷上的元数据 （因此， 没有媒介密钥便无法访问所有文件独有密钥， 也就无法访问受数据保护加密方法所保护的文件）。
+
+在 macOS 中， 媒介密钥会封装文件保险箱所保护宗卷上的密钥材料、 所有元数据和数据。 在上述任何一种情况下， 擦除媒介密钥会让加密的数据变得不可访问。
+
+密钥包 一种用于储存一组类密钥的数据结构。 每种类型 （用户、 设备、 系统、 备份、 托管或 iCloud 云备份）的格式都相同。
+
+包含以下内容的标头 ： 版本 （在 iOS 12 或更高版本中设为四）； 类型 （系统、 备份、 托管或 iCloud 云备份）；密钥包 UUID ； HMAC （若密钥包已签名）； 用于封装类密钥的方法 ： 配合盐和迭代计数使用 Tangling 及UID 或 PBKDF2。
+
+类密钥列表 ： 密钥 UUID ； 类 （哪个文件或钥匙串数据保护类）； 封装类型 （仅 UID 派生密钥 ； UID 派生密钥和密码派生密钥）； 封装的类密钥 ； 非对称类的公钥。
+
+文件独有密钥 数据保护用于在文件系统上加密文件的密钥。 文件独有密钥使用类密钥封装， 储存在文件的元数据中。
+
+文件系统密钥 用于加密每个文件的元数据的密钥， 包括其类密钥。 存储在可擦除存储器中， 用于实现快速擦除， 并非用于保密目的。
+
+专有芯片 ID (ECID) 每台 iOS 和 iPadOS 设备上的处理器所独有的一个 64 位标识符。 当在一台设备上接通电话时， 该设备通过低功耗蓝牙 (BLE) 4.0 进行短暂广播， 使附近的 iCloud 配对设备停止响铃。 广播的字节使用与 “接力” 广播相同的方法来加密。 作为个性化流程的一部分， 此标识符不被视为机密。
+
+xART eXtended 反重放技术， 或一组为具有反重放功能 （基于物理储存架构） 的安全隔区提供加密且经认证的永久储存区的服务。 请参阅 “安全储存组件”。
+
 ## 参考文献
+
+- [iOS 取证技术 - elcomsoft blog](https://blog.elcomsoft.com/2023/03/perfect-acquisition-part-1-introduction/)
+  
+### Filevault-P9
+
+Apple T2安全芯片运行T2OS 13操作系统。T2包括安全飞地，其中包含运行sepOS操作系统的SEP，以及执行存储加密的DMA存储控制器。加密引擎（EE）在T2上实例化。AA在英特尔芯片（密码获取）和T2上都实例化。安全飞地为所有EE功能（即存储数据的加密/解密除外）和AA的所有加密功能（即PBKDF2）提供安全相关功能。DMA存储控制器提供了一个专用的AES加密引擎，内置在主机平台的存储和主内存之间的直接内存访问（DMA）路径中。密码获取组件（AA）是存储驱动器上的预引导组件。它捕获用户密码并将其传递给安全飞地。
+
+### Apple_iOS_16_iPhone_Security_Target_v1.1.pdf - P16,P118
