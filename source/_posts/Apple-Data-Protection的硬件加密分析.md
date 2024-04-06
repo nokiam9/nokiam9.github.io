@@ -10,7 +10,7 @@ tags:
 
 本文就是依据上述公开信息的研究分析。
 
-## 一、Apple Secure Key Store 概览
+## 一、Secure Key Store 概述
 
 根据[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的表述（P16-P20），Apple 设备提供的加密服务分为三个层级：
 
@@ -71,28 +71,155 @@ tags:
 
 > 事实上，Curve25519 已成为 P-256 的替代品。2024 年，NIST 宣布弃用 FIPS 186-4 并发布[FIPS 186-5](https://csrc.nist.gov/pubs/fips/186-5/final)，Curve25519 和 Curve448 被正式纳入规范，ANSI X9.62 也被 ANSI X9.142 替代
 
-## 二、Secure Key Store 业务逻辑
+## 二、Secure Key Store 密钥层级
 
-### 1. 关键加密因子的生命周期
+根据之前的 iOS4 破解技术分析，Apple 数据保护技术的密钥主要有四种存储方式：
 
-根据之前的 iOS4 破解技术分析，Apple 的核心密钥有三种存储方式，即：
+- SEP 内部：每个设备唯一且不可修改的UID，基于固定参数衍生的Key 0x89B 和 Key 0x835
+- 可擦除区域（effaceable storage）：EMF Key，Dkey 和 Bag1。
+    以包裹状态的密文保存在 NAND 的 Block 1，其并不提供额外的机密性保护，而是便于快速抹掉数据
+- 用户密钥包（User Keybag）：各类文件保护 Class key 和钥匙串 Class key。
+    以包裹状态的密文保存在一个无保护类型的二进制文件（plist格式），存储于`/var/keybags/systembag.kb`
+- per-file key 以包裹状态的密文存储在文件系统元数据中，keychain 的 item 以包裹状态保存在一个 sqlite 数据库，存储于`/Users/<UserName>/Library/Keychains`目录中
+
 ![arch](arch3.jpg)
 
-- SEP 内部：每个设备唯一且不可修改的 UID、基于**固定参数**衍生的`Key 0x89B`和`Key 0x835`
-- 可擦除区域（effaceable storage）：`EMF Key`，`Dkey`和`Bag1`。
-    以包裹状态的密文存储在 NAND 闪存的 Block 1
-- 用户密钥包（User Keybag）：各类文件保护 Class key 和钥匙串 Class key。
-    以包裹状态的密文存储在 .plist二进制文件
+### 1. 关键加密因子
 
-基于[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)，P125 给出了 SKS 密钥层次的官方描述，其密钥层次关系保持不变，但 Class key 所在的 User keybag 不再是一个普通的（加密）数据文件，而是储存在受反重放随机数 (由安全隔区控制) 保护的有锁储存库中。
-
-基于[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)，其密钥层级关系如下：
+[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P119 - P121，介绍了密钥管理的基本概念并提供了 CSP（Critical Security Parameter，关键安全参数）的列表信息，P125 提供了密钥层次结构图，与 iOS4 的描述基本一致，
 
 ![TOC](<TOC-key.png>)
 
-### 2. 系统服务
+[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P20，也提供了关键安全参数的生命周期信息，本文对该表格的分析如下：
 
-#### 完全符合 FIPS 140-2 的系统服务
+1. 上图没有显示 keybag 的文件级密钥`Bag1`，其位于 CSP 列表第 7 行的`Moudle-manager keybags key`
+2. CSP 列表包含了`Key 0x835`（第 6 行:Escrow Keybag and the class D key encryption key），但没有提供`Key 0x89B`的信息
+
+### 2. 密钥包
+
+文件和钥匙串数据保护类的密钥均在密钥包中收集和管理。**Secure Key Store**负责管理系统密钥包，并且可以查询设备的锁定状态，只有当系统密钥包中的所有类密钥都可以访问并且已成功解开包装时，设备才会解锁。
+
+User keybag 是设备常规操作中使用的封装类密钥的储存位置（与 passcode 相关），设备密钥包用来储存用于涉及设备特定操作数据的封装类密钥（仅与 UID 相关），两者合称为系统密钥包。
+配置为单用户使用 (默认配置) 的 iOS 和 iPadOS 设备中，设备密钥包和用户密钥包是同一个。
+
+此外，还有用于备份、托管和 iCloud 云备份的几种的密钥包，item 包含了一些其他密钥，但数据结构完全相同。请参考[https://github.com/russtone/systembag.kb](https://github.com/russtone/systembag.kb)。
+[Behind the Scenes with iOS Security - Ivan Krstić](Behind_the_Scenes_with_iOS_Security.pdf)的 P27，也给出了一个示例。
+
+![keybag](keybag2.png)
+
+密钥包的头部字段包括：
+
+- VERS：版本号，iOS 12 之后都置为 4
+- TYPE：该密钥包的类型，[0-system，backup，escrow，iCloud Backup]
+- UUID：该密钥包的 UUID
+- HMCK：如果密钥包已签名，保存 HMAC 校验值，即**安全存储组件计算、并返回的加密箱熵值**
+- WRAP：包裹方式，[1:仅 UID 派生, 2:仅 passcode 派生, 3:两者都有]
+- SALT：PBKDF2 算法使用的盐
+- ITER：PBKDF2 算法的迭代次数
+
+> 不同版本可能还包含 GRCE、GRNT、TKMT、SART 等字段，信息格式未知
+
+对于每个密钥包的条目（文件保护类密钥 & 钥匙串类密钥），其字段包括：
+
+- CLAS：密钥的级别
+    文件保护类型为[1,2,3]：4-空缺，就是Dkey；5-保留未启用；
+    钥匙串保护类型为[6,7,8,9,10,11]：对应钥匙串的 3 个级别和相应的 device only
+- WRAP：包裹方式，与 Header 定义一致
+- KTPY：密钥类型，例如 Curve25519
+- WPKY：处于包裹状态的类密钥数据。如果是非对称密钥，此处存储的是 Private key
+- PBKY：可选（例如 CLASS B）。非对称密钥对的 Pulic key，包裹状态
+- UUID：该密钥的 UUID
+
+关于密钥包的解封流程，[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P23 指出：
+
+- 所有在钥匙包中、由加密模块管理的密钥，由 Device OS 负责存储在 non-volatile memory 中。
+- 密钥包基于 256 位的 AES-KW 包裹算法，然后输出到 Device OS 完成持久化存储（permanent storage）。
+- 设备加电启动后，加密模块从 Device OS 导入包裹状态的密钥包并完成解封。
+
+该模块通过以下方式实现基于密码的身份验证：
+
+- 当用户从模块请求加密服务时，它必须提供密码和对用户密钥包的引用，该密钥包在 SKS 内的 SP800-38F AES 密钥包装 (AES-KW) 下加密存储。
+- 该模块使用 PBKDF 从操作者提供的密码中派生 AES 密钥。
+- 然后，模块的 SP800-38F AES 密钥解包功能（即 AES-KW-AD）使用派生的 AES 密钥来解密参考用户密钥包并验证解密密钥的真实性。
+- 由于 AES-KW 是一种身份验证密码，因此解密操作只有在没有身份验证错误的情况下才会成功。这意味着用户提供了正确的密码来导出用于 AES 密钥解包的正确 AES 密钥。
+- 任何其他密码都将派生出不同的 AES 密钥，这将导致解密的用户密钥错误，导致身份验证检查失败。
+- 如果可以成功解开用户密钥包，则用户将通过模块的身份验证，然后将使用解开的用户密钥继续执行所请求的加密服务。
+- 解包用户密钥包失败也是用户身份验证失败，操作员将被拒绝访问模块。
+  
+## 三、Secure Key Store 业务逻辑
+
+根据[Demystifying the Secure Enclave Processor](us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf)的 P61 的描述，Secure Key Store 作为 SEPOS 的一个功能模块，其暴露在 SL1 级（内核 XNU）的 Endpoint 就是一个内核扩展`AppleKeyStore.kext`。此外，SEPOS 还包含了其他类型的 APP，包括：
+
+- ART Manager：反重放攻击服务
+- Secure Biometric Engine：生物识别引擎，简称 SBIO，用于 Touce ID 和 Face ID 等
+- Secure Credential Manager：凭据管理，用于网络连接和配件的安全管理
+- SSE：未知。似乎用于硬件识别？
+
+![SEPOS](sepos.png)
+
+[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P125-P127，介绍了SEP启动、第一次解锁、文件处理等核心业务场景的处理逻辑，结合[Behind the Scenes with iOS Security - Ivan Krstić](Behind_the_Scenes_with_iOS_Security.pdf)的 P31-P34 的流程图，做个简要分析。
+
+### 1. 系统启动
+
+![File](boot.jpg)
+
+- SEP 使用 NDRBG 生成一个`临时封装密钥`，并通过专用线路传送给 NVM 控制器的 AES 引擎
+- XNU（操作系统内核）的 AppleKeyStore 从 Effaceable storage 加载包裹状态的 EMF key 和 Dkey
+- SEP 持有`Key 0x835`解封`Dkey`，将 Class D key 加入 Keyring
+- XNU 加载系统分区表和文件系统元数据，发送给 SEP
+- SEP 持有`Key 0x89B`解封`EMF key`，持有`media key`解密文件系统元数据，并返回给 XNU
+
+现在 Userspace 就可以正确处理 Class D 类型的文件了，然后是处理密钥包：
+
+- 用户空间启动`keybagd`系统进程，读取无保护的数据文件`/var/keybags/systembag.kb`
+- `keybagd`从 Effaceable storage 加载 keybag prot key（即：Bag1，明文），并完成文件级解封
+- `keybagd`将解封后的密钥包发送给 SEP，SKS 将 Class B 的 Public key 加入 Keyring
+
+此时，SKS 就可以**新建 Class B 类型文件**（但不能读取已有文件，因为没有 Private key）；此外，SKS 安全内存中还有仍处于包裹状态的 Class A key、Class B 的 Private key 和 Class C key，需要等待第一次解锁！
+
+### 2. 首次解锁
+
+![File](first-unlock.jpg)
+
+- 用户空间的 SpringBoard（用户解锁界面）获得 passcode，通过 XNU 的 AppleKeyStore 发送给 SEP
+- SEP 的 Secure Key Store 基于 PBKDF2 算法生成 master key（即 Passcode key 或 REK）
+- 基于 master key XOR Dkey 解封密钥包，如果校验成功则将 Boot 阶段未完成的 3 个类密钥加入 Keyring
+
+此时 SKS 就可以正确处理所有类型的文件了，然后是处理 Touch ID：
+
+- SEP 的 SKS 随机生成一个 random secret
+- SKS 使用 random secret 包裹 master key，并保存在 SEP 内部
+- SKS 将 random secret 发送 SBIO
+- SKS 从内存中销毁 master key
+  
+这样以来，后续在没有输入 passcode 的情况下，可以使用 Touch ID 来恢复类密钥。
+
+### 3. 系统锁定
+
+![File](lock.jpg)
+
+如果用户界面触发了系统锁定事件，SKS 将从 Keyring 中删除 Class A key 和 Class B 的 private key。
+注意！此时 Class C key 仍然可用，因为已经成功完成一次解锁。
+
+### 4. 指纹解锁
+
+![File](touch-id-unlock.jpg)
+
+- 用户按压 Home 键时，启动指纹传感器
+- 指纹传感器匹配已存储模版，如果检测成功，SEP 的 SBIO 将 random secret 发送给 SKS
+- SKS 根据 random secret 解封获得 master key，并将 Class A key 和 Class B 的 private key 添加到 Keyring
+
+现在，SKS 又可以准确处理所有文件了。
+
+### 5. 读取文件
+
+![File](file.jpg)
+
+## 四、 Secure Key Store 系统服务
+
+[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P15-P17，提供了 SKS 系统服务清单。
+
+### 1. 完全符合 FIPS 140-2 的系统服务
 
 1. 文件系统服务（Class D File System Services）：包裹/解包 Dkey & EMF key
     Key wrapping: UID，AES Key used to wrap Class D Key（key 0x835），Class D Key
@@ -128,7 +255,7 @@ tags:
 12. 重启自检（Reboot that implies Self-test）：
 13. 显示状态（Show Status）：
 
-#### 不符合 FIPS 140-2 的系统服务
+### 2. 不符合 FIPS 140-2 的系统服务
 
 1. Generate Shared Secret using EC keys generated outside of the module
 2. Ed 25519 Digital signature generation
@@ -137,149 +264,38 @@ tags:
 5. RFC 5869 based HKDF
 6. AES-GCM Encryption and Decryption X
 
-### 3. 核心处理流程
-
-在[TOE 评估报告 - iOS 16](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P126，介绍了几个核心流程。
-
-#### TOE 启动
-
-1. 使用安全隔区的 TRNG 在 SEP 中创建一个 256 位的`临时封装密钥`
-2. OS 内核从 Effaceable Stroage 读取**包裹状态**的 `Dkey` 和 `EMF key`，并发送至 SEP
-3. SEP 持有`Key 0x835`解封`Dkey` ，持有`Key 0x89B`解封 `EMF key`
-4. SEP 持有 Step 1 生成的`临时封装密钥`包裹`Dkey`       // TODO: 返回给 Device OS
-5. SEP 通过专用线路（I2C协议）将`临时封装密钥`传输到 AES 引擎。OS 内核无法访问此区域。
-
-#### keybag 解封流程
-
-[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P23 指出：
-
-所有在钥匙包中、由加密模块管理的密钥，由 Device OS 负责存储在 non-volatile memory 中。
-密钥包基于 256 位的 AES-KW 包裹算法，然后输出到 Device OS 完成持久化存储（permanent storage）。
-设备加电启动后，加密模块从 Device OS 导入包裹状态的密钥包并完成解封。
-
-该模块通过以下方式实现基于密码的身份验证：
-
-- 当用户从模块请求加密服务时，它必须提供密码和对用户密钥包的引用，该密钥包在 SKS 内的 SP800-38F AES 密钥包装 (AES-KW) 下加密存储。
-- 该模块使用 PBKDF 从操作者提供的密码中派生 AES 密钥。
-- 然后，模块的 SP800-38F AES 密钥解包功能（即 AES-KW-AD）使用派生的 AES 密钥来解密参考用户密钥包并验证解密密钥的真实性。
-- 由于 AES-KW 是一种身份验证密码，因此解密操作只有在没有身份验证错误的情况下才会成功。这意味着用户提供了正确的密码来导出用于 AES 密钥解包的正确 AES 密钥。
-- 任何其他密码都将派生出不同的 AES 密钥，这将导致解密的用户密钥错误，导致身份验证检查失败。
-- 如果可以成功解开用户密钥包，则用户将通过模块的身份验证，然后将使用解开的用户密钥继续执行所请求的加密服务。
-- 解包用户密钥包失败也是用户身份验证失败，操作员将被拒绝访问模块。
-
-#### TOE OS 读取文件
-
-1. OS 内核首先提取**加密状态**的文件 meatdata 并将其发送到 SEP
-2. SEP 持有`EMF Key`解密文件 meatdata，并将其发送回 OS 内核
-3. OS 内核分析文件 meatdata 确定数据保护类别，并将**包裹状态**的`Class Key` 和`per-file key`一起发送到 SEP
-    - Class D 的类密钥基于`Dkey`包裹，其他类密钥基于`Dkey XOR Passcode Key`包裹
-    - `per-file key`基于指定的`Class Key`包裹
-4. SEP 持有`Dkey`和`Passcode Key`解封`per-file key`，使用`临时封装密钥`重新包裹它，并发送回 OS 内核
-5. OS 内核将文件访问请求（读取或写入）和**重新包裹状态**的`per-file key`一起发送到存储控制器
-6. 存储控制器使用 AES 引擎持有的`临时封装密钥`解封`per-file key`，然后在数据从闪存传输/传入闪存期间解密（读取操作时）或加密（写入操作时）
-
-## 三、技术分析
-
-### 1. 密钥包 - keybag
-
-文件和钥匙串数据保护类的密钥均在密钥包中收集和管理。
-
-User keybag 是设备常规操作中使用的封装类密钥的储存位置（与 passcode 相关），设备密钥包用来储存用于涉及设备特定操作数据的封装类密钥（仅与 UID 相关），两者合称为系统密钥包。
-> 配置为单用户使用 (默认配置) 的 iOS 和 iPadOS 设备中，设备密钥包和用户密钥包是同一个
-
-**Secure Key Store**负责管理系统密钥包，并且可以查询设备的锁定状态，只有当系统密钥包中的所有类密钥都可以访问并且已成功解开包装时，设备才会解锁。
-
-此外，还有用于备份、托管和 iCloud 云备份的几种的密钥包，item 包含了一些其他密钥，但数据结构完全相同。请参考[https://github.com/russtone/systembag.kb](https://github.com/russtone/systembag.kb)。
-
-#### keybag Header
-
-- VERS：版本号，iOS 12 之后都置为 4
-- TYPE：该密钥包的类型，[0-system，backup，escrow，iCloud Backup]
-- UUID：该密钥包的 UUID
-- HMCK：如果密钥包已签名，保存 HMAC 校验值，即**安全存储组件计算、并返回的加密箱熵值**
-- WRAP：包裹方式，[1:仅 UID 派生, 2:仅 passcode 派生, 3:两者都有]
-- SALT：PBKDF2 算法使用的盐
-- ITER：PBKDF2 算法的迭代次数
-- TKMT：未知
-- SART：未知，估计是 xART 机制，
-
-> iOS 4 软件加密的实现方式是两次解封，硬件加密的处理逻辑简化为：`Dkey XOR PDK`
-
-#### keybag Item
-
-类密钥的列表，包含文件保护类密钥，还有钥匙串类密钥
-
-- UUID：该类密钥的 UUID
-- CLAS：密钥的级别
-    文件保护类型为[1,2,3]：4-空缺，就是Dkey；5-保留未启用；
-    钥匙串保护类型为[6,7,8,9,10,11]：对应钥匙串的 3 个级别和相应的 device only
-- WRAP：包裹方式，与 Header 定义一致
-- WPKY：处于包裹状态的类密钥数据
-- PBKY：非对称算法的私钥，包裹状态，可选（例如 CLASS B）
-- KTPY：未知
-
-### 3. 关键加密参数 CSP
-
-[Apple SKS 加密模块（非专用设备）安全策略](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P20，提供了关键加密因子的列表。
-[TOE 评估报告 - iOS 16](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P119 - P121，介绍了密钥管理的基本概念，也提供了 CSP 的列表信息。
-
-#### 用于快速擦除的三个原生密钥
-
-存储在 Effaceable Stroage 的三个**原生**密钥，可被 sepOS 直接寻址和安全擦除。
-尽管当攻击者实际占有设备时，可擦除存储器无法提供保护，但其中存储的密钥可用作密钥层级的一部分，用于实现快速擦除和前向安全性。
-
-- File system object DEK：= `EMF key / Lwvm`，也称 the file system key。
-    用于文件系统的元数据加密，基于`Key 0x89B`以 AES-256 KW 封装，密文持久化存储
-- Class D Key：= `Dkey`，也称为 the device key。
-    用于类密钥`NSFileProtectionNone`的包裹密钥，基于`Key 0x835`以 AES-256 KW 封装，密文持久化存储
-- Module-managed keybags key：= `Bag1`
-    用于用户密钥包内容的加密/解密，基于`xxx`以 AES-256 KW 封装，密文持久化存储？// TODO:
-
-#### Root Encryption Key (REK)
-
-REK 就是`Passcode-derived key`！
-[Apple SKS 加密模块（非专用设备）安全策略](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P16 指出，系统服务 Create REK 的关键加密因子包括：
-
-- UID：唯一的 Root ID
-- PBKDF Password：：用户输入的登录口令 passcode
-- PBKDF Salt for REK：系统密钥包中的盐，随机数
-- DRBG internal state：DRBG 的内部状态，包括：V value, key and seed material
-- Entropy input string：从 TRNG 获取的真随机数
-- REK：？                               // TODO:
-- KEK as AES key used to wrap REK：？   // TODO:
-
-#### NVM storage controller shared key
-
-AES 引擎使用的**临时**封装密钥。
-
-每台包含安全隔区的 Apple 设备还具有专用的 AES256 加密引擎 （“AES 引擎”），它内置于 NAND（非易失性）闪存与主系统内存之间的直接内存访问 (DMA) 路径中，可以实现高效的文件加密。在 A9 或后续型号的 A 系列处理器上，闪存子系统位于隔离的总线上，该总线被授权只能通过 DMA 加密引擎访问包含用户数据的内存。
-
-sepOS 启动时使用 TRNG 生成，并通过**专用线路**传输到 AES 引擎，旨在防止它被安全隔区外的任何软件访问。
-sepOS 随后可以使用临时封装密钥来封装文件密钥，供应用程序处理器文件系统驱动程序使用。当文件系统驱动程序读取或写入文件时，它会将封装的密钥发送到 AES 引擎以解封密钥。
-
-### 2. MacOS Filevault 的技术分析
+## 五、MacOS Filevault 的技术分析
 
 基于[TOE 评估报告 - MacOS 13：FileVault](Apple_MacOS_13_Ventura_FileVault_Security_Target.pdf)，P9 指出：
 
 ![M1](filevault1.png)
 ![Intel](filevault2.png)
 
-Apple T2安全芯片运行T2OS 13操作系统。T2包括安全飞地，其中包含运行sepOS操作系统的SEP，以及执行存储加密的DMA存储控制器。加密引擎（EE）在T2上实例化。AA在英特尔芯片（密码获取）和T2上都实例化。安全飞地为所有EE功能（即存储数据的加密/解密除外）和AA的所有加密功能（即PBKDF2）提供安全相关功能。DMA存储控制器提供了一个专用的AES加密引擎，内置在主机平台的存储和主内存之间的直接内存访问（DMA）路径中。密码获取组件（AA）是存储驱动器上的预引导组件。它捕获用户密码并将其传递给安全飞地。
+Apple T2安全芯片运行T2OS 13操作系统。
+
+T2包括安全飞地，其中包含运行sepOS操作系统的SEP，以及执行存储加密的DMA存储控制器。
+加密引擎（EE）在T2上实例化。AA在英特尔芯片（密码获取）和T2上都实例化。
+安全飞地为所有EE功能（即存储数据的加密/解密除外）和AA的所有加密功能（即PBKDF2）提供安全相关功能。
+
+DMA存储控制器提供了一个专用的AES加密引擎，内置在主机平台的存储和主内存之间的直接内存访问（DMA）路径中。密码获取组件（AA）是存储驱动器上的预引导组件。它捕获用户密码并将其传递给安全飞地。
 
 When stored, the encrypted file system key is additionally wrapped by an “effaceable key” stored in Effaceable Storage **or** using a media key-wrapping key, protected by Secure Enclave anti-replay mechanism.
 
+AA - Authorization Acquisition
+EE - Encryption Engine
+
 待续！
 
-### 3. 参照 Apple 平台安全技术白皮书
+## 六、总结分析
 
-1. 与 Apple Secure Encalve 的架构对比，HW AES = `Secure Enclave AES Engine` ， 区别位于 DMA 路径上、用于 NAND 数据加密处理的`AES Engine`！
+### 1. 对比 Apple 平台安全技术白皮书
+
 ![SoC](soc.png)
 
-2. 此外，技术架构图显示其增加了公钥加速器（public key acceleration，PKA）。
+- 与 Apple Secure Encalve 的架构对比，HW AES = `Secure Enclave AES Engine` ， 区别位于 DMA 路径上、用于 NAND 数据加密处理的`AES Engine`！
+- 此外，技术架构图显示其增加了公钥加速器（public key acceleration，PKA）。
 
-## 五、疑难杂症
-
-### 1. 关于`Key 0x89B`和`Key 0x835`的讨论
+### 2. 关于 `Key 0x89B` 和 `Key 0x835` 的存储方式
 
 在[TOE 评估报告 - iOS 16](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P117 说明：
 > The UID is used to derive two other keys, called "Key 0x89B" and "Key 0x835". These two keys are derived during **the first boot** by encrypting defined constants with the UID.
@@ -295,17 +311,76 @@ P125
 - `Key 0x835 = AES_KW(UID, 0x’01010101010101010101010101010101’)`
 - `Key 0x89B = AES_KW(UID, 0x’183e99676bb03c546fa468f51c0cbd49’)`
 
-### 2. TOE 核心流程的几个错误？
+### 3. 关于 KEK as AES key used to wrap REK
 
-关于 TOE 的启动流程，
-> The SEP **wraps the Dkey with the newly generated ephemeral key**.
+CSP 列表 16 行的`REK wrapping key`，具体描述为：内部原生的对称密钥，Entered/Output in plaintext by calling application within physical the boundary。
 
-关于文件的存取流程，
+笔者判断，这个 KEK 指的是 SKS 和 SBIO 的共享随机密钥，其处理逻辑为：
+
+- 首次输入 passcode 成功解封 keybag 后，SKS 生成该共享密钥作为 KEK
+- 基于该密钥包裹 REK（该文称 Master Key）并保存在 SKS 内部
+- SKS 将共享密钥发送给 SBIO，并销毁该密钥和 REK
+- 如果 touch ID 匹配成功，向 SKS 发送共享密钥；
+- SKS 据此解封 REK，进而解封相应的类密钥并添加到 Keyring
+
+### 4. TOE 核心流程的几个错误？
+
+[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P126，描述了文件的存取流程。
 > The TOE OS kernel determines which class key to use and **sends the class key** (which is wrapped with the Dkey, or with the XOR of the Dkey and the Passcode Key) and the file key (which is wrapped with the class key) to the SEP.
 
-### 3. 关于 KEK as AES key used to wrap REK 的疑问
+笔者认为，发送给 SEP 的应该是 Class key type，而非包裹状态的 Class key。
+iOS 4 破解技术中介绍，WARP 类型‘3’ 是两轮解封，似乎硬件加密将其简化为：`Dkey XOR PDK`
 
-这是一个什么东东？
+此外，关于 TOE 的启动流程，其描述为：
+> The SEP **wraps the Dkey with the newly generated ephemeral key**.
+
+通过临时密钥包裹 Dkey，有何实际意义，目的又是发送给哪个组件呢？
+
+### 5. 关于安全存储组件的讨论？
+
+核心问题是：
+
+1. 安全存储组件是一个独立的、具备存储功能的硬件芯片，还是 NAND 闪存的某个特殊区域？
+2. 系统密钥包究竟是存储在文件系统的普通文件，还是 Effaceable Storage 呢？
+3. 系统密钥包和 AFPS 的容器密钥包、卷宗密钥包的关系是什么？
+4. 安全存储组件的内部到底存储了哪些关键数据？
+
+请参考[Apple平台安全保护-2022](https://help.apple.com/pdf/security/zh_CN/apple-platform-security-guide-cn.pdf)，P9 和 P61 对于 User Keybag 的描述：
+
+>- 虽然安全隔区不含储存设备，但它拥有一套将信息安全储存在所连接储存设备上的机制，该储存设备与应用程序处理器和操作系统使用的 NAND 闪存互相独立。
+>- 对于搭载 A9 之前的 SoC 的设备，该 .plist 文件的内容通过保存在可擦除存储器中的密钥（**即Bag1**）加密。为了给密钥包提供前向安全性，用户每次更改密码时，系统都会擦除并重新生成此密钥。
+>- 对于搭载 A9 或后续型号 SoC 的设备，该 .plist 文件包含一个密钥（**即安全储存组件生成，并返回给安全隔区的加密箱熵值**），表示密钥包储存在受反重放随机数 (由安全隔区控制) 保护的有锁储存库（**即安全存储组件**）中。
+>- 安全隔区管理用户密钥包并且可用于查询设备的锁定状态。仅当用户密钥包中的所有类密钥均可访问且成功解封时，它才会报告设备已解锁。
+
+安全隔区技术架构中的 Secure Nonvolatile Storage 翻译为“安全非易失性存储器”，也就是安全存储组件。该报告的 P137 提供了安全存储组件的定义。
+
+- 不可更改的 ROM 代码
+- 硬件随机数生成器
+- **每个设备唯一的加密密钥**
+- 加密引擎
+- 物理篡改检测
+- 计数器加密箱（第二代增加）：包含 salt、verify、counter、max_retry_limit
+
+P13 做了进一步的介绍：
+
+>- 安全隔区配备了专用的安全非易失性存储器设备。安全非易失性存储器通过专用的 I2C 总线与安全隔区连接，因此它仅可被安全隔区访问。所有用户数据加密密钥植根于储存在安全隔区非易失性存储器中的熵内。
+>- 搭载 A12、 S4 及后续型号 SoC 的设备并用了安全隔区与安全储存组件来储存熵。安全储存组件本身设计为使用不可更改的 ROM 代码、硬件随机数生成器、每个设备唯一的加密密钥、加密引擎和物理篡改检测。安全隔区和安全储存组件使用加密且认证的协议通信以提供对熵的独有访问权限。
+>- 2020 年秋季或之后首次发布的设备配备了第二代安全储存组件。第二代安全储存组件增加了计数器加密箱。每个计数器加密箱储存一个 128 位盐、一个 128 位密码验证器、一个 8 位计数器，以及一个 8 位最大尝试值。对计数器加密箱的访问通过加密且认证的协议来实现。
+
+P14 安全隔区的发展历史也包含了安全存储组件的内容。
+
+- A8 ～ A11 的安全存储是基于 EEPROM（电可擦除可编程只读存储器）芯片，只能提供安全存储服务；
+- A12 安全存储组件集成了 ROM 代码和若干专用硬件，可以提供完整的硬件安全性功能，并确保对熵的独有访问权限（专用 I2C bus）；
+- 2020年为抵御重放攻击紧急开发了第二代产品，关键是增加了计数器加密箱和 xART 机制。
+
+![his](his.png)
+
+[iOS 16 TOE] P126
+> The TOE OS kernel determines which class key to use and sends the class key (which is **wrapped with the Dkey**, or **with the XOR of the Dkey and the Passcode Key**) and the file key (which is wrapped with the class key) to the SEP.
+> The (wrapped) Dkey and (wrapped) EMF key (both 256-bit keys) are loaded by the TOE OS kernel from the **effaceable storage** and sent to the SEP.
+
+P127
+> The EMF key, Dkey, and the class keys are stored in the **effaceable area**, all in wrapped form only.
 
 ---
 
@@ -314,7 +389,9 @@ P125
 ### 功能组件类
 
 - Effaceable Storage（可擦除存储器）：NAND存储器中一个用于储存加密密钥的专用区域，可被直接寻址和安全擦除。尽管当攻击者实际占有设备时，可擦除存储器无法提供保护，但其中存储的密钥可用作密钥层级的一部分，用于实现快速擦除和前向安全性。
+    A dedicated area of NAND storage, used to store cryptographic keys, that can be addressed directly and wiped securely. While it doesn’t provide protection if an attacker has physical possession of a device, keys held in Effaceable Storage can be used as part of a key hierarchy to facilitate fast wipe and forward security.
 - Secure Storage Component（安全储存组件）：一个芯片，设计为使用不可更改的 RO 代码、硬件随机数生成器、加密引擎和物理篡改检测。在支持的设备上，安全隔区与用于储存反重放随机数的安全储存组件配对。为了读取和更新随机数，安全隔区和储存芯片采用安全协议来帮助确保对随机数的排他访问。此技术已更迭多代，提供了不同的安全性保证。
+    A chip designed with immutable RO code, a hardware random number generator, cryptography engines, and physical tamper detection. On supported devices, the Secure Enclave is paired with a Secure Storage Component for anti-replay nonce storage. To read and update nonces, the Secure Enclave and storage chip employ a secure protocol that helps ensure exclusive access to the nonces. There are multiple generations of this technology with differing security guarantees.
 - keybag（密钥包）：一种用于储存一组类密钥的数据结构。每种类型(用户、设备、系统、备份、托管或iCloud云备份)的格式都相同。
   - 标头：版本(在 iOS 12 或更高版本中设为 4 )；类型(系统、备份、托管或 iCloud 云备份)；密钥包 UUID；HMAC(若密钥包已签名)；用于封装类密钥的方法：配合盐和迭代计数使用 Tangling 及 UID 或 PBKDF2。
   - 类密钥列表：密钥 UUID；类(哪个文件或钥匙串数据保护类)；封装类型(仅 UID 派生密钥；UID 派生密钥和密码派生 密钥)；封装的类密钥；非对称类的公钥。
@@ -343,11 +420,11 @@ P125
 
 ## 附录二：Cocoa 框架
 
-Cocoa 是苹果公司为 macOS 所创建的原生面向对象的应用程序接口，是 Mac OS X 上五大 AP 之一（其它四个是Carbon、POSIX、X11和Java）。
+Cocoa 是苹果公司为 macOS 所创建的原生面向对象的应用程序接口，是 Mac OS X 上五大 AP 之一（其它四个是Carbon、POSIX、X11 和 Java）。
 
 Cocoa 应用程序一般在苹果公司的开发工具 Xcode（前身为 Project Builder ）和 Interface Builder 上用Objective-C 写成。
 
-Cocoa包含三个主要的Objective-C对象库，称为“框架”。框架的功能类似于动态库，即可以在运行时动态的加载应用程序的地址空间，但框架作为一个捆绑而非独立文件，其中除了可执行代码外，也包含了资源，头文件和文档。
+Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架的功能类似于动态库，即可以在运行时动态的加载应用程序的地址空间，但框架作为一个捆绑而非独立文件，其中除了可执行代码外，也包含了资源，头文件和文档。
 
 - Foundation：面向对象的通用函数库。提供了字符串，数值的管理，容器及其枚举，分布式计算，事件循环，以及一些其它的与图形用户界面没有直接关系的功能，其中用于类和常数的函数有`NS`前缀（因为源自于NeXTSTEP）。
     它可以在 MacOS 和 iOS 中使用。
@@ -392,53 +469,17 @@ Cocoa包含三个主要的Objective-C对象库，称为“框架”。框架的�
 > 钥匙串项使用两种不同的 AES-256-GCM 密钥加密 : 表格密钥 (元数据) 和行独有密钥 (私密密钥)。元数据密钥受安全隔区保护，但会缓存在应用程序处理器中以便进行钥匙串快速查询。私密密钥则始终需要通过安全隔区进行往返处理。
 > 钥匙串以储存在文件系统中的`SQLite`数据库的形式实现，而且数据库只有一个，`securityd`监控程序决定每个进程或 App 可以访问哪些钥匙串项。
 
-## 附录五：安全存储组件的官方描述
-
-请参考[Apple平台安全保护-2022](https://help.apple.com/pdf/security/zh_CN/apple-platform-security-guide-cn.pdf)，P9 和 P61 对于 User Keybag 的描述：
-
->- 虽然安全隔区不含储存设备，但它拥有一套将信息安全储存在所连接储存设备上的机制，该储存设备与应用程序处理器和操作系统使用的 NAND 闪存互相独立。
->- 对于搭载 A9 之前的 SoC 的设备，该 .plist 文件的内容通过保存在可擦除存储器中的密钥（**即Bag1**）加密。为了给密钥包提供前向安全性，用户每次更改密码时，系统都会擦除并重新生成此密钥。
->- 对于搭载 A9 或后续型号 SoC 的设备，该 .plist 文件包含一个密钥（**即安全储存组件生成，并返回给安全隔区的加密箱熵值**），表示密钥包储存在受反重放随机数 (由安全隔区控制) 保护的有锁储存库（**即安全存储组件**）中。
->- 安全隔区管理用户密钥包并且可用于查询设备的锁定状态。仅当用户密钥包中的所有类密钥均可访问且成功解封时，它才会报告设备已解锁。
-
-安全隔区技术架构中的 Secure Nonvolatile Storage 翻译为“安全非易失性存储器”，也就是安全存储组件。该报告的 P137 提供了安全存储组件的定义。
-
-- 不可更改的 ROM 代码
-- 硬件随机数生成器
-- **每个设备唯一的加密密钥**
-- 加密引擎
-- 物理篡改检测
-- 计数器加密箱（第二代增加）：包含 salt、verify、counter、max_retry_limit
-
-P13 做了进一步的介绍：
-
->- 安全隔区配备了专用的安全非易失性存储器设备。安全非易失性存储器通过专用的 I2C 总线与安全隔区连接，因此它仅可被安全隔区访问。所有用户数据加密密钥植根于储存在安全隔区非易失性存储器中的熵内。
->- 搭载 A12、 S4 及后续型号 SoC 的设备并用了安全隔区与安全储存组件来储存熵。安全储存组件本身设计为使用不可更改的 ROM 代码、硬件随机数生成器、每个设备唯一的加密密钥、加密引擎和物理篡改检测。安全隔区和安全储存组件使用加密且认证的协议通信以提供对熵的独有访问权限。
->- 2020 年秋季或之后首次发布的设备配备了第二代安全储存组件。第二代安全储存组件增加了计数器加密箱。每个计数器加密箱储存一个 128 位盐、一个 128 位密码验证器、一个 8 位计数器，以及一个 8 位最大尝试值。对计数器加密箱的访问通过加密且认证的协议来实现。
-
-P14 安全隔区的发展历史也包含了安全存储组件的内容。
-
-- A8 ～ A11 的安全存储是基于 EEPROM（电可擦除可编程只读存储器）芯片，只能提供安全存储服务；
-- A12 安全存储组件集成了 ROM 代码和若干专用硬件，可以提供完整的硬件安全性功能，并确保对熵的独有访问权限（专用 I2C bus）；
-- 2020年为抵御重放攻击紧急开发了第二代产品，关键是增加了计数器加密箱和 xART 机制。
-
-![his](his.png)
-
-[Apple平台安全保护-2022](https://help.apple.com/pdf/security/zh_CN/apple-platform-security-guide-cn.pdf)指出：
-> 文件的内容可能使用文件独有 (或范围独有) 的一个或多个密钥进行加密，密钥使用类密钥封装并储存在文件的元数据中，文件元数据又使用文件系统密钥进行加密。
-> 类密钥通过硬件 UID 获得保护，而某些类的类密钥则通过用户密码获得保护。
-> 此层次结构既可提供灵活性，又可保证性能。例如，更改文件的类只需重新封装其文件独有密钥，更改密码只需重新封装类密钥
-
 ---
 
 ## 参考文献
 
 - [iOS 取证技术 - elcomsoft blog](https://blog.elcomsoft.com/2023/03/perfect-acquisition-part-1-introduction/)
+- [揭开 Apple Touch ID 的神秘面纱](https://medium.com/hackernoon/demystifying-apples-touch-id-4883d5121b77)
 - [一场椭圆曲线的寻根问祖之旅](https://fisco-bcos-documentation.readthedocs.io/zh-cn/v2.8.0/docs/articles/3_features/36_cryptographic/elliptic_curve.html)
 - [椭圆曲线密码学 - Wiki](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography)
 - [ANSI X9.63 Overview](https://csrc.nist.gov/CSRC/media/Events/Key-Management-Workshop-2000/documents/x963_overview.pdf)
 - [密钥管理的国际标准汇总](https://www.antpedia.com/standard/sp/65347.html)
-  
+
 ### 官方文档下载
 
 - [Apple 平台安全保护 - 2022年中文版](apple-platform-security-guide-cn-2022.pdf)
@@ -446,16 +487,11 @@ P14 安全隔区的发展历史也包含了安全存储组件的内容。
 - [TOE 评估报告 - MacOS 13：FileVault](Apple_MacOS_13_Ventura_FileVault_Security_Target.pdf)
 - [TOE 评估报告 - iOS 16](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)
 - [Apple T2 安全芯片概览](Apple_T2_Security_Chip_Overview_2018.pdf)
+- [Behind the Scenes with iOS Security - Ivan Krstić](Behind_the_Scenes_with_iOS_Security.pdf)
 
 ### 研究报告下载
 
 - [iOS Platform Security](Platform_Security.pdf)
-- [Behind the Scenes with iOS Security](Behind_the_Scenes_with_iOS_Security.pdf)
 - [Data Security on Mobile Devices:Current State of the Art, Open Problems, and Proposed Solutions](Data_Security_on_Mobile_Devices.pdf)
+- [Demystifying the Secure Enclave Processor](us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf)
 
-[iOS 16 TOE] P126
-> The TOE OS kernel determines which class key to use and sends the class key (which is **wrapped with the Dkey**, or **with the XOR of the Dkey and the Passcode Key**) and the file key (which is wrapped with the class key) to the SEP.
-> The (wrapped) Dkey and (wrapped) EMF key (both 256-bit keys) are loaded by the TOE OS kernel from the **effaceable storage** and sent to the SEP.
-
-P127
-> The EMF key, Dkey, and the class keys are stored in the **effaceable area**, all in wrapped form only.
