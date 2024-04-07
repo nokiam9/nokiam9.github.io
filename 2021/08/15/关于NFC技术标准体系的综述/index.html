@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/nfc-protocol-3.bmp">
 <meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/protocol-3.png">
 <meta property="article:published_time" content="2021-08-15T10:05:45.000Z">
-<meta property="article:modified_time" content="2023-10-17T00:48:08.051Z">
+<meta property="article:modified_time" content="2024-04-07T09:17:08.444Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/protocol-1.png">
@@ -236,7 +236,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-17 08:48:08" itemprop="dateModified" datetime="2023-10-17T08:48:08+08:00">2023-10-17</time>
+      <time title="修改时间：2024-04-07 17:17:08" itemprop="dateModified" datetime="2024-04-07T17:17:08+08:00">2024-04-07</time>
     </span>
 
   
@@ -351,7 +351,7 @@
 <p>数据在NFC Tag的芯片中，可以简单理解成<strong>刷标签</strong>，本质上就是通过支持NFC的手机或其它电子设备从带有NFC芯片的标签、贴纸、名片等媒介中读写信息，随后它可能根据读取来自部件的信息执行操作。例如，靠近 NFC 标签的 NFC 手机会检索到一个 URL，并链接到相应的网站，NFC手机可以在无需打字的情况下发送 SMS （短消息服务）文本、获得优惠券、启动配对动作、获得电子名片（Vcard）等。</p>
 <img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/rw-mode.jpg" class="">
 
-<p>对于读卡器模式，NFC Forum定义了4种标准类型的<a href="#NFC%E6%A0%87%E7%AD%BE">NFC标签</a>（Type 5还不是正式标准），这四种类型NFC Tag的区别在于存储空间大小，数据传输率以及底层使用的协议上，后面有具体的技术细节。</p>
+<p>对于读卡器模式，NFC Forum定义了4种标准类型的 NFC 标签（Type 5还不是正式标准），这四种类型NFC Tag的区别在于存储空间大小，数据传输率以及底层使用的协议上，后面有具体的技术细节。</p>
 <p>此外，NFC Forum定义了两个通用的数据结构用于在NFC Device之间（包括R&#x2F;W模式中的NFC Reader和NFC Tag）传递数据。这两个通用数据结构分别是NFC Data Exchange Format（简写为NDEF）以及NFC Record。</p>
 <blockquote>
 <p>对于“刷标签”场景，NFC 手机工作在主动模式，而NFC标签是不需要外部供电的，依靠NFC手机发送的电磁场获得能量，<strong>此时数据传输是不安全的</strong>。</p>
@@ -361,12 +361,12 @@
 <p>通常存在于移动设备中的NFC控制器模拟ISO &#x2F; IEC 14443或FeliCa标准定义的非接触式卡的行为，用于诸如支付、交通等非接触式基础设施中。<br>在此模式下，NFC控制器仅处理低级别通信，而NFC安全应用程序位于SIM卡、嵌入式安全元件（eSE）、嵌入式SIM卡（eSIM）中或直接位于主应用程序处理器（Android的HCE）中。</p>
 <img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/ce-mode.jpg" class="">
 
-<p>该模式下，NFC 手机的工作类似于标准的<a href="#NFC%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93">非接触式IC卡</a>，为此ISO 14443定义了Type A 和 Type B两种数据传输标准（Type F不是正式标准），后续有详细技术分析。</p>
+<p>该模式下，NFC 手机的工作类似于标准的非接触式IC卡，为此ISO 14443定义了Type A 和 Type B两种数据传输标准（Type F不是正式标准），后续有详细技术分析。</p>
 <blockquote>
 <p>对于“刷手机”场景，NFC 手机工作在被动模式，它只在机具发出的射频场中被动响应，<strong>数据传输是安全的</strong>。</p>
 </blockquote>
 <h3 id="点对点模式（Peer-to-Peer-Mode）"><a href="#点对点模式（Peer-to-Peer-Mode）" class="headerlink" title="点对点模式（Peer-to-Peer Mode）"></a>点对点模式（Peer-to-Peer Mode）</h3><p>此模式设计用于交换两个NFC设备（如移动电话）之间的联系人信息等数据。每个点轮流作为读卡器（收发器）和标签，以实现双方之间的完整交换。</p>
-<p>在点对点 （P2P）中，具有 NFC 功能的设备工作在主动模式。其中的一个设备会发起通信链接。一旦链接建立，设备就会交替地与其他设备通信，并遵守 “ 说前先听 （listen-beforetalk） ” 规则。该通信模式下的数据交换相比其他模式更快，因此可以交换更多的数据。</p>
+<p>在点对点 （P2P）中，具有 NFC 功能的设备工作在主动模式。其中的一个设备会发起通信链接。一旦链接建立，设备就会交替地与其他设备通信，并遵守 “说前先听(listen-before-talk)” 规则。该通信模式下的数据交换相比其他模式更快，因此可以交换更多的数据。</p>
 <h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>从协议栈的角度，三种工作模式的分析如下：</p>
 <img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/rf.jpg" class="">
 
@@ -561,15 +561,14 @@
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://static.kancloud.cn/alex_wsc/android-wifi-nfc-gps">深入理解Android：Wi-Fi、NFC和GPS卷</a></li>
 <li><a target="_blank" rel="noopener" href="https://nfc-forum.org/our-work/specification-releases/">NFC-Forum官方网站的技术文档列表</a></li>
-<li><a target="_blank" rel="noopener" href="https://nfc-forum.org/our-work/compliance/certification-program/certification-register/">获得NFC-Forum官方认证的芯片清单</a></li>
+<li><a target="_blank" rel="noopener" href="https://nfc-forum.org/products/certified-products">获得NFC-Forum官方认证的芯片清单</a></li>
 <li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/EMV">EMV组织的Wiki信息</a></li>
 <li><a target="_blank" rel="noopener" href="https://lishiwen4.github.io/nfc/nfc-introduce">NFC标准概述</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.debugger.wiki/article/html/1562511839151556">ISO14443 &amp; ISO15693 &amp; ISO18092</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.st.com/resource/zh/brochure/nfc_solutions_from_st.pdf">ST意法半导体公司的NFC产品说明书</a></li>
 </ul>
 <h2 id="资料下载"><a href="#资料下载" class="headerlink" title="资料下载"></a>资料下载</h2><ul>
-<li>[ISO14443 Overview-v5.ppt](ISO14443 Overview-v5.ppt)</li>
+<li><a href="ISO14443-Overview-v5.ppt">ISO14443 Overview-v5</a></li>
 <li><a href="tn1216-st25-nfc-guide-stmicroelectronics.pdf">NFC技术指南</a></li>
-<li><a href="zh.NFC_Solutions_from_ST.pdf">ST意法半导体公司的NFC产品说明书</a></li>
 <li><a href="Near_Field_Communication_with_Linux.pdf">NFC在Linux的技术实现</a></li>
 <li><a href="NFC_mcs.pdf">NFC技术综述-中华电信</a></li>
 </ul>
