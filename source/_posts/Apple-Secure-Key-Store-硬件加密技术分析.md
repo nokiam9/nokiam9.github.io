@@ -4,21 +4,21 @@ date: 2024-04-07 21:08:41
 tags:
 ---
 
-根据 Apple 官网提供的[第三方平台认证信息](https://support.apple.com/zh-cn/guide/certifications/welcome/web)，其硬件、操作系统、应用软件、互联网服务和 Apple Pay 广泛采用 FIPS 140-2 加密标准（FIPS 140-3 认证已提交但尚未通过），当前[硬件加密模块 v10.0](https://csrc.nist.gov/CSRC/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp3811.pdf) 获得 CMVP 颁发的[3811 证书](https://csrc.nist.gov/Projects/cryptographic-module-validation-program/Certificate/3811)。
-
-同时，Apple 也积极参加通用标准 (CC) 评估，当前[认证产品清单](https://www.niap-ccevs.org/Product/index.cfm)包括：macOS 13 Ventura（含[FileVault](https://www.niap-ccevs.org/MMO/Product/st_vid11348-st.pdf)）、iOS 15 & [iOS 16](https://www.niap-ccevs.org/MMO/Product/st_vid11349-st.pdf)；iPadOS 15 & iPadOS 16，由[ATSEC 公司](https://www.atsec.com)出具 TOE（Target of Evaluation）评估报告。
-
-本文就是依据上述公开信息的研究分析。
-
-## 一、Secure Key Store 概述
-
 根据[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的表述（P16-P20），Apple 设备提供的加密服务分为三个层级：
 
 - User Space：SL1，软件级。驻留在用户空间内的动态可加载库，为 App 提供加密功能
 - Kernel Space：SL1，软件级。操作系统内核加载的扩展模块，仅为内核提供加密功能
-- Secure Key Store：SL2，硬件级，也称为 SKS（安全密钥存储）。一个单芯片独立硬件加密模块（即安全隔区），为传输中和静态数据提供保护，包含固件和硬件加密算法实现
+- Secure Key Store：SL2，硬件级。一个单芯片独立硬件加密模块，为静态数据和数据传输提供保护，包含固件和硬件加密算法实现
 
-### 1. 密码模块
+Secure Key Store（安全密钥存储，SKS，也称 Secure Key Service），是 Apple 公司基于 Secure Enclave 的加密模块，也是其硬件加密技术的核心组件。
+
+- 根据 Apple 官网提供的[第三方平台认证信息](https://support.apple.com/zh-cn/guide/certifications/welcome/web)，其硬件、操作系统、应用软件、互联网服务和 Apple Pay 广泛采用 FIPS 140-2 加密标准（FIPS 140-3 认证已提交但尚未通过），当前[硬件加密模块 v10.0](https://csrc.nist.gov/CSRC/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp3811.pdf) 获得 CMVP 颁发的[3811 证书](https://csrc.nist.gov/Projects/cryptographic-module-validation-program/Certificate/3811)。
+- Apple 积极参与通用标准 (CC) 评估，当前[认证产品清单](https://www.niap-ccevs.org/Product/index.cfm)包括：macOS 13 Ventura（含[FileVault](https://www.niap-ccevs.org/MMO/Product/st_vid11348-st.pdf)）、iOS 15 & [iOS 16](https://www.niap-ccevs.org/MMO/Product/st_vid11349-st.pdf)；iPadOS 15 & iPadOS 16，由 [ATSEC 公司](https://www.atsec.com)出具 TOE（Target of Evaluation）评估报告。
+- 2016年美国举办的 Black hat 会议上，Apple 公司的 Ivan Krstic 介绍了数据保护技术，也是难得的[官方资料]((Behind_the_Scenes_with_iOS_Security.pdf))。
+
+本文就是依据上述公开信息的研究分析。
+
+## 一、Secure Key Store 硬件环境
 
 根据[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的表述，其加密模块的逻辑边界包含组件：
 
@@ -35,9 +35,15 @@ tags:
 
 > 早期的 A8 处理器的硬件版本是 1.0，A9 及后续处理器升级为 2.0，差异在于是否提供 PAA (Processor Algorithm Accelerator，处理器算法加速，基于 ARM NEON 指令集实现)。
 
-### 2. 密码算法
+对比 Apple 平台安全技术白皮书提供的信息，HW AES = Secure Enclave AES Engine，此外还有 PKA（public key acceleration，公钥加速器）。
 
-#### 完全符合 FIPS 140-2 标准的算法
+![SoC](soc.png)
+
+## 二、 Secure Key Store 密码算法
+
+[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)有完整的的表述。
+
+### 1. 完全符合 FIPS 140-2 标准的算法
 
 - 对称加密/解密算法：基于[FIPS 197](https://csrc.nist.gov/pubs/fips/197/final)的 AES 算法，工作模式包括：
   - [SP 800-38 A](https://csrc.nist.gov/pubs/sp/800/38/a/final) ：工作模式 ECB CBC CFB OFB CTR
@@ -53,12 +59,15 @@ tags:
 - DRBG：基于[SP 800-90A](https://csrc.nist.gov/pubs/sp/800/90/a/r1/final) 的确定性随机数生成算法
 - 密钥交换算法：基于[SP 800-56A](https://csrc.nist.gov/pubs/sp/800/56/a/r3/final) 的一次性 DH 算法
 
-#### 不完全符合 FIPS 140-2 标准，但被允许使用的算法
+> ANSI（American National Standards Institute，美国国家标准协会）是一个非盈利组织，也是 IEEE 和 ISO 标准化组织的成员，还记得 ANSI C 吗？
+> [ANSI X9](https://x9.org/) 系列标准主要用于金融服务业，是信息和数据安全的重要参考。
+
+### 2. 不完全符合 FIPS 140-2 标准，但被允许使用的算法
 
 - 密钥扩展算法：基于[SP 800-132](https://csrc.nist.gov/pubs/sp/800/132/final)的 PBKDF 算法，Apple 基于 HMAC 和 SHA-256（早期为 SHA-1）的定制化 PBKDF2 算法，注意不支持自检功能！
 - TRNG：Apple 定制的，基于物理过程的真随机数生成器
 
-#### 未获得 FIPS 140-2 批准的算法
+### 3. 未获得 FIPS 140-2 批准的算法
 
 对于此类算法，Apple 规定**不得与上述算法共享加密因子**。
 
@@ -71,18 +80,44 @@ tags:
 
 > 事实上，Curve25519 已成为 P-256 的替代品。2024 年，NIST 宣布弃用 FIPS 186-4 并发布[FIPS 186-5](https://csrc.nist.gov/pubs/fips/186-5/final)，Curve25519 和 Curve448 被正式纳入规范，ANSI X9.62 也被 ANSI X9.142 替代
 
-## 二、Secure Key Store 密钥层级
+### 4. PBKDF2 算法
 
-根据之前的 iOS4 破解技术分析，Apple 数据保护技术的密钥主要有四种存储方式：
+用户的锁屏密码 Passcode 的长度有限，不能直接作为密钥使用，必须经过密钥扩展（Password-Based Key Derivation）生成标准的 Passcode Key，参考[SP 800-132](https://csrc.nist.gov/pubs/sp/800/132/final)第 5.4 节的 2b 模式。
+
+基于[Behind the Scenes with iOS Security - Ivan Krstić](Behind_the_Scenes_with_iOS_Security.pdf)的描述，其处理步骤包括：
+
+- 初始阶段：Userspace 侧完成。使用 HMAC-SHA-256 作为伪随机函数
+    输入：基于TRNG 生成的 128 位随机 salt、未经任何预处理的 passcode、**迭代计数 1**
+    输出：256 位的中间密钥 MK
+- 迭代阶段：SEP 侧完成。以 UID 为加密密钥，使用 AES-CBC-256 硬件重复迭代加密 MK，最终形成 Master Key
+    迭代次数需要根据硬件环境校准，确保计算时间为 100-150 毫秒，迭代次数至少为 50000 次
+
+> 大量重复运算使得暴力破解的成本很高，而添加盐值可以有效防御彩虹表攻击。
+
+![KDF](KDF.png)
+
+需要注意的是，不同版本硬件的算法和配置都可能发生变化：
+
+- iOS 4 迭代算法与标准规范有差异，增加了将 256位 MK 扩展为 4096 位的环节
+- iOS 4.3 升级了 Keybag 版本，v2 算法的 counter 更复杂
+- Filevault 软件加密方式的迭代次数为 41000，但加密因子不包含 UID！
+
+![PBKDF2](PBKDF2.png)
+
+## 三、Secure Key Store 密钥层级
+
+根据之前的 iOS4 破解技术分析，Apple 数据保护密钥的持久化存储有 4 种方式：
 
 - SEP 内部：每个设备唯一且不可修改的UID，基于固定参数衍生的Key 0x89B 和 Key 0x835
-- 可擦除区域（effaceable storage）：EMF Key，Dkey 和 Bag1。
-    以包裹状态的密文保存在 NAND 的 Block 1，其并不提供额外的机密性保护，而是便于快速抹掉数据
-- 用户密钥包（User Keybag）：各类文件保护 Class key 和钥匙串 Class key。
-    以包裹状态的密文保存在一个无保护类型的二进制文件（plist格式），存储于`/var/keybags/systembag.kb`
-- per-file key 以包裹状态的密文存储在文件系统元数据中，keychain 的 item 以包裹状态保存在一个 sqlite 数据库，存储于`/Users/<UserName>/Library/Keychains`目录中
+- 可擦除区域（effaceable storage）：EMF Key，Dkey 和 Bag1
+    包裹状态密文保存在 NAND 的 Block 1，不提供额外的机密性保护，而是便于快速/远程清除
+- 用户密钥包（User Keybag）：各类文件保护 Class key 和钥匙串 Class key
+    包裹状态密文保存在一个普通的数据文件（plist格式），存储于`/var/keybags/systembag.kb`
+- per-file key 以包裹状态的密文存储在文件系统元数据中，keychain 的 item 以包裹状态保存在一个 sqlite 数据库，存储目录位于`/Users/<UserName>/Library/Keychains/`
 
 ![arch](arch3.jpg)
+
+> 注意，系统密钥包**从不存储 Class D key**！因为 NSFileProtectionNone 实际是一个单密钥系统，该类所有文件的密钥完全相同，即：`Class D key = AES_Unwrap(key 0x835，Dkey)`
 
 ### 1. 关键加密因子
 
@@ -90,10 +125,21 @@ tags:
 
 ![TOC](<TOC-key.png>)
 
-[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P20，也提供了关键安全参数的生命周期信息，本文对该表格的分析如下：
+[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P20，也提供了关键安全参数的生命周期信息：
 
-1. 上图没有显示 keybag 的文件级密钥`Bag1`，其位于 CSP 列表第 7 行的`Moudle-manager keybags key`
-2. CSP 列表包含了`Key 0x835`（第 6 行:Escrow Keybag and the class D key encryption key），但没有提供`Key 0x89B`的信息
+1. Root Encryption Key (REK) = Passcode Key，其描述为
+    > Generation：Derived from passcode using PBKDF2 and entanglement with UID
+    > Entry and Output：Generated inside the module and is never output。
+2. CSP 列表的 Moudle-managed keybags key 所指**并非 Bag1**(因为其是明文存储方式)，而是密钥包中存储的各种 Class key
+    > Generation: Symmetric key generation services of the module
+    > Entered encrypted using AES-256 KW, Output encrypted using AES-256 KW
+    > Non-volatile store: cryptographically zeroized when overwriting the KEK
+    > Volatile store: zeroized when freeing the secure memory
+3. CSP 列表的 File system object DEK = EMF
+4. CSP 列表的 Escrow Keybag and the class D key encryption key = Key 0x835，
+   但没有提供 Key 0x89B 的信息
+
+> CSP 列表的 REK wrapping key = SKS 和 SBIO 之间的 random secret，分析见后文！！！
 
 ### 2. 密钥包
 
@@ -110,14 +156,14 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 密钥包的头部字段包括：
 
 - VERS：版本号，iOS 12 之后都置为 4
-- TYPE：该密钥包的类型，[0-system，backup，escrow，iCloud Backup]
+- TYPE：该密钥包的类型，[0-system，1-backup，2-escrow，3-iCloud Backup]
 - UUID：该密钥包的 UUID
 - HMCK：如果密钥包已签名，保存 HMAC 校验值，即**安全存储组件计算、并返回的加密箱熵值**
 - WRAP：包裹方式，[1:仅 UID 派生, 2:仅 passcode 派生, 3:两者都有]
 - SALT：PBKDF2 算法使用的盐
 - ITER：PBKDF2 算法的迭代次数
 
-> 不同版本可能还包含 GRCE、GRNT、TKMT、SART 等字段，信息格式未知
+> 不同版本可能出现 GRCE、GRNT、TKMT、SART 等字段，信息含义未知
 
 对于每个密钥包的条目（文件保护类密钥 & 钥匙串类密钥），其字段包括：
 
@@ -145,8 +191,8 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 - 任何其他密码都将派生出不同的 AES 密钥，这将导致解密的用户密钥错误，导致身份验证检查失败。
 - 如果可以成功解开用户密钥包，则用户将通过模块的身份验证，然后将使用解开的用户密钥继续执行所请求的加密服务。
 - 解包用户密钥包失败也是用户身份验证失败，操作员将被拒绝访问模块。
-  
-## 三、Secure Key Store 业务逻辑
+
+## 四、Secure Key Store 业务逻辑
 
 根据[Demystifying the Secure Enclave Processor](us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf)的 P61 的描述，Secure Key Store 作为 SEPOS 的一个功能模块，其暴露在 SL1 级（内核 XNU）的 Endpoint 就是一个内核扩展`AppleKeyStore.kext`。此外，SEPOS 还包含了其他类型的 APP，包括：
 
@@ -166,6 +212,7 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 - SEP 使用 NDRBG 生成一个`临时封装密钥`，并通过专用线路传送给 NVM 控制器的 AES 引擎
 - XNU（操作系统内核）的 AppleKeyStore 从 Effaceable storage 加载包裹状态的 EMF key 和 Dkey
 - SEP 持有`Key 0x835`解封`Dkey`，将 Class D key 加入 Keyring
+- SEP 使用`临时封装密钥`重新包裹 Class D key，**用于后续该类型文件的统一解密密钥**
 - XNU 加载系统分区表和文件系统元数据，发送给 SEP
 - SEP 持有`Key 0x89B`解封`EMF key`，持有`media key`解密文件系统元数据，并返回给 XNU
 
@@ -215,16 +262,16 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 
 ![File](file.jpg)
 
-## 四、 Secure Key Store 系统服务
+## 五、 Secure Key Store 服务接口
 
 [Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P15-P17，提供了 SKS 系统服务清单。
 
 ### 1. 完全符合 FIPS 140-2 的系统服务
 
-1. 文件系统服务（Class D File System Services）：包裹/解包 Dkey & EMF key
+1. 文件系统服务（Class D File System Services）：无保护类型的文件（读/写）服务
     Key wrapping: UID，AES Key used to wrap Class D Key（key 0x835），Class D Key
-    File system keys：DEK（EMF key 或 VEK）
-    Storage controller key：KEK（DMA临时密钥）
+    File system keys：DEK（EMF 或 VEK）
+    Storage controller key：KEK（ DMA临时密钥 ）
 2. 用户密钥包服务（User Keybag Services）：从 Device OS 导入包裹状态的用户密钥包
     Keybag wrapping：AES Key shared with NVM Storage Controller
     Keybag content：KEK
@@ -264,7 +311,7 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 5. RFC 5869 based HKDF
 6. AES-GCM Encryption and Decryption X
 
-## 五、MacOS Filevault 的技术分析
+## 六、MacOS Filevault 的技术分析
 
 基于[TOE 评估报告 - MacOS 13：FileVault](Apple_MacOS_13_Ventura_FileVault_Security_Target.pdf)，P9 指出：
 
@@ -286,14 +333,7 @@ EE - Encryption Engine
 
 待续！
 
-## 六、总结分析
-
-### 1. 对比 Apple 平台安全技术白皮书
-
-![SoC](soc.png)
-
-- 与 Apple Secure Encalve 的架构对比，HW AES = `Secure Enclave AES Engine` ， 区别位于 DMA 路径上、用于 NAND 数据加密处理的`AES Engine`！
-- 此外，技术架构图显示其增加了公钥加速器（public key acceleration，PKA）。
+## 七、总结分析
 
 ### 2. 关于 `Key 0x89B` 和 `Key 0x835` 的存储方式
 
@@ -471,6 +511,7 @@ Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架�
 - [TOE 评估报告 - iOS 16](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)
 - [Apple T2 安全芯片概览](Apple_T2_Security_Chip_Overview_2018.pdf)
 - [Behind the Scenes with iOS Security - Ivan Krstić](Behind_the_Scenes_with_iOS_Security.pdf)
+- [Behind the Scenes with iOS Security 演讲视频](https://www.youtube.com/watch?v=BLGFriOKz6U)
 
 ### 研究报告下载
 
