@@ -29,7 +29,7 @@
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/KEY-ARCH.jpg">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/daemon.png">
 <meta property="article:published_time" content="2024-01-27T06:34:06.000Z">
-<meta property="article:modified_time" content="2024-01-29T00:17:58.407Z">
+<meta property="article:modified_time" content="2024-04-07T02:23:47.994Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/KEY-ARCH.jpg">
@@ -228,7 +228,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-01-29 08:17:58" itemprop="dateModified" datetime="2024-01-29T08:17:58+08:00">2024-01-29</time>
+      <time title="修改时间：2024-04-07 10:23:47" itemprop="dateModified" datetime="2024-04-07T10:23:47+08:00">2024-04-07</time>
     </span>
 
   
@@ -305,6 +305,9 @@
 <li>该协议的临时公钥与封装的文件独有密钥一起储存。 KDF 是串联密钥导出函数 (Approved Alternative 1)，如 NIST SP 800-56A 中 5.8.1 所述。AlgorithmID 已忽略。 PartyUInfo 和 PartyVInfo 分别是临时公钥和静态公钥。SHA256 被用作哈希函数。一旦文件关闭，文件独有密钥就会从内存中擦除。要再次打开该文件，系统会使用 “未打开文件的保护” 类的私钥和文件的临时公钥重新创建共享密钥，用来解开文件独有密钥的封装，然后用文件独有密钥来解密文件。</li>
 <li>在 macOS 中，只要系统上的任何用户已登录或认证即可访问 NSFileProtectionCompleteUnlessOpen 的私有部分。</li>
 </ul>
+<blockquote>
+<p>由于 MacOS 的 FileVault 是单密钥系统，实际上 Class B &#x3D; Class C</p>
+</blockquote>
 <h3 id="C类：首次用户认证前保护，Protected-Until-First-User-Authentication"><a href="#C类：首次用户认证前保护，Protected-Until-First-User-Authentication" class="headerlink" title="C类：首次用户认证前保护，Protected Until First User Authentication"></a>C类：首次用户认证前保护，Protected Until First User Authentication</h3><ul>
 <li>此类和 “全面保护” 类的行为方式相同，只不过在设备锁定或用户退出登录时已解密的类密钥不会从内存中删除。此类中的保护与桌面电脑全宗卷加密有类似的属性，可防止数据受到涉及重新启动的攻击。这是未分配给数据保护类的所有第三方 App 数据的默认类。</li>
 <li>在 macOS 中，此类的作用类似于文件保险箱，且使用只要宗卷装载即可访问的宗卷密钥。</li>
@@ -319,37 +322,51 @@
 <h2 id="三、钥匙包（keyBag）数据保护"><a href="#三、钥匙包（keyBag）数据保护" class="headerlink" title="三、钥匙包（keyBag）数据保护"></a>三、钥匙包（keyBag）数据保护</h2><p>系统密钥包是一个加密的 <code>plist</code> 格式的二进制文件，存储了所有类密钥的数据，Apple 系统的数据解密实现方式见下图。</p>
 <p><img src="/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/daemon.png" alt="Daemon"></p>
 <p>有五种不同类型的钥匙包，但数据格式完全相同，包括：</p>
-<h3 id="1-用户密钥包-User-keyBag"><a href="#1-用户密钥包-User-keyBag" class="headerlink" title="1. 用户密钥包(User keyBag)"></a>1. 用户密钥包(User keyBag)</h3><p>用户密钥包是设备常规操作中使用的封装类密钥的储存位置。例如，输入密码后，<code>NSFileProtectionComplete</code>会从用户密钥包中载入并解封。它是储存在“无保护”类中的二进制属性列表 (.plist) 文件。<br>对于搭载 A9 之前的 SoC 的设备，该 .plist 文件的内容通过保存在可擦除存储器中的密钥（Bag1 Key）加密。为了给密钥包提供前向安全性，用户每次更改密码时，系统都会擦除并重新生成此密钥。<br>对于搭载 A9 或后续型号 SoC 的设备，该 .plist 文件包含一个密钥，表示密钥包储存在受反重放随机数（由安全隔区控制）保护的有锁储存库中。</p>
-<h3 id="2-设备密钥包-Device-keyBag"><a href="#2-设备密钥包-Device-keyBag" class="headerlink" title="2. 设备密钥包 (Device keyBag)"></a>2. 设备密钥包 (Device keyBag)</h3><p>设备密钥包用来储存用于涉及设备特定操作数据的封装类密钥。 配置为共用的 iPadOS 设备有时需要在用户登录前访问凭证，因此需要一个不受用户密码保护的密钥包。<br>iOS 和 iPadOS 不支持对用户独有的文件系统内容进行单独加密，这就意味着系统使用来自设备密钥包的类密钥，对文件独有密钥进行封装，而钥匙串则使用来自用户密钥包中的类密钥来保护用户钥匙串中的项目。<br>在配置为单用户使用 (默认配置) 的 iOS 和 iPadOS 设备中， 设备密钥包和用户密钥包是同一个， 并受用户的密码保护。</p>
-<h3 id="3-备份密钥包（Backup-keyBag）"><a href="#3-备份密钥包（Backup-keyBag）" class="headerlink" title="3. 备份密钥包（Backup keyBag）"></a>3. 备份密钥包（Backup keyBag）</h3><p>备份密钥包在 “访达” (macOS 10.15 或更高版本) 或 iTunes (macOS 10.14 或更低版本) 进行加密备份时创建，并储存在设备被备份到的电脑中。<br>新密钥包是通过一组新密钥创建的，备份的数据会使用这些新密钥重新加密。 如前所述，不可迁移钥匙串项仍使用 UID 派生密钥封装，以使其可以恢复到最初备份它们的设备，但在其他设备上不可访问。<br>由于备份密钥包并未捆绑特定设备， 理论上尝试在多台电脑上对备份密钥包并行展开暴力破解是可行的。<br>如果用户选择不加密备份， 那么不管备份文件属于哪一种数据保护类， 备份文件都不加密，但钥匙串仍使用 UID 派生密钥获得保护。这就是只有设置备份密码才能将钥匙串项迁移到新设备的原因。</p>
-<h3 id="4-托管密钥包（Escrow-keybag）"><a href="#4-托管密钥包（Escrow-keybag）" class="headerlink" title="4. 托管密钥包（Escrow keybag）"></a>4. 托管密钥包（Escrow keybag）</h3><p>托管密钥包用于通过 USB 与 “访达” (macOS 10.15 或更高版本) 或 iTunes (macOS 10.14 或更低版 本) 进行同步， 还用于移动设备管理 (MDM)。 此密钥包允许 “访达” 或 iTunes 执行备份和同步， 而无需用户输入密码，它还允许 MDM 解决方案远程清除用户密码。它储存在用于与 “访达” 或 iTunes 进行同步的电脑上，或者在远程管理设备的 MDM 解决方案上。<br>托管密钥包改善了设备同步过程中的用户体验，期间可能需要访问所有类别的数据。当使用密码锁定的设备首次连接到 “访达” 或 iTunes 时，会提示用户输入密码。然后设备创建托管密钥包，其中包含的类密钥与设备上使用的完全相同，该密钥包由新生成的密钥进行保护。托管密钥包及用于保护它的密钥划分到设备和主机或服务器上，其数据以 “首次用户认证前保护” 类储存在设备上。这就是重新启动后，用户首次使用 “访达” 或 iTunes 进行备份之前必须输入设备密码的原因。</p>
+<h3 id="1-用户密钥包-User-keyBag"><a href="#1-用户密钥包-User-keyBag" class="headerlink" title="1. 用户密钥包(User keyBag)"></a>1. 用户密钥包(User keyBag)</h3><p>用户密钥包是设备常规操作中使用的封装类密钥的储存位置。例如，输入密码后，<code>NSFileProtectionComplete</code>会从用户密钥包中载入并解封。它是储存在“无保护”类中的二进制属性列表 (.plist) 文件。<br>对于搭载 A9 之前的 SoC 的设备，该 .plist 文件的内容<strong>通过保存在可擦除存储器中的密钥（Bag1 Key）加密</strong>。为了给密钥包提供前向安全性，用户每次更改密码时，系统都会擦除并重新生成此密钥。<br>对于搭载 A9 或后续型号 SoC 的设备，该 .plist 文件包含一个密钥，表示<strong>密钥包储存在受反重放随机数（由安全隔区控制）保护的有锁储存库中</strong>。</p>
+<h3 id="2-设备密钥包-Device-keyBag"><a href="#2-设备密钥包-Device-keyBag" class="headerlink" title="2. 设备密钥包 (Device keyBag)"></a>2. 设备密钥包 (Device keyBag)</h3><p>设备密钥包用来储存用于涉及设备特定操作数据的封装类密钥。 配置为共用的 iPadOS 设备有时需要在用户登录前访问凭证，因此需要一个不受用户密码保护的密钥包。<br>iOS 和 iPadOS 不支持对用户独有的文件系统内容进行单独加密，这就意味着系统使用来自设备密钥包的类密钥，对文件独有密钥进行封装，而钥匙串则使用来自用户密钥包中的类密钥来保护用户钥匙串中的项目。<br>在配置为单用户使用 (默认配置) 的 iOS 和 iPadOS 设备中，<strong>设备密钥包和用户密钥包是同一个</strong>，并受用户的密码保护。</p>
+<h3 id="3-备份密钥包（Backup-keyBag）"><a href="#3-备份密钥包（Backup-keyBag）" class="headerlink" title="3. 备份密钥包（Backup keyBag）"></a>3. 备份密钥包（Backup keyBag）</h3><p>备份密钥包在 “访达” (macOS 10.15 或更高版本) 或 iTunes (macOS 10.14 或更低版本) 进行加密备份时创建，并储存在设备被备份到的电脑中。<br>新密钥包是通过一组新密钥创建的，<strong>备份的数据会使用这些新密钥重新加密</strong>。 如前所述，不可迁移钥匙串项仍使用 UID 派生密钥封装，以使其可以恢复到最初备份它们的设备，但在其他设备上不可访问。<br>由于备份密钥包并未捆绑特定设备，理论上尝试在多台电脑上对备份密钥包并行展开暴力破解是可行的。<br>如果用户选择不加密备份，那么不管备份文件属于哪一种数据保护类，备份文件都不加密，但钥匙串仍使用 UID 派生密钥获得保护。这就是只有设置备份密码才能将钥匙串项迁移到新设备的原因。</p>
+<h3 id="4-托管密钥包（Escrow-keybag）"><a href="#4-托管密钥包（Escrow-keybag）" class="headerlink" title="4. 托管密钥包（Escrow keybag）"></a>4. 托管密钥包（Escrow keybag）</h3><p>托管密钥包用于通过 USB 与 “访达” (macOS 10.15 或更高版本) 或 iTunes (macOS 10.14 或更低版 本) 进行同步， 还用于移动设备管理 (MDM)。 此密钥包允许 “访达” 或 iTunes 执行备份和同步， 而无需用户输入密码，它还允许 MDM 解决方案远程清除用户密码。它储存在用于与 “访达” 或 iTunes 进行同步的电脑上，或者在远程管理设备的 MDM 解决方案上。</p>
+<p>托管密钥包改善了设备同步过程中的用户体验，期间可能需要访问所有类别的数据。当使用密码锁定的设备首次连接到 “访达” 或 iTunes 时，会提示用户输入密码。然后设备创建托管密钥包，其中包含的类密钥与设备上使用的完全相同，该密钥包由新生成的密钥进行保护。托管密钥包及用于保护它的密钥划分到设备和主机或服务器上，其数据以 “首次用户认证前保护” 类储存在设备上。这就是重新启动后，用户首次使用 “访达” 或 iTunes 进行备份之前必须输入设备密码的原因。</p>
 <h3 id="5-云备份密钥包（iCloud-Backup-keybag）"><a href="#5-云备份密钥包（iCloud-Backup-keybag）" class="headerlink" title="5.云备份密钥包（iCloud Backup keybag）"></a>5.云备份密钥包（iCloud Backup keybag）</h3><p>iCloud 云备份密钥包与备份密钥包类似。 该密钥包中的所有类密钥都是非对称的 (与 “未打开文件的保护”数据保护类一样， 使用 Curve25519)。<br>非对称密钥包还可用于 “iCloud 钥匙串” 钥匙串恢复中的备份。</p>
 <h2 id="四、钥匙串-Key-Chain-数据保护"><a href="#四、钥匙串-Key-Chain-数据保护" class="headerlink" title="四、钥匙串 (Key Chain)数据保护"></a>四、钥匙串 (Key Chain)数据保护</h2><p>许多 App 都需要处理密码和其他一些简短但比较敏感的数据，如密钥和登录令牌。钥匙串提供了储存这些项的安全方式。不同的 Apple 操作系统采用不同机制实施与各钥匙串保护类关联的保障。<br>在 macOS (包括搭 载 Apple 芯片的 Mac) 中，数据保护不直接用于实施此类保障。</p>
 <p>钥匙串项使用两种不同的 AES-256-GCM 密钥加密 : 表格密钥 (元数据) 和行独有密钥 (私密密钥)。钥匙串元数据 (除 kSecValue 外的所有属性) 使用元数据密钥加密以加速搜索，私密值 (kSecValueData) 使用私密密钥进行加密。元数据密钥受安全隔区保护，但会缓存在应用程序处理器中以便进行钥匙串快速查询。私密密钥则始终需要通过安全隔区进行往返处理。</p>
 <blockquote>
-<p>元数据密钥就是 FileSystem Key（EMF），私密密钥就是 Passcode Key</p>
+<p>元数据密钥就是 EMF key，私密密钥根据 WARP 类型不同采用 Dkey 或 Dkey + Passcode Key</p>
 </blockquote>
 <p>钥匙串以储存在文件系统中的<code>SQLite</code>数据库的形式实现， 而且数据库只有一个<code>securityd</code>监控程序决定每个进程或 App 可以访问哪些钥匙串项。钥匙串访问 API 将生成对监控程序的调用，从而查询 App 的 “keychain-access-groups”、 “application-identifier” 和 “application-group” 权限。访问组允许在 App 之间共享钥匙串项，而非将访问权限限制于单个进程。</p>
-<h3 id="1-类型定义"><a href="#1-类型定义" class="headerlink" title="1. 类型定义"></a>1. 类型定义</h3><p>根据 Apple 最新的 <a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/security/ksecattraccessiblewhenunlockedthisdeviceonly">KeyChain 的开发技术文档</a>，当前提供如下类型：</p>
-<p>对应文件保护的类型定义：</p>
-<ul>
-<li>kSecAttrAccessibleAfterFirstUnlock: 首次解锁后，对应文件保护的 Class C</li>
-<li>kSecAttrAccessibleWhenUnlocked: 未锁定状态下，对应文件保护的 Class A</li>
-<li>kSecAttrAccessibleAlways: <strong>iOS 13 已弃用</strong>。始终，对应文件保护的 Class D</li>
-</ul>
-<blockquote>
-<p>使用后台刷新服务的 App 可通过 kSecAttrAccessibleAfterFirstUnlock 访问需要的钥匙串项</p>
-</blockquote>
-<p>钥匙串类都有对应的 “仅限本设备” 项目，后者在备份期间从设备拷贝时始终通过 UID 加以保护，如果恢复（迁移）至其他设备将无法使用，例如 VPN 证书。</p>
-<ul>
-<li>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly: 仅限本设备，首次解锁后</li>
-<li>kSecAttrAccessibleWhenUnlockedThisDeviceOnly: 仅限本设备，未锁定状态下</li>
-<li>kSecAttrAccessibleAlwaysThisDeviceOnly: <strong>iOS 13 已弃用</strong>。仅限本设备，始终</li>
-</ul>
-<p>还有一个仅存在于系统密钥包的特殊类型，一旦用户密码被移除或重设，该类密钥便会丢弃，且不会备份、不同步到 iCloud 钥匙串、不包括在托管密钥包。</p>
-<ul>
-<li>kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly：仅当设备配置了密码时可用，行为方式与“未锁定状态下”相同</li>
-</ul>
+<h3 id="1-类型定义"><a href="#1-类型定义" class="headerlink" title="1. 类型定义"></a>1. 类型定义</h3><table>
+<thead>
+<tr>
+<th align="center">Keychain的数据保护类型</th>
+<th align="center">File的数据保护类型</th>
+<th align="center">适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">kSecAttrAccessibleWhenUnlocked</td>
+<td align="center">NSFileProtectionComplete</td>
+<td align="center">未锁定状态</td>
+</tr>
+<tr>
+<td align="center">N&#x2F;A</td>
+<td align="center">NSFileProtectionCompleteUnlessOpen</td>
+<td align="center">锁定状态</td>
+</tr>
+<tr>
+<td align="center">kSecAttrAccessibleAfterFirstUnlock</td>
+<td align="center">NSFileProtectionCompleteUntilFirstUserAuthentication</td>
+<td align="center">首次解锁后</td>
+</tr>
+<tr>
+<td align="center">kSecAttrAccessibleAlways</td>
+<td align="center">NSFileProtectionNone</td>
+<td align="center">始终</td>
+</tr>
+</tbody></table>
+<p>三个钥匙串类都有对应的<code>ThisDeviceOnly</code>项目，后者在备份期间从设备拷贝时始终通过 UID 加以保护，因此如果恢复至其他设备将无法使用，例如 VPN 证书不适合迁移至另一台设备。</p>
+<p>文件的 Class B 使用了非对称加密算法，钥匙串不提供相应的 Class key。如果 APP 确实存在后台更新的需求，官方建议使用<code>kSecAttrAccessibleAfterFirstUnlock</code>，即对应 Class C。</p>
+<p>还有一个仅存在于系统密钥包的特殊类型<code>kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly</code>，其行为方式与<code>kSecAttrAccessibleWhenUnlocked</code>相同。一旦用户密码被移除或重设，该类密钥便会丢弃，且不会备份、不同步到 iCloud 钥匙串、不包括在托管密钥包。</p>
+<p>从 iOS 14 开始，<code>kSecAttrAccessibleAlways</code>和<code>kSecAttrAccessibleAlwaysThisDeviceOnly</code>被弃用！请参考<a target="_blank" rel="noopener" href="https://developer.apple.com/documentation/security/ksecattraccessiblealways">Apple开发手册</a>，</p>
 <h3 id="2-典型场景"><a href="#2-典型场景" class="headerlink" title="2. 典型场景"></a>2. 典型场景</h3><p>Apple 根据所保护信息的类型以及 iOS 和 iPadOS 需要这些信息的时间来选择钥匙串类，妥善平衡了安全性和可用性。例如，VPN 证书必须始终可用，这样设备才能保持连接，但它归类为 “不可迁移”， 因此不能将其移至另一台设备.</p>
 <table>
 <thead>
@@ -447,14 +464,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">218k</span>
+    <span title="站点总字数">227k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">13:13</span>
+    <span title="站点阅读时长">13:44</span>
   </span>
 </div>
 <div class="busuanzi-count">
