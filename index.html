@@ -211,9 +211,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2024-04-07 21:08:41 / 修改时间：21:17:50" itemprop="dateCreated datePublished" datetime="2024-04-07T21:08:41+08:00">2024-04-07</time>
+      <time title="创建时间：2024-04-07 21:08:41" itemprop="dateCreated datePublished" datetime="2024-04-07T21:08:41+08:00">2024-04-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-04-08 01:20:29" itemprop="dateModified" datetime="2024-04-08T01:20:29+08:00">2024-04-08</time>
     </span>
 
   
@@ -223,14 +229,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>8.6k</span>
+      <span>9.3k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>31 分钟</span>
+      <span>34 分钟</span>
     </span>
 </div>
 
@@ -241,11 +247,13 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          根据 Apple 官网提供的第三方平台认证信息，其硬件、操作系统、应用软件、互联网服务和 Apple Pay 广泛采用 FIPS 140-2 加密标准（FIPS 140-3 认证已提交但尚未通过），当前硬件加密模块 v10.0 获得 CMVP 颁发的3811 证书。
+          根据iOS 16 安全评估报告的表述（P16-P20），Apple 设备提供的加密服务分为三个层级：
 
-同时，Apple 也积极参加通用标准 (CC) 评估，当前认证产品清单包括：macOS 13 Ventura（含FileVault）、iOS 15 & iOS 16；iPadOS 15 & iPadOS 16，由ATSEC 公司出具 TOE（Target of Evaluation）评估报告。
+ * User Space：SL1，软件级。驻留在用户空间内的动态可加载库，为 App 提供加密功能
+ * Kernel Space：SL1，软件级。操作系统内核加载的扩展模块，仅为内核提供加密功能
+ * Secure Key Store：SL2，硬件级。一个单芯片独立硬件加密模块，为静态数据和数据传输提供保护，包含固件和硬件加密算法实现
 
-本文就是依据上述公开信息的研究分
+Secure Key Store（安全密钥存储，SKS，也称 Secure Key Service），是 Apple 公司基于 Secure Encla
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
@@ -1221,7 +1229,7 @@ MathJax是一个开源JavaScript库。它支持La
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">13:44</span>
+    <span title="站点阅读时长">13:46</span>
   </span>
 </div>
 <div class="busuanzi-count">
