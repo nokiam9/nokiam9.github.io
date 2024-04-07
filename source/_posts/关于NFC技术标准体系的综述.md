@@ -106,7 +106,7 @@ NFC是多种技术路线并行发展的综合体，得益于条形码、磁条�
 
 {% asset_img rw-mode.jpg %}
 
-对于读卡器模式，NFC Forum定义了4种标准类型的[NFC标签](#NFC标签)（Type 5还不是正式标准），这四种类型NFC Tag的区别在于存储空间大小，数据传输率以及底层使用的协议上，后面有具体的技术细节。
+对于读卡器模式，NFC Forum定义了4种标准类型的 NFC 标签（Type 5还不是正式标准），这四种类型NFC Tag的区别在于存储空间大小，数据传输率以及底层使用的协议上，后面有具体的技术细节。
 
 此外，NFC Forum定义了两个通用的数据结构用于在NFC Device之间（包括R/W模式中的NFC Reader和NFC Tag）传递数据。这两个通用数据结构分别是NFC Data Exchange Format（简写为NDEF）以及NFC Record。
 
@@ -123,7 +123,7 @@ NFC是多种技术路线并行发展的综合体，得益于条形码、磁条�
 
 {% asset_img ce-mode.jpg %}
 
-该模式下，NFC 手机的工作类似于标准的[非接触式IC卡](#NFC数据传输)，为此ISO 14443定义了Type A 和 Type B两种数据传输标准（Type F不是正式标准），后续有详细技术分析。
+该模式下，NFC 手机的工作类似于标准的非接触式IC卡，为此ISO 14443定义了Type A 和 Type B两种数据传输标准（Type F不是正式标准），后续有详细技术分析。
 
 > 对于“刷手机”场景，NFC 手机工作在被动模式，它只在机具发出的射频场中被动响应，**数据传输是安全的**。
 
@@ -131,7 +131,7 @@ NFC是多种技术路线并行发展的综合体，得益于条形码、磁条�
 
 此模式设计用于交换两个NFC设备（如移动电话）之间的联系人信息等数据。每个点轮流作为读卡器（收发器）和标签，以实现双方之间的完整交换。
 
-在点对点 （P2P）中，具有 NFC 功能的设备工作在主动模式。其中的一个设备会发起通信链接。一旦链接建立，设备就会交替地与其他设备通信，并遵守 “ 说前先听 （listen-beforetalk） ” 规则。该通信模式下的数据交换相比其他模式更快，因此可以交换更多的数据。
+在点对点 （P2P）中，具有 NFC 功能的设备工作在主动模式。其中的一个设备会发起通信链接。一旦链接建立，设备就会交替地与其他设备通信，并遵守 “说前先听(listen-before-talk)” 规则。该通信模式下的数据交换相比其他模式更快，因此可以交换更多的数据。
 
 ### 小结
 
@@ -319,15 +319,14 @@ NFC技术的发展方兴未艾，当前还在快速变化中，最新进展包�
 
 - [深入理解Android：Wi-Fi、NFC和GPS卷](https://static.kancloud.cn/alex_wsc/android-wifi-nfc-gps)
 - [NFC-Forum官方网站的技术文档列表](https://nfc-forum.org/our-work/specification-releases/)
-- [获得NFC-Forum官方认证的芯片清单](https://nfc-forum.org/our-work/compliance/certification-program/certification-register/)
+- [获得NFC-Forum官方认证的芯片清单](https://nfc-forum.org/products/certified-products)
 - [EMV组织的Wiki信息](https://zh.wikipedia.org/wiki/EMV)
 - [NFC标准概述](https://lishiwen4.github.io/nfc/nfc-introduce)
-- [ISO14443 & ISO15693 & ISO18092](https://www.debugger.wiki/article/html/1562511839151556)
+- [ST意法半导体公司的NFC产品说明书](https://www.st.com/resource/zh/brochure/nfc_solutions_from_st.pdf)
 
 ## 资料下载
 
-- [ISO14443 Overview-v5.ppt](ISO14443 Overview-v5.ppt)
+- [ISO14443 Overview-v5](ISO14443-Overview-v5.ppt)
 - [NFC技术指南](tn1216-st25-nfc-guide-stmicroelectronics.pdf)
-- [ST意法半导体公司的NFC产品说明书](zh.NFC_Solutions_from_ST.pdf)
 - [NFC在Linux的技术实现](Near_Field_Communication_with_Linux.pdf)
 - [NFC技术综述-中华电信](NFC_mcs.pdf)
