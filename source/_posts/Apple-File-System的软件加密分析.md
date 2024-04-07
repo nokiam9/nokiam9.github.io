@@ -891,8 +891,8 @@ Apple 安全白皮书介绍：
 > The media key doesn’t provide additional confidentiality of data; instead, it’s designed to enable swift and secure deletion of data because without it decryption is impossible.
 > On a Mac with Apple silicon and those with the T2 chip, the media key is guaranteed to be erased by the Secure Enclave supported technology—for example by remote MDM commands.
 > Erasing the media key in this manner renders the volume cryptographically inaccessible.
-> media key Part of the encryption key hierarchy that helps provide for a secure and instant wipe. 
-> In iOS, iPadOS, tvOS, and watchOS, the media key wraps the metadata on the data volume (and thus without it access to all per-file keys is impossible, rendering files protected with Data Protection inaccessible). 
+> media key Part of the encryption key hierarchy that helps provide for a secure and instant wipe.
+> In iOS, iPadOS, tvOS, and watchOS, the media key wraps the metadata on the data volume (and thus without it access to all per-file keys is impossible, rendering files protected with Data Protection inaccessible).
 > In macOS, the media key wraps the keying material, all metadata, and data on the FileVault protected volume. In either case, wipe of the media key renders encrypted data inaccessible.
 
 ---

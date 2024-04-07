@@ -173,7 +173,6 @@ MS Name/IP address         Stratum Poll Reach LastRx Last sample
 ^* 192.168.0.140                 2   6    17     3  -1348ns[  +19us] +/-   12ms
 ```
 
-
 ## 参考文献
 
 - [时间同步 chrony 的服务端和客户端配置](https://www.jianshu.com/p/e9be333aa54c)

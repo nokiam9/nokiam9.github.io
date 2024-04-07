@@ -1,6 +1,6 @@
 ---
-title: Apple Data Protection的硬件加密分析
-date: 2024-03-04 21:23:05
+title: Apple Secure Key Store 硬件加密技术分析
+date: 2024-04-07 21:08:41
 tags:
 ---
 
@@ -475,5 +475,5 @@ Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架�
 ### 研究报告下载
 
 - [iOS Platform Security](Platform_Security.pdf)
-- [Data Security on Mobile Devices:Current State of the Art, Open Problems, and Proposed Solutions](Data_Security_on_Mobile_Devices.pdf)
+- [Data Security on Mobile Devices](Data_Security_on_Mobile_Devices.pdf)
 - [Demystifying the Secure Enclave Processor](us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf)
