@@ -452,23 +452,6 @@ Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架�
 
 所有的攻击类型都利用了加密/解密系统在进行加密/解密操作时算法逻辑没有被发现缺陷，但是通过物理效应提供了有用的额外信息（这也是称为“旁路”的缘由），而这些物理信息往往包含了密钥、密码、密文等隐密资料。
 
-## 附录四：钥匙串类密钥的补充说明
-
-|Keychain的数据保护类型|File的数据保护类型|适用场景|
-|:---:|:---:|:---:|
-|kSecAttrAccessibleWhenUnlocked|NSFileProtectionComplete|未锁定状态|
-|N/A |NSFileProtectionCompleteUnlessOpen|锁定状态|
-|kSecAttrAccessibleAfterFirstUnlock|NSFileProtectionCompleteUntilFirstUserAuthentication |首次解锁后|
-|kSecAttrAccessibleAlways|NSFileProtectionNone|始终|
-
-- 三个钥匙串类都有对应的`ThisDeviceOnly`项目，后者在备份期间从设备拷贝时始终通过 UID 加以保护，因此如果恢复至其他设备将无法使用，例如 VPN 证书不适合迁移至另一台设备
-- 文件的 Class B 使用了非对称加密算法，钥匙串不提供相应的 Class key。如果 APP 确实存在后台更新的需求，官方建议使用`kSecAttrAccessibleAfterFirstUnlock`，即对应 Class C
-- `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`仅存在于系统密钥包中，仅当设备配置了密码时可用，其行为方式与`kSecAttrAccessibleWhenUnlocked`相同，且它不同步到 iCloud 钥匙串、不会备份、不包括在托管密钥包中。
-- 从 iOS 14 开始`kSecAttrAccessibleAlways`和`kSecAttrAccessibleAlwaysThisDeviceOnly`被弃用！请参考[Apple开发手册](https://developer.apple.com/documentation/security/ksecattraccessiblealways)，
-
-> 钥匙串项使用两种不同的 AES-256-GCM 密钥加密 : 表格密钥 (元数据) 和行独有密钥 (私密密钥)。元数据密钥受安全隔区保护，但会缓存在应用程序处理器中以便进行钥匙串快速查询。私密密钥则始终需要通过安全隔区进行往返处理。
-> 钥匙串以储存在文件系统中的`SQLite`数据库的形式实现，而且数据库只有一个，`securityd`监控程序决定每个进程或 App 可以访问哪些钥匙串项。
-
 ---
 
 ## 参考文献
@@ -494,4 +477,3 @@ Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架�
 - [iOS Platform Security](Platform_Security.pdf)
 - [Data Security on Mobile Devices:Current State of the Art, Open Problems, and Proposed Solutions](Data_Security_on_Mobile_Devices.pdf)
 - [Demystifying the Secure Enclave Processor](us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf)
-
