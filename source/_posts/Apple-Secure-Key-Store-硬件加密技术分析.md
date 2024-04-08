@@ -159,7 +159,6 @@ Secure Key Store（安全密钥存储，SKS，也称 Secure Key Service）是 Ap
 ### 2. Effaceable Storage
 
 根据[iPhone Data Protection in Depth](iPhone_Data_Protection_in_Depth.pdf)的介绍，从 iPhone 3GS 开始，iPhone 内置的闪存芯片都最前面的 16 个 block 和最后的 15 个 block 保留给 Apple，并将 Block 1 作为 Effaceable Storage（可擦除区域），用于储存加密密钥的专用区域，可被直接寻址和安全擦除。
-尽管当攻击者实际占有设备时，可擦除存储器无法提供保护（事实上 OS 可以直接读取该区域），但其中存储的密钥（EMF、DKey、Bag1）可用作密钥层级的一部分，用于实现快速擦除和前向安全性。
 
 ![effaceable storage](ES.png)
 
@@ -172,6 +171,10 @@ Github 上有一个取证软件包可以读取早期的 iOS 系统数据，请�
 第四个标记：0x444F4E45 = DONE，长度 0x0000，这就是结束了！
 
 ![effaceable storage](ES2.png)
+
+尽管当攻击者实际占有设备时，可擦除存储器无法提供保护（事实上 OS 可以直接读取该区域），但其中存储的密钥作为密钥层级的一部分，可以实现快速擦除和前向安全性。
+
+![effaceable storage](ES3.png)
 
 ### 3. 密钥包
 
