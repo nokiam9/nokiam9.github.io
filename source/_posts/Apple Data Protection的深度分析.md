@@ -309,7 +309,10 @@ NAND Key：负责加密GPT分区表和系统分区表，也被称为媒体密钥
 
 ### 2. 遗留问题
 
-1. 用户修改passcode后，需要重新封装metadata中所有的per-file key，似乎计算量也不小啊！
+1. 用户修改 passcode 后，需要重新封装 metadata 中所有的 per-file key，似乎计算量也不小啊！
+
+正确！
+如果 iPhone 或 Macbook 修改了 passscode，大概需要十多分钟处理时间以修改文件系统元数据，但与重新加密数据文件对比，这个代价是值得的。
 
 ---
 
@@ -349,36 +352,6 @@ NAND Key：负责加密GPT分区表和系统分区表，也被称为媒体密钥
 
 ---
 
-![PHY](TOC-phy.png)
-
-### 每次 TOE（Target of Evaluation） 启动时，执行如下操作
-
-1. 使用安全隔区的 TRNG 在 SEP 中创建一个 256 位的临时 AES 密钥（姑且称为`DMA0`）
-2. TOE OS kernel 从 effaceable storage 读取 `wrapped DKey` 和 `wrapped EMF`，并发送给 SEP
-3. SEP 持有`Key 0x89B`，据此解封获得`Dkey` ；持有`Key 0x835`，据此解封获得`EMF`
-4. SEP 使用第一步生成的临时密钥`DMA0`封装`Dkey` // TODO：有啥用呢？
-5. SEP（通过专用线路）将临时密钥`DMA0`发送给 AES 引擎（与存储控制器连接，这个区域是TOE OS内核无法访问的）
-
-![PHY](TOC-key.png)
-
-1. TOE OS kernel 提取某个文件的元数据，并将其发送给 SEP
-2. SEP 持有`EMF`密钥，据此解密文件元数据，并将其发送回 TOE OS kernel
-3. TOE OS kernel 解析文件元数据，解析数据保护等级标记，并将`wrapped per-file key`发送给 SEP
-    >  class key 用Dkey包装，或者用Dkey和Passcode key的异或包装
-4. SEP 持有`class key`，据此解封`per-file key`，使用用临时密钥`DMA0`再次封装为`wrapped per-file key2`，并返回给 TOE OS kernel
-5. TOE OS kernel 将文件访问请求(读或写)和`wrapped per-file key2`一并发送给存储控制器
-6. AES 引擎持有临时密钥`DMA0`，据此解封获得`per-file key`，然后在存储控制器的数据传输过程中完成加密/解密
-
-
-The TOE OS kernel first extracts the file metadata (which are encrypted with the EMF key) and sends them to the SEP.
-The SEP decrypts the file metadata and sends it back to the TOE OS kernel.
-The TOE OS kernel determines which class key to use and sends the class key (which is wrapped with the Dkey, or with the XOR of the Dkey and the Passcode Key) and the file key (which is wrapped with the class key) to the SEP.
-● The SEP unwraps the file key and re-wraps it with the ephemeral key and sends this wrapped key back to the TOE OS kernel.
-The TOE OS kernel sends the file access request (read or write) together with the wrapped file key to the storage controller.
-The storage controller uses its internal implementation of AES, decrypts the file key, and then decrypts (when the operation is read) or encrypts (when the operation is write) the data during its transfer from/to the flash memory.
-
----
-
 ## 官方文档解读
 
 数据保护通过构建和管理密钥层级来实施，并建立在 Apple 设备内建的硬件加密技术基础上。它通过将某个类分配给每个文件来实现对文件的逐个控制； 可访问性根据该类密钥是否已解锁确定。APFS （Apple 文件系统）使文件系统可进一步以各个范围为基础对密钥进行细分（文件的各个部分可以拥有不同的密钥）。
@@ -414,7 +387,6 @@ The storage controller uses its internal implementation of AES, decrypts the fil
 > 实际上，A9之后的Soc设备增加了第二代安全存储组件，User Keybag 不再是一个加密的 .plist 文件，而是转移到
 > 注意！media key 不适用于 MacOS，FileVault 的密钥层级就是 KEK + VEK
 
-
 对于搭载 A9 之前的 SoC 的设备， 该 .plist 文件的内容通过保存在可擦除存储器中的密钥加密。 为了给密钥
 包提供前向安全性， 用户每次更改密码时， 系统都会擦除并重新生成此密钥。
 对于搭载 A9 或后续型号 SoC 的设备， 该 .plist 文件包含一个密钥， 表示密钥包储存在受反重放随机数
@@ -423,4 +395,3 @@ The storage controller uses its internal implementation of AES, decrypts the fil
 在任何一种情况下，擦除媒体密钥都会使加密数据无法访问。
 
 文件的内容可能使用文件独有（或范围独有）的一个或多个密钥进行加密，密钥使用类密钥封装并储存在文件的元数据中，文件元数据又使用文件系统密钥进行加密。类密钥通过硬件 UID 获得保护，而某些类的类密钥则通过用户密码获得保护。此层次结构既可提供灵活性，又可保证性能。例如，更改文件的类只需重新封装其文件独有密钥，更改密码只需重新封装类密钥。
-> asd 
