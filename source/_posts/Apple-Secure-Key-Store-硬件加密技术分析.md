@@ -532,6 +532,7 @@ Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架�
 ### 研究报告下载
 
 - [iPhone Data Protection in Depth - Sogti](iPhone_Data_Protection_in_Depth.pdf)
+- [iOS Encryption - NCC Group](2016-BSidesROC-iOSCrypto.pdf)
 - [iOS Platform Security](Platform_Security.pdf)
 - [Data Security on Mobile Devices](Data_Security_on_Mobile_Devices.pdf)
 - [Demystifying the Secure Enclave Processor](us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf)
