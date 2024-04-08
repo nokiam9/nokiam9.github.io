@@ -156,7 +156,24 @@ Secure Key Store（安全密钥存储，SKS，也称 Secure Key Service）是 Ap
 > 描述为：Entered/Output in plaintext by calling application within physical the boundary。
 > random secret 在 SKS 和 SBIO 之间明文传输，但都处于 SEP 范围内，行为方式符合其描述
 
-### 2. 密钥包
+### 2. Effaceable Storage
+
+根据[iPhone Data Protection in Depth](iPhone_Data_Protection_in_Depth.pdf)的介绍，从 iPhone 3GS 开始，iPhone 内置的闪存芯片都最前面的 16 个 block 和最后的 15 个 block 保留给 Apple，并将 Block 1 作为 Effaceable Storage（可擦除区域），用于储存加密密钥的专用区域，可被直接寻址和安全擦除。
+尽管当攻击者实际占有设备时，可擦除存储器无法提供保护（事实上 OS 可以直接读取该区域），但其中存储的密钥（EMF、DKey、Bag1）可用作密钥层级的一部分，用于实现快速擦除和前向安全性。
+
+![effaceable storage](ES.png)
+
+Github 上有一个取证软件包可以读取早期的 iOS 系统数据，请参见[https://github.com/nabla-c0d3/iphone-dataprotection](https://github.com/nabla-c0d3/iphone-dataprotection)。
+
+浅蓝色是 length ，红色是 tag 标记，注意 HFS 是大端字节顺序，字符串要反着读。
+第一个标记：0x42414731 = BAG1，长度 0x0034 = 52 个字节
+第二个标记：0xC46B6579 = key，长度 0x0028 = 40 个字节
+第三个标记：0xC54D4621 = EMF!，长度 0x0024 = 36 个字节
+第四个标记：0x444F4E45 = DONE，长度 0x0000，这就是结束了！
+
+![effaceable storage](ES2.png)
+
+### 3. 密钥包
 
 文件和钥匙串数据保护类的密钥均在密钥包中收集和管理。**Secure Key Store**负责管理系统密钥包，并且可以查询设备的锁定状态，只有当系统密钥包中的所有类密钥都可以访问并且已成功解开包装时，设备才会解锁。
 
@@ -409,8 +426,11 @@ The UID (a.k.a. UID key) is not accessible by any software. The "Key 0x89B" and 
 
 笔者认为，这两个 UID 衍生密钥应该是安全隔区**每次**启动时，基于固定值计算得出并保存在内存中，无需持久化存储。
 
-- `Key 0x835 = AES_KW(UID, 0x’01010101010101010101010101010101’)`
-- `Key 0x89B = AES_KW(UID, 0x’183e99676bb03c546fa468f51c0cbd49’)`
+- Key 0x835 = AES_KW(UID, 0x’01010101010101010101010101010101’)：Dkey 包裹密钥
+- Key 0x89B = AES_KW(UID, 0x’183e99676bb03c546fa468f51c0cbd49’)：EMF 包裹密钥
+- Key 0x836 = AES_KW(UID, 0x‘00E5A0E6526FAE66C5C1C6D4F16D6180’)
+- Key 0x837 = AES_KW(GID, 0x’345A2D6C5050D058780DA431F0710E15’)：Apple 固件的 img3 文件解密
+- Key 0x838 = AES_KW(UID, 0x’8C8318A27D7F030717D2B8FC5514F8E1‘)
 
 当然也有一种可能性，就是设备第一次启动时生成，并保存在安全存储组件的 Flash 中，这就留待后续验证吧。
 
@@ -508,6 +528,7 @@ Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架�
 
 ### 研究报告下载
 
+- [iPhone Data Protection in Depth - Sogti](iPhone_Data_Protection_in_Depth.pdf)
 - [iOS Platform Security](Platform_Security.pdf)
 - [Data Security on Mobile Devices](Data_Security_on_Mobile_Devices.pdf)
 - [Demystifying the Secure Enclave Processor](us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf)
