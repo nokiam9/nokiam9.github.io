@@ -287,17 +287,14 @@ P14 描述了基于密码的身份验证工作模式：
 
 ![File](file.jpg)
 
-上图是一个简要描述，[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P126 提供了更详细的步骤，但似乎存在一些偏差。
+上图是一个简要描述，[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P126 提供了更详细的步骤，但似乎存在一些偏差，后续有勘误分析！
 
 - XNU 首先提取文件元数据（使用 EMF 密钥加密），并将其发送到 SEP
 - SEP 持有 EMF 密钥，据此解密文件元数据，并将其发送回 XNU
-- XNU 判断文件保护类型，并将**类密钥（用 Dkey 包装，或 Dkey XOR Passcode Key 包装）**和文件密钥（用类密钥包装）发送到 SEP
+- XNU 判断文件保护类型，并将文件密钥（用类密钥包裹）和**类密钥标记**发送到 SEP
 - SEP 解开文件密钥，使用临时密钥重新包裹，并将其返回 XNU
 - XNU 将文件访问请求（读/写）与重新包裹的文件密钥一起发送到存储控制器。
 - 存储控制器使用其内部的 AES 硬件解密文件密钥，然后在从闪存传输数据或向闪存传输数据期间解密（读取操作时）或加密（写入操作时）数据
-
-> Q2：SEP 内部的 SKS keyring 保存已解封的类密钥，尚未解封类密钥也保存在 SKS memory ，因此 XNU 无需发送 wrapped class key，仅提供 class key type 即可。
-> 此外，iOS 4 破解技术中介绍 WARP 类型‘3’ 是两轮解封，硬件加密简化为：`Dkey XOR PDK`？
 
 ## 五、 Secure Key Store 服务接口
 
@@ -365,7 +362,7 @@ AA 组件有三种类型的加密因子，分别是设备厂商提供的硬件�
 ![Intel](filevault2.png)
 ![M1](filevault1.png)
 
-## 七、关于安全存储组件的讨论
+## 七、几个问题的讨论
 
 ### 1. 安全存储组件的数据保存在哪里？
 
@@ -406,6 +403,8 @@ SKP（Sealed Key Protection，密封密钥保护，也称操作系统绑定密�
 - 在搭载 Apple 芯片的 Mac 中，LLB（Low Level Bootloader，底层引导载入程序）会验证设备是否存在有效的 LocalPolicy，且 LocalPolicy 策略随机数值是否与**安全储存组件中所储存的值匹配**
 - 系统还会使用一个独立于 lpnh 和 rpnh 的随机数，以便设备被“查找”置于停用状态时，现有操作系统可被停用（通过将其 **LPN 和 RPN 从安全储存组件中移除**）的同时仍保持系统 recoveryOS 可启动
 
+![搭载 Apple 芯片的 Mac 开机时的启动过程步骤](mac-boot.png)
+
 初步探讨一下：
 
 1. Hardward key 1 = UID，Hardward key 2 = Key 0x835
@@ -413,9 +412,9 @@ SKP（Sealed Key Protection，密封密钥保护，也称操作系统绑定密�
 3. passcode key 仍然由 passcode 和 UID 通过 PBKDF2 算法生成，但是增加了 LPN 和 RPN 的校验环节以支持 SKP 功能。
 4. 操作系统绑定的目的是阻止用户安装未经 Apple 授权的操作系统，从根本上杜绝了 iOS 越狱功能。对于个人使用的 iPhone，其只能通过 Apple Store 安装官方认证的 APP，但是对于生产力工具 Macbook 来说，必须支持用户手工安装应用程序，因此设定了不同的安全等级来支持。
 
-### 4.  `Key 0x89B` 和 `Key 0x835` 的存储方式
+### 4.  `Key 0x89B` 和 `Key 0x835` 存储方式的勘误
 
-在[TOE 评估报告 - iOS 16](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P117 说明：
+[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P117 说明：
 The UID is used to derive two other keys, called "Key 0x89B" and "Key 0x835". These two keys are derived during **the first boot** by encrypting defined constants with the UID.
 
 P121 的密钥列表中，关于这两个 UID 衍生密钥的存储方式描述是：
@@ -434,43 +433,21 @@ The UID (a.k.a. UID key) is not accessible by any software. The "Key 0x89B" and 
 
 当然也有一种可能性，就是设备第一次启动时生成，并保存在安全存储组件的 Flash 中，这就留待后续验证吧。
 
+### 5. 关于文件读写流程的勘误
+
+[iOS 16 安全评估报告](Apple_iOS_16_iPhone_Security_Target_v1.1.pdf)的 P126 提供了详细的文件读写流程，但似乎存在一些偏差，其描述为：
+
+> XNU 判断文件保护类型，并将类密钥（用 Dkey 包装，或 Dkey XOR Passcode Key 包装）和文件密钥（用类密钥包装）发送到 SEP
+
+笔者的分析认为，内部的 SKS keyring 保存已解封的类密钥，尚未解封类密钥也保存在 SKS memory ，因此 XNU 无需发送 wrapped class key，仅提供 class key type 即可，请参见安全白皮书的描述：
+
+> 当打开一个文件时，系统会使用文件系统密钥解密文件的元数据，以显露出**封装的文件独有密钥**和表示它受哪个**类保护的记号**。文件独有或范围独有密钥使用类密钥解封，然后提供给硬件 AES 引擎，该引擎会在从闪存中读取文件时对文件进行解密。所有封装文件密钥的处理发生在安全隔区中；文件密钥绝不会直接透露给应用程序处理器。启动时，安全隔区与 AES 引擎协商得到一个临时密钥。当安全隔区解开文件密钥时， 它们又通过该临时密钥再次封装，然后发送回应用程序处理器。
+
+此外，iOS 4 破解技术中介绍 WARP 类型‘3’ 是两轮解封，硬件加密简化为：`Dkey XOR PDK`？
+
 ---
 
-## 附录一：名词解释
-
-### 功能组件类
-
-- Effaceable Storage（可擦除存储器）：NAND存储器中一个用于储存加密密钥的专用区域，可被直接寻址和安全擦除。尽管当攻击者实际占有设备时，可擦除存储器无法提供保护，但其中存储的密钥可用作密钥层级的一部分，用于实现快速擦除和前向安全性。
-    A dedicated area of NAND storage, used to store cryptographic keys, that can be addressed directly and wiped securely. While it doesn’t provide protection if an attacker has physical possession of a device, keys held in Effaceable Storage can be used as part of a key hierarchy to facilitate fast wipe and forward security.
-- Secure Storage Component（安全储存组件）：一个芯片，设计为使用不可更改的 RO 代码、硬件随机数生成器、加密引擎和物理篡改检测。在支持的设备上，安全隔区与用于储存反重放随机数的安全储存组件配对。为了读取和更新随机数，安全隔区和储存芯片采用安全协议来帮助确保对随机数的排他访问。此技术已更迭多代，提供了不同的安全性保证。
-    A chip designed with immutable RO code, a hardware random number generator, cryptography engines, and physical tamper detection. On supported devices, the Secure Enclave is paired with a Secure Storage Component for anti-replay nonce storage. To read and update nonces, the Secure Enclave and storage chip employ a secure protocol that helps ensure exclusive access to the nonces. There are multiple generations of this technology with differing security guarantees.
-- keybag（密钥包）：一种用于储存一组类密钥的数据结构。每种类型(用户、设备、系统、备份、托管或iCloud云备份)的格式都相同。
-  - 标头：版本(在 iOS 12 或更高版本中设为 4 )；类型(系统、备份、托管或 iCloud 云备份)；密钥包 UUID；HMAC(若密钥包已签名)；用于封装类密钥的方法：配合盐和迭代计数使用 Tangling 及 UID 或 PBKDF2。
-  - 类密钥列表：密钥 UUID；类(哪个文件或钥匙串数据保护类)；封装类型(仅 UID 派生密钥；UID 派生密钥和密码派生 密钥)；封装的类密钥；非对称类的公钥。
-- keychain（钥匙串）： 一种基础架构和一组 API、Apple 操作系统和第三方 App，用来储存和检索密码、密钥及其他敏感凭证。
-- Boot ROM：设备的处理器在首次启动时所执行的第一个代码。作为处理器不可分割的一部分，Apple或攻击者均无法修改。
-- sepOS：安全隔区固件，基于 Apple 定制版本的 L4 微内核。
-- XNU（X is Not Unix）：Apple 操作系统中央的内核。默认为受信任状态，并强制执行代码签名、沙盒化、授权核对和地址空间布局 随机化 (ASLR) 等安全措施。
-
-### 实体密钥类
-
-- UID：一个 256 位的 AES 密钥，在设备制造过程中刻录在每个处理器上。这种密钥无法由固件或软件读取，只能由处理器的硬件 AES 引擎使用。若要获取实际密钥，攻击者必须对处理器的芯片发起极为复杂且代价高昂的物理攻击。UID 与设备上的任何其他标识符均无关，包括但不限于 UDID。
-- ECID（集成电路 ID）：每台 iOS 和 iPadOS 设备上的处理器所独有的一个 64 位标识符。当在一台设备上接通电话 时，该设备通过低功耗蓝牙 (BLE) 4.0 进行短暂广播，使附近的 iCloud 配对设备停止响铃。广播的字节使用与“接力” 广播相同的方法来加密。作为个性化流程的一部分，此标识符不被视为机密。
-- Media key（媒介密钥）：加密密钥层次的一部分，可帮助实现安全的立即擦除。
-  - 在 iOS、iPadOS、Apple tvOS 和 watchOS 中，媒介密钥会封装数据宗卷上的元数据(因此，没有媒介密钥便无法访问所有文件独有密钥，也就无法访问受数据保护加密方法所保护的文件)。
-  - 在 macOS 中，媒介密钥会封装文件保险箱所保护宗卷上的密钥材料、所有元数据和数据。
-- per-file key（文件独有密钥）：数据保护用于在文件系统上加密文件的密钥。文件独有密钥使用类密钥封装，储存在文件的元数据中。
-- filesystem key（文件系统密钥）：用于加密每个文件的元数据的密钥，包括其类密钥。存储在可擦除存储器中，用于实现快速擦除，并非用于保密目的。
-- Passcode-derived key（密码派生密钥，PDK）：用户密码与长期 SKP 密钥和安全隔区的 UID 配合使用，由此派生加密密钥。
-
-### 软件算法类
-
-- key wrapping（密钥封装/包裹）：使用一个密钥来加密另一个密钥。iOS 和 iPadOS 根据 RFC 3394 使用 NIST AES 密钥封装。
-- Tangling（密钥缠绕）：用户密码转换为密钥并使用设备的 UID 加强的过程。此过程帮助确保暴力攻击只能在特定设备上执行， 因此可限制攻击的频度且避免多部设备同时遭到攻击。Tangling 算法是 PBKDF2。这种算法为每次迭代使用加入 设备 UID 的 AES 密钥作为伪随机函数 (PRF)。
-- xART（eXtended Anti-Replay Technology，反重放技术）：一组为具有反重放功能(基于物理储存架构)的安全隔区提供加密且经认证的 永久储存区的服务。
-- Sealed Key Protection（密封密钥保护，SKP）：数据保护中的一种技术，其使用系统软件的测量值和仅在硬件中可用的密钥来保护(或密封)加密密钥。
-
-## 附录二：Cocoa 框架
+## 附录一：Cocoa 框架
 
 Cocoa 是苹果公司为 macOS 所创建的原生面向对象的应用程序接口，是 Mac OS X 上五大 AP 之一（其它四个是Carbon、POSIX、X11 和 Java）。
 
@@ -484,7 +461,7 @@ Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架�
     它只能在 MacOS 中使用。
 - UIKit（User Interface Kit，用户界面工具包）：用于 iOS 的图形用户界面工具包。与AppKit不同，它使用`UI`的前缀。
 
-## 附录三：侧信道攻击
+## 附录二：侧信道攻击
 
 在密码学中，侧信道攻击（side-channel attack，也称旁路攻击）是一种基于密码系统的**物理实现**中获取信息的攻击方式，区别于暴力破解法，或者基于算法理论性弱点的密码分析。
 值得注意的是，如果破解密码学系统使用的信息是通过与其使用人的合法交流获取的，这通常归类于社会工程学攻击。
@@ -533,3 +510,6 @@ Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架�
 - [iOS Platform Security](Platform_Security.pdf)
 - [Data Security on Mobile Devices](Data_Security_on_Mobile_Devices.pdf)
 - [Demystifying the Secure Enclave Processor](us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf)
+- [iOS Encryption Systems - 奥地利格拉茨技术大学](iOS_Encryption_Systems.pdf)
+- [iOS 5的数据保护技术分析](0721C6_Andrey.Belenko_Evolution.of.iOS.Data.Protection.pdf)
+- [iPhone 数据保护技术 - ELComSoft](OWASP_BeNeLux_Day_2011_-_A._Belenko_-_Overcoming_iOS_Data_Protection.pdf)

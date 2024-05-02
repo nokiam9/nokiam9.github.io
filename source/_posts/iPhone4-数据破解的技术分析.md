@@ -332,19 +332,24 @@ PROTECTION_CLASSES={
     `Class key = AES_DECRYPT(Key 0x835, Class Key!)`
 6. 现在类密钥已经出现在内存中，可以用于解封文件 metadata 中的`per-file key`
 
-## 四、遗留问题
+## 四、简要分析
 
-## 1. systembag.kb 文件头部包含的 Salt 和 HMCK 字段，是否已经转移到安全隔区的第二代存储组件了呢？
+### 1. systembag.kb 文件头部包含的 Salt 字段，是否已经转移到安全隔区的第二代存储组件了呢？
 
 正确！
 Apple 第二代安全储存组件增加了计数器加密箱，包括：
 
-- 1个128位盐：就是 Salt 字段
-- 1个128位密码验证器：就是 HMCK 字段，存储了 HMAC 校验值
-- 1个8位计数器
+- 1个 128 位盐：就是 Salt 字段
+- 1个 128 位密码验证器：存储了 HMAC 校验值
+- 1个 8 位计数器
 - 1个 8 位最大尝试值
 
 也就是说，最核心的加密材料从 REE 环境的 keybag 中转移到 TEE 环境的安全隔区中。
+需要注意的是，笔者认为第二代安全储存组件的密码验证器不是密钥包中的 HMCK 字段，因为密码验证器要求不能对外泄露，不可能存储在外部的密钥包中，HMCK 字段应该仅用于密钥包自身的数据完整性检查。
+
+### 2. Android 的文件级保护类别
+
+![A](android.jpg)
 
 ---
 
@@ -370,9 +375,26 @@ Apple 第二代安全储存组件增加了计数器加密箱，包括：
 
 ## 参考文献
 
-- [iphone-dataprotection 工具包 - Github](https://github.com/nabla-c0d3/iphone-dataprotection)
-- [Linux文件系统简介](https://www.cnblogs.com/xumenger/p/4491425.html)
+### 官方文档
+
 - [ATS-Key-Wrap 算法的 RFC 3394 规范](https://rfc2cn.com/rfc3394.html)
-- [解密iPhone的固件](https://blog.csdn.net/XiNGRZ/article/details/5332915)
+- [FBE 文件级加密原理 - Android官方](https://source.android.com/docs/security/features/encryption/file-based?hl=zh-cn)
+
+### 源代码
+
+- [iphone-dataprotection 工具包 - Github](https://github.com/nabla-c0d3/iphone-dataprotection)
+
+### 研究报告
+
+- [Linux文件系统简介](https://www.cnblogs.com/xumenger/p/4491425.html)
 - [通过侧信道分析加强对iPhone用户身份验证的暴力破解攻击](https://www.anquanke.com/post/id/237769)
 - [你的安卓手机究竟是FDE加密还是FBE加密？](https://page.om.qq.com/page/O3yauEIx2l-9WrUkHgQgRUBw0)
+- [iOS资料保护机制简介](https://www.kaotenforensic.com/ios/ios-data-protection/)
+- [超越FBI NSA, iPhone 5c 以物理NAND備份法破解iOS密碼](https://www.osslab.com.tw/iphone-5c-nand/)
+- [Jonathan Zdziarski 对iOS文件系统的论述](https://www.theiphonewiki.com/wiki/File_System_Crypto)
+- [FBI vs Apple：FBI是幸运的 - 盘古团队](https://www.leiphone.com/category/zhuanlan/4dO3QQ178rkZ3mo5.html)
+- [iOS 破解分析 - 乌云](https://paper.seebug.org/papers/Archive/drops2/%E3%80%8AiOS%E5%BA%94%E7%94%A8%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E6%88%98%E3%80%8B%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%9A%E6%97%A0%E6%B3%95%E9%94%80%E6%AF%81%E7%9A%84%E6%96%87%E4%BB%B6.html)
+- [Android 檔案系統加密機制](https://www.kaotenforensic.com/android/android_encryption/)
+- [Android 系統基本架構 - 開機流程與分區說明](https://www.kaotenforensic.com/android/booting-partitions/)
+- [iOS 数据保护基础知识](https://www.pmbonneau.com/multiboot/dataprotection_basics.php)
+- [拆解 iPhone 的黑客指南（第 3 部分）](http://securityhorror.blogspot.com/2013/09/the-hackers-guide-to-dismantling-iphone_5697.html)
