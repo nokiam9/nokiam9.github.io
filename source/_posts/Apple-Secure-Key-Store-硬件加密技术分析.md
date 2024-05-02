@@ -130,7 +130,7 @@ Secure Key Store（安全密钥存储，SKS，也称 Secure Key Service）是 Ap
 
 ![arch](arch3.jpg)
 
-> 注意，系统密钥包**从不存储 Class D key**！因为 NSFileProtectionNone 实际是一个单密钥系统，即：`per-file key = Class D key = AES_Unwrap(key 0x835，Dkey)`
+> 注意，系统密钥包**不存储 Class D key**！因为 NSFileProtectionNone 实际是一个单密钥系统，即：`per-file key = Class D key = AES_Unwrap(key 0x835，Dkey)`
 
 ### 1. 关键安全参数
 
@@ -138,21 +138,21 @@ Secure Key Store（安全密钥存储，SKS，也称 Secure Key Service）是 Ap
 
 ![TOC](<TOC-key.png>)
 
-[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P20，也提供了关键安全参数的生命周期信息：
+[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P20，也提供了关键安全参数 CSP 的生命周期列表：
 
-- CSP 列表的 Root Encryption Key (REK) = Passcode Key，其描述为：
+- `Root Encryption Key (REK)` = Passcode Key，其描述为：
     Generation：Derived from passcode using PBKDF2 and entanglement with UID
     Entry and Output：Generated inside the module and is never output。
-- CSP 列表的 Moudle-managed keybags key 所指**并非 Bag1**(因为其是明文存储方式)，而是密钥包中存储的各种 Class key
+- `Moudle-managed keybags key` **不是 Bag1**(因为其是明文存储方式)，而是指密钥包中存储的各种 Class key
     Generation: Symmetric key generation services of the module
     Entered encrypted using AES-256 KW, Output encrypted using AES-256 KW
     Non-volatile store: cryptographically zeroized when overwriting the KEK
     Volatile store: zeroized when freeing the secure memory
-- CSP 列表的 File system object DEK = EMF
-- CSP 列表的 Escrow Keybag and the class D key encryption key = Key 0x835
+- `File system object DEK` = EMF
+- `Escrow Keybag and the class D key encryption key` = Key 0x835
 - CSP 列表没有提供 Key 0x89B 的信息
 
-> Q1： CSP 列表的 REK wrapping key 应该就是 SKS 和 SBIO 之间的 random secret。
+> Q1： CSP 列表的 `REK wrapping key` 应该就是 SKS 和 SBIO 之间的 random secret。
 > 描述为：Entered/Output in plaintext by calling application within physical the boundary。
 > random secret 在 SKS 和 SBIO 之间明文传输，但都处于 SEP 范围内，行为方式符合其描述
 
@@ -193,7 +193,7 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 - VERS：版本号，iOS 12 之后都置为 4
 - TYPE：该密钥包的类型，[0-system，1-backup，2-escrow，3-iCloud Backup]
 - UUID：该密钥包的 UUID
-- HMCK：如果密钥包已签名，保存 HMAC 校验值，即**安全存储组件计算、并返回的加密箱熵值**
+- HMCK：如果密钥包已签名，保存 HMAC 校验值
 - WRAP：包裹方式，[1:仅 UID 派生, 2:仅 passcode 派生, 3:两者都有]
 - SALT：PBKDF2 算法使用的盐
 - ITER：PBKDF2 算法的迭代次数
@@ -202,13 +202,13 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 
 对于每个密钥包的条目（文件保护类密钥 & 钥匙串类密钥），其字段包括：
 
-- CLAS：密钥的级别
+- CLAS：class，密钥的级别
     文件保护类型为[1,2,3]：4-空缺，就是Dkey；5-保留未启用；
     钥匙串保护类型为[6,7,8,9,10,11]：对应钥匙串的 3 个级别和相应的 device only
-- WRAP：包裹方式，与 Header 定义一致
-- KTPY：密钥类型，例如 Curve25519
-- WPKY：处于包裹状态的类密钥数据。如果是非对称密钥，此处存储的是 Private key
-- PBKY：可选（例如 CLASS B）。非对称密钥对的 Pulic key，包裹状态
+- WRAP：wraping type，包裹方式。与 Header 定义一致
+- KTPY：key type。例如 Curve25519
+- WPKY：wrapped key。如果是非对称密钥，此处存储的是 Private key
+- PBKY：public key（可选）。Class B 的 Pulic key，包裹状态
 - UUID：该密钥的 UUID
 
 关于密钥包的解封流程，[Apple SKS 加密模块](Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf)的 P23 指出：
@@ -217,15 +217,14 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 - 密钥包基于 256 位的 AES-KW 包裹算法，然后输出到 Device OS 完成持久化存储（permanent storage）。
 - 设备加电启动后，加密模块从 Device OS 导入包裹状态的密钥包并完成解封。
 
-该模块通过以下方式实现基于密码的身份验证：
+P14 描述了基于密码的身份验证工作模式：
 
-- 当用户从模块请求加密服务时，它必须提供密码和对用户密钥包的引用，该密钥包在 SKS 内的 SP800-38F AES 密钥包装 (AES-KW) 下加密存储。
-- 该模块使用 PBKDF 从操作者提供的密码中派生 AES 密钥。
+- 当用户从模块请求加密服务时，它必须提供密码和对用户密钥包的引用，该密钥包在 SKS 内的 SP800-38F AES 密钥包装 (AES-KW) 下加密存储。该模块使用 PBKDF 从操作者提供的密码中派生 AES 密钥。
 - 然后，模块的 SP800-38F AES 密钥解包功能（即 AES-KW-AD）使用派生的 AES 密钥来解密参考用户密钥包并验证解密密钥的真实性。
-- 由于 AES-KW 是一种身份验证密码，因此解密操作只有在没有身份验证错误的情况下才会成功。这意味着用户提供了正确的密码来导出用于 AES 密钥解包的正确 AES 密钥。
-- 任何其他密码都将派生出不同的 AES 密钥，这将导致解密的用户密钥错误，导致身份验证检查失败。
+    由于 AES-KW 是一种身份验证密码，因此解密操作只有在没有身份验证错误的情况下才会成功。这意味着用户提供了正确的密码来导出用于 AES 密钥解包的正确 AES 密钥。
+    任何其他密码都将派生出不同的 AES 密钥，这将导致解密的用户密钥错误，导致身份验证检查失败。
 - 如果可以成功解开用户密钥包，则用户将通过模块的身份验证，然后将使用解开的用户密钥继续执行所请求的加密服务。
-- 解包用户密钥包失败也是用户身份验证失败，操作员将被拒绝访问模块。
+    解包用户密钥包失败也是用户身份验证失败，操作员将被拒绝访问模块。
 
 ## 四、Secure Key Store 业务逻辑
 
@@ -297,7 +296,7 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 - XNU 将文件访问请求（读/写）与重新包裹的文件密钥一起发送到存储控制器。
 - 存储控制器使用其内部的 AES 硬件解密文件密钥，然后在从闪存传输数据或向闪存传输数据期间解密（读取操作时）或加密（写入操作时）数据
 
-> Q2：class key 只在 SEP 内部使用，XNU 应该发送 Class type，而非包裹状态的 Class key
+> Q2：SEP 内部的 SKS keyring 保存已解封的类密钥，尚未解封类密钥也保存在 SKS memory ，因此 XNU 无需发送 wrapped class key，仅提供 class key type 即可。
 > 此外，iOS 4 破解技术中介绍 WARP 类型‘3’ 是两轮解封，硬件加密简化为：`Dkey XOR PDK`？
 
 ## 五、 Secure Key Store 服务接口
@@ -306,7 +305,7 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 
 ### 1. 完全符合 FIPS 140-2 的系统服务
 
-1. 文件系统服务（Class D File System Services）：无保护类型的文件（读/写）服务
+1. 文件系统服务（Class D File System Services）：无保护类型文件的系统（读/写）服务
     Key wrapping: UID，AES Key used to wrap Class D Key（key 0x835），Class D Key
     File system keys：DEK（EMF 或 VEK）
     Storage controller key：KEK（ DMA临时密钥 ）
@@ -349,27 +348,22 @@ User keybag 是设备常规操作中使用的封装类密钥的储存位置（�
 5. RFC 5869 based HKDF
 6. AES-GCM Encryption and Decryption X
 
-## 六、MacOS Filevault 的技术分析
+## 六、MacOS FileVault 的技术分析
 
-基于[TOE 评估报告 - MacOS 13：FileVault](Apple_MacOS_13_Ventura_FileVault_Security_Target.pdf)，P9 指出：
+与 iPhone OS 相比，MacOS 的加密技术方案 FileVault 有着明显差异，一是仅支持单密钥的 FDE 加密方案，而非数据保护技术的 FBE 加密方案；二是 Macbook 长期使用 Intel CPU，硬件加密只能采用 T2 安全芯片的外挂方案。
 
-![M1](filevault1.png)
+NIAP 根据 CC 安全标准定义了 FDE 的保护配置文件，请参见[https://www.niap-ccevs.org/Profile/PP.cfm](https://www.niap-ccevs.org/Profile/PP.cfm)，其核心功能组件分别为 AA（Authorization Acquisition，授权获取）和 EE（Encryption Engine，加密引擎），可以由不同的供应商提供组合能力。
+![FDE](FDE1.png)
+
+一般来说，AA 和 EE 的运行环境可能会根据其运行平台的启动阶段而有所不同，初始化方面以及可能的授权可以在 Pre-Boot 中执行，同时配置、加密、解密和管理功能可能在 OS 中执行。
+
+![FDE](FDE2.png)
+
+AA 组件有三种类型的加密因子，分别是设备厂商提供的硬件密钥，用户提供的 passcode，和 TRNG 随机生成的 salt，共同构成了机密性保护。
+根据 [TOE 评估报告 - MacOS 13：FileVault](Apple_MacOS_13_Ventura_FileVault_Security_Target.pdf)，P9 指出了 Apple 自研 CPU 负责实现 AA 和 EE 的全部功能，而 Intel CPU 只负责 AA 的 Password Acquisition 功能的实例化，其他核心功能仍然由 T2 安全芯片提供，具体对比见下图。
+
 ![Intel](filevault2.png)
-
-Apple T2安全芯片运行T2OS 13操作系统。
-
-T2包括安全飞地，其中包含运行sepOS操作系统的SEP，以及执行存储加密的DMA存储控制器。
-加密引擎（EE）在T2上实例化。AA在英特尔芯片（密码获取）和T2上都实例化。
-安全飞地为所有EE功能（即存储数据的加密/解密除外）和AA的所有加密功能（即PBKDF2）提供安全相关功能。
-
-DMA存储控制器提供了一个专用的AES加密引擎，内置在主机平台的存储和主内存之间的直接内存访问（DMA）路径中。密码获取组件（AA）是存储驱动器上的预引导组件。它捕获用户密码并将其传递给安全飞地。
-
-When stored, the encrypted file system key is additionally wrapped by an “effaceable key” stored in Effaceable Storage **or** using a media key-wrapping key, protected by Secure Enclave anti-replay mechanism.
-
-AA - Authorization Acquisition
-EE - Encryption Engine
-
-待续！
+![M1](filevault1.png)
 
 ## 七、关于安全存储组件的讨论
 
@@ -395,26 +389,29 @@ EE - Encryption Engine
 
 做个初步的分析。
 
-1. 安全储存组件只存储一些关键的安全参数（熵），核心密钥仍然由 Secure Key Store 管理。
-2. 安全存储组件的 Salt 与系统密钥包中用于 REK 的 Salt 不是一回事，其仅在内部保存并且不以任何形式输出，为 xART 机制提供额外的机密性。
-3. 密码熵值和加密箱熵值在安全隔区和安全存储之间传递，这是一个标准的双向鉴权流程。
-   密码熵值可能就是 Passcode Key，加密箱熵值可能就是系统密钥包的 SART 字段（早期版本就存在的 HMCK 字段保存了签名信息，但其目标是确保密钥包内容的完整性，而非反重放攻击）。
+1. 密码熵值和加密箱熵值在安全隔区和安全存储之间传递，这是一个标准的双向鉴权流程。
+    密码熵值可以肯定就是 Passcode Key，加密箱熵值估计是系统密钥包的 SART 字段，即安全白皮书介绍的 A9 设备的新增密钥。
+    早期版本的 HMCK 字段保存签名信息，但目标是密钥包内容的完整性，而非反重放攻击。
+2. 核心密钥全部由 Secure Key Store 管理，安全储存组件仅负责存储一些关键的安全参数，包括：反重放随机数（区别于系统密钥包中、用于 REK 的 Salt）、密码验证器、计数器和最大尝试值等，这些数据不以任何形式输出，为 xART 机制提供额外的机密性。
+3. 安全储存组件的唯一加密密钥（即 xART key）的构造方式不清楚，猜测是一个 UID 的固定衍生密钥（如果是原生密钥，就需要额外考虑持久化存储方式）。
 
-### 3. xART Key 是什么？
+### 3. 操作系统绑定密钥的工作机制？
 
-在搭载 Apple 芯片的 Mac 上，对 KEK 的保护通过整合有关系统安全性策略的信息进一步得到了加强。下图是一个最完整的密钥层次图。
+SKP（Sealed Key Protection，密封密钥保护，也称操作系统绑定密钥），是使用系统软件的测量值和仅在硬件中可用的密钥来保护（或密封）加密密钥的一种技术。搭载 Apple 芯片的 Mac 上，对 KEK 的保护通过整合有关系统安全性策略的信息进一步得到了加强。
 
 ![SKP](SKP.png)
 
-- Apple 设备支持一项称为密封密钥保护 (SKP) 的技术，其旨在确保加密材料在这些情况下不可用：脱离设备时，或者对操作系统版本或安全性设置存在未经用户正确授权的操纵时。**此功能不是由安全隔区提供，而是由位于更底层的硬件寄存器支持**，目的是针对解密用户数据所需的密钥提供独立于安全隔区的额外保护层。
-- 由用户密码与长期 SKP 密钥和硬件密钥 1（安全隔区的 UID）配合使用而生成的密钥称为密码派生密钥。**此密钥用于保护用户密钥包（在所有支持的平台上）和 KEK（仅限在 macOS 中）**，然后启用生物识别解锁或使用其他设备（如Apple Watch）自动解锁。
-- 在搭载 Apple 芯片的 Mac 中，LLB（Low Level Bootloader，底层引导载入程序）会验证设备是否存在有效的 LocalPolicy 且 LocalPolicy 策略随机数值是否与**安全储存组件中所储存的值匹配**。
+- Apple 设备支持一项称为密封密钥保护 (SKP) 的技术，其旨在确保加密材料在这些情况下不可用：脱离设备时，或者对操作系统版本或安全性设置存在未经用户正确授权的操纵时。**此功能不是由安全隔区提供，而是由位于更底层的硬件寄存器支持**，目的是针对解密用户数据所需的密钥提供独立于安全隔区的额外保护层
+- 由用户密码与长期 SKP 密钥和硬件密钥 1（安全隔区的 UID）配合使用而生成的密钥称为密码派生密钥。**此密钥用于保护用户密钥包（在所有支持的平台上）和 KEK（仅限在 macOS 中）**，然后启用生物识别解锁或使用其他设备（如Apple Watch）自动解锁
+- 在搭载 Apple 芯片的 Mac 中，LLB（Low Level Bootloader，底层引导载入程序）会验证设备是否存在有效的 LocalPolicy，且 LocalPolicy 策略随机数值是否与**安全储存组件中所储存的值匹配**
+- 系统还会使用一个独立于 lpnh 和 rpnh 的随机数，以便设备被“查找”置于停用状态时，现有操作系统可被停用（通过将其 **LPN 和 RPN 从安全储存组件中移除**）的同时仍保持系统 recoveryOS 可启动
 
 初步探讨一下：
 
-1. Hardward key 1 = UID，password-derived key = REK，Hardward key 2 = Key 0x835
-2. 安全存储组件的唯一加密密钥，是否就是 xART key ？其构造方式也不清楚。
-3. LLB 需要校验的策略随机数值，是否等同于安全存储组件保存的 Salt ?
+1. Hardward key 1 = UID，Hardward key 2 = Key 0x835
+2. LPN（Local Policy Number，本地策略随机数）和 RPN（Remote Policy Number，远程策略随机数）是用于 LLB 校验的策略随机数值，也在安全存储组件中保存。
+3. passcode key 仍然由 passcode 和 UID 通过 PBKDF2 算法生成，但是增加了 LPN 和 RPN 的校验环节以支持 SKP 功能。
+4. 操作系统绑定的目的是阻止用户安装未经 Apple 授权的操作系统，从根本上杜绝了 iOS 越狱功能。对于个人使用的 iPhone，其只能通过 Apple Store 安装官方认证的 APP，但是对于生产力工具 Macbook 来说，必须支持用户手工安装应用程序，因此设定了不同的安全等级来支持。
 
 ### 4.  `Key 0x89B` 和 `Key 0x835` 的存储方式
 
