@@ -349,7 +349,16 @@ Apple 第二代安全储存组件增加了计数器加密箱，包括：
 
 ### 2. Android 的文件级保护类别
 
+在 FBE 的设计中，根据文件内容的私密性，Android 把用户数据分区的存储位置划分安全等级，包括下几类：
+
+- Unencrypted Storage：不加密的存储位置。iOS 没有该类型。
+- System Device Encrypted (DE) Storage ：相当于 Class D。一般存储一些设备相关，Framework 相关等用户无关的数据。
+- Device Encrypted (DE) Storage ：相当于 Class C，与用户相关的数据，安全性要求一般，在设备启动后以及用户解锁设备后都可以直接访问。
+- Credential Encrypted (CE) Storage ：相当于 Class A，与用户密切相关的数据，安全性等级高，如果用户设置了锁屏密码，必须在用户解锁设备后这些存储位置的数据才可用。
+
 ![A](android.jpg)
+
+Android 没有相当于 Class B 的类型，可以用 Class C 替代。
 
 ---
 
@@ -398,3 +407,4 @@ Apple 第二代安全储存组件增加了计数器加密箱，包括：
 - [Android 系統基本架構 - 開機流程與分區說明](https://www.kaotenforensic.com/android/booting-partitions/)
 - [iOS 数据保护基础知识](https://www.pmbonneau.com/multiboot/dataprotection_basics.php)
 - [拆解 iPhone 的黑客指南（第 3 部分）](http://securityhorror.blogspot.com/2013/09/the-hackers-guide-to-dismantling-iphone_5697.html)
+  
