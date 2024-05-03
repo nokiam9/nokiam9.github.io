@@ -391,6 +391,7 @@ Apple 第二代安全储存组件增加了计数器加密箱，包括：
 
 ## 参考文献
 
+- [iPhone 攻击技术文档大全](https://github.com/antoniozekic/papers_and_slides)
 - [Linux文件系统简介](https://www.cnblogs.com/xumenger/p/4491425.html)
 - [通过侧信道分析加强对iPhone用户身份验证的暴力破解攻击](https://www.anquanke.com/post/id/237769)
 - [iOS资料保护机制简介](https://www.kaotenforensic.com/ios/ios-data-protection/)
