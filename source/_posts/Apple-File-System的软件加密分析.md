@@ -1025,6 +1025,7 @@ Apple 安全白皮书介绍：
 - [ApFS Structure - NTFS.com](https://www.ntfs.com/apfs-structure.htm)
 - [APFS 数据结构参考图](APFS-ref.pdf)
 - [Fork (file system) - Wiki](https://en.wikipedia.org/wiki/Fork_(file_system))
+- [谈谈 Mac OS 的文件系统](https://zhuanlan.zhihu.com/p/33656976)
 
 ### 官方文档
 

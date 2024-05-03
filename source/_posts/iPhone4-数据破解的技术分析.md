@@ -347,22 +347,29 @@ Apple 第二代安全储存组件增加了计数器加密箱，包括：
 也就是说，最核心的加密材料从 REE 环境的 keybag 中转移到 TEE 环境的安全隔区中。
 需要注意的是，笔者认为第二代安全储存组件的密码验证器不是密钥包中的 HMCK 字段，因为密码验证器要求不能对外泄露，不可能存储在外部的密钥包中，HMCK 字段应该仅用于密钥包自身的数据完整性检查。
 
-### 2. Android 的文件级保护类别
-
-在 FBE 的设计中，根据文件内容的私密性，Android 把用户数据分区的存储位置划分安全等级，包括下几类：
-
-- Unencrypted Storage：不加密的存储位置。iOS 没有该类型。
-- System Device Encrypted (DE) Storage ：相当于 Class D。一般存储一些设备相关，Framework 相关等用户无关的数据。
-- Device Encrypted (DE) Storage ：相当于 Class C，与用户相关的数据，安全性要求一般，在设备启动后以及用户解锁设备后都可以直接访问。
-- Credential Encrypted (CE) Storage ：相当于 Class A，与用户密切相关的数据，安全性等级高，如果用户设置了锁屏密码，必须在用户解锁设备后这些存储位置的数据才可用。
-
-![A](android.jpg)
-
-Android 没有相当于 Class B 的类型，可以用 Class C 替代。
-
 ---
 
-## 附录：有意思的一些企业信息
+## 附录一：侧信道攻击
+
+在密码学中，侧信道攻击（side-channel attack，也称旁路攻击）是一种基于密码系统的**物理实现**中获取信息的攻击方式，区别于暴力破解法，或者基于算法理论性弱点的密码分析。
+值得注意的是，如果破解密码学系统使用的信息是通过与其使用人的合法交流获取的，这通常归类于社会工程学攻击。
+
+根据借助的介质，旁路攻击分为多个大类，包括：
+
+- 缓存攻击（Cache attack）：通过获取对缓存的访问权而获取缓存内的一些敏感信息，例如攻击者获取云端主机物理主机的访问权而获取存储器的访问权；
+- 计时攻击（Timing attack）：基于测量各种计算（例如，将攻击者的给定密码与受害者的未知密码进行比较）所需的时间的攻击。
+- 功耗监控攻击（Power-monitoring attack）：同一设备不同的硬件电路单元的运作功耗也是不一样的，因此一个程序运行时的功耗会随着程序使用哪一种硬件电路单元而变动，据此推断出资料输出位于哪一个硬件单元，进而窃取资料；
+    进一步细分为 SPA（simple power analysis，静态功耗分析）和 DPA（differential power analysis，动态功耗分析）
+- 电磁攻击（Electromagnetic attack ）：设备运算时会泄漏电磁辐射，经过得当分析的话可解析出这些泄漏的电磁辐射中包含的信息（比如文本、声音、图像等），这种攻击方式除了用于密码学攻击以外也被用于非密码学攻击等窃听行为，如TEMPEST攻击（例如范·埃克窃听、辐射监测）；
+- 声学密码分析（Acoustic cryptanalysis ）：通过捕捉设备在运算时泄漏的声学信号捉取信息（与功率分析类似）；
+- 差别错误分析（Differential fault analysis）：隐密资料在程序运行发生错误并输出错误信息时被发现；
+- 数据残留（Data remanence ）：可使理应被删除的敏感资料被读取出来（例如冷启动攻击）；
+- 软件初始化错误攻击（Software-initiated fault attacks）：现时较为少见，行锤（Row Hammer）攻击是该类攻击方式的一个实例，在这种攻击实现中，被禁止访问的存储器位置旁边的存储器空间如果被频繁访问将会有状态保留丢失的风险；
+- 光学方式（Optical）：即隐密资料被一些视觉光学仪器（如高清晰度相机、高清晰度摄影机等设备）捕捉。
+
+所有的攻击类型都利用了加密/解密系统在进行加密/解密操作时算法逻辑没有被发现缺陷，但是通过物理效应提供了有用的额外信息（这也是称为“旁路”的缘由），而这些物理信息往往包含了密钥、密码、密文等隐密资料。
+
+## 附录二：有意思的一些企业信息
 
 1. Sogeti 是凯捷咨询集团（Capgemini）旗下从事本地化技术服务的子公司，1967年在法国创建。该集团还包括 CAP 、GEMINI 和安永咨询等公司，是欧洲最大的IT外包服务商。
   [iPhone数据保护的深度分析 - iPhone Data Protection in Depth](iPhone_Data_Protection_in_Depth.pdf)
@@ -384,27 +391,21 @@ Android 没有相当于 Class B 的类型，可以用 Class C 替代。
 
 ## 参考文献
 
-### 官方文档
-
-- [ATS-Key-Wrap 算法的 RFC 3394 规范](https://rfc2cn.com/rfc3394.html)
-- [FBE 文件级加密原理 - Android官方](https://source.android.com/docs/security/features/encryption/file-based?hl=zh-cn)
-
-### 源代码
-
-- [iphone-dataprotection 工具包 - Github](https://github.com/nabla-c0d3/iphone-dataprotection)
-
-### 研究报告
-
 - [Linux文件系统简介](https://www.cnblogs.com/xumenger/p/4491425.html)
 - [通过侧信道分析加强对iPhone用户身份验证的暴力破解攻击](https://www.anquanke.com/post/id/237769)
-- [你的安卓手机究竟是FDE加密还是FBE加密？](https://page.om.qq.com/page/O3yauEIx2l-9WrUkHgQgRUBw0)
 - [iOS资料保护机制简介](https://www.kaotenforensic.com/ios/ios-data-protection/)
 - [超越FBI NSA, iPhone 5c 以物理NAND備份法破解iOS密碼](https://www.osslab.com.tw/iphone-5c-nand/)
 - [Jonathan Zdziarski 对iOS文件系统的论述](https://www.theiphonewiki.com/wiki/File_System_Crypto)
 - [FBI vs Apple：FBI是幸运的 - 盘古团队](https://www.leiphone.com/category/zhuanlan/4dO3QQ178rkZ3mo5.html)
 - [iOS 破解分析 - 乌云](https://paper.seebug.org/papers/Archive/drops2/%E3%80%8AiOS%E5%BA%94%E7%94%A8%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E6%88%98%E3%80%8B%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%9A%E6%97%A0%E6%B3%95%E9%94%80%E6%AF%81%E7%9A%84%E6%96%87%E4%BB%B6.html)
-- [Android 檔案系統加密機制](https://www.kaotenforensic.com/android/android_encryption/)
-- [Android 系統基本架構 - 開機流程與分區說明](https://www.kaotenforensic.com/android/booting-partitions/)
-- [iOS 数据保护基础知识](https://www.pmbonneau.com/multiboot/dataprotection_basics.php)
+- [iPhone4 越狱教程系列](https://www.pmbonneau.com/multiboot/)
 - [拆解 iPhone 的黑客指南（第 3 部分）](http://securityhorror.blogspot.com/2013/09/the-hackers-guide-to-dismantling-iphone_5697.html)
-  
+
+### 官方文档
+
+- [ATS-Key-Wrap 算法的 RFC 3394 规范](https://rfc2cn.com/rfc3394.html)
+
+### 源代码
+
+- [iphone-dataprotection 工具包 - Github](https://github.com/nabla-c0d3/iphone-dataprotection)
+- [https://github.com/russtone/systembag.kb](https://github.com/russtone/systembag.kb)
