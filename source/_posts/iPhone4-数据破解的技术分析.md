@@ -401,6 +401,7 @@ Apple 第二代安全储存组件增加了计数器加密箱，包括：
 - [iOS 破解分析 - 乌云](https://paper.seebug.org/papers/Archive/drops2/%E3%80%8AiOS%E5%BA%94%E7%94%A8%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E6%88%98%E3%80%8B%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%9A%E6%97%A0%E6%B3%95%E9%94%80%E6%AF%81%E7%9A%84%E6%96%87%E4%BB%B6.html)
 - [iPhone4 越狱教程系列](https://www.pmbonneau.com/multiboot/)
 - [拆解 iPhone 的黑客指南（第 3 部分）](http://securityhorror.blogspot.com/2013/09/the-hackers-guide-to-dismantling-iphone_5697.html)
+- [有关iOS越狱的信息](https://promon.co/security-news/what-you-need-to-know-about-ios-jailbreaks/)
 
 ### 官方文档
 
