@@ -64,7 +64,6 @@ GQA（Grouped-Query Attentio，分组查询注意力）是一种针对 Transform
 
 MQA 和 MHA 主要是在计算 K 和 V 的过程中有计算量的差异，由于训练阶段由于数据是并行的，这种差异整体不明显，而在推理阶段，在 memery cache的基础上，MQA 的推理速度有明显提升，同时也更省内存。
 
-
 ---
 
 ## Transformer 架构解析
