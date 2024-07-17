@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/unlock2.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/unlock.png">
 <meta property="article:published_time" content="2024-01-09T17:40:38.000Z">
-<meta property="article:modified_time" content="2024-01-29T00:17:58.523Z">
+<meta property="article:modified_time" content="2024-05-28T11:14:18.711Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/plog.png">
@@ -144,7 +144,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE-metadata"><span class="nav-text">一、文件系统的元数据 - metadata</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-inode-%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">1. inode 的数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-cprotect-%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">2. cprotect 的数据结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E5%AF%86%E9%92%A5%E6%8F%90%E5%8F%96"><span class="nav-text">二、核心密钥提取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%AE%BE%E5%A4%87%E5%AF%86%E9%92%A5%E5%8C%85-Device-Bag"><span class="nav-text">三、设备密钥包 - Device Bag</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Device-Bag-%E7%9A%84%E6%96%87%E4%BB%B6%E7%BA%A7%E8%A7%A3%E5%AF%86"><span class="nav-text">1. Device Bag 的文件级解密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Class-Key-%E7%9A%84%E8%A7%A3%E5%B0%81"><span class="nav-text">2. Class Key 的解封</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="nav-text">四、遗留问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-systembag-kb-%E6%96%87%E4%BB%B6%E5%A4%B4%E9%83%A8%E5%8C%85%E5%90%AB%E7%9A%84-Salt-%E5%92%8C-HMCK-%E5%AD%97%E6%AE%B5%EF%BC%8C%E6%98%AF%E5%90%A6%E5%B7%B2%E7%BB%8F%E8%BD%AC%E7%A7%BB%E5%88%B0%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E7%9A%84%E7%AC%AC%E4%BA%8C%E4%BB%A3%E5%AD%98%E5%82%A8%E7%BB%84%E4%BB%B6%E4%BA%86%E5%91%A2%EF%BC%9F"><span class="nav-text">1. systembag.kb 文件头部包含的 Salt 和 HMCK 字段，是否已经转移到安全隔区的第二代存储组件了呢？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BC%81%E4%B8%9A%E4%BF%A1%E6%81%AF"><span class="nav-text">附录：有意思的一些企业信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%85%83%E6%95%B0%E6%8D%AE-metadata"><span class="nav-text">一、文件系统的元数据 - metadata</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-inode-%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">1. inode 的数据结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-cprotect-%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-text">2. cprotect 的数据结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E5%AF%86%E9%92%A5%E6%8F%90%E5%8F%96"><span class="nav-text">二、核心密钥提取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E8%AE%BE%E5%A4%87%E5%AF%86%E9%92%A5%E5%8C%85-Device-Bag"><span class="nav-text">三、设备密钥包 - Device Bag</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Device-Bag-%E7%9A%84%E6%96%87%E4%BB%B6%E7%BA%A7%E8%A7%A3%E5%AF%86"><span class="nav-text">1. Device Bag 的文件级解密</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Class-Key-%E7%9A%84%E8%A7%A3%E5%B0%81"><span class="nav-text">2. Class Key 的解封</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-text">四、简要分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-systembag-kb-%E6%96%87%E4%BB%B6%E5%A4%B4%E9%83%A8%E5%8C%85%E5%90%AB%E7%9A%84-Salt-%E5%AD%97%E6%AE%B5%EF%BC%8C%E6%98%AF%E5%90%A6%E5%B7%B2%E7%BB%8F%E8%BD%AC%E7%A7%BB%E5%88%B0%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%E7%9A%84%E7%AC%AC%E4%BA%8C%E4%BB%A3%E5%AD%98%E5%82%A8%E7%BB%84%E4%BB%B6%E4%BA%86%E5%91%A2%EF%BC%9F"><span class="nav-text">1. systembag.kb 文件头部包含的 Salt 字段，是否已经转移到安全隔区的第二代存储组件了呢？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9A%E4%BE%A7%E4%BF%A1%E9%81%93%E6%94%BB%E5%87%BB"><span class="nav-text">附录一：侧信道攻击</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9A%E6%9C%89%E6%84%8F%E6%80%9D%E7%9A%84%E4%B8%80%E4%BA%9B%E4%BC%81%E4%B8%9A%E4%BF%A1%E6%81%AF"><span class="nav-text">附录二：有意思的一些企业信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-text">官方文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E4%BB%A3%E7%A0%81"><span class="nav-text">源代码</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -157,7 +157,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">93</span>
+          <span class="site-state-item-count">100</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -231,7 +231,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-01-29 08:17:58" itemprop="dateModified" datetime="2024-01-29T08:17:58+08:00">2024-01-29</time>
+      <time title="修改时间：2024-05-28 19:14:18" itemprop="dateModified" datetime="2024-05-28T19:14:18+08:00">2024-05-28</time>
     </span>
 
   
@@ -248,14 +248,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>3k</span>
+      <span>4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
+      <span>14 分钟</span>
     </span>
 </div>
 
@@ -331,16 +331,30 @@
 <li>安全隔区使用基于 UID 的 Key 0x835 对类密钥进行解密<br> <code>Class key = AES_DECRYPT(Key 0x835, Class Key!)</code></li>
 <li>现在类密钥已经出现在内存中，可以用于解封文件 metadata 中的<code>per-file key</code></li>
 </ol>
-<h2 id="四、遗留问题"><a href="#四、遗留问题" class="headerlink" title="四、遗留问题"></a>四、遗留问题</h2><h2 id="1-systembag-kb-文件头部包含的-Salt-和-HMCK-字段，是否已经转移到安全隔区的第二代存储组件了呢？"><a href="#1-systembag-kb-文件头部包含的-Salt-和-HMCK-字段，是否已经转移到安全隔区的第二代存储组件了呢？" class="headerlink" title="1. systembag.kb 文件头部包含的 Salt 和 HMCK 字段，是否已经转移到安全隔区的第二代存储组件了呢？"></a>1. systembag.kb 文件头部包含的 Salt 和 HMCK 字段，是否已经转移到安全隔区的第二代存储组件了呢？</h2><p>正确！<br>Apple 第二代安全储存组件增加了计数器加密箱，包括：</p>
+<h2 id="四、简要分析"><a href="#四、简要分析" class="headerlink" title="四、简要分析"></a>四、简要分析</h2><h3 id="1-systembag-kb-文件头部包含的-Salt-字段，是否已经转移到安全隔区的第二代存储组件了呢？"><a href="#1-systembag-kb-文件头部包含的-Salt-字段，是否已经转移到安全隔区的第二代存储组件了呢？" class="headerlink" title="1. systembag.kb 文件头部包含的 Salt 字段，是否已经转移到安全隔区的第二代存储组件了呢？"></a>1. systembag.kb 文件头部包含的 Salt 字段，是否已经转移到安全隔区的第二代存储组件了呢？</h3><p>正确！<br>Apple 第二代安全储存组件增加了计数器加密箱，包括：</p>
 <ul>
-<li>1个128位盐：就是 Salt 字段</li>
-<li>1个128位密码验证器：就是 HMCK 字段，存储了 HMAC 校验值</li>
-<li>1个8位计数器</li>
+<li>1个 128 位盐：就是 Salt 字段</li>
+<li>1个 128 位密码验证器：存储了 HMAC 校验值</li>
+<li>1个 8 位计数器</li>
 <li>1个 8 位最大尝试值</li>
 </ul>
-<p>也就是说，最核心的加密材料从 REE 环境的 keybag 中转移到 TEE 环境的安全隔区中。</p>
+<p>也就是说，最核心的加密材料从 REE 环境的 keybag 中转移到 TEE 环境的安全隔区中。<br>需要注意的是，笔者认为第二代安全储存组件的密码验证器不是密钥包中的 HMCK 字段，因为密码验证器要求不能对外泄露，不可能存储在外部的密钥包中，HMCK 字段应该仅用于密钥包自身的数据完整性检查。</p>
 <hr>
-<h2 id="附录：有意思的一些企业信息"><a href="#附录：有意思的一些企业信息" class="headerlink" title="附录：有意思的一些企业信息"></a>附录：有意思的一些企业信息</h2><ol>
+<h2 id="附录一：侧信道攻击"><a href="#附录一：侧信道攻击" class="headerlink" title="附录一：侧信道攻击"></a>附录一：侧信道攻击</h2><p>在密码学中，侧信道攻击（side-channel attack，也称旁路攻击）是一种基于密码系统的<strong>物理实现</strong>中获取信息的攻击方式，区别于暴力破解法，或者基于算法理论性弱点的密码分析。<br>值得注意的是，如果破解密码学系统使用的信息是通过与其使用人的合法交流获取的，这通常归类于社会工程学攻击。</p>
+<p>根据借助的介质，旁路攻击分为多个大类，包括：</p>
+<ul>
+<li>缓存攻击（Cache attack）：通过获取对缓存的访问权而获取缓存内的一些敏感信息，例如攻击者获取云端主机物理主机的访问权而获取存储器的访问权；</li>
+<li>计时攻击（Timing attack）：基于测量各种计算（例如，将攻击者的给定密码与受害者的未知密码进行比较）所需的时间的攻击。</li>
+<li>功耗监控攻击（Power-monitoring attack）：同一设备不同的硬件电路单元的运作功耗也是不一样的，因此一个程序运行时的功耗会随着程序使用哪一种硬件电路单元而变动，据此推断出资料输出位于哪一个硬件单元，进而窃取资料；<br>  进一步细分为 SPA（simple power analysis，静态功耗分析）和 DPA（differential power analysis，动态功耗分析）</li>
+<li>电磁攻击（Electromagnetic attack ）：设备运算时会泄漏电磁辐射，经过得当分析的话可解析出这些泄漏的电磁辐射中包含的信息（比如文本、声音、图像等），这种攻击方式除了用于密码学攻击以外也被用于非密码学攻击等窃听行为，如TEMPEST攻击（例如范·埃克窃听、辐射监测）；</li>
+<li>声学密码分析（Acoustic cryptanalysis ）：通过捕捉设备在运算时泄漏的声学信号捉取信息（与功率分析类似）；</li>
+<li>差别错误分析（Differential fault analysis）：隐密资料在程序运行发生错误并输出错误信息时被发现；</li>
+<li>数据残留（Data remanence ）：可使理应被删除的敏感资料被读取出来（例如冷启动攻击）；</li>
+<li>软件初始化错误攻击（Software-initiated fault attacks）：现时较为少见，行锤（Row Hammer）攻击是该类攻击方式的一个实例，在这种攻击实现中，被禁止访问的存储器位置旁边的存储器空间如果被频繁访问将会有状态保留丢失的风险；</li>
+<li>光学方式（Optical）：即隐密资料被一些视觉光学仪器（如高清晰度相机、高清晰度摄影机等设备）捕捉。</li>
+</ul>
+<p>所有的攻击类型都利用了加密&#x2F;解密系统在进行加密&#x2F;解密操作时算法逻辑没有被发现缺陷，但是通过物理效应提供了有用的额外信息（这也是称为“旁路”的缘由），而这些物理信息往往包含了密钥、密码、密文等隐密资料。</p>
+<h2 id="附录二：有意思的一些企业信息"><a href="#附录二：有意思的一些企业信息" class="headerlink" title="附录二：有意思的一些企业信息"></a>附录二：有意思的一些企业信息</h2><ol>
 <li>Sogeti 是凯捷咨询集团（Capgemini）旗下从事本地化技术服务的子公司，1967年在法国创建。该集团还包括 CAP 、GEMINI 和安永咨询等公司，是欧洲最大的IT外包服务商。<br>  <a href="iPhone_Data_Protection_in_Depth.pdf">iPhone数据保护的深度分析 - iPhone Data Protection in Depth</a></li>
 <li>NCC Group 成立于1999年6月，当时美国国家计算中心（the National Computing Centre）将其商业部门出售给其现有的管理团队，是一个专业的安全审计机构。<br>  <a href="2016-BSidesROC-iOSCrypto.pdf">iOS加密技术高级分析 -  A (not-so-quick) Primer on iOS Encryption</a></li>
 <li>ElcomSoft Co. Ltd.公司于1990年在美国成立，是国际领先的数字取证工具开发公司。<br>  <a href="OWASP_BeNeLux_Day_2011_-_A._Belenko_-_Overcoming_iOS_Data_Protection.pdf">iOS取证技术 - iOS Forensics: Overcoming iPhone Data Protection</a><br>  <a href="0721C6_Andrey.Belenko_Evolution.of.iOS.Data.Protection.pdf">iOS 数据保护的演变</a></li>
@@ -351,12 +365,24 @@
 </ol>
 <hr>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://github.com/nabla-c0d3/iphone-dataprotection">iphone-dataprotection 工具包 - Github</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/antoniozekic/papers_and_slides">iPhone 攻击技术文档大全</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/xumenger/p/4491425.html">Linux文件系统简介</a></li>
-<li><a target="_blank" rel="noopener" href="https://rfc2cn.com/rfc3394.html">ATS-Key-Wrap 算法的 RFC 3394 规范</a></li>
-<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/XiNGRZ/article/details/5332915">解密iPhone的固件</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.anquanke.com/post/id/237769">通过侧信道分析加强对iPhone用户身份验证的暴力破解攻击</a></li>
-<li><a target="_blank" rel="noopener" href="https://page.om.qq.com/page/O3yauEIx2l-9WrUkHgQgRUBw0">你的安卓手机究竟是FDE加密还是FBE加密？</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.kaotenforensic.com/ios/ios-data-protection/">iOS资料保护机制简介</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.osslab.com.tw/iphone-5c-nand/">超越FBI NSA, iPhone 5c 以物理NAND備份法破解iOS密碼</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.theiphonewiki.com/wiki/File_System_Crypto">Jonathan Zdziarski 对iOS文件系统的论述</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.leiphone.com/category/zhuanlan/4dO3QQ178rkZ3mo5.html">FBI vs Apple：FBI是幸运的 - 盘古团队</a></li>
+<li><a target="_blank" rel="noopener" href="https://paper.seebug.org/papers/Archive/drops2/%E3%80%8AiOS%E5%BA%94%E7%94%A8%E5%AE%89%E5%85%A8%E6%94%BB%E9%98%B2%E5%AE%9E%E6%88%98%E3%80%8B%E7%AC%AC%E5%85%AD%E7%AB%A0%EF%BC%9A%E6%97%A0%E6%B3%95%E9%94%80%E6%AF%81%E7%9A%84%E6%96%87%E4%BB%B6.html">iOS 破解分析 - 乌云</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.pmbonneau.com/multiboot/">iPhone4 越狱教程系列</a></li>
+<li><a target="_blank" rel="noopener" href="http://securityhorror.blogspot.com/2013/09/the-hackers-guide-to-dismantling-iphone_5697.html">拆解 iPhone 的黑客指南（第 3 部分）</a></li>
+<li><a target="_blank" rel="noopener" href="https://promon.co/security-news/what-you-need-to-know-about-ios-jailbreaks/">有关iOS越狱的信息</a></li>
+</ul>
+<h3 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a>官方文档</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://rfc2cn.com/rfc3394.html">ATS-Key-Wrap 算法的 RFC 3394 规范</a></li>
+</ul>
+<h3 id="源代码"><a href="#源代码" class="headerlink" title="源代码"></a>源代码</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/nabla-c0d3/iphone-dataprotection">iphone-dataprotection 工具包 - Github</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/russtone/systembag.kb">https://github.com/russtone/systembag.kb</a></li>
 </ul>
 
     </div>
@@ -410,14 +436,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">227k</span>
+    <span title="站点总字数">241k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">13:47</span>
+    <span title="站点阅读时长">14:36</span>
   </span>
 </div>
 <div class="busuanzi-count">
