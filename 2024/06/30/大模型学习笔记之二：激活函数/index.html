@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/softmax.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png">
 <meta property="article:published_time" content="2024-06-30T05:27:50.000Z">
-<meta property="article:modified_time" content="2024-07-07T08:43:21.617Z">
+<meta property="article:modified_time" content="2024-07-26T03:43:50.662Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png">
@@ -149,7 +149,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8D%95%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">二、单变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Sigmoid%EF%BC%88S%E5%9E%8B%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">1. Sigmoid（S型函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Tanh%EF%BC%88Hyperbolic-tangent%EF%BC%8C%E5%8F%8C%E6%9B%B2%E6%AD%A3%E5%88%87%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">2. Tanh（Hyperbolic tangent，双曲正切函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-ReLU%EF%BC%88Rectified-Linear-Unit-%E7%BA%BF%E5%BD%A2%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">3. ReLU（Rectified Linear Unit, 线形整流函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Leak-ReLU%EF%BC%88Leakly-Rectified-Linear-Unit%EF%BC%8C%E5%B8%A6%E6%B3%84%E9%9C%B2%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">Leak-ReLU（Leakly Rectified Linear Unit，带泄露线性整流函数）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RReLU%EF%BC%88Random-Rectified-Linear-Unit%EF%BC%8C%E9%9A%8F%E6%9C%BA%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%8D%95%E5%85%83%EF%BC%89"><span class="nav-text">RReLU（Random Rectified Linear Unit，随机线性整流单元）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-ELU%EF%BC%88Exponential-Linear-Unit%EF%BC%8C%E6%8C%87%E6%95%B0%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">4. ELU（Exponential Linear Unit，指数线性函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SELU%EF%BC%88Scaled-Exponential-Linear-Unit%EF%BC%8C%E6%89%A9%E5%B1%95%E6%8C%87%E6%95%B0%E7%BA%BF%E5%BD%A2%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">SELU（Scaled Exponential Linear Unit，扩展指数线形函数）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%85%B6%E4%BB%96"><span class="nav-text">5. 其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%A4%9A%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">三、多变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Softmax-%E5%87%BD%E6%95%B0"><span class="nav-text">1. Softmax 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Maxout-%E5%87%BD%E6%95%B0"><span class="nav-text">2. Maxout 函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%BB%93%E8%AE%BA"><span class="nav-text">四、结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8D%95%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">二、单变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Sigmoid%EF%BC%88S%E5%9E%8B%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">1. Sigmoid（S型函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Tanh%EF%BC%88Hyperbolic-tangent%EF%BC%8C%E5%8F%8C%E6%9B%B2%E6%AD%A3%E5%88%87%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">2. Tanh（Hyperbolic tangent，双曲正切函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-ReLU%EF%BC%88Rectified-Linear-Unit-%E7%BA%BF%E5%BD%A2%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">3. ReLU（Rectified Linear Unit, 线形整流函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Leak-ReLU%EF%BC%88Leakly-Rectified-Linear-Unit%EF%BC%8C%E5%B8%A6%E6%B3%84%E9%9C%B2%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">Leak-ReLU（Leakly Rectified Linear Unit，带泄露线性整流函数）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RReLU%EF%BC%88Random-Rectified-Linear-Unit%EF%BC%8C%E9%9A%8F%E6%9C%BA%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%8D%95%E5%85%83%EF%BC%89"><span class="nav-text">RReLU（Random Rectified Linear Unit，随机线性整流单元）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-ELU%EF%BC%88Exponential-Linear-Unit%EF%BC%8C%E6%8C%87%E6%95%B0%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">4. ELU（Exponential Linear Unit，指数线性函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SELU%EF%BC%88Scaled-Exponential-Linear-Unit%EF%BC%8C%E6%89%A9%E5%B1%95%E6%8C%87%E6%95%B0%E7%BA%BF%E5%BD%A2%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">SELU（Scaled Exponential Linear Unit，扩展指数线形函数）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%85%B6%E4%BB%96"><span class="nav-text">5. 其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%A4%9A%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">三、多变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Softmax-%E5%87%BD%E6%95%B0"><span class="nav-text">1. Softmax 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Maxout-%E5%87%BD%E6%95%B0"><span class="nav-text">2. Maxout 函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-text">四、简要分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%87%BD%E6%95%B0%E9%80%89%E6%8B%A9%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%AD%96%E7%95%A5"><span class="nav-text">1. 函数选择的基本策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%B8%A9%E5%BA%A6"><span class="nav-text">2. 模型的温度</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -162,7 +162,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">100</span>
+          <span class="site-state-item-count">99</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -236,7 +236,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-07 16:43:21" itemprop="dateModified" datetime="2024-07-07T16:43:21+08:00">2024-07-07</time>
+      <time title="修改时间：2024-07-26 11:43:50" itemprop="dateModified" datetime="2024-07-26T11:43:50+08:00">2024-07-26</time>
     </span>
 
   
@@ -253,14 +253,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.8k</span>
+      <span>3k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>10 分钟</span>
+      <span>11 分钟</span>
     </span>
 </div>
 
@@ -341,7 +341,7 @@
 </ul>
 <p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/group.gif" alt="Group"></p>
 <h2 id="三、多变量输入的激活函数"><a href="#三、多变量输入的激活函数" class="headerlink" title="三、多变量输入的激活函数"></a>三、多变量输入的激活函数</h2><h3 id="1-Softmax-函数"><a href="#1-Softmax-函数" class="headerlink" title="1. Softmax 函数"></a>1. Softmax 函数</h3><p>Softmax 是一种激活函数，将一个数值向量<strong>归一化</strong>为一个概率分布向量，且各个概率之和为 1。</p>
-<p>$$<br>Softmax(z_i)&#x3D;\frac {e^{z_i}} {\sum\limits_{j&#x3D;1}^{n} e^{z_j}}<br>$$</p>
+<p>$$ Softmax(z_i)&#x3D;\frac {e^{z_i}} {\sum\limits_{j&#x3D;1}^{n} e^{z_j}} $$</p>
 <p>正常的 max 函数仅输出最大值，但 Softmax 函数确保较小的值具有较小的概率，并且不会直接丢弃。可以认为它是    argmax 函数的概率版本或“soft”版本。<br>Softmax 函数的分母结合了原始输出值的所有因子，这意味着 Softmax 函数获得的各种概率彼此相关。</p>
 <p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/softmax.png" alt="softmax"></p>
 <p>Softmax 通常作为神经网络的<strong>最后</strong>一层，用于多分类问题的输出，它将多个神经元的输出，映射到（0,1）区间内，可以看成概率来理解，从而来进行多分类，常常和交叉熵损失函数一起结合使用。</p>
@@ -353,7 +353,7 @@
 <p>Maxout 的本质是<strong>分段线性拟合</strong>，理论上可以拟合<strong>任意的凸函数</strong>；同时，由于其应用了 max 函数，又具备非线形的特征，因此比其它激活函数有着更好的性能的应用，换个角度看，如果 w 和 b 都设置为 0 ，就转换为 ReLU 函数。<br><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png" alt="maxout"></p>
 <p>Maxout 连接与普通的全连接并无区别，之后每两个单元<strong>连接</strong>到一个单元上，当然，这里不是真的连接，因为该条线上并不涉及参数，那么如何从两个单元得到一个单元的值呢？其实只需要比较两个单元的值即可，大的值就是 MaxOut。</p>
 <p>Maxout 继承了 RELU 的优点而且没有死区，但是需要 2 次线性映射运算，因此计算量也会翻倍。</p>
-<h2 id="四、结论"><a href="#四、结论" class="headerlink" title="四、结论"></a>四、结论</h2><ol>
+<h2 id="四、简要分析"><a href="#四、简要分析" class="headerlink" title="四、简要分析"></a>四、简要分析</h2><h3 id="1-函数选择的基本策略"><a href="#1-函数选择的基本策略" class="headerlink" title="1. 函数选择的基本策略"></a>1. 函数选择的基本策略</h3><ol>
 <li>首先尝试 ReLU，速度快，但是要注意训练的状态</li>
 <li>如果 ReLU 效果欠佳，尝试 Leaky ReLU 或者 Maxout 等变种</li>
 <li>最好不用 Sigmoid 函数，可以尝试 tanh 函数，但通常其效果比不上 ReLU 和 maxout</li>
@@ -361,6 +361,8 @@
 <li>在浅层神经网络中，如不超过四层，可选择使用多种激励函数，没有太大的影响</li>
 <li>如果是使用 ReLU，那么一定要小心设置 learning rate，而且要注意，不要让网络出现很多“dead”神经元，如果这个问题不好解决，那么可以试试 Leaky ReLU ,PReLU , 或者 Maxout。</li>
 </ol>
+<h3 id="2-模型的温度"><a href="#2-模型的温度" class="headerlink" title="2. 模型的温度"></a>2. 模型的温度</h3><p>对于 Softmax 函数，我们可以使用不同的基底参数，其结果仍然服从归一化概率分布，但数值分布发生了变化。<br>$$ Softmax(z_i)&#x3D;\frac {e^{z_i&#x2F;T}} {\sum\limits_{j&#x3D;1}^{n} e^{z_j&#x2F;T}} $$</p>
+<p>其中，$z_i$ 是模型输出的第 $i$ 个元素，$T$ 称为<strong>温度调整（Temperature Scaling）</strong>参数。温度 $T$ 较低时，Softmax 输出的概率分布更加尖锐，即一个值占主导地位（结果的确定性更高）；温度 $T$ 较高时，分布更加平坦，即类别之间的概率差异减小（系统熵增加，随机性更高）。</p>
 <hr>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">激活函数 - Wiki</a></li>
@@ -386,8 +388,8 @@
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="next" title="大模型学习笔记之三：神经网络">
-                  大模型学习笔记之三：神经网络 <i class="fa fa-angle-right"></i>
+                <a href="/2024/07/07/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" rel="next" title="大模型学习笔记之三：损失函数">
+                  大模型学习笔记之三：损失函数 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
           </div>
@@ -420,14 +422,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">242k</span>
+    <span title="站点总字数">243k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">14:38</span>
+    <span title="站点阅读时长">14:44</span>
   </span>
 </div>
 <div class="busuanzi-count">

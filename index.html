@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">100</span>
+          <span class="site-state-item-count">99</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -219,7 +219,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-21 15:56:12" itemprop="dateModified" datetime="2024-07-21T15:56:12+08:00">2024-07-21</time>
+      <time title="修改时间：2024-07-26 13:41:27" itemprop="dateModified" datetime="2024-07-26T13:41:27+08:00">2024-07-26</time>
     </span>
 
   
@@ -229,14 +229,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>4.8k</span>
+      <span>5.1k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>18 分钟</span>
+      <span>19 分钟</span>
     </span>
 </div>
 
@@ -256,6 +256,116 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/07/10/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E5%9B%9B%EF%BC%9ATransformer/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/07/10/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E5%9B%9B%EF%BC%9ATransformer/" class="post-title-link" itemprop="url">大模型学习笔记之四：Transformer</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-07-10 13:32:20" itemprop="dateCreated datePublished" datetime="2024-07-10T13:32:20+08:00">2024-07-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-07-26 22:16:02" itemprop="dateModified" datetime="2024-07-26T22:16:02+08:00">2024-07-26</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          以 Gemma 7B 为例，分析其配置文件
+
+
+
+与最近大语言模型的研究趋势一致，我们的网络也基于 Transformer 架构（Vaswani 等，2017）。 但做了很多改进，也借鉴了其他模型（例如 PaLM）中的一些技巧。
+
+2.2.1 改进
+以下是与原始架构的主要差异，
+
+预归一化（Pre-normalization）：受 GPT3 启发
+为了提高训练稳定性，我们对每个 Transformer sub-layer 的输入进行归一化，而不是对输出进行归一化。 这里使用由 Zhang 和 Sennrich（2019）提出的 RMSNorm 归一化函数。
+
+SwiGLU 激活函数：受 PaL
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/07/10/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E5%9B%9B%EF%BC%9ATransformer/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -322,7 +432,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-18 00:17:58" itemprop="dateModified" datetime="2024-07-18T00:17:58+08:00">2024-07-18</time>
+      <time title="修改时间：2024-07-26 22:09:35" itemprop="dateModified" datetime="2024-07-26T22:09:35+08:00">2024-07-26</time>
     </span>
 
   
@@ -332,14 +442,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>3.1k</span>
+      <span>4.4k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
+      <span>16 分钟</span>
     </span>
 </div>
 
@@ -356,224 +466,13 @@
  * 代价函数（Cost function）：用于定义单个批次，或整个训练集样本与真实值之间的误差；
  * 目标函数（Objective function）：泛指任意可以被优化的函数。
 
-损失函数是用于衡量模型所作出的预测离真实值（Ground Truth）之间的偏离程度。通常，我们都会最小化目标函数，最常用的算法便是“梯度下降法”（Gradient Descent）。俗话说，任何事情必然有它的两面性，因此，并没有一种万能的损失
+损失函数是用于衡量模型所作出的预测离真实值（Ground Truth）之间的偏离程度。
+
+一、概述
+在深度学习广为使用的今天，我们可以在脑海里清晰的知道，一个模型想要达到很好的效果需要学习（=训练）。一个好的训练离不开优质的负反馈，损失函数（L
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2024/07/07/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E5%9B%9B%EF%BC%9ATransformer/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E5%9B%9B%EF%BC%9ATransformer/" class="post-title-link" itemprop="url">大模型学习笔记之四：Transformer</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-06-30 13:32:20" itemprop="dateCreated datePublished" datetime="2024-06-30T13:32:20+08:00">2024-06-30</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-07 16:28:12" itemprop="dateModified" datetime="2024-07-07T16:28:12+08:00">2024-07-07</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          以 Gemma 7B 为例，分析其配置文件
-
-
-
-与最近大语言模型的研究趋势一致，我们的网络也基于 Transformer 架构（Vaswani 等，2017）。 但做了很多改进，也借鉴了其他模型（例如 PaLM）中的一些技巧。
-
-2.2.1 改进
-以下是与原始架构的主要差异，
-
-预归一化（Pre-normalization）：受 GPT3 启发
-为了提高训练稳定性，我们对每个 Transformer sub-layer 的输入进行归一化，而不是对输出进行归一化。 这里使用由 Zhang 和 Sennrich（2019）提出的 RMSNorm 归一化函数。
-
-SwiGLU 激活函数：受 PaL
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E5%9B%9B%EF%BC%9ATransformer/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" class="post-title-link" itemprop="url">大模型学习笔记之三：神经网络</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-06-30 13:31:42" itemprop="dateCreated datePublished" datetime="2024-06-30T13:31:42+08:00">2024-06-30</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-06 16:03:37" itemprop="dateModified" datetime="2024-07-06T16:03:37+08:00">2024-07-06</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>620</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          残差网络 ResNet
-Residual Network（残差网络，ResNet）是一种深度卷积神经网络（CNN）架构，由 Kaiming He（何凯明）在 2015 年提出，核心思想是通过引入“残差学习”（residual learning）来解决深度神经网络训练中的退化问题（degradation problem）。
-
-在传统的深度神经网络中，随着网络层数的增加，理论上网络的表示能力应该更强，但实际上，过深的网络往往难以训练，性能反而不如层数较少的网络。这种现象被称为“退化问题”，即随着网络深度的增加，网络的准确率不再提升，甚至下降。
-
-
-ResNet通过引入“跳跃连接”（skip con
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -640,7 +539,7 @@ ResNet通过引入“跳跃连接”（skip con
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-07 16:43:21" itemprop="dateModified" datetime="2024-07-07T16:43:21+08:00">2024-07-07</time>
+      <time title="修改时间：2024-07-26 11:43:50" itemprop="dateModified" datetime="2024-07-26T11:43:50+08:00">2024-07-26</time>
     </span>
 
   
@@ -650,14 +549,14 @@ ResNet通过引入“跳跃连接”（skip con
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>2.8k</span>
+      <span>3k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>10 分钟</span>
+      <span>11 分钟</span>
     </span>
 </div>
 
@@ -1214,6 +1113,102 @@ FIPS 140 是 NIST（国家标准与技术研究院，美国）制定的一项技
 
 
 
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/" class="post-title-link" itemprop="url">Common Criteria 国际安全认证体系</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-03-10 10:33:49 / 修改时间：23:23:24" itemprop="dateCreated datePublished" datetime="2024-03-10T10:33:49+08:00">2024-03-10</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          1993 年，在美国的 TCSEC、欧洲的 ITSEC、加拿大的 CTCPEC、美国的 FC（Federal Criteria）等信息安全准则的基础上，由 6 个国家 7 方(美国国家安全局 NSA 和国家技术标准研究所 NIST、加、英、法、德、荷)共同提出了信息技术安全评价通用准则（The Common Criteria for Information Technology security Evaluation，简称 CC 标准），目标是采用一套公共的准则规范为 IT 保障类产品的广泛用户群体提供最大的便利，提供了一个更全面的框架用来评估信息系统、信息产品的安全性。
+
+
+
+Common 
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
   <nav class="pagination">
     <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1238,14 +1233,14 @@ FIPS 140 是 NIST（国家标准与技术研究院，美国）制定的一项技
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">242k</span>
+    <span title="站点总字数">243k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">14:38</span>
+    <span title="站点阅读时长">14:44</span>
   </span>
 </div>
 <div class="busuanzi-count">
