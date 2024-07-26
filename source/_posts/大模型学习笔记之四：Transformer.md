@@ -1,6 +1,6 @@
 ---
 title: 大模型学习笔记之四：Transformer
-date: 2024-06-30 13:32:20
+date: 2024-07-10 13:32:20
 tags:
 ---
 
@@ -114,6 +114,55 @@ Transformer总体架构可分为四个部分：输入、输出、编码器、解
 ![attendtion](attention.png)
 
 - [Transformer架构解析](https://blog.csdn.net/m0_56192771/article/details/118087175)
+
+---
+
+## 附录一：残差网络（ResNet）
+
+Residual Network（残差网络，ResNet）是一种深度卷积神经网络（CNN）架构，由 Kaiming He（何凯明）在 2015 年提出，核心思想是通过引入“残差学习”（residual learning）来解决深度神经网络训练中的退化问题（degradation problem）。
+
+在传统的深度神经网络中，随着网络层数的增加，理论上网络的表示能力应该更强，但实际上，过深的网络往往难以训练，性能反而不如层数较少的网络。这种现象被称为“退化问题”，即随着网络深度的增加，网络的准确率不再提升，甚至下降。
+![error](resnet0.png)
+
+ResNet通过引入“跳跃连接”（skip connections）或“捷径连接”（shortcut connections）来解决这个问题。在ResNet中，输入不仅传递给当前层，还直接传递到后面的层，跳过一些中间层。这样，后面的层可以直接学习到输入与输出之间的残差（即差异），而不是学习到未处理的输入。这种设计允许网络学习到恒等映射（identity mapping），即输出与输入相同，从而使得网络可以通过更简单的路径来学习到正确的映射关系。
+
+![res](resnet.png)
+
+在 Transformer 模型中，残差网络的使用主要是为了解决自注意力机制（self-attention）带来的问题。Transformer模型完全基于注意力机制，没有卷积层，但其结构本质上也是深度网络。在 Transformer 中，每个编码器（encoder）和解码器（decoder）层都包含自注意力和前馈网络，这些层的参数量非常大，网络深度也很容易变得很深。使用残差连接可以帮助Transformer模型更有效地训练深层网络。在 Transformer 的自注意力层中，输入通过自注意力和前馈网络后，与原始输入相加，形成残差连接。这种设计使得网络即使在增加更多层数时，也能保持较好的性能，避免了退化问题。
+
+参考[https://zh.d2l.ai/chapter_convolutional-modern/resnet.html](https://zh.d2l.ai/chapter_convolutional-modern/resnet.html)
+
+```python
+import torch
+from torch import nn
+from torch.nn import functional as F
+from d2l import torch as d2l
+
+
+class Residual(nn.Module):  #@save
+    def __init__(self, input_channels, num_channels,
+                 use_1x1conv=False, strides=1):
+        super().__init__()
+        self.conv1 = nn.Conv2d(input_channels, num_channels,
+                               kernel_size=3, padding=1, stride=strides)
+        self.conv2 = nn.Conv2d(num_channels, num_channels,
+                               kernel_size=3, padding=1)
+        if use_1x1conv:
+            self.conv3 = nn.Conv2d(input_channels, num_channels,
+                                   kernel_size=1, stride=strides)
+        else:
+            self.conv3 = None
+        self.bn1 = nn.BatchNorm2d(num_channels)
+        self.bn2 = nn.BatchNorm2d(num_channels)
+
+    def forward(self, X):
+        Y = F.relu(self.bn1(self.conv1(X)))
+        Y = self.bn2(self.conv2(Y))
+        if self.conv3:
+            X = self.conv3(X)
+        Y += X
+        return F.relu(Y)
+```
 
 ---
 
