@@ -27,6 +27,7 @@
 <meta property="og:description" content="一、概述 神经网络中的每个神经元节点接受上一层神经元的输出值作为本神经元的输入值，并将输入值传递给下一层，输入层神经元节点会将输入属性直接传递到下一层（隐层或输出层）。在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数（activation function）。    $\sum\limits_{i}{w_{i}x_{i}+b}$ 是线形组合部分，$f()$">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/vs.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/Sigmoid.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/tanh.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ReLU.png">
@@ -37,7 +38,7 @@
 <meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/softmax.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png">
 <meta property="article:published_time" content="2024-06-30T05:27:50.000Z">
-<meta property="article:modified_time" content="2024-07-26T03:43:50.662Z">
+<meta property="article:modified_time" content="2024-07-28T07:25:40.064Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png">
@@ -149,7 +150,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8D%95%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">二、单变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Sigmoid%EF%BC%88S%E5%9E%8B%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">1. Sigmoid（S型函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Tanh%EF%BC%88Hyperbolic-tangent%EF%BC%8C%E5%8F%8C%E6%9B%B2%E6%AD%A3%E5%88%87%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">2. Tanh（Hyperbolic tangent，双曲正切函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-ReLU%EF%BC%88Rectified-Linear-Unit-%E7%BA%BF%E5%BD%A2%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">3. ReLU（Rectified Linear Unit, 线形整流函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Leak-ReLU%EF%BC%88Leakly-Rectified-Linear-Unit%EF%BC%8C%E5%B8%A6%E6%B3%84%E9%9C%B2%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">Leak-ReLU（Leakly Rectified Linear Unit，带泄露线性整流函数）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RReLU%EF%BC%88Random-Rectified-Linear-Unit%EF%BC%8C%E9%9A%8F%E6%9C%BA%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%8D%95%E5%85%83%EF%BC%89"><span class="nav-text">RReLU（Random Rectified Linear Unit，随机线性整流单元）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-ELU%EF%BC%88Exponential-Linear-Unit%EF%BC%8C%E6%8C%87%E6%95%B0%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">4. ELU（Exponential Linear Unit，指数线性函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SELU%EF%BC%88Scaled-Exponential-Linear-Unit%EF%BC%8C%E6%89%A9%E5%B1%95%E6%8C%87%E6%95%B0%E7%BA%BF%E5%BD%A2%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">SELU（Scaled Exponential Linear Unit，扩展指数线形函数）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%85%B6%E4%BB%96"><span class="nav-text">5. 其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%A4%9A%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">三、多变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Softmax-%E5%87%BD%E6%95%B0"><span class="nav-text">1. Softmax 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Maxout-%E5%87%BD%E6%95%B0"><span class="nav-text">2. Maxout 函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-text">四、简要分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%87%BD%E6%95%B0%E9%80%89%E6%8B%A9%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%AD%96%E7%95%A5"><span class="nav-text">1. 函数选择的基本策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%B8%A9%E5%BA%A6"><span class="nav-text">2. 模型的温度</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8D%95%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">二、单变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Sigmoid%EF%BC%88S%E5%9E%8B%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">1. Sigmoid（S型函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Tanh%EF%BC%88Hyperbolic-tangent%EF%BC%8C%E5%8F%8C%E6%9B%B2%E6%AD%A3%E5%88%87%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">2. Tanh（Hyperbolic tangent，双曲正切函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-ReLU%EF%BC%88Rectified-Linear-Unit-%E7%BA%BF%E5%BD%A2%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">3. ReLU（Rectified Linear Unit, 线形整流函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Leak-ReLU%EF%BC%88Leakly-Rectified-Linear-Unit%EF%BC%8C%E5%B8%A6%E6%B3%84%E9%9C%B2%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">Leak-ReLU（Leakly Rectified Linear Unit，带泄露线性整流函数）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RReLU%EF%BC%88Random-Rectified-Linear-Unit%EF%BC%8C%E9%9A%8F%E6%9C%BA%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%8D%95%E5%85%83%EF%BC%89"><span class="nav-text">RReLU（Random Rectified Linear Unit，随机线性整流单元）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-ELU%EF%BC%88Exponential-Linear-Unit%EF%BC%8C%E6%8C%87%E6%95%B0%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">4. ELU（Exponential Linear Unit，指数线性函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SELU%EF%BC%88Scaled-Exponential-Linear-Unit%EF%BC%8C%E6%89%A9%E5%B1%95%E6%8C%87%E6%95%B0%E7%BA%BF%E5%BD%A2%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">SELU（Scaled Exponential Linear Unit，扩展指数线形函数）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%85%B6%E4%BB%96"><span class="nav-text">5. 其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%A4%9A%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">三、多变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Softmax-%E5%87%BD%E6%95%B0"><span class="nav-text">1. Softmax 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Maxout-%E5%87%BD%E6%95%B0"><span class="nav-text">2. Maxout 函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-text">四、简要分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Sigmoid-%E5%92%8C-Softmax"><span class="nav-text">1. Sigmoid 和 Softmax</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%B8%A9%E5%BA%A6"><span class="nav-text">2. 模型的温度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%87%BD%E6%95%B0%E9%80%89%E6%8B%A9%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%AD%96%E7%95%A5"><span class="nav-text">3. 函数选择的基本策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -236,7 +237,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-26 11:43:50" itemprop="dateModified" datetime="2024-07-26T11:43:50+08:00">2024-07-26</time>
+      <time title="修改时间：2024-07-28 15:25:40" itemprop="dateModified" datetime="2024-07-28T15:25:40+08:00">2024-07-28</time>
     </span>
 
   
@@ -253,14 +254,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>3k</span>
+      <span>3.2k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
+      <span>12 分钟</span>
     </span>
 </div>
 
@@ -277,6 +278,7 @@
 <p>从哲学的角度看，线性组合解决的是<strong>描述问题</strong>，激励函数解决的是<strong>判断问题</strong>，就是价值观！</p>
 </blockquote>
 <p>在神经网络中，如果不对上一层结点的输出做非线性转换的话（即：激活函数为$f(x)&#x3D;x$），再深的网络也是线性模型，只能把输入线性组合再输出，不能学习到复杂的映射关系，就是最原始的感知机（perceptron），那么网络的逼近能力就相当有限，因此需要使用激活函数提供非线性转换，这样深层神经网络表达能力就更加强大了，几乎可以逼近任意函数。</p>
+<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/vs.png" alt="vs"></p>
 <p>设计一个合格的激活函数，必须满足以下性质：</p>
 <ul>
 <li>非线性：这是激活函数的基本要求，目的就是提供<strong>超越</strong>线形组合的表达能力</li>
@@ -353,7 +355,20 @@
 <p>Maxout 的本质是<strong>分段线性拟合</strong>，理论上可以拟合<strong>任意的凸函数</strong>；同时，由于其应用了 max 函数，又具备非线形的特征，因此比其它激活函数有着更好的性能的应用，换个角度看，如果 w 和 b 都设置为 0 ，就转换为 ReLU 函数。<br><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png" alt="maxout"></p>
 <p>Maxout 连接与普通的全连接并无区别，之后每两个单元<strong>连接</strong>到一个单元上，当然，这里不是真的连接，因为该条线上并不涉及参数，那么如何从两个单元得到一个单元的值呢？其实只需要比较两个单元的值即可，大的值就是 MaxOut。</p>
 <p>Maxout 继承了 RELU 的优点而且没有死区，但是需要 2 次线性映射运算，因此计算量也会翻倍。</p>
-<h2 id="四、简要分析"><a href="#四、简要分析" class="headerlink" title="四、简要分析"></a>四、简要分析</h2><h3 id="1-函数选择的基本策略"><a href="#1-函数选择的基本策略" class="headerlink" title="1. 函数选择的基本策略"></a>1. 函数选择的基本策略</h3><ol>
+<h2 id="四、简要分析"><a href="#四、简要分析" class="headerlink" title="四、简要分析"></a>四、简要分析</h2><h3 id="1-Sigmoid-和-Softmax"><a href="#1-Sigmoid-和-Softmax" class="headerlink" title="1. Sigmoid 和 Softmax"></a>1. Sigmoid 和 Softmax</h3><ul>
+<li>Sigmoid 函数将模型的输出转化为概率形式，即将任意实数映射到（0，1）区间，从而解决了归一化问题</li>
+<li>Softmax 是 Sigmoid 的扩展形式，即 Sigmoid 是 Softmax 在二分类情况下的特例。即：<br>  $$Softmax([z,0]) &#x3D; [\frac {e^z}{e^z+1}, \frac {1}{e^z+1}]$$</li>
+<li>使用 Sigmoid &amp; Softmax &#x3D; 选择了<strong>最大熵原理</strong>，因此模型的中间层可能使用其他激活函数（为了解决梯度消失问题），但最终输出必然使用 Softmax</li>
+</ul>
+<p>请参见<a target="_blank" rel="noopener" href="https://blog.csdn.net/Kevin_Carpricron/article/details/124123134">用最大熵搞懂Softmax</a></p>
+<h3 id="2-模型的温度"><a href="#2-模型的温度" class="headerlink" title="2. 模型的温度"></a>2. 模型的温度</h3><p>对于 Softmax 函数，我们可以使用不同的基底参数，其结果仍然服从归一化概率分布，但数值分布发生了变化。<br>$$ Softmax(z_i)&#x3D;\frac {e^{z_i&#x2F;T}} {\sum\limits_{j&#x3D;1}^{n} e^{z_j&#x2F;T}} $$</p>
+<p>其中，$z_i$ 是模型输出的第 $i$ 个元素，$T$ 称为<strong>温度调整（Temperature Scaling）</strong>参数，默认值为 1。</p>
+<ul>
+<li>温度 $T$ 较低时，Softmax 输出的概率分布更加尖锐，即一个值占主导地位（结果的确定性更高）；</li>
+<li>温度 $T$ 较高时，分布更加平坦，即类别之间的概率差异减小（系统熵增加，随机性更高）。</li>
+<li>在实际应用和计算中，$T$ 不能设置为 0（分母为零没有意义），但可以是一个非常小的数字（ Pytorch 通常设置 $eps&#x3D;1e^{-6}$），此时函数表现行为就是最大值的概率为100%</li>
+</ul>
+<h3 id="3-函数选择的基本策略"><a href="#3-函数选择的基本策略" class="headerlink" title="3. 函数选择的基本策略"></a>3. 函数选择的基本策略</h3><ol>
 <li>首先尝试 ReLU，速度快，但是要注意训练的状态</li>
 <li>如果 ReLU 效果欠佳，尝试 Leaky ReLU 或者 Maxout 等变种</li>
 <li>最好不用 Sigmoid 函数，可以尝试 tanh 函数，但通常其效果比不上 ReLU 和 maxout</li>
@@ -361,8 +376,6 @@
 <li>在浅层神经网络中，如不超过四层，可选择使用多种激励函数，没有太大的影响</li>
 <li>如果是使用 ReLU，那么一定要小心设置 learning rate，而且要注意，不要让网络出现很多“dead”神经元，如果这个问题不好解决，那么可以试试 Leaky ReLU ,PReLU , 或者 Maxout。</li>
 </ol>
-<h3 id="2-模型的温度"><a href="#2-模型的温度" class="headerlink" title="2. 模型的温度"></a>2. 模型的温度</h3><p>对于 Softmax 函数，我们可以使用不同的基底参数，其结果仍然服从归一化概率分布，但数值分布发生了变化。<br>$$ Softmax(z_i)&#x3D;\frac {e^{z_i&#x2F;T}} {\sum\limits_{j&#x3D;1}^{n} e^{z_j&#x2F;T}} $$</p>
-<p>其中，$z_i$ 是模型输出的第 $i$ 个元素，$T$ 称为<strong>温度调整（Temperature Scaling）</strong>参数。温度 $T$ 较低时，Softmax 输出的概率分布更加尖锐，即一个值占主导地位（结果的确定性更高）；温度 $T$ 较高时，分布更加平坦，即类别之间的概率差异减小（系统熵增加，随机性更高）。</p>
 <hr>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
 <li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">激活函数 - Wiki</a></li>
@@ -422,14 +435,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">243k</span>
+    <span title="站点总字数">244k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">14:44</span>
+    <span title="站点阅读时长">14:48</span>
   </span>
 </div>
 <div class="busuanzi-count">
