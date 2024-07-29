@@ -4,11 +4,11 @@ date: 2024-07-10 13:32:20
 tags:
 ---
 
-[Transformer 高级讲解 - Jay Alammar](https://jalammar.github.io/illustrated-transformer/)
+Transformer 架构于 2017 年在 [Attention Is All You Need](https://arxiv.org/pdf/1706.03762) 论文中提出，因其具有能够有效捕捉长距离的依赖关系的能力，迅速成为自然语言处理（LLM）和计算机视觉（CV）任务的标准架构。
 
 ## 一、概述
 
-Transformer总体架构可分为四个部分：输入、输出、编码器、解码器。
+Transformer 总体架构可分为四个部分：输入、输出、编码器、解码器。
 
 ![tr](transformer-c.png)
 
@@ -28,7 +28,9 @@ Transformer总体架构可分为四个部分：输入、输出、编码器、解
     - 第二个子层连接结构包括：一个多头注意力子层（**不是自注意力**），规范化层，一个残差连接
     - 第三个子层连接结构包括：一个前馈全连接子层，规范化层，一个残差连接
 
-## 二、源（目标）文本嵌入层
+尽管存在许多堆叠的技术组件，但基本构成就是几种：文本嵌入组件+位置编码器、多头注意力组件、前馈全连接组件、残差组件、规范化组件。
+
+## 二、输入/输出文本嵌入（Inputs/Outputs Enbedding）
 
 ### 掩码张量
 
@@ -185,10 +187,6 @@ MQA 和 MHA 主要是在计算 K 和 V 的过程中有计算量的差异，由�
 
 
 
-
-
-- [Transformer架构解析](https://blog.csdn.net/m0_56192771/article/details/118087175)
-
 ---
 
 ## 附录一：残差网络（ResNet）
@@ -244,17 +242,29 @@ class Residual(nn.Module):  #@save
 
 - [Attention Is All You Need](https://arxiv.org/pdf/1706.03762)
 
-### 精品视频
+### 视频教材
 
-- [认识Transformer架构和代码实现（合集）- 浙大教授](https://www.bilibili.com/video/BV1sW4y1J7cL/?spm_id_from=333.999.0.0&vd_source=735a6376f6214c7b974a1074096ba0fa)
 - [Deep Learning 合集 - 3Blue1Brown](https://space.bilibili.com/88461692/channel/seriesdetail?sid=1528929)
+- [踏踏实实理解神经网络 - 王木头学科学](https://space.bilibili.com/504715181/channel/collectiondetail?sid=643185)
+- [认识Transformer架构和代码实现（合集）- 浙大教授](https://www.bilibili.com/video/BV1sW4y1J7cL/?spm_id_from=333.999.0.0&vd_source=735a6376f6214c7b974a1074096ba0fa)
+
+### 技术解读
+
+- [Transformer 高级讲解 - Jay Alammar](https://jalammar.github.io/illustrated-transformer/)
+- [想要更好地理解大模型架构？从计算参数量快速入手](https://juejin.cn/post/7243435843145924667)
+- [Self-Attention：Learning QKV step by step](https://www.cnblogs.com/hbuwyg/p/16978264.html)
+- [Transformer中的位置编码](https://ziuch.com/article/Positional-Encoding-in-Transform)
+- [Transformer架构解析](https://blog.csdn.net/m0_56192771/article/details/118087175)
+- [深入解析 LLaMA 如何改进 Transformer 的底层结构](https://www.cnblogs.com/huaweiyun/p/17881295.html)
+
+---
 
 ### 官方文档
 
 - [Gemma: Open Models Based on Gemini Research and Technology](gemma-report.pdf)
 - [Gemma Pytorch - Github](https://github.com/google/gemma_pytorch)
 
-### 技术解读
+### 技术解读2
 
 - [Gemma模型论文详解](https://blog.csdn.net/qinduohao333/article/details/136264993)
 - [LLM常见问题（Attention 优化部分）](https://juejin.cn/post/7310061802464264242)
@@ -263,4 +273,3 @@ class Residual(nn.Module):  #@save
 
 - [LLaMA: Open and Efficient Foundation Language Models](2302.13971v1.pdf)
 - [上面论文的中文翻译](https://arthurchiao.art/blog/llama-paper-zh/)
-- [深入解析 LLaMA 如何改进 Transformer 的底层结构](https://www.cnblogs.com/huaweiyun/p/17881295.html)
