@@ -5,6 +5,20 @@ tags:
 ---
 
 Transformer 架构于 2017 年在 [Attention Is All You Need](https://arxiv.org/pdf/1706.03762) 论文中提出，因其具有能够有效捕捉长距离的依赖关系的能力，迅速成为自然语言处理（LLM）和计算机视觉（CV）任务的标准架构。
+> 文字数字化、位置向量化、语义关系化、预测概率化
+> 多头注意力机制，就是能力更强的 CNN，其中词向量的维度就是 CNN 的通道，多头对应的就是卷积核
+> 词向量采用了**绝对**位置的编码信息（基于加法进行矩阵修饰），而注意力机制采用了**相对位置**的编码信息
+> 最后的 Liner 就是对前面的词向量进行一个线性运算，训练时变换称为计算损失值的形式，推理时变换为独热编码，以判断哪个 Token 的概率最大
+
+位置编码的要求：
+
+- 每个单词的TOken都能包含它的位置信息
+- 模型可以看到文字之间的距离
+- 模型可看懂并学习到位置编码的规则
+
+QKV就是在token原有客观语义的基础上，增加 context 代表的主观语义（嵌入向量，word embedding）进行修正，例如校准多义词的具体含义
+WQ、WK、WV是增加了一些参数，如果没有他们，就是$XX^TT$ 也是可以表达自注意力，但是表达能力弱一点
+单头QKV情况下，WV是一个（dmodel，dmodel）的矩阵，为了减少数据量 ，可以将其转化为（dmode，x）乘以（x，dmodl），即降秩+升秩；在多头情况下，WV是 nhead 个（dmodel，dhead=dmodel/nhead）的矩阵，然后连接起来与WO（dhead，dmodel）相乘，最终得到输出矩阵（ctx-lenght，dmodel）。上述两个方法在数学上是等价的。
 
 ## 一、概述
 
@@ -30,98 +44,95 @@ Transformer 总体架构可分为四个部分：输入、输出、编码器、�
 
 尽管存在许多堆叠的技术组件，但基本构成就是几种：文本嵌入组件+位置编码器、多头注意力组件、前馈全连接组件、残差组件、规范化组件。
 
-## 二、输入/输出文本嵌入（Inputs/Outputs Enbedding）
+## 二、Position Embedding - 位置嵌入
 
-### 掩码张量
+对于 Inputs 和 Outputs 的输入序列来说，仅仅完成词向量的 tokenlized 是不够的（例如“温州的气温是多少度”，两个“温”字的词向量完全相同，但其实际含义完全不同），因此我们需要为词向量添加位置信息。
 
-掩代表遮掩，码就是我们张量中的数值，它的尺寸不定，里面一般只有1和0的元素，代表位置被遮掩或者不被遮掩，至于是0位置被遮掩还是1位置被遮掩可以自定义，因此它的作用就是让另外一个张量中的一些数值被遮掩，也可以说被替换, 它的表现形式是一个张量.
+一般来说，位置编码与嵌入具有相同的维数模型，Transformer 建议采用“矩阵加法”实现，数值则使用了不同频率的正弦和余弦函数，数学表示为：
 
-掩码张量的作用:
+$$ \begin{align*}
+    PE_{(pos,2i)} &= sin(pos/10000^{2i/d_{model}}) \\\\
+    PE_{(pos,2i+1)} &= cos(pos/10000^{2i/d_{model}})
+    \end{align*}
+$$
+其中，$pos$ 定义了位置，$i$ 定义了维度。
 
-在transformer的编码器中, 掩码张量的主要作用是遮蔽掉源语言中对结果没有意义的字符而产生的注意力值（也就是说遮蔽掉对结果没有意义的字符而将注意力集中在有意义的词上面），比如说，对于一句话:“我爱美丽的中国”,我们要提取句子的主要部分，即"我爱中国",而屏蔽掉对结果没有意义的字符，比如"美丽"这个修饰词，以此提升模型效果和训练速度
+![PE](PE.png)
 
-在transformer的解码器中, 掩码张量的主要作用在应用attention时，有一些生成的attention张量中的值计算有可能已知了未来信息而得到的，未来信息被看到是因为训练时会把整个输出结果都一次性进行Embedding，但是理论上解码器的的输出却不是一次就能产生最终结果的，而是一次次通过上一次结果综合得出的，因此，未来的信息可能被提前利用. 所以，我们会进行遮掩. 比如在解码器准备生成第一个字符或词汇时，我们其实已经传入了第一个字符以便计算损失，但是我们不希望在生成第一个字符时模型能利用这个信息，因此我们会将其遮掩，同样生成第二个字符或词汇时，模型只能使用第一个字符或词汇信息，第二个字符以及之后的信息都不允许被模型使用.
+## 三、Multi-Head Attention - 多头注意力
 
-上文经常提及“词嵌入”，原文的词嵌入是 Encoder 的输入，译文的词嵌入是 Decoder 的输入之一。我们可以用 pytorch 很方便地实现普通的词嵌入，但是这里的词嵌入还包含 Position Embedding。
+在传统的循环神经网络（RNN）和长短期记忆网络（LSTM）中，处理长距离依赖可能非常困难，因为信息需要通过许多时间步长传递。自注意力机制可以直接捕捉序列中任意两个位置之间的依赖关系，无论它们之间的距离有多远，因此成为 Transformer 最关键的技术改进点！！！
 
-首先翻译是与词的相对位置紧密相关的，尽管我们在 中将句子中的词按顺序排列，但实际上做矩阵乘法时，这种“顺序”是直接被忽略掉的，在参数看来，这些词就是无序的。我们必须 explicitly 在词嵌入的数值上体现相对位置。
+### 1. 数学定义
 
-## 三、多头注意力子层
+![attention](attention.png)
 
-解码器中的自注意力层的运行方式与编码器中的自注意力层略有不同：
+最基础的注意力结构是 Scaled Dot-Product Attention（缩放点积注意力，即单头注意力），数学表达为：
+$$Attention(Q,K,V) = softmax(\frac {QK^T}{\sqrt {d_k}})V$$
 
-- 在解码器中，自注意力层只允许关注输出序列中较早的位置。这是通过在自注意力计算中的 softmax 步骤之前屏蔽未来位置（将其设置为）来完成的。-inf
-- “编码器-解码器注意力”层的工作方式与多头自注意力类似，只不过它从其下面的层创建其查询矩阵，并从编码器堆栈的输出中获取键和值矩阵。
+Multi-Head Attention（多头注意力）是 Scaled Dot-Product Attention 的扩展，数学表达为：
+![multi](attention-2.png)
 
-### 1. （带掩码的）多头注意力组件
+相比单头注意力机制，多头注意力机制（Multi-Head Attention）具有以下优势：
 
-![attendtion](attention.png)
+- 多头注意力允许模型在多个不同的表示子空间（分别关注输入序列的不同方面，例如，一个头可能关注句法信息，而另一个头可能关注语义信息）中并行地捕获信息，这增加了模型的表示能力，使其能够同时学习到输入数据的多种特征。
+- 多头注意力的计算是高度并行的，这使得模型可以高效地利用 GPU 进行快速训练。
+- 多头注意力可以帮助模型在面对不完整或嘈杂的数据时更加鲁棒，因为不同的头可以捕捉到不同的信息，从而减少对单一特征的依赖，同时也有助于提高模型的泛化能力
+- 调整头的数量可以控制模型的复杂性和容量。更多的头可以提供更细粒度的分析，但也增加了计算成本。
 
-词向量已经提供了基于字典表的、单个 token 的客观语义，自注意力机制的目的是提供基于当前上下文的、token 之间的主观语义，并据此对输入向量进行修正。
+### 2. 具体实现
 
-与基于直线的线形变换相比，矩阵二次型实际上是基于圆锥曲线的高纬变换，因此有着更强的表达能力。
+观察上面的 Transformer 结构图，可以发现 3 个不同的多头注意力子层：
 
-Q 表示查询向量，K 表示关键字向量，V 表示值向量
-可以认为，$Q$ 和 $K$ 分别负责**设定语义**和**表达语义**。
+1. encoder-decoder attention：模仿了机器翻译的注意力机制，Query 来自于解码器的前一层，Key 和 Value 来自于编码器的输出。注意输入顺序是**V、K、Q**！
+2. encoder self-attention：标准的自注意力机制，Q、K、V 都来自于编码器的前一层输出。
+3. decoder masked attention：带掩码的自注意力机制，以确保解码器的 auto-regressive 自回归特性（即在生成每个位置时，只能看到它之前的位置，而不能“看到”未来的位置）。实现方法是将矩阵对角线以上部分的所有值设为 $-\infty$
+
+### 3. 物理意义
 
 ![交叉注意力](qkv-2.png)
 
-$$
-\begin{align*}
-A &= X \cdot W_q \cdot [X \cdot W_k]^T \\\\
-    &= X \cdot [W_q \cdot W_k^T] \cdot X^T \\\\
-    &= X \cdot W_A \cdot X^T
-\end{align*}
-$$
+- 词向量已经提供了基于字典表的、单个 token 的**客观语义**，自注意力机制的目的是提供基于当前上下文的、token 之间的**主观语义**，并据此对输入向量进行修正。
+- 与基于直线的线形变换相比，矩阵二次型实际上是基于圆锥曲线的高维变换，因此有着更强的表达能力。
+    $$ A = X \cdot W_Q \cdot [X \cdot W_K]^T = X \cdot [W_Q \cdot W_K^T] \cdot X^T = X \cdot W_A \cdot X^T $$
+- Q 表示查询向量，K 表示关键字向量，V 表示值向量。可以认为，$Q$ 和 $K$ 分别负责**设定语义**和**表达语义**。
 
-词汇表的容量为 $n_{vocab}$，词向量的维度是 $d_{model}$（也称为 d_embed）
+换个角度看，就是：
+![attention](attention-3.png)
 
-输入数据为：
+### 4. 后续改进
 
-- $T_1$：基准输入数据，形状为 $(length_{ctx1}, d_{model})$
-- $T_2$：对照输入数据，形状为 $(length_{ctx2}, d_{model})$
-- 如果是自注意力机制，则 $T_2=T_1$
+![VS](MQA.png)
 
-注意力机制的层数是 $n_{layers}$，如果是单头注意力机制：
+MHA（Multi-head Attention）是标准的多头注意力机制，包含 H 个Query、Key 和 Value 矩阵。所有注意力头的 Key 和 Value 矩阵权重不共享。
 
-- 1 个 $W_q$：Query 权重矩阵，形状为$(length_{ctx1}, d_{model})$
-- 1 个 $W_k$：Key 权重矩阵，形状为$(length_{ctx2},  d_{model})$
-- 1 个 $W_v$：Value 权重矩阵，形状为$(length_{ctx2}, d_{model})$
-- 中间结果 $A$ 的形状为 $(length_{ctx1}, length_{ctx2})$
+MQA（Multi-Query Attention，多查询注意力）是 19 年提出的一种 Attention 机制，其能够在保证模型效果的同时加快 decoder 生成 token 的速度。MQA 是将 head 中的 key 和 value 矩阵抽出来单独存为一份共享参数，而 query 则是依旧保留在原来的 head 中，每个 head 有一份自己独有的 query 参数。
 
-> TODO: 3Blue1Brown 视频视频中说 Value 是 12288 * 12288 的矩阵，分解为 12288 * 128 乘以 128 * 12288 的矩阵乘法，参数分别是 value 和 output，与我的理解有差异！！！
+GQA（Grouped-Query Attentio，分组查询注意力）是一种针对 Transformer 模型中 Multi-head Attention 的改进方法，旨在提高模型的运算速度，同时保持预测质量。在标准的Multi-head Attention中，每个注意力头都是独立计算的，这导致了计算和存储需求较高。分组查询注意力通过将查询头分组，让每组共享一个键头和值头，从而减少计算和存储需求。
 
-如果是多头注意力机制，则有$d_{head} = d_{model} \div n_{heads}$（也称为 d_query），相应的：
+MQA 和 MHA 主要是在计算 K 和 V 的过程中有计算量的差异，由于训练阶段由于数据是并行的，这种差异整体不明显，而在推理阶段，在 memery cache的基础上，MQA 的推理速度有明显提升，同时也更省内存。
 
-- $n_{heads}$ 个 $W_q$：Query 权重矩阵，形状为$(length_{ctx1}, d_{head})$
-- $n_{heads}$ 个 $W_k$：Key 权重矩阵，形状为$(length_{ctx2},  d_{head})$
-- $n_{heads}$ 个 $W_v$：Value 权重矩阵，形状为$(length_{ctx2}, d_{head})$
+## 四、Feed Forward Network - 前馈网络
 
-输出数据的形状为 $(length_{ctx1}, d_{model})$，也就是与输入数据的形状完全系统。
+在 Transformer 模型中，每层编码器和解码器都包含一个前馈网络（Feed-Forward Network，FFN），负责在注意力机制的基础上进一步提取特征，增加模型的表达能力。
+$$ FFN(x) = \max(0,xW_1+b_1)W_2+b_2$$
 
-![GPT-3](gpt3.png)
+前馈网络包含两个线性变换（也称为全连接层或线性层），不同层使用不同的参数。尽管每个位置使用的线性变换形式相同，但是不同层之间的参数是不同的。这意味着每一层都有自己的权重矩阵和偏置项。
+这种结构也可以被看作是两次具有核大小为 1 的卷积操作。这里的“卷积”是指在输入序列上应用线性滤波器，但由于核大小为1，它实际上等同于全连接层。
+
+输入和输出的维度都是 $d_{model}$，中间层的维度是 $d_{ff}$（一般设定为 $d_{model}$ 的 4 倍），激活函数建议使用 ReLU。
+
+## 五、其他组件
 
 ### 2. 规范化组件
 
 ### 3. 残差连接组件
 
-## 四、前馈全联接子层
-
-GPT-3 的前馈全联接子层包含 2 个串联的线性组件，分别是 Up-projection 和 Down—projection，主要参数是：
-
-- Up-projection：输出数据的形状为 $(length_{ctx1}, d_{model})$，包含 $n_{neurons}$ 个神经元，输出数据的形状为 $(length_{ctx1}, n_{neurons})$
-- Down—projection：输入就是 Up-projection 的输出，包含 $d_{model}$ 个神经元，输出数据的形状为 $(length_{ctx1}, d_{model})$
-
-> TODO: LLM张老师说，神经元的数量 = 词向量维度 * 4，为什么？
-> 以及，QKV 的参数矩阵 ，还要加上一个 W-output矩阵，为什么？
-
-## 五、输出部分
-
 ---
 
 ## 附录一：Gemma 7B 对比分析
 
-以 Gemma 7B 为例，分析其配置文件
+以 LLaMA-2 7B 为例，分析其配置文件
 
 ![arch](arch.jpg)
 
@@ -171,20 +182,83 @@ tokenizer: Optional[str] = 'tokenizer/tokenizer.model'
 - 隐藏层的维度：3072
 - 自注意力 head 的数量：16
 
-![VS](MQA.png)
 
-MHA（Multi-head Attention）是标准的多头注意力机制，包含 H 个Query、Key 和 Value 矩阵。所有注意力头的 Key 和 Value 矩阵权重不共享。
-
-MQA（Multi-Query Attention，多查询注意力）是 19 年提出的一种 Attention 机制，其能够在保证模型效果的同时加快 decoder 生成 token 的速度。MQA 是将 head 中的 key 和 value 矩阵抽出来单独存为一份共享参数，而 query 则是依旧保留在原来的 head 中，每个 head 有一份自己独有的 query 参数。
-
-GQA（Grouped-Query Attentio，分组查询注意力）是一种针对 Transformer 模型中 Multi-head Attention 的改进方法，旨在提高模型的运算速度，同时保持预测质量。在标准的Multi-head Attention中，每个注意力头都是独立计算的，这导致了计算和存储需求较高。分组查询注意力通过将查询头分组，让每组共享一个键头和值头，从而减少计算和存储需求。
-
-MQA 和 MHA 主要是在计算 K 和 V 的过程中有计算量的差异，由于训练阶段由于数据是并行的，这种差异整体不明显，而在推理阶段，在 memery cache的基础上，MQA 的推理速度有明显提升，同时也更省内存。
 
 ---
 
-## Transformer 架构解析
+## 三、GPT-3 模型的参数构成分析
 
+[GPT-3](https://github.com/openai/gpt-3) 是一个由 1750 亿个参数组成的语言模型，其 Transformer 架构仅包含解码器部分，预训练时将生成并**固化**所有 175B 个模型参数。
+为了定义 GPT-3 模型的结构，其核心的超参数（无法通过训练调整的参数）包括：
+
+- 词向量维度：$d_{model}=12288$，词汇表容量：$n_{vocab}=50257$
+- 解码器层数：$n_{layers}=96$
+- 注意力头数：$n_{heads}=96$；相应得出查询向量维度：$d_k = d_{model} \div n_{heads} = 12288 / 96 =128$，而且仅有解码器部分时，$d_v=d_k$
+- 前馈神经元数量：$n_{neurons}=49152$（经验表明，隐藏层神经元数量通常设置为输入层的 4 倍）
+- 上下文长度：$n_{ctx}=2048$
+- 批次大小：Batch Size = 3.2M
+- 学习率：Learning Rate = $0.6 \times 10^{-4}$
+
+![GPT-3](gpt3-2.png)
+
+Inputs 作为原始语言输入，例如“大模型的三个要素是”包含了 9 个 token，是一个用户输入的、长度为 $length_{ctx}$ 的向量（当然 $length_{ctx} \leqslant n_{ctx}$），后续就是其与包含大模型 175B 参数的若干个矩阵进行计算：
+
+1. 1 个 $W_E(n_{vocab},d_{model})$：词向量嵌入矩阵，存储了所有词汇表及其维度信息。
+    对用户输入进行向量化处理（Input Embedding），并嵌入位置信息（Positional Embedding）。
+    输出一个形状为$(length_{ctx},d_{model})$ 的矩阵 $X$ 作为下一阶段的输入。
+2. 96 个多头注意力子层：包含了 96 个注意力头，每个注意力头包含 4 个矩阵
+   - $W_Q(d_{model},d_k)$：$Q=XW_Q$
+   - $W_K(d_{model},d_k)$：$K=XW_K$
+    计算自注意力矩阵$A(length_{ctx},length_{ctx}) = QK^T$，softmax 归一化处理得到$A'$
+   - $W_V(d_{model},d_v)$：也称 Value Down 矩阵，$V=XW_V$，
+    对于每个单头，分别计算 $O(length_{ctx}，d_v)=A'V$
+   - $W_O(d_v,d_{model})$：也称 Value UP 矩阵，目的是还原为 $d_{model}$ 维度
+    对于每个单头，分别计算 $OW_O$，最后拼接起来还是 $X'(length_{ctx}，d_{model})$
+3. 96 个前馈全联接子层：包含了 2 次线性变换，即图中的 **Wff**
+    - $W_{Up}(d_{model},n_{neurons})$：$Up=XW_{Up}$，维度从 $d_{model}$ 提升到 $d_{neurons}$
+    - $W_{Down}(n_{neurons},d_{model})$：$X''=Down=UpW_{Down}$，维度从 $d_{neurons}$ 还原到 $d_{model}$
+4. 1 个Unembedding Matrix $(n_{model},d_{vocab})$：即图中的 **Wp/WU**
+
+> 对于每一个可能的输出特征，在词典中对应的每一个文字，都有一个dmodel维度的权重向量
+
+汇总参数数量如下图，其中前馈全联接子层占比66%，自注意力子层占比33%，词汇表不足1%。
+![GPT-3](gpt3.png)
+
+### 1. Word Embedding Matrix（）
+
+### 2. QKV 矩阵
+
+### 3. Feed Forward 
+
+输入数据为：
+
+- $T_1$：基准输入数据，形状为 $(length_{ctx1}, d_{model})$
+- $T_2$：对照输入数据，形状为 $(length_{ctx2}, d_{model})$
+- 如果是自注意力机制，则 $T_2=T_1$
+
+注意力机制的层数是 $n_{layers}$，如果是单头注意力机制：
+
+- 1 个 $W_q$：Query 权重矩阵，形状为$(length_{ctx1}, d_{model})$
+- 1 个 $W_k$：Key 权重矩阵，形状为$(length_{ctx2},  d_{model})$
+- 1 个 $W_v$：Value 权重矩阵，形状为$(length_{ctx2}, d_{model})$
+- 中间结果 $A$ 的形状为 $(length_{ctx1}, length_{ctx2})$
+
+> TODO: 3Blue1Brown 视频视频中说 Value 是 12288 * 12288 的矩阵，分解为 12288 * 128 乘以 128 * 12288 的矩阵乘法，参数分别是 value 和 output，与我的理解有差异！！！
+
+如果是多头注意力机制，则有$d_{head} = d_{model} \div n_{heads}$（也称为 d_query），相应的：
+
+- $n_{heads}$ 个 $W_q$：Query 权重矩阵，形状为$(length_{ctx1}, d_{head})$
+- $n_{heads}$ 个 $W_k$：Key 权重矩阵，形状为$(length_{ctx2},  d_{head})$
+- $n_{heads}$ 个 $W_v$：Value 权重矩阵，形状为$(length_{ctx2}, d_{head})$
+
+输出数据的形状为 $(length_{ctx1}, d_{model})$，也就是与输入数据的形状完全系统。
+
+
+
+GPT-3 的前馈全联接子层包含 2 个串联的线性组件，分别是 Up-projection 和 Down—projection，主要参数是：
+
+- Up-projection：输出数据的形状为 $(length_{ctx1}, d_{model})$，包含 $n_{neurons}$ 个神经元，输出数据的形状为 $(length_{ctx1}, n_{neurons})$
+- Down—projection：输入就是 Up-projection 的输出，包含 $d_{model}$ 个神经元，输出数据的形状为 $(length_{ctx1}, d_{model})$
 
 
 ---
