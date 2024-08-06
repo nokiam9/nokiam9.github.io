@@ -1,6 +1,6 @@
 ---
-title: 大模型学习笔记之四：Transformer
-date: 2024-07-10 13:32:20
+title: 大模型学习笔记之六：Transformer
+date: 2024-08-05 13:32:20
 tags:
 ---
 
@@ -70,6 +70,8 @@ $$
 最基础的注意力结构是 Scaled Dot-Product Attention（缩放点积注意力，即单头注意力），数学表达为：
 $$Attention(Q,K,V) = softmax(\frac {QK^T}{\sqrt {d_k}})V$$
 
+其中：$\sqrt {d_k}$ 代表了 Scale（缩放），Softmax 就是概率的归一化，此外有可能需要采用 Mask（掩码）。
+
 Multi-Head Attention（多头注意力）是 Scaled Dot-Product Attention 的扩展，数学表达为：
 ![multi](attention-2.png)
 
@@ -84,9 +86,9 @@ Multi-Head Attention（多头注意力）是 Scaled Dot-Product Attention 的扩
 
 观察上面的 Transformer 结构图，可以发现 3 个不同的多头注意力子层：
 
-1. encoder-decoder attention：模仿了机器翻译的注意力机制，Query 来自于解码器的前一层，Key 和 Value 来自于编码器的输出。注意输入顺序是**V、K、Q**！
+1. encoder-decoder cross-attention：模仿了机器翻译的交叉注意力机制，Query 来自于解码器的前一层，Key 和 Value 来自于编码器的输出。注意输入顺序是**V、K、Q**！
 2. encoder self-attention：标准的自注意力机制，Q、K、V 都来自于编码器的前一层输出。
-3. decoder masked attention：带掩码的自注意力机制，以确保解码器的 auto-regressive 自回归特性（即在生成每个位置时，只能看到它之前的位置，而不能“看到”未来的位置）。实现方法是将矩阵对角线以上部分的所有值设为 $-\infty$
+3. decoder masked self-attention：带掩码的自注意力机制，以确保解码器的 auto-regressive 自回归特性（即在生成每个位置时，只能看到它之前的位置，而不能“看到”未来的位置）。实现方法是将矩阵对角线以上部分的所有值设为 $-\infty$
 
 ### 3. 物理意义
 
@@ -206,18 +208,20 @@ Inputs 作为原始语言输入，例如“大模型的三个要素是”包含�
 1. 1 个 $W_E(n_{vocab},d_{model})$：词向量嵌入矩阵，存储了所有词汇表及其维度信息。
     对用户输入进行向量化处理（Input Embedding），并嵌入位置信息（Positional Embedding）。
     输出一个形状为$(length_{ctx},d_{model})$ 的矩阵 $X$ 作为下一阶段的输入。
-2. 96 个多头注意力子层：包含了 96 个注意力头，每个注意力头包含 4 个矩阵
+2. 96 个多头注意力子层：包含了 96 个注意力头，每个注意力头包含 3 个矩阵
+
    - $W_Q(d_{model},d_k)$：$Q=XW_Q$
-   - $W_K(d_{model},d_k)$：$K=XW_K$
+   - $W_K(d_{model},d_k)$：$K=XW_K$，
     计算自注意力矩阵$A(length_{ctx},length_{ctx}) = QK^T$，softmax 归一化处理得到$A'$
-   - $W_V(d_{model},d_v)$：也称 Value Down 矩阵，$V=XW_V$，
+   - $W_V(d_{model},d_v)$：也称 Value Down 矩阵，$V=XW_V$
     对于每个单头，分别计算 $O(length_{ctx}，d_v)=A'V$
-   - $W_O(d_v,d_{model})$：也称 Value UP 矩阵，目的是还原为 $d_{model}$ 维度
-    对于每个单头，分别计算 $OW_O$，最后拼接起来还是 $X'(length_{ctx}，d_{model})$
+
+    最后，$W_O(d_{model},d_{model})$：也称 Value UP 矩阵，目的是还原为 $d_{model}$ 维度
+    把全部单头拼接起来形成$O'$，然后计算 $O'W_O$ 得到 $X'(length_{ctx}，d_{model})$
 3. 96 个前馈全联接子层：包含了 2 次线性变换，即图中的 **Wff**
     - $W_{Up}(d_{model},n_{neurons})$：$Up=XW_{Up}$，维度从 $d_{model}$ 提升到 $d_{neurons}$
     - $W_{Down}(n_{neurons},d_{model})$：$X''=Down=UpW_{Down}$，维度从 $d_{neurons}$ 还原到 $d_{model}$
-4. 1 个Unembedding Matrix $(n_{model},d_{vocab})$：即图中的 **Wp/WU**
+4. 1 个Unembedding Matrix $(n_{model},d_{vocab})$：即图中的 **Wp/WU**，与WE相似，但是行列顺序相反，目的是基于词向量维度，线性变换为词汇表，然后 Softmax 计算出每个词的概率，并选择概率最大的单词作为输出。
 
 > 对于每一个可能的输出特征，在词典中对应的每一个文字，都有一个dmodel维度的权重向量
 
