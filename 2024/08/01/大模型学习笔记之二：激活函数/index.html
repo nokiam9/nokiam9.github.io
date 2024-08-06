@@ -22,33 +22,33 @@
     <meta name="description" content="一、概述 神经网络中的每个神经元节点接受上一层神经元的输出值作为本神经元的输入值，并将输入值传递给下一层，输入层神经元节点会将输入属性直接传递到下一层（隐层或输出层）。在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数（activation function）。    $\sum\limits_{i}{w_{i}x_{i}+b}$ 是线形组合部分，$f()$">
 <meta property="og:type" content="article">
 <meta property="og:title" content="大模型学习笔记之二：激活函数">
-<meta property="og:url" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/index.html">
+<meta property="og:url" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
 <meta property="og:description" content="一、概述 神经网络中的每个神经元节点接受上一层神经元的输出值作为本神经元的输入值，并将输入值传递给下一层，输入层神经元节点会将输入属性直接传递到下一层（隐层或输出层）。在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数（activation function）。    $\sum\limits_{i}{w_{i}x_{i}+b}$ 是线形组合部分，$f()$">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/vs.png">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/Sigmoid.png">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/tanh.png">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ReLU.png">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/LU.png">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/L-ReLU.png">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ELU.png">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/group.gif">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/softmax.png">
-<meta property="og:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png">
-<meta property="article:published_time" content="2024-06-30T05:27:50.000Z">
-<meta property="article:modified_time" content="2024-07-28T07:25:40.064Z">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/vs.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/Sigmoid.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/tanh.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ReLU.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/LU.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/L-ReLU.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ELU.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/group.gif">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/softmax.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png">
+<meta property="article:published_time" content="2024-08-01T05:27:50.000Z">
+<meta property="article:modified_time" content="2024-08-06T13:11:15.221Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png">
 
 
-<link rel="canonical" href="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/">
+<link rel="canonical" href="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/","path":"2024/06/30/大模型学习笔记之二：激活函数/","title":"大模型学习笔记之二：激活函数"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/","path":"2024/08/01/大模型学习笔记之二：激活函数/","title":"大模型学习笔记之二：激活函数"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
 <title>大模型学习笔记之二：激活函数 | Alex的技术博客</title>
@@ -163,7 +163,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">99</span>
+          <span class="site-state-item-count">101</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -201,7 +201,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -230,14 +230,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2024-06-30 13:27:50" itemprop="dateCreated datePublished" datetime="2024-06-30T13:27:50+08:00">2024-06-30</time>
+      <time title="创建时间：2024-08-01 13:27:50" itemprop="dateCreated datePublished" datetime="2024-08-01T13:27:50+08:00">2024-08-01</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-28 15:25:40" itemprop="dateModified" datetime="2024-07-28T15:25:40+08:00">2024-07-28</time>
+      <time title="修改时间：2024-08-06 21:11:15" itemprop="dateModified" datetime="2024-08-06T21:11:15+08:00">2024-08-06</time>
     </span>
 
   
@@ -272,13 +272,13 @@
     
     
     <div class="post-body" itemprop="articleBody"><h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>神经网络中的每个神经元节点接受上一层神经元的输出值作为本神经元的输入值，并将输入值传递给下一层，输入层神经元节点会将输入属性直接传递到下一层（隐层或输出层）。在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数（activation function）。</p>
-<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png" alt="cell"></p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png" alt="cell"></p>
 <p>$\sum\limits_{i}{w_{i}x_{i}+b}$ 是线形组合部分，$f()$ 部分就是激活函数，核心用途是为神经元加入非线性因素！</p>
 <blockquote>
 <p>从哲学的角度看，线性组合解决的是<strong>描述问题</strong>，激励函数解决的是<strong>判断问题</strong>，就是价值观！</p>
 </blockquote>
 <p>在神经网络中，如果不对上一层结点的输出做非线性转换的话（即：激活函数为$f(x)&#x3D;x$），再深的网络也是线性模型，只能把输入线性组合再输出，不能学习到复杂的映射关系，就是最原始的感知机（perceptron），那么网络的逼近能力就相当有限，因此需要使用激活函数提供非线性转换，这样深层神经网络表达能力就更加强大了，几乎可以逼近任意函数。</p>
-<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/vs.png" alt="vs"></p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/vs.png" alt="vs"></p>
 <p>设计一个合格的激活函数，必须满足以下性质：</p>
 <ul>
 <li>非线性：这是激活函数的基本要求，目的就是提供<strong>超越</strong>线形组合的表达能力</li>
@@ -292,7 +292,7 @@
 </ul>
 <p>根据输入变量的数量，激活函数分为单变量输入$f(x)$ 和 多变量输入$f(x_1,..x_n)$。</p>
 <h2 id="二、单变量输入的激活函数"><a href="#二、单变量输入的激活函数" class="headerlink" title="二、单变量输入的激活函数"></a>二、单变量输入的激活函数</h2><h3 id="1-Sigmoid（S型函数）"><a href="#1-Sigmoid（S型函数）" class="headerlink" title="1. Sigmoid（S型函数）"></a>1. Sigmoid（S型函数）</h3><p>Sigmoid 函数把一个实数（输入的连续实值）压缩到 0 到 1 之间，当输入的数字非常大的时候，结果会接近 1（完全被激活），当输入非常大的负数时，则会得到接近 0 （几乎死掉了），很好地解释了神经元受到刺激后是否被激活，并向后传递的场景，因此在早期的神经网络中使用非常普遍！</p>
-<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/Sigmoid.png" alt="sigmoid"></p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/Sigmoid.png" alt="sigmoid"></p>
 <p>不过，其在近期深度学习的应用中已经很少使用，主要存在以下缺点：</p>
 <ul>
 <li>当神经网络的层数很多时，如果每一层的激活函数都采用 Sigmoid 函数的话，就会产生梯度弥散和梯度爆炸的问题，其中梯度爆炸发生的概率非常小，而<strong>梯度消失</strong>的发生概率比较大。</li>
@@ -303,7 +303,7 @@
 <p>zero-centered 问题：如果当前参数（$w_0$, $w_1$）的最佳优化方向是 （$+d_0$, $-d_1$），则根据反向传播计算公式，我们希望 $x_0$ 和 $x_1$ 符号相反，但是如果上一级神经元采用 Sigmoid 函数作为激活函数，其输出值恒为正，那么我们无法进行更快的参数更新，只能走 Z 字形逼近最优解。</p>
 </blockquote>
 <h3 id="2-Tanh（Hyperbolic-tangent，双曲正切函数）"><a href="#2-Tanh（Hyperbolic-tangent，双曲正切函数）" class="headerlink" title="2. Tanh（Hyperbolic tangent，双曲正切函数）"></a>2. Tanh（Hyperbolic tangent，双曲正切函数）</h3><p>在数学中，双曲正切 tanh 是由双曲正弦和双曲余弦这两个基本双曲函数推导而来。<br>$$<br>tanh(x)&#x3D;\dfrac{(e^x-e^{-x})}{(e^x+e^{-x})}<br>$$</p>
-<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/tanh.png" alt="tanh"></p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/tanh.png" alt="tanh"></p>
 <p>与 Sigmoid 相比，tanh 函数有了明显改进，但有些问题依然存在：</p>
 <ul>
 <li>tanh 函数输出位于[-1,1]，解决了 Sigmoid 函数输出的 zero-centered 问题</li>
@@ -311,7 +311,7 @@
 <li>计算量仍然加大，因为解析式中仍然包含幂函数！</li>
 </ul>
 <h3 id="3-ReLU（Rectified-Linear-Unit-线形整流函数）"><a href="#3-ReLU（Rectified-Linear-Unit-线形整流函数）" class="headerlink" title="3. ReLU（Rectified Linear Unit, 线形整流函数）"></a>3. ReLU（Rectified Linear Unit, 线形整流函数）</h3><p>针对 Sigmoid 函数和 tanh 的缺点，提出了一种<strong>斜坡</strong>函数，就是 ReLU函数。</p>
-<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ReLU.png" alt="R"></p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ReLU.png" alt="R"></p>
 <p>ReLU 是目前最受欢迎的激活函数！突出优点是：</p>
 <ul>
 <li>解决了梯度消失（gradient vanishing）问题，仅在正区间部分</li>
@@ -323,14 +323,14 @@
 <li>由于负数部分恒为零，有些场景下比较脆弱。即如果变量的更新太快，还没有找到最佳值就进入小于零的分段，就会使得梯度变为零，神经元就直接死掉了（无法更新）</li>
 <li>输出不是 zero-centered</li>
 </ul>
-<p>解决方法是可以采用 Xavier 初始化方法，以及避免将 learning rate 设置太大或使用 adagrad 等自动调节 learning rate 的算法。<br>为了改进 ReLU 的缺点，陆续出现了许多的变种，如下图：<br><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/LU.png" alt="LUs"></p>
+<p>解决方法是可以采用 Xavier 初始化方法，以及避免将 learning rate 设置太大或使用 adagrad 等自动调节 learning rate 的算法。<br>为了改进 ReLU 的缺点，陆续出现了许多的变种，如下图：<br><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/LU.png" alt="LUs"></p>
 <h4 id="Leak-ReLU（Leakly-Rectified-Linear-Unit，带泄露线性整流函数）"><a href="#Leak-ReLU（Leakly-Rectified-Linear-Unit，带泄露线性整流函数）" class="headerlink" title="Leak-ReLU（Leakly Rectified Linear Unit，带泄露线性整流函数）"></a>Leak-ReLU（Leakly Rectified Linear Unit，带泄露线性整流函数）</h4><p>为了避免 ReLU 存在的梯度消失问题，提出了将 ReLU 的前半段设为 $ax$ 而非 0，即当神经元处于非激活状态时，允许一个非0的梯度存在，a 可由方向传播算法学出来，通常设置为 0.01。也称为 LReLU 。</p>
 <p>$$f(x)&#x3D;max(ax, x)$$</p>
-<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/L-ReLU.png" alt="R"></p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/L-ReLU.png" alt="R"></p>
 <p>理论上来说，Leaky ReLU 具备 ReLU的所有优点，外加不会有 Dead ReLU 问题，但是在实际操作当中，并没有完全证明 Leaky ReLU 总是好于 ReLU。</p>
 <h4 id="RReLU（Random-Rectified-Linear-Unit，随机线性整流单元）"><a href="#RReLU（Random-Rectified-Linear-Unit，随机线性整流单元）" class="headerlink" title="RReLU（Random Rectified Linear Unit，随机线性整流单元）"></a>RReLU（Random Rectified Linear Unit，随机线性整流单元）</h4><p>Leaky ReLU的一个变体。在 PReLU中，负值的斜率在<strong>训练</strong>中是随机的，在之后的测试中就变成了固定的了。</p>
 <h3 id="4-ELU（Exponential-Linear-Unit，指数线性函数）"><a href="#4-ELU（Exponential-Linear-Unit，指数线性函数）" class="headerlink" title="4. ELU（Exponential Linear Unit，指数线性函数）"></a>4. ELU（Exponential Linear Unit，指数线性函数）</h3><p>一个 ReLU 的进化版，正数部分是和 ReLU 完全相同的 $x$ ，但负数部分是 $\alpha(e^x-1)$ 。</p>
-<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ELU.png" alt="ELU"></p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ELU.png" alt="ELU"></p>
 <p>ELU 试图将激活函数的平均值接近零，从而加速学习的速率。同时它融合了 Sigmoid 和 ReLU，左侧具有软饱和性，右侧无饱和性，则可以通过正值的标识来避免梯度消失的问题。根据一些研究，ELU 分类精确度是高于 ReLUs的。</p>
 <h4 id="SELU（Scaled-Exponential-Linear-Unit，扩展指数线形函数）"><a href="#SELU（Scaled-Exponential-Linear-Unit，扩展指数线形函数）" class="headerlink" title="SELU（Scaled Exponential Linear Unit，扩展指数线形函数）"></a>SELU（Scaled Exponential Linear Unit，扩展指数线形函数）</h4><p>一个 ELU 的变种，把每一个值的前面都乘上一个系数，即：正数部分为 $\lambda x$ ，负数部分为 $\lambda\alpha(e^x-1)$ 。</p>
 <p><a target="_blank" rel="noopener" href="https://github.com/bioinf-jku/SNNs">有关数学推导</a>表明，最佳参数为：$\alpha$&#x3D;1.67326324，$\lambda$&#x3D;1.050700987。</p>
@@ -341,18 +341,18 @@
 <li>正弦函数：$f(x)&#x3D;sin(x)$</li>
 <li>高斯函数：$f(x)&#x3D;e^{-x^2}$</li>
 </ul>
-<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/group.gif" alt="Group"></p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/group.gif" alt="Group"></p>
 <h2 id="三、多变量输入的激活函数"><a href="#三、多变量输入的激活函数" class="headerlink" title="三、多变量输入的激活函数"></a>三、多变量输入的激活函数</h2><h3 id="1-Softmax-函数"><a href="#1-Softmax-函数" class="headerlink" title="1. Softmax 函数"></a>1. Softmax 函数</h3><p>Softmax 是一种激活函数，将一个数值向量<strong>归一化</strong>为一个概率分布向量，且各个概率之和为 1。</p>
 <p>$$ Softmax(z_i)&#x3D;\frac {e^{z_i}} {\sum\limits_{j&#x3D;1}^{n} e^{z_j}} $$</p>
 <p>正常的 max 函数仅输出最大值，但 Softmax 函数确保较小的值具有较小的概率，并且不会直接丢弃。可以认为它是    argmax 函数的概率版本或“soft”版本。<br>Softmax 函数的分母结合了原始输出值的所有因子，这意味着 Softmax 函数获得的各种概率彼此相关。</p>
-<p><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/softmax.png" alt="softmax"></p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/softmax.png" alt="softmax"></p>
 <p>Softmax 通常作为神经网络的<strong>最后</strong>一层，用于多分类问题的输出，它将多个神经元的输出，映射到（0,1）区间内，可以看成概率来理解，从而来进行多分类，常常和交叉熵损失函数一起结合使用。</p>
 <p>下面是使用Python进行函数计算的示例代码：</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> math</span><br><span class="line">z = [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>, <span class="number">4.0</span>, <span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>]</span><br><span class="line">z_exp = [math.exp(i) <span class="keyword">for</span> i <span class="keyword">in</span> z]  </span><br><span class="line"><span class="built_in">print</span>(z_exp)  <span class="comment"># Result: [2.72, 7.39, 20.09, 54.6, 2.72, 7.39, 20.09] </span></span><br><span class="line">sum_z_exp = <span class="built_in">sum</span>(z_exp)  </span><br><span class="line"><span class="built_in">print</span>(sum_z_exp)  <span class="comment"># Result: 114.98 </span></span><br><span class="line">softmax = [<span class="built_in">round</span>(i / sum_z_exp, <span class="number">3</span>) <span class="keyword">for</span> i <span class="keyword">in</span> z_exp]</span><br><span class="line"><span class="built_in">print</span>(softmax)  <span class="comment"># Result: [0.024, 0.064, 0.175, 0.475, 0.024, 0.064, 0.175]</span></span><br></pre></td></tr></table></figure>
 
 <h3 id="2-Maxout-函数"><a href="#2-Maxout-函数" class="headerlink" title="2. Maxout 函数"></a>2. Maxout 函数</h3><p>Maxout 是 Goodfellow 在 2013 年提出的一个新的激活函数，相比于其它的激活函数，Maxout 本身是需要参数的，参数可以通过网络的反向传播得到学习。</p>
 <p>$$f(x)&#x3D;\max(w_1x^T + b_1, w_2x^T + b_2, …, w_nx^T + b_n)$$</p>
-<p>Maxout 的本质是<strong>分段线性拟合</strong>，理论上可以拟合<strong>任意的凸函数</strong>；同时，由于其应用了 max 函数，又具备非线形的特征，因此比其它激活函数有着更好的性能的应用，换个角度看，如果 w 和 b 都设置为 0 ，就转换为 ReLU 函数。<br><img src="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png" alt="maxout"></p>
+<p>Maxout 的本质是<strong>分段线性拟合</strong>，理论上可以拟合<strong>任意的凸函数</strong>；同时，由于其应用了 max 函数，又具备非线形的特征，因此比其它激活函数有着更好的性能的应用，换个角度看，如果 w 和 b 都设置为 0 ，就转换为 ReLU 函数。<br><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png" alt="maxout"></p>
 <p>Maxout 连接与普通的全连接并无区别，之后每两个单元<strong>连接</strong>到一个单元上，当然，这里不是真的连接，因为该条线上并不涉及参数，那么如何从两个单元得到一个单元的值呢？其实只需要比较两个单元的值即可，大的值就是 MaxOut。</p>
 <p>Maxout 继承了 RELU 的优点而且没有死区，但是需要 2 次线性映射运算，因此计算量也会翻倍。</p>
 <h2 id="四、简要分析"><a href="#四、简要分析" class="headerlink" title="四、简要分析"></a>四、简要分析</h2><h3 id="1-Sigmoid-和-Softmax"><a href="#1-Sigmoid-和-Softmax" class="headerlink" title="1. Sigmoid 和 Softmax"></a>1. Sigmoid 和 Softmax</h3><ul>
@@ -396,12 +396,12 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/06/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9ATensor/" rel="prev" title="大模型学习笔记之一：Tensor">
-                  <i class="fa fa-angle-left"></i> 大模型学习笔记之一：Tensor
+                <a href="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" rel="prev" title="大模型学习笔记之一：基本概念">
+                  <i class="fa fa-angle-left"></i> 大模型学习笔记之一：基本概念
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2024/07/07/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" rel="next" title="大模型学习笔记之三：损失函数">
+                <a href="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" rel="next" title="大模型学习笔记之三：损失函数">
                   大模型学习笔记之三：损失函数 <i class="fa fa-angle-right"></i>
                 </a>
             </div>
@@ -435,14 +435,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">244k</span>
+    <span title="站点总字数">248k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">14:48</span>
+    <span title="站点阅读时长">15:01</span>
   </span>
 </div>
 <div class="busuanzi-count">
