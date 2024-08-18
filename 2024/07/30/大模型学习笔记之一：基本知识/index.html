@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/cp1.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/cp2.png">
 <meta property="article:published_time" content="2024-07-30T05:25:25.000Z">
-<meta property="article:modified_time" content="2024-08-18T02:20:14.440Z">
+<meta property="article:modified_time" content="2024-08-18T06:23:05.688Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/tensor.png">
@@ -146,7 +146,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%A0%E9%87%8F"><span class="nav-text">一、张量</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E6%80%A7%E8%B4%A8"><span class="nav-text">数学性质</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%A0%E9%87%8F%E7%9A%84%E8%8C%83%E6%95%B0-norm"><span class="nav-text">张量的范数 - norm</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%A0%E9%87%8F%E7%9A%84%E5%86%85%E7%A7%AF-inner-product"><span class="nav-text">张量的内积 - inner product</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E8%BF%90%E7%AE%97"><span class="nav-text">数学运算</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%BF%90%E7%AE%97"><span class="nav-text">基本运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0%E8%BF%90%E7%AE%97"><span class="nav-text">线性代数运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E3%80%81%E5%88%86%E7%89%87%E3%80%81%E5%8F%98%E5%BD%A2"><span class="nav-text">连接、分片、变形</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%86%85%E7%A7%AF%E5%92%8C%E5%A4%96%E7%A7%AF"><span class="nav-text">二、内积和外积</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E7%A7%AF%EF%BC%88inner-product%EF%BC%89"><span class="nav-text">内积（inner product）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E7%A7%AF%EF%BC%88external-product%EF%BC%89"><span class="nav-text">外积（external product）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-text">应用示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%8D%B7%E7%A7%AF%EF%BC%88convolution%EF%BC%89"><span class="nav-text">三、卷积（convolution）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E5%AE%9A%E4%B9%89"><span class="nav-text">数学定义</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-text">附录：名词解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MOE%EF%BC%88Mixture-of-Experts%EF%BC%8C%E4%B8%93%E5%AE%B6%E6%B7%B7%E5%90%88%EF%BC%89%E6%A8%A1%E5%9E%8B"><span class="nav-text">MOE（Mixture of Experts，专家混合）模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E6%8B%9F%E5%90%88-%E6%B3%9B%E5%8C%96"><span class="nav-text">过拟合 &amp; 泛化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1%E3%80%81%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8"><span class="nav-text">梯度消失、梯度爆炸</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dropout%E3%80%81masked"><span class="nav-text">dropout、masked</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B6%85%E5%8F%82%E6%95%B0"><span class="nav-text">超参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVM%EF%BC%88Support-Vector-Machine%EF%BC%8C%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA%EF%BC%89"><span class="nav-text">SVM（Support Vector Machine，支持向量机）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Perceptron%EF%BC%88%E6%84%9F%E7%9F%A5%E6%9C%BA%EF%BC%89"><span class="nav-text">Perceptron（感知机）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kernel-Function%EF%BC%88%E6%A0%B8%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">Kernel Function（核函数）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E8%A7%A3%E8%AF%BB"><span class="nav-text">技术解读</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%A0%E9%87%8F%EF%BC%88tensor%EF%BC%89"><span class="nav-text">一、张量（tensor）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E6%80%A7%E8%B4%A8"><span class="nav-text">数学性质</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%A0%E9%87%8F%E7%9A%84%E8%8C%83%E6%95%B0-norm"><span class="nav-text">张量的范数 - norm</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%A0%E9%87%8F%E7%9A%84%E5%86%85%E7%A7%AF-inner-product"><span class="nav-text">张量的内积 - inner product</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E8%BF%90%E7%AE%97"><span class="nav-text">数学运算</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%BF%90%E7%AE%97"><span class="nav-text">基本运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0%E8%BF%90%E7%AE%97"><span class="nav-text">线性代数运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E3%80%81%E5%88%86%E7%89%87%E3%80%81%E5%8F%98%E5%BD%A2"><span class="nav-text">连接、分片、变形</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%86%85%E7%A7%AF%E5%92%8C%E5%A4%96%E7%A7%AF%EF%BC%88inner-product-external-product%EF%BC%89"><span class="nav-text">二、内积和外积（inner product &amp; external product）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E7%A7%AF%EF%BC%88inner-product%EF%BC%89"><span class="nav-text">内积（inner product）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E7%A7%AF%EF%BC%88external-product%EF%BC%89"><span class="nav-text">外积（external product）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-text">应用示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%8D%B7%E7%A7%AF%EF%BC%88convolution%EF%BC%89"><span class="nav-text">三、卷积（convolution）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E5%AE%9A%E4%B9%89"><span class="nav-text">数学定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B"><span class="nav-text">应用实例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-text">附录：名词解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MOE%EF%BC%88Mixture-of-Experts%EF%BC%8C%E4%B8%93%E5%AE%B6%E6%B7%B7%E5%90%88%EF%BC%89%E6%A8%A1%E5%9E%8B"><span class="nav-text">MOE（Mixture of Experts，专家混合）模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E6%8B%9F%E5%90%88-%E6%B3%9B%E5%8C%96"><span class="nav-text">过拟合 &amp; 泛化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1%E3%80%81%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8"><span class="nav-text">梯度消失、梯度爆炸</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dropout%E3%80%81masked"><span class="nav-text">dropout、masked</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B6%85%E5%8F%82%E6%95%B0"><span class="nav-text">超参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVM%EF%BC%88Support-Vector-Machine%EF%BC%8C%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA%EF%BC%89"><span class="nav-text">SVM（Support Vector Machine，支持向量机）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Perceptron%EF%BC%88%E6%84%9F%E7%9F%A5%E6%9C%BA%EF%BC%89"><span class="nav-text">Perceptron（感知机）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kernel-Function%EF%BC%88%E6%A0%B8%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">Kernel Function（核函数）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E8%A7%A3%E8%AF%BB"><span class="nav-text">技术解读</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -159,7 +159,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">101</span>
+          <span class="site-state-item-count">102</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -233,7 +233,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-08-18 10:20:14" itemprop="dateModified" datetime="2024-08-18T10:20:14+08:00">2024-08-18</time>
+      <time title="修改时间：2024-08-18 14:23:05" itemprop="dateModified" datetime="2024-08-18T14:23:05+08:00">2024-08-18</time>
     </span>
 
   
@@ -250,14 +250,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>3k</span>
+      <span>3.3k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>11 分钟</span>
+      <span>12 分钟</span>
     </span>
 </div>
 
@@ -273,7 +273,7 @@
 <li>学习策略（Learning Strategy）：涉及如何选择训练神经网络的方法，包括损失函数的选择、优化算法等。损失函数定义了模型预测与实际结果之间的差异如何计算，而优化算法则用于调整网络的权重以最小化损失函数。</li>
 <li>激活函数（Activation Function）：决定了神经网络如何处理和传递信息。它们通常用于在网络的每个神经元中引入非线性，使得网络能够学习和模拟复杂的函数映射。</li>
 </ol>
-<h2 id="一、张量"><a href="#一、张量" class="headerlink" title="一、张量"></a>一、张量</h2><p>张量（Tensor）是一个具有统一数据类型的多维数组，本质就是一组有序的数字。</p>
+<h2 id="一、张量（tensor）"><a href="#一、张量（tensor）" class="headerlink" title="一、张量（tensor）"></a>一、张量（tensor）</h2><p>张量（Tensor）是一个具有统一数据类型的多维数组，本质就是一组有序的数字。</p>
 <p>张量的阶数（order）也称为维数（dimensions）、模态（modes）或方式（ways）。一个 N 阶张量是 N 个向量空间元素的张量积，每个向量空间都有自己的坐标系。实际上，引入 tensor 的目的就是把向量、矩阵推向更高的维度.</p>
 <p>零阶张量是一个标量（scalar），一阶张量是一个矢量（vector，也称向量），二阶张量是一个矩阵（matrix），三阶或更高阶的张量叫做高阶张量（tensor）。</p>
 <p><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/tensor.png" alt="tensor"></p>
@@ -321,7 +321,7 @@
 <li>torch.squeeze()&#x2F;unsqueeze()：tensor对于张量中大小为1的维度的压缩与扩张</li>
 <li>torch.permute()：返回维度排列后的原始张量输入的视图。</li>
 </ul>
-<h2 id="二、内积和外积"><a href="#二、内积和外积" class="headerlink" title="二、内积和外积"></a>二、内积和外积</h2><p>由于历史原因，数学学科和物理学科关于 inner product 和 outer product 两个词汇有着五花八门的翻译。<br>在数学学科，通常翻译成内积和外积，是两个名词的直译。点乘和叉乘是根据运算符号得来的俗称。<br>在物理学科，一般翻译成标积和矢积，表示运算的结果为标量和矢量，高中数学则称之为数量积和向量积。</p>
+<h2 id="二、内积和外积（inner-product-external-product）"><a href="#二、内积和外积（inner-product-external-product）" class="headerlink" title="二、内积和外积（inner product &amp; external product）"></a>二、内积和外积（inner product &amp; external product）</h2><p>由于历史原因，数学学科和物理学科关于 inner product 和 outer product 两个词汇有着五花八门的翻译。<br>在数学学科，通常翻译成内积和外积，是两个名词的直译。点乘和叉乘是根据运算符号得来的俗称。<br>在物理学科，一般翻译成标积和矢积，表示运算的结果为标量和矢量，高中数学则称之为数量积和向量积。</p>
 <h3 id="内积（inner-product）"><a href="#内积（inner-product）" class="headerlink" title="内积（inner product）"></a>内积（inner product）</h3><p>也称为<strong>点积</strong>（dot product）或<strong>数量积</strong>（scalar product），运算结果是一个<strong>标量</strong>。<br>数学定义为：已知两个向量 $a$, $b$，它们的夹角为 $\theta$，那么：<br>$$ a \cdot b &#x3D; |a||b|\cos \theta$$</p>
 <p>内积的代数定义，对于任意维数的向量都适用：<br>$$\vec{a} \cdot \vec{b} &#x3D; \sum_{i&#x3D;1}^{n}a_ib_i&#x3D;a_1b_1+a_2b_2+…+a_nb_n$$</p>
 <p>内积的几何意义：内积 $a \cdot b$ 等于 $a$ 的模与 $b$ 在 $a$ 方向上的投影的乘积。<br><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/Scalar-product.gif" alt="inner"></p>
@@ -364,6 +364,19 @@
 <li>微分有关：$ (f*g)’ &#x3D; f’ *g &#x3D; f *g’ $</li>
 </ul>
 <p><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/cp1.png" alt="cp1"><br><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/cp2.png" alt="cp2"></p>
+<h3 id="应用实例"><a href="#应用实例" class="headerlink" title="应用实例"></a>应用实例</h3><ul>
+<li>代数中，整数乘法和多项式乘法都是卷积。</li>
+<li>统计学中，加权的滑动平均是一种卷积。</li>
+<li>概率论中，两个统计独立变量X与Y的和的概率密度函数是X与Y的概率密度函数的卷积。</li>
+<li>声学中，回声可以用源声与一个反映各种反射效应的函数的卷积表示。</li>
+<li>物理学中，任何一个线性系统（符合叠加原理）都存在卷积。</li>
+</ul>
+<p>在工程技术中的应用更加重要：</p>
+<ul>
+<li>卷积神经网络，应用了多重级联的卷积核心，它被用于机器视觉和人工智能，尽管在多数情况下实际上用的是互相关而非卷积</li>
+<li>传统计算机图像处理中，用作图像模糊、锐化、边缘检测</li>
+<li>信号处理中，任一个线性系统的输出都可以通过将输入信号与系统函数（系统的冲激响应）做卷积获得</li>
+</ul>
 <hr>
 <h2 id="附录：名词解释"><a href="#附录：名词解释" class="headerlink" title="附录：名词解释"></a>附录：名词解释</h2><h3 id="MOE（Mixture-of-Experts，专家混合）模型"><a href="#MOE（Mixture-of-Experts，专家混合）模型" class="headerlink" title="MOE（Mixture of Experts，专家混合）模型"></a>MOE（Mixture of Experts，专家混合）模型</h3><p>MOE 是一种深度学习架构，它将多个专家（experts）网络组合在一起，并通过一个门控（gating）网络来决定每个输入样本应该由哪个专家网络来处理。每个专家网络通常是一个小型的神经网络，它们专注于学习数据的不同部分或特征。</p>
 <h3 id="过拟合-泛化"><a href="#过拟合-泛化" class="headerlink" title="过拟合 &amp; 泛化"></a>过拟合 &amp; 泛化</h3><h3 id="梯度消失、梯度爆炸"><a href="#梯度消失、梯度爆炸" class="headerlink" title="梯度消失、梯度爆炸"></a>梯度消失、梯度爆炸</h3><h3 id="dropout、masked"><a href="#dropout、masked" class="headerlink" title="dropout、masked"></a>dropout、masked</h3><h3 id="超参数"><a href="#超参数" class="headerlink" title="超参数"></a>超参数</h3><p>学习率（learning rate，例如 10%）也是超参数，可以动态吗？</p>
@@ -388,6 +401,10 @@
 <li><a target="_blank" rel="noopener" href="https://juejin.cn/post/7315122130287280138">向量外积在图像纠错中的应用</a></li>
 <li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/346918533">格拉斯曼: 扩展的学问与线之代数</a></li>
 <li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2179484">卷积公式</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zdaiot.com/MachineLearning/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E5%8D%B7%E7%A7%AF%E7%9A%84%E6%9C%AC%E8%B4%A8%E5%8F%8A%E7%89%A9%E7%90%86%E6%84%8F%E4%B9%89%EF%BC%88%E5%85%A8%E9%9D%A2%E7%90%86%E8%A7%A3%E5%8D%B7%E7%A7%AF%EF%BC%89/">卷积的本质及物理意义</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/196786958?utm_oi=1191492330161606656">什么是卷积？</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.sciencenet.cn/blog-548663-744441.html">卷积与自由能</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2127881">很详细的讲解什么以及为什么是卷积</a></li>
 </ul>
 
     </div>
@@ -441,14 +458,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">248k</span>
+    <span title="站点总字数">252k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">15:03</span>
+    <span title="站点阅读时长">15:15</span>
   </span>
 </div>
 <div class="busuanzi-count">
