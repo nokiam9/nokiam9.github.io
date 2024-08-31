@@ -19,19 +19,21 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="1948年，美国数学家克劳德·香农发表论文《通信的数学理论》（A Mathematical Theory of Communication），奠定了信息论的基础。  信息论回答了通信理论的两个基本问题：一是数据压缩的极限（答案：熵$H$）；二是通信传输速率的临界（答案：信道容量$C$）   * 香农第一定理：无失真信源编码定理，或变长码信源编码定理    将原始信源符号转化为新的码符号，使码符号尽">
+    <meta name="description" content="熵（Entropy）最早是物理学的概念，用于表示一个热力学系统的无序程度。1948年，美国数学家克劳德·香农发表论文《通信的数学理论》（A Mathematical Theory of Communication），将统计物理中熵的概念引申到信道通信的过程中，从而奠定了信息论的基础。  信息论回答了通信理论的两个基本问题：一是数据压缩的极限（答案：熵$H$）；二是通信传输速率的临界（答案：信道容量">
 <meta property="og:type" content="article">
 <meta property="og:title" content="信息论基础 - 信息熵">
 <meta property="og:url" content="https://nokiam9.github.io/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="1948年，美国数学家克劳德·香农发表论文《通信的数学理论》（A Mathematical Theory of Communication），奠定了信息论的基础。  信息论回答了通信理论的两个基本问题：一是数据压缩的极限（答案：熵$H$）；二是通信传输速率的临界（答案：信道容量$C$）   * 香农第一定理：无失真信源编码定理，或变长码信源编码定理    将原始信源符号转化为新的码符号，使码符号尽">
+<meta property="og:description" content="熵（Entropy）最早是物理学的概念，用于表示一个热力学系统的无序程度。1948年，美国数学家克劳德·香农发表论文《通信的数学理论》（A Mathematical Theory of Communication），将统计物理中熵的概念引申到信道通信的过程中，从而奠定了信息论的基础。  信息论回答了通信理论的两个基本问题：一是数据压缩的极限（答案：熵$H$）；二是通信传输速率的临界（答案：信道容量">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://nokiam9.github.io/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/xxs0.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/xxs2.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/sum1.png">
 <meta property="og:image" content="https://nokiam9.github.io/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/KL.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/KL2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/demo.png">
 <meta property="article:published_time" content="2024-07-16T12:26:44.000Z">
-<meta property="article:modified_time" content="2024-07-17T16:42:57.391Z">
+<meta property="article:modified_time" content="2024-07-29T00:21:19.943Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://nokiam9.github.io/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/xxs0.png">
@@ -143,7 +145,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%AE%9A%E4%B9%89%E5%9C%A8%E4%BA%8B%E4%BB%B6%E4%B8%8A%E7%9A%84%E5%87%BD%E6%95%B0"><span class="nav-text">一、定义在事件上的函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%87%AA%E4%BF%A1%E6%81%AF%EF%BC%88Self-information%EF%BC%89"><span class="nav-text">1. 自信息（Self-information）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%81%94%E5%90%88%E8%87%AA%E4%BF%A1%E6%81%AF%EF%BC%88Joint-Information%EF%BC%89"><span class="nav-text">2. 联合自信息（Joint Information）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9D%A1%E4%BB%B6%E8%87%AA%E4%BF%A1%E6%81%AF%EF%BC%88Conditional-Information%EF%BC%89"><span class="nav-text">3. 条件自信息（Conditional Information）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BA%92%E4%BF%A1%E6%81%AF%EF%BC%88Mutual-Information%EF%BC%89"><span class="nav-text">4. 互信息（Mutual Information）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%AE%9A%E4%B9%89%E5%9C%A8%E6%A6%82%E7%8E%87%E5%88%86%E5%B8%83%E4%B8%8A%E7%9A%84%E5%87%BD%E6%95%B0"><span class="nav-text">二、定义在概率分布上的函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BF%A1%E6%81%AF%E7%86%B5%EF%BC%88Information-Entropy%EF%BC%89"><span class="nav-text">1. 信息熵（Information Entropy）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B7%AE%E5%88%86%E7%86%B5%EF%BC%88Differential-Entropy%EF%BC%89"><span class="nav-text">差分熵（Differential Entropy）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E8%81%94%E5%90%88%E7%86%B5%EF%BC%88Joint-Entropy%EF%BC%89"><span class="nav-text">2. 联合熵（Joint Entropy）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9D%A1%E4%BB%B6%E7%86%B5%EF%BC%88Conditional-Entropy%EF%BC%89"><span class="nav-text">3. 条件熵（Conditional Entropy）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%86%B5%E5%92%8C%E4%BA%92%E4%BF%A1%E6%81%AF%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-text">4. 熵和互信息的关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%B8%8D%E5%90%8C%E6%A6%82%E7%8E%87%E5%88%86%E5%B8%83%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-text">三、不同概率分布的比较</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%9B%B8%E5%AF%B9%E7%86%B5%EF%BC%88Relative-Entropy%EF%BC%8C%E4%B9%9F%E7%A7%B0-Kullback-Leibler-Divergence-%EF%BC%89"><span class="nav-text">1. 相对熵（Relative Entropy，也称 Kullback-Leibler Divergence ）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#KL-%E6%95%A3%E5%BA%A6%E7%9A%84%E7%89%B9%E6%80%A7"><span class="nav-text">KL 散度的特性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BA%A4%E5%8F%89%E7%86%B5-Cross-Entropy"><span class="nav-text">2. 交叉熵(Cross Entropy)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%B0%8F%E7%BB%93"><span class="nav-text">3. 小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9A%E6%9C%80%E5%A4%A7%E7%86%B5%E6%80%9D%E6%83%B3-Maximum-Entropy-Principle"><span class="nav-text">附录一：最大熵思想 (Maximum Entropy Principle)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BF%A1%E6%81%AF%E7%86%B5%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-text">一、信息熵的定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%87%AA%E4%BF%A1%E6%81%AF%EF%BC%88Self-information%EF%BC%89"><span class="nav-text">1. 自信息（Self-information）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BF%A1%E6%81%AF%E7%86%B5%EF%BC%88Information-Entropy%EF%BC%89"><span class="nav-text">2. 信息熵（Information Entropy）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%B7%AE%E5%88%86%E7%86%B5%EF%BC%88Differential-Entropy%EF%BC%89"><span class="nav-text">3. 差分熵（Differential Entropy）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%81%94%E5%90%88%E7%86%B5%E3%80%81%E6%9D%A1%E4%BB%B6%E7%86%B5%E5%92%8C%E4%BA%92%E4%BF%A1%E6%81%AF"><span class="nav-text">二、联合熵、条件熵和互信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%81%94%E5%90%88%E7%86%B5%EF%BC%88Joint-Entropy%EF%BC%89"><span class="nav-text">1. 联合熵（Joint Entropy）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%9D%A1%E4%BB%B6%E7%86%B5%EF%BC%88Conditional-Entropy%EF%BC%89"><span class="nav-text">2. 条件熵（Conditional Entropy）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E4%BA%92%E4%BF%A1%E6%81%AF%EF%BC%88Mutual-Information%EF%BC%89"><span class="nav-text">3. 互信息（Mutual Information）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%86%B5%E5%92%8C%E4%BA%92%E4%BF%A1%E6%81%AF%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-text">4. 熵和互信息的关系</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%9B%B8%E5%AF%B9%E7%86%B5-%E4%B8%8D%E5%90%8C%E6%A6%82%E7%8E%87%E5%88%86%E5%B8%83%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-text">三、相对熵 - 不同概率分布的比较</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-KL%E6%95%A3%E5%BA%A6%EF%BC%88Kullback-Leibler-Divergence%EF%BC%8C%E6%88%96-%E7%9B%B8%E5%AF%B9%E7%86%B5-Relative-Entropy%EF%BC%89"><span class="nav-text">1. KL散度（Kullback-Leibler Divergence，或 相对熵 - Relative Entropy）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%BA%A4%E5%8F%89%E7%86%B5%EF%BC%88Cross-Entropy%EF%BC%89"><span class="nav-text">2. 交叉熵（Cross Entropy）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-JS%E6%95%A3%E5%BA%A6%EF%BC%88Jensen-Shannon-Divergence%EF%BC%89"><span class="nav-text">3. JS散度（Jensen-Shannon Divergence）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%BA%94%E7%94%A8%E5%88%86%E6%9E%90"><span class="nav-text">四、应用分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B"><span class="nav-text">示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9A%E5%87%A0%E4%B8%AA%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-text">附录一：几个名词解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Divergence-%E6%95%A3%E5%BA%A6"><span class="nav-text">Divergence - 散度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metric-%E5%BA%A6%E9%87%8F"><span class="nav-text">Metric - 度量</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9A%E5%90%89%E5%B8%83%E6%96%AF%E4%B8%8D%E7%AD%89%E5%BC%8F%EF%BC%88Gibbs%E2%80%99-Inequality%EF%BC%89"><span class="nav-text">附录二：吉布斯不等式（Gibbs’ Inequality）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%89%EF%BC%9A%E6%9C%80%E5%A4%A7%E7%86%B5%E6%80%9D%E6%83%B3-Maximum-Entropy-Principle"><span class="nav-text">附录三：最大熵思想 (Maximum Entropy Principle)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E5%9B%9B%EF%BC%9A%E7%83%AD%E5%8A%9B%E5%AD%A6%E7%AC%AC%E4%BA%8C%E5%AE%9A%E5%BE%8B%E7%9A%84%E8%A7%A3%E9%87%8A"><span class="nav-text">附录四：热力学第二定律的解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -156,7 +158,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">100</span>
+          <span class="site-state-item-count">102</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -230,7 +232,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-07-18 00:42:57" itemprop="dateModified" datetime="2024-07-18T00:42:57+08:00">2024-07-18</time>
+      <time title="修改时间：2024-07-29 08:21:19" itemprop="dateModified" datetime="2024-07-29T08:21:19+08:00">2024-07-29</time>
     </span>
 
   
@@ -247,14 +249,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>4.3k</span>
+      <span>5.1k</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>16 分钟</span>
+      <span>19 分钟</span>
     </span>
 </div>
 
@@ -264,7 +266,7 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><p>1948年，美国数学家克劳德·香农发表论文《通信的数学理论》（A Mathematical Theory of Communication），奠定了信息论的基础。</p>
+    <div class="post-body" itemprop="articleBody"><p>熵（Entropy）最早是物理学的概念，用于表示一个热力学系统的无序程度。1948年，美国数学家克劳德·香农发表论文《通信的数学理论》（A Mathematical Theory of Communication），将统计物理中熵的概念引申到信道通信的过程中，从而奠定了信息论的基础。</p>
 <p>信息论回答了通信理论的两个基本问题：一是数据压缩的极限（答案：熵$H$）；二是通信传输速率的临界（答案：信道容量$C$）</p>
 <ul>
 <li>香农第一定理：无失真信源编码定理，或变长码信源编码定理<br>  将原始信源符号转化为新的码符号，使码符号尽量服从等概分布，从而每个码符号所携带的信息量达到最大，进而可以用尽量少的码符号传输信源信息。即信源的信息熵 $H_r(S)$ 是无失真信源压缩的极限值。</li>
@@ -274,7 +276,7 @@
 <blockquote>
 <p>样本空间是概率论的基础，包含了所有可能的实验结果或观察结果。<br>本文使用 $:&#x3D;$ 表示“<strong>定义</strong>”，区别与一般意义的“相等”，或“赋值”</p>
 </blockquote>
-<h2 id="一、定义在事件上的函数"><a href="#一、定义在事件上的函数" class="headerlink" title="一、定义在事件上的函数"></a>一、定义在事件上的函数</h2><h3 id="1-自信息（Self-information）"><a href="#1-自信息（Self-information）" class="headerlink" title="1. 自信息（Self-information）"></a>1. 自信息（Self-information）</h3><p>自信息是一个事件的信息量的度量，基本思想是概率越小，事件蕴含的信息量越大，定义为：<br>$$I(x) :&#x3D; -\log P_X(x)$$</p>
+<h2 id="一、信息熵的定义"><a href="#一、信息熵的定义" class="headerlink" title="一、信息熵的定义"></a>一、信息熵的定义</h2><h3 id="1-自信息（Self-information）"><a href="#1-自信息（Self-information）" class="headerlink" title="1. 自信息（Self-information）"></a>1. 自信息（Self-information）</h3><p>自信息是一个事件的信息量的度量，基本思想是概率越小，事件蕴含的信息量越大，定义为：<br>$$I(x) :&#x3D; -\log P_X(x)$$</p>
 <p>举个例子，假定北京天气是晴天的概率是 80%，下雨的概率是 20%，那么：</p>
 <ul>
 <li>天气预报说“今天是晴天”，提供的信息量就是 $-\log 0.8&#x3D;0.322$，说明这是一个大概率事件</li>
@@ -287,29 +289,17 @@
 <li>单调（递减）性：如果 $P(a) &lt; P(b)$，则$I(a) &gt; I(b)$</li>
 <li>独立可加性：当事件 $a$ 和 $b$ 相互独立时，$I(a,b) &#x3D; I(a) + I(b)$</li>
 </ul>
-<h3 id="2-联合自信息（Joint-Information）"><a href="#2-联合自信息（Joint-Information）" class="headerlink" title="2. 联合自信息（Joint Information）"></a>2. 联合自信息（Joint Information）</h3><p>定义：给定样本空间 X 和 Y，两个事件 $x$,$y$ 的概率的联合自信息为：<br>$$I(x,y) :&#x3D; -\log P_{XY}(xy)$$</p>
-<h3 id="3-条件自信息（Conditional-Information）"><a href="#3-条件自信息（Conditional-Information）" class="headerlink" title="3. 条件自信息（Conditional Information）"></a>3. 条件自信息（Conditional Information）</h3><p>定义：给定样本空间 X 和 Y，当给定事件 $y$ 发生的条件下，事件 $x$ 的条件自信息为：<br>$$I(x|y) :&#x3D; -\log P_{X|Y}(x|y)$$</p>
-<p>满足如下性质：</p>
-<ul>
-<li>$I(x,y) &#x3D; I(x|y) + I(y) &#x3D; I(y|x) + I(x) $</li>
-</ul>
-<h3 id="4-互信息（Mutual-Information）"><a href="#4-互信息（Mutual-Information）" class="headerlink" title="4. 互信息（Mutual Information）"></a>4. 互信息（Mutual Information）</h3><p>定义：已知 $I(x)$是 $x$ 事件所含有的信息量，$I(x|y)$ 是 $x$ 事件在给定 $y$ 事件发生后的信息量，那么两者的差值就是 $y$ 事件带给 $x$ 事件的信息量（增益）:<br>$$ I_{X;Y}(x,y) :&#x3D; I_X(x) - I_{X|Y}(x|y) &#x3D; \log \frac {P_{X|Y}(x|y)}{P_X(x)} &#x3D; \log \frac {P_{XY}(xy)}{P_X(x)P_Y(y)}$$</p>
-<p>互信息是用来衡量随机变量之间的依赖性的度量，满足如下性质：</p>
-<ul>
-<li>对称性：$I(x;y) &#x3D; I(y;x)$</li>
-<li>当事件 $x$ 和 $y$ 相互独立时，$I(x;y) &#x3D; 0$；即 $y$ 无法给 $x$ 带来信息（增益）</li>
-<li>可正可负</li>
-<li>$I(x;y) \leq \frac {I(x)}{I(y)}$</li>
-</ul>
-<h2 id="二、定义在概率分布上的函数"><a href="#二、定义在概率分布上的函数" class="headerlink" title="二、定义在概率分布上的函数"></a>二、定义在概率分布上的函数</h2><p>上一章节的定义都是针对单一事件的的函数，现在我们要从样本空间的整体角度，定义一些基于概率分布的重要函数。</p>
-<h3 id="1-信息熵（Information-Entropy）"><a href="#1-信息熵（Information-Entropy）" class="headerlink" title="1. 信息熵（Information Entropy）"></a>1. 信息熵（Information Entropy）</h3><p>定义为一个样本空间上所有随机事件（随机变量是离散的）的自信息的期望，熵在物理意义上是平均意义下对随机事件不确定性&#x2F;信息量的度量，计算机意义上是平均意义上对随机变量的编码长度。<br>换句话说，事件的概率分布和每个事件的信息量构成了一个随机变量，这个随机变量的均值（即期望），就是这个分布产生的信息量的平均值，即为信息熵。</p>
+<h3 id="2-信息熵（Information-Entropy）"><a href="#2-信息熵（Information-Entropy）" class="headerlink" title="2. 信息熵（Information Entropy）"></a>2. 信息熵（Information Entropy）</h3><p>定义为一个样本空间上所有随机事件（随机变量是离散的）的自信息的期望，熵在物理意义上是平均意义下对随机事件不确定性&#x2F;信息量的度量，计算机意义上是平均意义上对随机变量的编码长度。<br>换句话说，事件的概率分布和每个事件的信息量构成了一个随机变量，这个随机变量的均值（即期望），就是这个分布产生的信息量的平均值，即为信息熵。</p>
 <p><img src="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/xxs0.png" alt="XXS"></p>
-<p>如果样本空间是离散变量，也称为香农熵（Shannon Entropy），定义为：<br>$$H(x) :&#x3D; E_X[I(X)] &#x3D; - \sum_{i&#x3D;1}^{n} p(x_i) \log {p(x_i)}$$</p>
+<p>如果样本空间是离散变量，也称为香农熵（Shannon Entropy），定义为：<br>$$H(x) :&#x3D; E_X[I(X)] &#x3D; - \sum_{x \in X} p(x) \log {p(x)}$$</p>
 <p>香农熵满足以下性质：</p>
 <ul>
 <li>非负性：$H(X) \geq 0$</li>
-<li>$X$ 满足平均分布时，$H(X)$ 取得最大值</li>
+<li>概率密度函数为平均分布时，$H(X)$ 取得最大值</li>
 </ul>
+<blockquote>
+<p>信息论的物理意义：根据信息的概率分布对信息编码所需要的<strong>最短平均编码长度</strong>。</p>
+</blockquote>
 <p>还是以天气预报为例，考虑几种不同的概率分布：</p>
 <ul>
 <li>如果晴天概率80%，雨天概率20%，信息熵为 $-(0.8 \times log_{2}0.8 + 0.2 \times log_{2}0.2) &#x3D;0.7219$</li>
@@ -317,13 +307,15 @@
 <li>再搞复杂一点，如果有四种天气，分别是晴天、阴天、小雨和大雨，其发生概率都是25%，则信息熵为 $-(0.25 \times log_{2}0.25 + 0.25 \times log_{2}0.25 + 0.25 \times log_{2}0.25 + 0.25 \times log_{2}0.25 &#x3D; 2$</li>
 </ul>
 <p>对于一个给定的（预测）概率分布，信息熵是对可能产生的信息量的期望，代表着对系统不确定性的评估数值。在上面的例子中，预测二的概率分布比预测一更平均，因此不确定性更强；与预测二相比，预测三同样是平均分布，但天气的状态数量更多，也说明其不确定性更高。</p>
-<blockquote>
-<p>信息论的物理意义：根据信息的概率分布对信息编码所需要的<strong>最短平均编码长度</strong>。</p>
-</blockquote>
 <p><img src="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/xxs2.png" alt="alt text"><br>预测三的 4 种天气为均匀分布，其信息熵为 2，意味着最少需要 2 位编码表示；<br>而上图的不均匀分布，最优编码是 0、10、110、111，平均编码长度为 1.75，与信息熵相等。<br>$ 1 \times 0.5+2 \times 0.25+3 \times 0.125+3 \times 0.125&#x3D;1.75 $</p>
-<h4 id="差分熵（Differential-Entropy）"><a href="#差分熵（Differential-Entropy）" class="headerlink" title="差分熵（Differential Entropy）"></a>差分熵（Differential Entropy）</h4><p>香农熵是基于离散变量的，如果拓展到连续变量，称为差分熵（Differential Entropy），定义为：<br>$$h(x) :&#x3D; -\int p(x) \log p(x)dx$$</p>
-<p>可以证明，当变量满足正态（高斯）分布时，$h(x)$取得最大值。<br>注意！差分熵<strong>不满足非负性</strong>，可能小于 0。请参见 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Differential_entropy">Differential entropy - Wiki</a>。</p>
-<h3 id="2-联合熵（Joint-Entropy）"><a href="#2-联合熵（Joint-Entropy）" class="headerlink" title="2. 联合熵（Joint Entropy）"></a>2. 联合熵（Joint Entropy）</h3><p>联合熵是衡量一组变量的不确定性的指标，显然其与联合概率有关。数学定义为：<br>$$ H(X,Y) :&#x3D; E[I(X,Y)] &#x3D; -\sum_{i&#x3D;1}^{n} \sum_{y&#x3D;1}^{m} p(x_i,y_j) \log {p(x_i,y_j)}$$</p>
+<h3 id="3-差分熵（Differential-Entropy）"><a href="#3-差分熵（Differential-Entropy）" class="headerlink" title="3. 差分熵（Differential Entropy）"></a>3. 差分熵（Differential Entropy）</h3><p>香农熵是基于离散变量的，如果拓展到连续变量，称为差分熵（Differential Entropy），定义为：<br>$$h(x) :&#x3D; -\int p(x) \log p(x)dx$$</p>
+<p>微分熵满足以下性质：</p>
+<ul>
+<li>概率密度函数为正态（高斯）分布时，$h(x)$取得最大值。</li>
+<li><strong>不满足非负性</strong>。<br>  差分熵可以是正的，也可以是负的，甚至是未定义的。例如，柯西分布（Cauchy distribution）就是一个具有未定义的差分熵的分布，因为它有一个尖峰在中心，并且尾部衰减得非常慢，导致其概率密度函数在中心附近为零，但在整个实数线上积分不为零。请参见 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Differential_entropy">Differential entropy - Wiki</a>。</li>
+</ul>
+<h2 id="二、联合熵、条件熵和互信息"><a href="#二、联合熵、条件熵和互信息" class="headerlink" title="二、联合熵、条件熵和互信息"></a>二、联合熵、条件熵和互信息</h2><p>上面定义了一个随机变量的熵，现在推广到两个或多个随机变量。</p>
+<h3 id="1-联合熵（Joint-Entropy）"><a href="#1-联合熵（Joint-Entropy）" class="headerlink" title="1. 联合熵（Joint Entropy）"></a>1. 联合熵（Joint Entropy）</h3><p>联合熵是衡量一组变量的不确定性的指标，显然其与联合概率有关。数学定义为：<br>$$ H(X,Y) :&#x3D; E[I(X,Y)] &#x3D; -\sum_{x \in X} \sum_{y \in Y} p(x,y) \log {p(x,y)}$$</p>
 <p>满足以下性质：</p>
 <ul>
 <li>如果 $X$ 与 $Y$ 是独立的，$H(X, Y) &#x3D; H(X) + H(Y)$ , 并推广到 N 个变量</li>
@@ -331,7 +323,7 @@
 <blockquote>
 <p>信息论的物理意义：观察一个包含多个随机变量的随机系统获得的信息量。</p>
 </blockquote>
-<h3 id="3-条件熵（Conditional-Entropy）"><a href="#3-条件熵（Conditional-Entropy）" class="headerlink" title="3. 条件熵（Conditional Entropy）"></a>3. 条件熵（Conditional Entropy）</h3><p>在给定 $Y &#x3D; \{y_1, y_2, y_3 … y_n\}$ 发生的前提下，求事件 $X &#x3D; \{x_1, x_2, x_3 … x_m\}$ 的熵，称为 $X$ 的条件熵，用来衡量 $Y$ 发生的不确定性, 此时用 $H(X|Y)$ 来表示 $X$ 的条件。<br>与熵是一样的，条件熵越大，表示该事件的不确定性越大。数学定义是：<br>$$ H(X|Y) :&#x3D; -\sum_{i&#x3D;1}^{n} \sum_{y&#x3D;1}^{m} p(x_i,y_j) \log p(x_i|y_j)$$</p>
+<h3 id="2-条件熵（Conditional-Entropy）"><a href="#2-条件熵（Conditional-Entropy）" class="headerlink" title="2. 条件熵（Conditional Entropy）"></a>2. 条件熵（Conditional Entropy）</h3><p>在给定 $Y &#x3D; \{y_1, y_2, y_3 … y_n\}$ 发生的前提下，求事件 $X &#x3D; \{x_1, x_2, x_3 … x_m\}$ 的熵，称为 $X$ 的条件熵，用来衡量 $Y$ 发生的不确定性, 此时用 $H(X|Y)$ 来表示 $X$ 的条件。数学定义是：<br>$$ H(X|Y) :&#x3D; -\sum_{x \in X} \sum_{y \in Y} p(x,y) \log p(x|y) &#x3D;  -\sum_{x \in X} \sum_{y \in Y} p(x,y) \log \frac {p(x,y)}{p(x)} $$</p>
 <p>满足以下性质：</p>
 <ul>
 <li>链式规则：$H(Y|X) &#x3D; H(X,Y) - H(X)$</li>
@@ -340,6 +332,17 @@
 <blockquote>
 <p>信息论的物理意义：在得知某一确定信息的基础上，获取另外一个信息时所获得的信息量。</p>
 </blockquote>
+<h3 id="3-互信息（Mutual-Information）"><a href="#3-互信息（Mutual-Information）" class="headerlink" title="3. 互信息（Mutual Information）"></a>3. 互信息（Mutual Information）</h3><p>定义：已知 $I(x)$是 $x$ 事件所含有的信息量，$I(x|y)$ 是 $x$ 事件在给定 $y$ 事件发生后的信息量，那么两者的差值就是 $y$ 事件带给 $x$ 事件的信息量（增益）:<br>$$ I(X;Y) :&#x3D; I(X) - I(X|Y) &#x3D;  -\sum_{x \in X} \sum_{y \in Y} p(x,y) \log \frac {p(x,y)}{p(x)p(y)} $$</p>
+<p>互信息是用来衡量随机变量之间的依赖性的度量，满足如下性质：</p>
+<ul>
+<li>对称性：$I(x;y) &#x3D; I(y;x)$</li>
+<li>当事件 $x$ 和 $y$ 相互独立时，$I(x;y) &#x3D; 0$；即 $y$ 无法给 $x$ 带来信息（增益）</li>
+<li>可正可负</li>
+<li>$I(x;y) \leq \frac {I(x)}{I(y)}$</li>
+</ul>
+<blockquote>
+<p>信息论的物理意义：互信息（信息增益） &#x3D; 信息熵 — 条件熵</p>
+</blockquote>
 <h3 id="4-熵和互信息的关系"><a href="#4-熵和互信息的关系" class="headerlink" title="4. 熵和互信息的关系"></a>4. 熵和互信息的关系</h3><p>对于随机变量 $X$, $Y$，它们的熵、联合熵、条件熵以及互信息之间的关系是：<br><img src="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/sum1.png" alt="sum"></p>
 <ol>
 <li>$I(X;Y) &#x3D; H(X) - H(X|Y) &#x3D; H(Y) - H(Y|X)$</li>
@@ -347,54 +350,81 @@
 <li>$I(X;Y) &#x3D; I(Y;X)$，满足对称性，因此不能用于确定信息流的方向</li>
 <li>$I(X;X) &#x3D; H(X)$，单一变量不能给自身带来新的信息</li>
 </ol>
-<blockquote>
-<p>信息论的物理意义：互信息（信息增益） &#x3D; 信息熵 — 条件熵</p>
-</blockquote>
 <p>互信息就是信息增益，用于衡量随机变量之间相互依赖程度的度量。例如，构建决策树时选择某个特征变量，导致分类模型（另一个变量）的不确定性减少，也就是带来了新的信息，减少的越多说明这个特征越重要。<br>反之，如果 $X$ 和 $Y$ 互相独立，即两者之间互相不提供任何信息，则他们的互信息为 0。</p>
-<h2 id="三、不同概率分布的比较"><a href="#三、不同概率分布的比较" class="headerlink" title="三、不同概率分布的比较"></a>三、不同概率分布的比较</h2><h3 id="1-相对熵（Relative-Entropy，也称-Kullback-Leibler-Divergence-）"><a href="#1-相对熵（Relative-Entropy，也称-Kullback-Leibler-Divergence-）" class="headerlink" title="1. 相对熵（Relative Entropy，也称 Kullback-Leibler Divergence ）"></a>1. 相对熵（Relative Entropy，也称 Kullback-Leibler Divergence ）</h3><p>相对熵是衡量两个不同分布之间的<strong>距离</strong>或者相似的一个指标。也称为 KL散度（Kullback-Leibler Divergence）。<br>假设 $P(x)$ 是目标分布，$Q(x)$ 是评价分布，衡量$Q(x)$与目标分布 $P(x)$ 之间的距离，就可以使用这个指标实现。公式是，<br>$$D_{KL}(p||q) &#x3D; \sum_{i&#x3D;1}^n p(x_i)log(\frac {p(x_i)}{q(x_i)})$$</p>
-<blockquote>
-<p>Divergence 这个词来源于拉丁语词根 diverge，意为”分叉”或”偏离”。在数学中，通常指的是向量场中某一点的发散性，即向量从这一点向外散开的程度。在物理学中，可以指能量或物质的发散，例如在热力学中，热量的发散。<br>反义词是 convergence ，意为”汇聚”或”趋同”，指的是从不同起点汇聚到一点或趋于一致。</p>
-</blockquote>
-<p>相对熵是衡量两个不同分布之间的“距离”或者相似的一个指标。假设这两个分布是P(x)和Q(x)，其中P(x)是目标分布，Q(x)是评价分布，衡量Q(x)与目标分布P(x)之间的距离，就可以使用这个指标实现。公式是，<br><code>相对熵 = 交叉熵 - 信息熵</code></p>
+<h2 id="三、相对熵-不同概率分布的比较"><a href="#三、相对熵-不同概率分布的比较" class="headerlink" title="三、相对熵 - 不同概率分布的比较"></a>三、相对熵 - 不同概率分布的比较</h2><p>衡量两个概率分布之间的差异（不确定性），主要有 KL 散度、JS 散度、交叉熵和 Wasserstein 距离等指标。</p>
+<h3 id="1-KL散度（Kullback-Leibler-Divergence，或-相对熵-Relative-Entropy）"><a href="#1-KL散度（Kullback-Leibler-Divergence，或-相对熵-Relative-Entropy）" class="headerlink" title="1. KL散度（Kullback-Leibler Divergence，或 相对熵 - Relative Entropy）"></a>1. KL散度（Kullback-Leibler Divergence，或 相对熵 - Relative Entropy）</h3><p>若 $P$,$Q$ 定义在同一个概率空间的不同测度，那么 KL Divergence 定义为：<br>$$D_{KL}(P||Q) :&#x3D; E_P[\log \frac {p(x)}{q(x)}] &#x3D; \sum_{i&#x3D;1}^n p(x_i)log(\frac {p(x_i)}{q(x_i)})$$<br>其中，为了保证连续性，定义 $0 \log \frac{0}{0} &#x3D; 0$，$0 \log \frac{0}{q} &#x3D; 0$。</p>
+<p>以下图为例，黄色柱体是目标分布 $P(x)$，蓝色柱体是评价分布 $Q(x)$，棕色是两者的重叠部分，而本色区域就两者之间的“距离”，再基于 $P(x)$ 的概率分布“累计”得到期望值，这就是 KL 散度的直观解释。</p>
 <p><img src="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/KL.png" alt="KL"></p>
-<h4 id="KL-散度的特性"><a href="#KL-散度的特性" class="headerlink" title="KL 散度的特性"></a>KL 散度的特性</h4><ol>
-<li>非对称性：$ D_{KL}(P \| Q) \neq D_{KL}(Q \Vert P) $。即 KL 散度不是一个对称量</li>
+<p>KL散度又称为<strong>相对熵</strong>，信息散度，信息增益。满足以下性质：</p>
+<ol>
+<li>非对称性：$ D_{KL}(P \| Q) \neq D_{KL}(Q \Vert P) $。KL 散度不是严格意义的 <strong>metric</strong> 指标。</li>
 <li>非负性：$ D_{KL}(P || Q) \geqslant 0 $，当且仅当 $P(x) &#x3D; Q(x) $ 时等号成立。根据<a target="_blank" rel="noopener" href="https://allenwind.github.io/blog/6631/">吉布斯不等式</a>可以证明</li>
+<li>$D_{KL}(P||Q) &#x3D; H(P,Q) - H(P)$，即：<strong>相对熵 &#x3D; 交叉熵 - P的信息熵</strong></li>
 </ol>
-<p>KL 散度 &#x3D; H(P,Q) - H(P) &#x3D; 交叉熵 - 信息熵</p>
-<p>在模型的训练阶段，输入数据和标签常常已经确定，那么真实概率分布P(X)是确定，所以信息熵在这里是一个常量。<br>由于KL散度的值表示真实概率分布P(x)与预测概率分布Q(x)之间的差异，值越小表示两个分布之间的差异性越小，所以目标变成最小化KL散度。但是由于交叉熵等于KL散度加上一个常量，且公式相比KL散度更加容易，因此最小化KL散度与最小化交叉熵的效果是一致的，且优化交叉熵的计算量小于优化KL散度。</p>
 <blockquote>
-<p>一个测量（metric，也称 distance 距离）指标需要满足三个条件：对称性、非负性、三角不等式。</p>
+<p>信息论的物理意义：使用错误分布 $Q$ 来表示真实分布 $P$ 中的样本，所使用编码的<strong>平均长度的增量</strong></p>
 </blockquote>
-<h3 id="2-交叉熵-Cross-Entropy"><a href="#2-交叉熵-Cross-Entropy" class="headerlink" title="2. 交叉熵(Cross Entropy)"></a>2. 交叉熵(Cross Entropy)</h3><p>交叉熵是在机器学习的分类任务里被广泛使用的目标函数(objective function)&#x2F;损失函数(loss function)。上面提到了，理论上相对熵才是衡量两个分布是否相近的指标，而在实际中为什么使用的是交叉熵呢？通过下面的推导公式，可以得出结论</p>
-<p>给定一个策略，交叉熵就是在该策略下猜中颜色所需要的问题的期望值。交叉熵用来衡量在给定的真实分布下，使用非真实分布所指定的策略消除系统的不确定性所需要付出成本的大小。交叉的字面意思在于：真实分布与非真实分布的交叉。给定一个方案，越优的策略，交叉熵越低，具有最低的交叉熵策略就是最优的策略。而在此时，交叉熵&#x3D;信息熵。因此，我们通常需要最小化交叉熵，也间接证明了我们的算法所算出的非真实分布接近真实分布。交叉熵也叫对数似然</p>
-<h3 id="3-小结"><a href="#3-小结" class="headerlink" title="3. 小结"></a>3. 小结</h3><p>交叉熵：预测越准确，交叉熵越小；交叉熵只与真实标签的预测概率相关<br>$$ H(P,q) &#x3D; - \sum_{i&#x3D;1}^{n} p(x_i)logq(x_i) $$<br>二分类公式：$ H(P,Q) &#x3D; -(plogq + (1-p)log(1-q))$</p>
-<p>对比熵和交叉熵的公式，我们可以发现两者在形式上非常相似，都涉及到了概率乘以对数概率的形式。主要区别在于：</p>
-<p>熵H ( X ) H(X)H(X)只依赖于一个概率分布，它衡量的是这个概率分布本身的不确定性。<br>对应的，交叉熵H ( P , Q ) H(P, Q)H(P,Q)依赖于两个概率分布，它衡量的是一个概率分布相对于另一个概率分布的不确定性。</p>
-<p>简单的说，交叉熵背后是KL距离的计算，KL距离可以用来衡量两个概率分布的”距离”。但是KL距离并不是度量，不满足交换律，即KL(p,q)不等于KL(q,p)，含义也是不一样的。</p>
-<p>区别<br>概念上：交叉熵衡量的是在一个分布下，编码另一个分布所需的信息量；而 KL 散度衡量的是两个概率分布之间的信息损失或差异。<br>计算公式：交叉熵的计算公式中不直接涉及真实分布P PP相对于预测分布Q QQ的比率，而KL散度的公式直接涉及到这个比率P ( x ) Q ( x ) \frac{P(x)}{Q(x)} Q(x)P(x)。<br>对称性：交叉熵是对称的，没有明确的方向性；KL散度是非对称的，明确区分了哪个是“真实”分布，哪个是“预测”或“近似”分布。<br>关系：二者之间有密切关系，实际上，KL散度可以被视为两个分布之间交叉熵和真实分布熵的差值：<br>D K L ( P ∥ Q ) &#x3D; H ( P , Q ) − H ( P ) D_{KL}(P \Vert Q) &#x3D; H(P, Q) - H(P) D KL</p>
-<hr>
-<p>分析备注：</p>
+<p>互信息是用于衡量两个随机变量之间的依赖性的度量，其实也是一种相对熵，只是它衡量的并非随机变量 $p$ 和 $q$，而是他们的联合分布 $p(x,y)$ 和边缘分布乘积 $p(x)p(y)$ 的相似程度。<br>$$ I_{X;Y}(x,y) :&#x3D; I_X(x) - I_{X|Y}(x|y) &#x3D; \log \frac {P_{X|Y}(x|y)}{P_X(x)} &#x3D; \log \frac {P_{XY}(xy)}{P_X(x)P_Y(y)}$$</p>
+<h3 id="2-交叉熵（Cross-Entropy）"><a href="#2-交叉熵（Cross-Entropy）" class="headerlink" title="2. 交叉熵（Cross Entropy）"></a>2. 交叉熵（Cross Entropy）</h3><p>给定两个概率分布 $P$ 和 $Q$，$P$ 相对于 $Q$ 的交叉熵定义为：<br>$$H(P,Q) :&#x3D; E_P[-\log Q] &#x3D; -\sum_{x \in X} p(x) \log q(x)$$</p>
+<p>还是以 KL散度的图为例，蓝色柱体是评价分布 $Q(x)$，不考虑黄色柱体，直接以目标分布 $P(x)$ 的概率分布“累计”得到期望值，这就是交叉熵的直观解释。这也体现了两者之间的差别就是目标分布 $P(x)$ 的信息熵。</p>
+<blockquote>
+<p>信息论的物理意义：使用错误分布 $Q$ 来表示真实分布 $P$ 中的样本，所使用编码的<strong>平均长度</strong></p>
+</blockquote>
+<h3 id="3-JS散度（Jensen-Shannon-Divergence）"><a href="#3-JS散度（Jensen-Shannon-Divergence）" class="headerlink" title="3. JS散度（Jensen-Shannon Divergence）"></a>3. JS散度（Jensen-Shannon Divergence）</h3><p>对于两个概率分布 $P$ 和 $Q$，JS 散度定义为：<br>$$D_{JS}(P||Q) &#x3D; \frac{1}{2} D_{KL}(P || M) + \frac{1}{2} D_{KL}(Q || M) $$<br>其中： $M$ 是 $P$ 和 $Q$ 的几何平均，定义为：$ M(x) &#x3D; \sqrt{P(x) \cdot Q(x)} $</p>
+<p>JS散度是 KL散度的一种<strong>对称化形式</strong>，满足如下性质：</p>
 <ul>
-<li>在每个离散量上，计算两个不同分布的信息量差值（看起来就像是距离，当然有正有负），再乘以 P 分布的当前概率，结果就是当前点的期望值，最后再对每个点进行汇总。得出整体期望值。</li>
-<li>如果两个样本空间的数量不一致，即 n ！&#x3D; m，此时计算KL散度应基于较大的样本数量汇总</li>
-<li>交叉熵和KL散度一样，不具有对称性。</li>
-<li>对同一件事求交叉熵实际上就是求该事件的熵</li>
-<li>KL不具备对称性，因为颠倒顺序后，差值正负颠倒，而概率基数也发生了变化</li>
+<li>非负性：$D_{JS} \geq 0$，且仅当 $P &#x3D; Q$ 时为 0</li>
+<li>对称性：JS 散度是对称的，即 $D_{JS}(P || Q) &#x3D; D_{JS}(Q || P)$</li>
+<li>三角不等式：对于任意三个概率分布 $P$，$Q$ 和 $R$，有：$ D_{JS}(P || R) \leq D_{JS}(P || Q) + D_{JS}(Q || R) $</li>
+</ul>
+<h2 id="四、应用分析"><a href="#四、应用分析" class="headerlink" title="四、应用分析"></a>四、应用分析</h2><p>KL散度可以用来衡量两个概率分布的”距离”。但是KL散度并不是标准意义的度量指标（不满足对称性），即$D_{KL}(p,q) \neq D_{KL}(q,p)$，因此应用KL散度时，必须明确区分哪个是“真实”分布，哪个是“近似（预测）”分布。</p>
+<p>通常我们使用的是$D_{KL}(p,q)$（也记作$D_q(p)$），称为正向KL散度（Forward KL），要使其最小的数学表达为：<br>$$q^* &#x3D; \arg \min_q D_{KL}(p||q) &#x3D; \arg \min_q \sum_{x \in X} p(x)\log \frac {p(x)}{q(x)} $$<br>其优化重点是在$p(x)$较小的位置，$q(x)$应避免为零（将导致对数无穷大），因此其也被称为“<strong>zero avoiding</strong>”，结果是得到一个较宽的分布，峰值未必突出，但底部比较平坦。</p>
+<p>反之，$D_{KL}(q,p)$（也记作$D_p(q)$）称为反向KL散度（Reverse KL），要使其最小的数学表达为：<br>$$q^* &#x3D; \arg \min_q D_{KL}(q||p) &#x3D; \arg \min_q \sum_{x \in X} q(x)\log \frac {q(x)}{p(x)} $$<br>其优化重点是在$p(x)$为零的位置，$q(x)$应尽量为零（因为分母为零导致对数无穷大，但 $0 \log \frac{0}{0}&#x3D;0$），因此其也被称为“<strong>zero forceing</strong>”，结果是得到一个较窄的分布，底部尽量低，这也往往导致峰值更突出。</p>
+<p><img src="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/KL2.png" alt="alt text"></p>
+<p>综上所述，正向KL散度的分布偏向一般化，而反向KL散度的分布偏向极端化。从模型泛化的角度看，在损失函数结果相等的情况下，显然正向KL散度更有优势！</p>
+<p>此外，在模型的训练阶段通常已经确定了输入数据和标签数据，即真实概率分布<code>P(X)</code>的信息熵是一个常量，此时最小化KL散度与最小化交叉熵效果是一致的，但是优化交叉熵的计算量小于优化KL散度，因此在损失函数的计算中得到广泛应用。</p>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p>概率分布 $P$ 和 $Q$ 分别定义在同样的样本空间 {0, 1} 上，真实分布 $P$：$P(0) &#x3D; 0.8, P(1) &#x3D; 0.2 $</p>
+<ol>
+<li>对于预测分布$Q1$：$Q(0) &#x3D; 0.6, Q(1) &#x3D; 0.4 $，计算交叉熵：<br>$H(P,Q) &#x3D;-(P(0) \log Q(0) + P(1) \log Q(1)) &#x3D;-(0.8 \log0.6 + 0.2 \log0.4) &#x3D; 0.8540$</li>
+<li>换一个预测分布$Q2$：$Q(0) &#x3D; 0.7, Q(1) &#x3D; 0.3 $，此时交叉熵为：<br>$H(P,Q) &#x3D;-(P(0) \log Q(0) + P(1) \log Q(1)) &#x3D; -(0.8 \log0.7 + 0.1 \log0.3) &#x3D; 0.7591$</li>
+<li>如果预测分布等于真实分布，$Q(0) &#x3D; 0.6, Q(1) &#x3D; 0.4 $，此时交叉熵：<br>$H(P,Q) &#x3D;-(P(0) \log Q(0) + P(1) \log Q(1)) &#x3D; -(0.8 \log0.8 + 0.2 \log0.2) &#x3D; 0.7219$</li>
+<li>进一步，如果预测分布$Q4$：$Q(0) &#x3D; 0.9, Q(1) &#x3D; 0.1 $，此时交叉熵为：<br>$H(P,Q) &#x3D;-(P(0) \log Q(0) + P(1) \log Q(1)) &#x3D; -(0.8 \log0.9 + 0.2 \log0.1) &#x3D; 0.7860$</li>
+</ol>
+<p>分析交叉熵的数值：</p>
+<ul>
+<li>$H(P,Q2) &lt; H(P,Q1)$：表明相比$Q1$，$Q2$更接近真实分布；</li>
+<li>$H(P,Q3)$ 是最小值：因为真实分布与其自身的交叉熵就是信息熵，$H(P,P) &#x3D; H(P)$；</li>
+<li>$H(P,Q4) \approx H(P,Q2)$：表明两者与真实分布的“距离”差不多。而 $H(P,Q4) &gt; H(P,Q3)$是肯定的。</li>
 </ul>
 <hr>
-<h2 id="附录一：最大熵思想-Maximum-Entropy-Principle"><a href="#附录一：最大熵思想-Maximum-Entropy-Principle" class="headerlink" title="附录一：最大熵思想 (Maximum Entropy Principle)"></a>附录一：最大熵思想 (Maximum Entropy Principle)</h2><p>最大熵的思想是，当你要猜一个概率分布时，如果你对这个分布一无所知，那就猜熵最大的均匀分布；如果你对这个分布知道一些情况，那么，就猜满足这些情况下的熵最大的分布。</p>
+<h2 id="附录一：几个名词解释"><a href="#附录一：几个名词解释" class="headerlink" title="附录一：几个名词解释"></a>附录一：几个名词解释</h2><h3 id="Divergence-散度"><a href="#Divergence-散度" class="headerlink" title="Divergence - 散度"></a>Divergence - 散度</h3><p>Divergence 这个词来源于拉丁语词根 diverge，意为”分叉”或”偏离”。<br>在数学中，通常指的是向量场中某一点的发散性，即向量从这一点向外散开的程度。<br>在物理学中，可以指能量或物质的发散，例如在热力学中，热量的发散。<br>反义词是 convergence ，意为”汇聚”或”趋同”，指的是从不同起点汇聚到一点或趋于一致。</p>
+<h3 id="Metric-度量"><a href="#Metric-度量" class="headerlink" title="Metric - 度量"></a>Metric - 度量</h3><p>在数学中，度量空间（metric space）是具有<strong>距离（distance）</strong>这一个概念的集合，具体来说，是装配了一个称为度量的函数，用以表示此集合中任两个成员间的距离。历史上是由法国数学家莫里斯·弗雷歇在1906年于其意大利语著作《Sur quelques points du calcul fonctionnel》首次使用。其定义为：</p>
+<p>$M$ 为集合，若其装配了函数 $d: M \times M \rightarrow R$，对任意 $x,y,z \in M$ 满足：</p>
+<ul>
+<li>同一性：$d(x,y) &#x3D; 0 \Longleftrightarrow x &#x3D; y$</li>
+<li>对称性：$d(x,y) &#x3D; d(y,x)$</li>
+<li>三角不等式：$d(x,z) \leq d(x,y) + d(y,z)$</li>
+</ul>
+<p>则称 $d$ 为定义在 $M$ 上的度量（metric），或是距离函数，且称 $(M,d)$ 为度量空间。</p>
+<h2 id="附录二：吉布斯不等式（Gibbs’-Inequality）"><a href="#附录二：吉布斯不等式（Gibbs’-Inequality）" class="headerlink" title="附录二：吉布斯不等式（Gibbs’ Inequality）"></a>附录二：吉布斯不等式（Gibbs’ Inequality）</h2><p>吉布斯不等式（Gibbs’ Inequality）是信息论中的一个基本不等式，由 J.W. Gibbs 提出的，表明联合熵（Joint Entropy）不会超过两个随机变量各自熵（Entropy）的和，数学定义是：</p>
+<p>对于任意两个随机变量 $X$ 和 $Y$，$H(X, Y) \leq H(X) + H(Y) $</p>
+<p>当且仅当随机变量 $X$ 和 $Y$ 相互独立时，等号成立，即 $ H(X, Y) &#x3D; H(X) + H(Y) $。这是因为如果 $X$ 和 $Y $ 独立，那么知道 $X$ 的信息不会对 $Y$ 的不确定性产生任何影响，反之亦然。</p>
+<h2 id="附录三：最大熵思想-Maximum-Entropy-Principle"><a href="#附录三：最大熵思想-Maximum-Entropy-Principle" class="headerlink" title="附录三：最大熵思想 (Maximum Entropy Principle)"></a>附录三：最大熵思想 (Maximum Entropy Principle)</h2><p>最大熵的思想是，当你要猜一个概率分布时，如果你对这个分布一无所知，那就猜熵最大的均匀分布；如果你对这个分布知道一些情况，那么，就猜满足这些情况下的熵最大的分布。<br>换句话说，除了已经确认的信息，不做任何未知假设，直接把所有未知事件当成<strong>等概率</strong>事件处理。</p>
 <p>吴军老师的《数学之美》第 20 章中提到了一个掷骰子的例子可以很好的解释最大熵原理。对于一个骰子，每面向上的概率是多少，可能我们会不加思索会说是1&#x2F;6，但是，如果说骰子的其中四点被做过特殊处理，四点向上的概率为1&#x2F;3，那么其他点向上的概率则变为2&#x2F;15。</p>
 <p>首先，在骰子没做任何处理之前，我们认为骰子的各个面出现的概率是相同的，即符合均匀分布，此时熵最大。然后，当增加四点被做过特殊处理后，其他面的向上的概率变为2&#x2F;15，在这里四点被做过特殊处理，即所谓的约束条件，满足约束条件之后，而对其它则不做任何假设其他面向上的概率是相同的，即为2&#x2F;15，也是熵最大的。</p>
 <p>在这个例子中，不作任何假设就是使用“等概率”，这个时候概率分布最均匀，从而使得概率分布的熵最大，即最大熵原理。</p>
+<h2 id="附录四：热力学第二定律的解释"><a href="#附录四：热力学第二定律的解释" class="headerlink" title="附录四：热力学第二定律的解释"></a>附录四：热力学第二定律的解释</h2><p>有一种说法，宇宙诞生时是符合帕累托分布的，它的熵值很低，也具有很大的活力；宇宙热寂时，它的熵值很大，符合正态分布，也就是说事物的发展过程就是从幂律分布到正态分布。</p>
+<p><img src="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/demo.png" alt="alt text"></p>
+<p>社会学还有一个叫做二八定律的东西，20% 的人掌握着社会 80% 的财富，把这种离散的模型迁移到连续的情况，这就是帕累托分布（这是一个厚尾模型，它的均值在采样无限时可以趋于无限大）。从其图像可以看到，采样时大部分样本都聚集在后面，但采样足够多时，总有几个非常大的样本来影响采样数据整体的分布，这个概率分布的熵值就很低。<br>马克思主义指出，资本主义必将演化到共产主义，也就是大部分财富在少部分人手中的幂等分布，最终必将演化到正态分布，即大部分财富掌握在大部分人手中！</p>
 <hr>
 <h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://faculty.ustc.edu.cn/_resources/group1/M00/00/37/wKhJFGN1l3WAH_v2AxmG8aJYbXg890.pdf">信息论基础 - Thomas M.Cover, Joy A,Thomas</a></li>
 <li><a target="_blank" rel="noopener" href="https://zodiac911.github.io/blog/entropy-and-crossentropy.html#%E4%BA%A4%E5%8F%89%E7%86%B5-Cross-Entropy">通俗理解熵与交叉熵</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/Blackteaxx/p/18164220">Entropy</a></li>
 <li><a target="_blank" rel="noopener" href="https://medium.com/@eric_zhu/%E7%86%B5-entropy-8299ccce0cf2">熵 (Entropy)</a></li>
-<li><a target="_blank" rel="noopener" href="https://gulico.github.io/2020/07/20/xinxilun/">信息熵、交叉熵、KL-散度、联合熵、条件熵和互信息</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/71bd778dfb5a">信息论基础（熵，互信息，交叉熵）- 老羊肖恩</a></li>
 <li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/ZihanZhang/p/16049215.html">机器学习里的信息论</a></li>
+<li><a target="_blank" rel="noopener" href="https://lumingdong.cn/various-entropies-in-machine-learning.html">机器学习中的各种熵</a></li>
 </ul>
 
     </div>
@@ -409,11 +439,14 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2024/07/07/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" rel="prev" title="大模型学习笔记之三：损失函数">
-                  <i class="fa fa-angle-left"></i> 大模型学习笔记之三：损失函数
+                <a href="/2024/05/26/CNN-%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%80%E4%BB%8B/" rel="prev" title="CNN 卷积神经网络简介">
+                  <i class="fa fa-angle-left"></i> CNN 卷积神经网络简介
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" rel="next" title="大模型学习笔记之一：基本知识">
+                  大模型学习笔记之一：基本知识 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
@@ -445,14 +478,14 @@
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">241k</span>
+    <span title="站点总字数">253k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">14:36</span>
+    <span title="站点阅读时长">15:19</span>
   </span>
 </div>
 <div class="busuanzi-count">
