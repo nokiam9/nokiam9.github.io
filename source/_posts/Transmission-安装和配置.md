@@ -255,7 +255,7 @@ Linux桌面系统的市场份额很少，但是很庞杂：
 
 ## 五、常见问题的解决方案
 
-### 1：UDP缓冲区不足导致Daemon启动失败
+### 1. UDP缓冲区不足导致Daemon启动失败
 
 如果启动失败，并产生如下信息，通常是操作系统的UDP网络缓冲区不足
 
@@ -272,7 +272,7 @@ echo 'net.core.wmem_max = 4194304' >> /etc/sysctl.conf
 sysctl -p
 ```
 
-### 2: Web UI界面无法打开
+### 2. Web UI界面无法打开
 
 如果浏览器提示“403: Forbidden”错误信息，并提示“Unauthorized IP Addres”，通常是因为默认只允许来自本机`127.0.0.1`的白名单访问。
 解决方法是：
@@ -297,9 +297,11 @@ sysctl -p
 
 ---
 
-## 附录一：全量配置参数
+## 附录一：Transmission 全量配置参数
 
-以Centos为例，其配置文件位于`/var/lib/transmission/.config/transmission-daemon/settings.json`：
+以 Centos 7为例，
+默认配置文件路径：`/var/lib/transmission/.config/transmission-daemon/settings.json`
+默认下载文件目录：`/var/lib/transmission/Downloads`
 
 ``` bash
 "alt-speed-up": 500, #计划时段上传限速值
@@ -317,13 +319,13 @@ sysctl -p
 "cache-size-mb": 4, #缓存大小，以MB为单位，建议设大一些，避免频繁读写硬盘而伤硬盘，建议设为内存大小的1/6～1/4
 "compact-view": false,
 "dht-enabled": false, #关闭DHT（不通过tracker寻找节点）功能，不少PT站的要求，但BT下载设置为true会使得下载更好
-"download-dir": "/home/yys/Downloads", #下载的内容存放的目录
+"download-dir": "/var/lib/transmission/Downloads", #已完成下载的内容存放目录
 "download-queue-enabled": true,
 "download-queue-size": 5,
 "encryption": 1, #0=不加密，1=优先加密，2=必须加密
 "idle-seeding-limit": 30,
 "idle-seeding-limit-enabled": false,
-"incomplete-dir": "/home/yys/Downloads",
+"incomplete-dir": "/var/lib/transmission/Downloads", #正在下载的内容存放目录
 "incomplete-dir-enabled": false,
 "inhibit-desktop-hibernation": true,
 "lpd-enabled": false, #禁用LDP（本地节点发现，用于在本地网络寻找节点）,不少PT站的要求
@@ -393,27 +395,133 @@ sysctl -p
 "watch-dir-enabled": false
 ```
 
-## 附录二：关于Qt 和 GTK
+## 附录二：Samba SMB 文件共享服务
+
+SMB（Server Message Block，服务器消息块）是一种**计算机通信协议**（并非一款具体的软件产品），最初由 IBM 开发，用于在本地局域网 LAN 的不同计算机之间共享文件、打印机、串口等资源。
+
+后来，Microsoft 对其进行了扩展和改进称为 CIFS（Common Internet File System，通用因特网文件系统），在 Windows 操作系统中得到广泛使用，并支持与其他操作系统实现文件共享。
+
+Samba 是一个开源的软件产品，主要功能是为 Linux 服务器实现文件服务器、身份授权和认证、名称解析和打印服务等功能，其中包含了 SMB 协议的实现，它允许 Windows 客户访问 Linux 系统上的目录、打印机和文件（就像访问 Windows 服务器时一样）。参见 [https://www.samba.org/](https://www.samba.org/)
+> Samba 可以在 Linux 服务器上自动构建一个 domain 控制器，以直接使用 Windows 域中的用户凭据。
+
+Samba 的早期版本使用 139 端口在 Windows 网络上建立会话和进行文件共享，但由于缺乏加密和身份验证的支持而存在安全风险。现代版本改用 445 端口，提供了更高的安全性和功能，包括对加密和身份验证的支持。
+
+### 安装方法
+
+Samba 可以直接使用 YUM 软件源进行安装，参见[Centos 7 的 Samba 服务安装和配置详解](https://www.cnblogs.com/ling-yu-amen/p/10756076.html)。
+由于其使用了专用网络端口，注意关闭 selinux 和防火墙。
+
+```bash
+yum install -y samba
+```
+
+### 参数配置
+
+Samba 的配置文件位于`/etc/samba/smb.conf`，初始配置信息为：
+
+``` config
+[global]
+    workgroup = SAMBA
+    security = user             # 安全验证方式，可选：user, share, server, domain
+
+    passdb backend = tdbsam     # 后端鉴权方式，可选：smbpasswd, tdbsam, ldapsam
+
+    printing = cups
+    printcap name = cups
+    load printers = yes
+    cups options = raw
+
+[homes]
+    comment = Home Directories
+    valid users = %S, %D%w%S
+    browseable = No
+    read only = No
+    inherit acls = Yes
+
+[printers]
+    comment = All Printers
+    path = /var/tmp
+    printable = Yes
+    create mask = 0600
+    browseable = No
+
+[print$]
+    comment = Printer Drivers
+    path = /var/lib/samba/drivers
+    write list = @printadmin root
+    force group = @printadmin
+    create mask = 0664
+    directory mask = 0775
+```
+
+用户可以设置文件共享目录，方法是在配置文件中增加如下信息：
+
+``` cfg
+[transmission]
+    comment = transmission                      # 连接服务器的提示信息
+    path = /var/lib/transmission/Downloads/     # 共享目录的绝对路径
+    public = yes                                # 允许公开
+    browseable = yes                            # 允许浏览目录
+    writable = yes                              # 允许写入
+    guest ok = yes                              # 允许 guest 登录，无需用户名和口令
+    create mask = 0644                  
+    directory mask = 0775
+```
+
+为了支持 guest 匿名登录，还需要修改 `[global]` 段落的配置信息，注释取消 `passdb backend = tdbsam` ，并增加 `map to guest = bad user`，即以 `nobody` 用户身份读写文件。
+
+### 启动方式
+
+注意 Samba 的系统服务名称为`smb.service`，因此其启动方式为：
+
+```console
+[root@Copy-of-VM-Centos7 ~]# systemctl enable --now smb
+Created symlink from /etc/systemd/system/multi-user.target.wants/smb.service to /usr/lib/systemd/system/smb.service.
+
+[root@Copy-of-VM-Centos7 ~]# systemctl status smb
+● smb.service - Samba SMB Daemon
+   Loaded: loaded (/usr/lib/systemd/system/smb.service; enabled; vendor preset: disabled)
+   Active: active (running) since 六 2024-08-31 15:49:08 CST; 6s ago
+     Docs: man:smbd(8)
+           man:samba(7)
+           man:smb.conf(5)
+ Main PID: 1376 (smbd)
+   Status: "smbd: ready to serve connections..."
+   CGroup: /system.slice/smb.service
+           ├─1376 /usr/sbin/smbd --foreground --no-process-group
+           ├─1378 /usr/sbin/smbd --foreground --no-process-group
+           ├─1379 /usr/sbin/smbd --foreground --no-process-group
+           └─1380 /usr/sbin/smbd --foreground --no-process-group
+
+8月 31 15:49:07 Copy-of-VM-Centos7.8-local systemd[1]: Starting Samba SMB Daemon...
+8月 31 15:49:08 Copy-of-VM-Centos7.8-local smbd[1376]: [2024/08/31 15:49:08.961337,  0] ../../lib/util/become_daemon.c:136(daemon_ready)
+8月 31 15:49:08 Copy-of-VM-Centos7.8-local systemd[1]: Started Samba SMB Daemon.
+8月 31 15:49:08 Copy-of-VM-Centos7.8-local smbd[1376]:   daemon_ready: daemon 'smbd' finished starting up and ready to serve connections
+```
+
+SMB 服务启动成功后，客户端 mac 电脑就可以通过 `Finder` - `前往` - `连接服务器`，并输入`smb://192.168.0.x` 连接共享目录了！
+
+## 附录三：关于Qt 和 GTK
 
 ### Qt
 
-1991年，Haavard Nord和Eirik Chambe-Eng开发了“Qt”，该工具包名为Qt是因为字母Q在Haavard的Emacs字体特别漂亮，而“t”代表“toolkit”，灵感来自Xt，X toolkit。
-后来，两人成立了Trolltech公司（中文名是“奇趣科技”），2008年被NOKIA公司收购，以增强该公司在跨平台软件研发方面的实力，更名Qt Software并宣布开放Qt源代码，
-2012年8月9日，Digia宣布已完成对诺基亚Qt业务及软件技术的全面收购，并计划将Qt应用到Android、iOS及Windows 8平台上。
+1991年，Haavard Nord 和 Eirik Chambe-Eng 开发了 Qt ，该工具包名为 Qt 是因为字母 Q 在 Haavard 的 Emacs 字体特别漂亮，而 t 代表 toolkit，灵感来自 Xt，X toolkit。
+后来，两人成立了 Trolltech 公司（中文名是“奇趣科技”），2008年被 NOKIA 公司收购，以增强该公司在跨平台软件研发方面的实力，更名 Qt Software并 宣布开放 Qt 源代码，
+2012年8月9日，Digia 宣布已完成对诺基亚 Qt 业务及软件技术的全面收购，并计划将 Qt 应用到 Android、iOS 及Windows 8 平台上。
 
-Qt的图形用户界面的基础是QWidget。Qt中所有类型的GUI组件如按钮、标签、工具栏等都派生自QWidget，而QWidget本身则为QObject的子类。Widget负责接收鼠标，键盘和来自窗口系统的其他事件，并描绘了自身显示在屏幕上。每一个GUI组件都是一个widget，widget还可以作为容器，在其内包含其他Widget。
-使用Qt开发的软件，相同的代码可以在任何支持的平台上编译与执行，而不需要修改源代码。会自动依平台的不同，表现平台特有的图形界面风格。
-Qt开放源代码，并提供LGPL和GPL的自由软件用户协议，可以免费使用，但商业版需收取授权费。
+Qt 的图形用户界面的基础是 QWidget。Qt 中所有类型的 GUI 组件如按钮、标签、工具栏等都派生自 QWidget，而QWidget 本身则为 QObject 的子类。Widget 负责接收鼠标，键盘和来自窗口系统的其他事件，并描绘了自身显示在屏幕上。每一个 GUI 组件都是一个 widget，widget 还可以作为容器，在其内包含其他 Widget。
+使用 Qt 开发的软件，相同的代码可以在任何支持的平台上编译与执行，而不需要修改源代码。会自动依平台的不同，表现平台特有的图形界面风格。
+Qt 开放源代码，并提供 LGPL 和 GPL 的自由软件用户协议，可以免费使用，但商业版需收取授权费。
 
-KDE Plasma Workspaces就是基于Qt开发的Linux GUI，此外Symbain、MeeGo等手机厂商也采用Qt框架，但现在已经是Android的天下了！！！
+KDE Plasma Workspaces 就是基于 Qt 开发的 Linux GUI，此外 Symbain、MeeGo 等手机厂商也采用 Qt 框架，但现在已经是 Android 的天下了！！！
 
 ### GTK
 
-GTK（原名GTK+）最初是GIMP的专用开发库（GIMP Toolkit），后来发展为类Unix系统下开发图形界面的应用程序的主流开发工具之一。
-GTK是自由软件，并且是GNU计划的一部分。自2019年2月6日起，GTK+改名为GTK。
-GTK使用C语言开发，但使用了面向对象技术，也提供了C++（gtkmm）、Perl、Ruby、Java和Python（PyGTK）绑定，其他的绑定有Ada、D、Haskell、PHP和所有的.NET编程语言。
+GTK（原名GTK+）最初是 GIMP 的专用开发库（GIMP Toolkit），后来发展为类 Unix 系统下开发图形界面的应用程序的主流开发工具之一。
+GTK 是自由软件，并且是 GNU 计划的一部分。自 2019 年 2 月 6 日起，GTK+ 改名为 GTK。
+GTK 使用 C 语言开发，但使用了面向对象技术，也提供了C++（gtkmm）、Perl、Ruby、Java 和 Python（PyGTK）绑定，其他的绑定有 Ada、D、Haskell、PHP和 所有的 .NET 编程语言。
 
-GNOME是以GTK为基础，就是说为GNOME编写的程序使用GTK做为其工具箱，Firefox也是基于GTK开发的。
+GNOME 是以 GTK 为基础，就是说使用 GTK 做为其工具箱，Firefox 也是基于 GTK 开发的。
 
 ---
 
