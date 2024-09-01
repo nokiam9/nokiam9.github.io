@@ -468,7 +468,12 @@ Samba 的配置文件位于`/etc/samba/smb.conf`，初始配置信息为：
     directory mask = 0775
 ```
 
-为了支持 guest 匿名登录，还需要修改 `[global]` 段落的配置信息，注释取消 `passdb backend = tdbsam` ，并增加 `map to guest = bad user`，即以 `nobody` 用户身份读写文件。
+为了支持 guest 匿名登录，还需要修改 `[global]` 段落的配置信息，注释取消 `passdb backend = tdbsam` ，并增加以下信息，即以 `transmission` 用户身份读写文件。
+
+```config
+map to guest = bad user
+guest account = transmission
+```
 
 ### 启动方式
 
