@@ -11,7 +11,8 @@ tags:
 注意找到正确的 Python 执行码版本，常见目录包括：
 
 - Conda安装：`/usr/local/anaconda3/`
-- Python官方安装：`/System/Library/Frameworks/Python.framework/Versions/*`
+- 操作系统内置Python2：`/System/Library/Frameworks/Python.framework/Versions/`
+- 官方Python3：`/Library/Frameworks/Python.framework/Versions/`
 
 在当前的`.venv`子目录，安装虚拟环境
 

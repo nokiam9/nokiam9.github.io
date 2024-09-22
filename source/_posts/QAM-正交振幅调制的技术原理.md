@@ -74,84 +74,7 @@ $$C(t)=A \cos( \omega_ct + \phi_0)$$
 
 因此，为了进一步提高传输效率，不适合采用高于 8PSK 的数字调制技术，而是改为 ASK + PSK 的联合调制方式！
 
-## 四、IQ 调制
-
-### 1. 数学原理
-
-IQ 调制很早就在模拟调制技术中得到应用，最初是为了解决多个信号的合成问题。
-
-#### 传统的信号合成
-
-传统的信号合成是采用三角函数的**乘法**。
-定义：载波信号为$\cos \omega_ct$，基带信号为$s(t)=\cos \omega t$，则调制结果为
-$$ s_{RF}(t) = s(t) \cos \omega_ct = \cos \omega t \cos \omega _ct 
-    = \frac {\cos(\omega_c - \omega)t + \cos(\omega_c + \omega)t} 2
-$$
-
-#### 正交的信号合成
-
-所谓正交合成，就是载波信号和基带信号的计算采用三角函数的**减法**，即
-$$ s_{RF}(t) = \cos (\omega_ct - \omega t)
-    = \cos\omega_ct \cos \omega t + \sin \omega _ct \sin \omega t
-$$
-
-令：$ I = \cos \omega t ,Q = \sin \omega t $ ，则有 $ s_{RF}(t) = I \cos \omega_ct + Q \sin \omega_ct$
-在调制环节，其结果是生成了一个单一的正弦波，其频率是 $\omega_ct - \omega t$ 。
-
-
-在解调环节，分别处理 I 分支和 Q 分支：
-对于 I 分支：
-$$
-\begin {align}
-    [I \cos \omega_ct  + Q \sin \omega_ct].2\cos \omega_ct & = I.2 \cos ^2\omega_ct + Q.\sin 2\omega_ct \\\\
-    & = I.(1+\cos 2\omega_ct) + Q.\sin 2\omega_ct \\\\
-    & = I + I.\cos 2\omega_ct + Q.\sin 2\omega t
-\end {align}
-$$
-
-对于 Q 分支：
-$$
-\begin {align}
-    [I \cos \omega_ct  + Q \sin \omega_ct].2\sin \omega_ct & = I.\sin 2\omega_ct + Q.2 \sin ^2\omega_ct \\\\
-    & = I.\sin 2\omega_ct + Q.(1-\cos 2\omega_ct) \\\\
-    & = Q - Q.\cos 2\omega_ct + I.\sin 2\omega_ct
-\end {align}
-$$
-
-在 IQ 调制中，信号被分解为两个分量独立地携带信息，从而提高数据传输的效率。
-
-- **I（In-phase）分量**：同相分量，与载波信号同相位。
-- **Q（Quadrature）分量**：正交分量，与载波信号相位相差90度（或π/2弧度）。
-
-数学表示通常为：
-$$ s(t) = I(t) \cos(\omega_c t) - Q(t) \sin(\omega_c t) $$
-其中，$\omega_c $ 是载波的角频率，$I(t)$ 和 $Q(t)$ 分别是调制信号的同相和正交分量。
-![IQ](IQ.gif)
-> BPSK 可以看作是一个特例，其中只有 I 分量携带信息，而 Q 分量 为零。
-
-
-![IQ](IQ-struct.jpg)
-![alt text](IQ-A.png)
-![alt text](IQ-D.png)
-
-数学上，BPSK信号可以表示为：
-$$ s(t) = \cos(\omega_c t + \pi b(t)) $$
-其中，$b(t)$ 是一个二进制数据序列，取值为0或1，对应于信号的相位变化。
-
-### 从IQ到BPSK
-
-在IQ调制中，如果将Q分量设置为0，并且根据I分量的值改变相位，就可以实现BPSK。具体来说：
-
-- 当 $ I(t) = 1 $ 时，信号为 $ \cos(\omega_c t) $。
-- 当 $ I(t) = -1 $ 时，信号为 $ cos(\omega_c t + \pi) $。
-
-### 应用和优势
-
-使用IQ调制可以轻松地扩展到更复杂的调制方案，如QPSK（四相位调制）、QAM（正交幅度调制）等，这些调制方案可以提供更高的数据传输速率。而BPSK作为一种简单的调制方式，由于其实现简单和对信道要求较低，常用于低速率或高干扰环境中的通信系统。
-
-总结来说，BPSK是IQ调制的一个特殊情况，它利用了IQ调制框架中的同相分量来传输信息，而忽略了正交分量。这种关系使得从BPSK到更复杂的IQ调制方案的过渡变得自然而直接。
-
-## QAM（Quadrature Amplitude Modulation，正交幅度调制）
+## 四、QAM（Quadrature Amplitude Modulation，正交幅度调制）
 
 正交幅度调制 （QAM） 是现代电信中广泛用于传输信息的数字调制方法系列和模拟调制方法的相关系列的名称。它通过使用幅移键控 （ASK） 数字调制方案或幅度调制 （AM） 模拟调制方案来改变（调制）两个载波的幅度，从而传送两个模拟消息信号或两个数字位流。两个载波的频率相同，并且彼此异相 90°，这种情况称为正交或正交。传输的信号是通过将两个载波相加来创建的。在接收器处，由于它们的正交性，两个波可以相干分离（解调）。
 
@@ -169,8 +92,6 @@ $$ S_k(t) = X_k \cos \omega_ot + Y_k \sin \omega_0t$$
 
 在接收器处，相干解调器将接收到的信号分别与余弦和正弦信号相乘，以产生接收到的 I（t） 和 Q（t） 估计值。例如：
 低通滤波 r（t） 去除高频项（包含 4πfct），只留下 I（t） 项。此滤波信号不受 Q（t） 的影响，表明同相分量可以独立于正交分量接收。同样，我们可以将 sc（t） 乘以正弦波，然后用低通滤波器提取 Q（t）。
-
-
 
 ### 正交调幅法
 
@@ -216,9 +137,6 @@ $$ S_k(t) = X_k \cos \omega_ot + Y_k \sin \omega_0t$$
 - [星座图通信原理](https://zhuanlan.zhihu.com/p/594337231)
 - [Wave Modulation – analog and digital](https://telecom.altanai.com/tag/qam/)
 - [信号调制与解调](https://zhuanlan.zhihu.com/p/517843859)
-- [IQ 调制基本理论及解调简述](http://www.spectrumscience.cn/page93?article_id=145)
-- [详解IQ调制以及星座图原理](https://blog.csdn.net/weixin_44586473/article/details/104066625)
-- [Josh 的学习笔记之数字通信（Part 4——带通调制和解调）](https://blog.csdn.net/weixin_43870101/article/details/106543036)
 
 ### 文档下载
 
@@ -227,7 +145,7 @@ $$ S_k(t) = X_k \cos \omega_ot + Y_k \sin \omega_0t$$
 
 ### 视频教材
 
+- [MQAM调制原理最强解读](https://www.bilibili.com/video/BV1mK421Y7jB/?spm_id_from=333.999.0.0&vd_source=735a6376f6214c7b974a1074096ba0fa)
 - [QAM 通信原理1 - 大连理工大学](https://www.bilibili.com/video/BV1Xu4y1J77o/?spm_id_from=333.999.0.0&vd_source=735a6376f6214c7b974a1074096ba0fa)
 - [QAM 通信原理2 - 大连理工大学](https://www.bilibili.com/video/BV1Ge411C7ee/?spm_id_from=333.788.recommend_more_video.-1&vd_source=735a6376f6214c7b974a1074096ba0fa)
 - [正交相移键控 (QPSK) BPSK 和 QPSK QPSK 波形（数字调制技术）](https://www.bilibili.com/video/BV1Zb4y1z7Tj/?spm_id_from=333.999.0.0&vd_source=735a6376f6214c7b974a1074096ba0fa)
-- [IQ信号的理解](https://www.bilibili.com/video/BV1Au4y1d7TQ/?spm_id_from=333.999.0.0&vd_source=735a6376f6214c7b974a1074096ba0fa)
