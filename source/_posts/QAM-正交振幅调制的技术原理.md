@@ -137,6 +137,7 @@ $$ S_k(t) = X_k \cos \omega_ot + Y_k \sin \omega_0t$$
 - [星座图通信原理](https://zhuanlan.zhihu.com/p/594337231)
 - [Wave Modulation – analog and digital](https://telecom.altanai.com/tag/qam/)
 - [信号调制与解调](https://zhuanlan.zhihu.com/p/517843859)
+- [给“小白”图示讲解OFDM的原理](https://blog.csdn.net/aixdm/article/details/108135653)
 
 ### 文档下载
 

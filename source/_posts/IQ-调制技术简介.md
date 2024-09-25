@@ -193,6 +193,7 @@ test_receive()
 
 ![图示](sp.gif)
 
+![换个角度看](T+P.jpg)
 从时域到频域，转换方法就是傅里叶变换，有三种类型：
 
 - FI（Fourier Integral，傅里叶积分）：用于将时域内的理想数学表达式变换为频域表示，是将时域时间轴从负无穷到正无穷积分，得出从零到正无穷上连续的频域函数。
@@ -249,6 +250,7 @@ $$ y[n] = \sum _{i=0}^P b_ix[n-i] + \sum _{i=1}^Q a_iy[n-i] $$
 - [常用的信号处理函数 Scipy 之滤波器](https://blog.csdn.net/qq_36002089/article/details/127793378)
 - [如何通俗易懂地理解 FIR/IIR 滤波器](https://www.zhihu.com/question/323353814)
 - [详解 FIR 滤波器与 IIR 滤波器的具体区别](https://www.jianshu.com/p/c825679ea991)
+- [快速傅里叶变换及python代码实现](https://www.cnblogs.com/LXP-Never/p/11558302.html)
 
 ### 视频教材
 
