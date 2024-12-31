@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-count">107</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -174,6 +174,540 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/08/17/BCLinux-oe21-10-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/08/17/BCLinux-oe21-10-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" class="post-title-link" itemprop="url">BCLinux oe21.10 安装记录</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-08-17 23:47:40" itemprop="dateCreated datePublished" datetime="2023-08-17T23:47:40+08:00">2023-08-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-17 08:48:07" itemprop="dateModified" datetime="2023-10-17T08:48:07+08:00">2023-10-17</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          一、概述
+移动云的软件源站点是：https://mirrors.cmecloud.cn，提供了一些基础的软件，包括BCLinux。
+BCLinux的镜像地址为：https://mirrors.cmecloud.cn/bclinux/
+
+mirrors.bclinux.org是同源域名，yum repolist 内部是这个域名
+
+1. 版本规划
+作为Linux的发行版，BCLinux 有两个完全不同的技术路线，早期的版本是基于 Centos 定制化，包括：
+
+ * V7: 基于 Centos 7，目前包含 v7.8，仅提供x86架构
+ * V8: 基于 Centos 8，目前包含 v8.2、v8
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/08/17/BCLinux-oe21-10-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/" class="post-title-link" itemprop="url">移动通信网的鉴权认证技术</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-04-16 17:05:41" itemprop="dateCreated datePublished" datetime="2023-04-16T17:05:41+08:00">2023-04-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-11-27 23:24:23" itemprop="dateModified" datetime="2023-11-27T23:24:23+08:00">2023-11-27</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          先给个总体演进图。
+
+
+
+一、基本概念
+移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证，判明和确认通信双方真实身份。
+
+移动通信网的鉴权认证过程采用的是古老的“Challenge - Response”（挑战 - 响应）的机制，即认证方向被认证方发送一个“挑战”（一般是一个随机数），被
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/01/02/%E5%85%B3%E4%BA%8E%E5%AF%86%E7%A0%81%E5%AD%A6%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2023/01/02/%E5%85%B3%E4%BA%8E%E5%AF%86%E7%A0%81%E5%AD%A6%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" class="post-title-link" itemprop="url">关于密码学的几个基本概念</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-01-02 11:53:17" itemprop="dateCreated datePublished" datetime="2023-01-02T11:53:17+08:00">2023-01-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-05-03 13:35:59" itemprop="dateModified" datetime="2024-05-03T13:35:59+08:00">2024-05-03</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          现代密码学
+1949年，Shannon（香农）发表《保密系统的通信理论》标志着现代密码学的真正开始。
+1976年，Diffie 和 Hellman 发表《密码学的新方向》，标志着公钥密码体制的诞生。
+1978年，Rivest、Shamir 和 Adleman 提出了 RSA 公钥密码体制。
+
+密码学的 CIA 目标
+ * 机密性（Confidentiality）：确保数据在存储或传输中保持秘密状态
+ * 完整性（Integrity）：保证数据在传输中不被篡改
+ * 不可否认性（Availability）：为接收者提供担保，保证消息确实来自发送者而不是来自伪装者
+
+有的理论还补充了一些目标，例如
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/01/02/%E5%85%B3%E4%BA%8E%E5%AF%86%E7%A0%81%E5%AD%A6%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/12/23/%E6%B5%81%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AE%9E%E7%8E%B0-%E4%BB%A5GSM%E7%BD%91%E7%BB%9C%E7%9A%84A5%E7%AE%97%E6%B3%95%E4%B8%BA%E4%BE%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/12/23/%E6%B5%81%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AE%9E%E7%8E%B0-%E4%BB%A5GSM%E7%BD%91%E7%BB%9C%E7%9A%84A5%E7%AE%97%E6%B3%95%E4%B8%BA%E4%BE%8B/" class="post-title-link" itemprop="url">流密码算法的硬件实现-以GSM网络的A5算法为例</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-12-23 17:17:12" itemprop="dateCreated datePublished" datetime="2022-12-23T17:17:12+08:00">2022-12-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-18 02:09:06" itemprop="dateModified" datetime="2023-10-18T02:09:06+08:00">2023-10-18</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          1917 年, Vernam 密码体制被提出, 后来 Mauborgne 提出了改进方案, 即 “一次一密” 密码体制。
+1949 年, Shannon 证明 “一次一密” 密码体制具备完全的理论安全性，但必须满足三个条件：
+
+ * 密钥流必须完全随机生成
+ * 密钥长度至少与明文相同
+ * 密钥不能重复使用
+
+这些限制条件在实际应用中存在很大困难，而且密钥的生成、分配和管理也是不容忽视的问题，因此科学家设计了各种流密码（Stream cipher，也称为流加密）算法来代替 “一次一密” 体制，其基本特征是：
+
+ * 作为一种对称加密算法，加密和解密双方使用相同的伪随机加密数据流（pseudo
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/12/23/%E6%B5%81%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95%E7%9A%84%E7%A1%AC%E4%BB%B6%E5%AE%9E%E7%8E%B0-%E4%BB%A5GSM%E7%BD%91%E7%BB%9C%E7%9A%84A5%E7%AE%97%E6%B3%95%E4%B8%BA%E4%BE%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/12/17/%E5%88%86%E7%BB%84%E5%8A%A0%E5%AF%86%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%E6%A6%82%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/12/17/%E5%88%86%E7%BB%84%E5%8A%A0%E5%AF%86%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%E6%A6%82%E8%BF%B0/" class="post-title-link" itemprop="url">分组加密的工作模式概述</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-12-17 16:26:07" itemprop="dateCreated datePublished" datetime="2022-12-17T16:26:07+08:00">2022-12-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-12-03 22:11:06" itemprop="dateModified" datetime="2023-12-03T22:11:06+08:00">2023-12-03</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>14 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          一、背景
+在密码学中，最基本的分类就是：对称加密 Vs 非对称加密。
+
+ * 如果使用相同的密钥进行消息的加密与解密（算法不一定相同，例如函数 & 逆函数），就是对称加密算法（也称为ciphers），例如：DES、3DES、AES、Blowfish、IDEA、RC5、RC6…
+ * 否则，就是非对称加密算法，通常需要一个密钥对：公钥 (public key) + 私钥 (private key)，分别用于加密和解密，例如：RSA、DSA、ECC、DH…
+
+关于对称加密算法，可以进一步细分为：分组加密算法 Vs 流密码算法。
+
+ * 流密码算法（Stream Cipher）：明文和密钥的长度相同
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/12/17/%E5%88%86%E7%BB%84%E5%8A%A0%E5%AF%86%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%E6%A6%82%E8%BF%B0/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -703,565 +1237,6 @@ apple平台安全白皮书指出，Apple平台安全性的核心理念是：强�
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/06/05/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%BA%8C%EF%BC%9Athis%E6%8C%87%E5%90%91%E5%93%AA%E9%87%8C/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/06/05/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%BA%8C%EF%BC%9Athis%E6%8C%87%E5%90%91%E5%93%AA%E9%87%8C/" class="post-title-link" itemprop="url">JavaScript技术分析之二：this指向哪里</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-06-05 00:16:25" itemprop="dateCreated datePublished" datetime="2022-06-05T00:16:25+08:00">2022-06-05</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-17 08:48:07" itemprop="dateModified" datetime="2023-10-17T08:48:07+08:00">2023-10-17</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>10 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          一、作用域
-作用域（Scope），是指程序源代码中定义变量的区域作用域。
-作用域规定了如何查找变量，也就是确定当前执行代码对变量的访问权限。其核心任务就是隔离变量，以确保在不同作用域下的同名变量不会发生冲突。
-作用域有两种不同的设计思路，分别是静态作用域和动态作用域。
-
-静态作用域
-静态作用域是指函数的作用域在定义的时候就确定了，本质是在编译阶段就以唯一标志符的形式确定了作用域。
-C++、Java等大多数语言都采用静态作用域，JavaScript自称为词法作用域(lexical scoping)。
-
-JavaScript有三种作用域：
-
- * 全局作用域：在函数定义之外声明的变量是全局变量，它
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/06/05/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%BA%8C%EF%BC%9Athis%E6%8C%87%E5%90%91%E5%93%AA%E9%87%8C/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/" class="post-title-link" itemprop="url">JavaScript技术分析之一：面向对象编程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-06-04 16:44:07" itemprop="dateCreated datePublished" datetime="2022-06-04T16:44:07+08:00">2022-06-04</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-17 08:48:07" itemprop="dateModified" datetime="2023-10-17T08:48:07+08:00">2023-10-17</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>16 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          一、面向对象编程（Object-oriented programming）
-对于面向对象的 OOP 编程语言，最基本的概念就是是：类、实例、对象。
-
- * Class - 类是对象的类型模板
-   类是抽象的，而不是其所描述的对象集合中的任何特定的个体。
-   类定义了某一对象集合所具有的共同特征，包含了存储数据的结构（Attribute属性）和操纵数据的行为（Method方法）
- * Instance - 实例是根据类创建的对象
-   对象就是实例，是一个类的实例化。例如， Victoria 是 Employee 类的一个实例，表示一个特定的雇员个体。
-   实例具有和其父类完全一致的属性，
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/05/05/JavaScript-%E5%BC%80%E5%8F%91%E7%BB%8F%E9%AA%8C%E7%82%B9%E6%BB%B4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/05/05/JavaScript-%E5%BC%80%E5%8F%91%E7%BB%8F%E9%AA%8C%E7%82%B9%E6%BB%B4/" class="post-title-link" itemprop="url">JavaScript 开发经验点滴</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-05-05 11:31:56" itemprop="dateCreated datePublished" datetime="2022-05-05T11:31:56+08:00">2022-05-05</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-17 08:48:07" itemprop="dateModified" datetime="2023-10-17T08:48:07+08:00">2023-10-17</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>572</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          一、常用资料
- * JavaScript - 菜鸟课堂
- * ECMAScript 6 入门 - 阮一峰
- * JavaScript教程 - 廖雪峰
- * HTML DOM 参考手册 - W3School
-
-二、有用技巧
-1. 如何获得唯一标识符（UID）
-利用toString(36)，将一个数字转换为36进制，也就是10个数字+26个字母
-uid = Number(Math.random().toString().split('.')[1]).toString(36);
-
-2. localStorage采用[k,v]格式，仅支持字符串格式，怎么存储对象格式？
- * 存储：通过JSON.str
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/05/05/JavaScript-%E5%BC%80%E5%8F%91%E7%BB%8F%E9%AA%8C%E7%82%B9%E6%BB%B4/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/04/23/Nginx-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/04/23/Nginx-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/" class="post-title-link" itemprop="url">Nginx 安装和配置方法</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-04-23 10:37:51" itemprop="dateCreated datePublished" datetime="2022-04-23T10:37:51+08:00">2022-04-23</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-17 08:48:07" itemprop="dateModified" datetime="2023-10-17T08:48:07+08:00">2023-10-17</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>5 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          nginx（发音为“engine x”）是一个免费的开源 Web 服务器，由俄罗斯软件工程师 Igor Sysoev 编写。自 2004 年公开推出以来，nginx 一直专注于高性能、高并发和低内存使用。Web 服务器功能之上的附加功能，如负载平衡、缓存、访问和带宽控制，以及与各种应用程序有效集成的能力，有助于使 nginx 成为现代网站架构的理想选择。目前 nginx 是 Internet 上第二受欢迎的开源 Web 服务器。
-
-概述
-如前所述，nginx 代码库由一个核心和许多模块组成。nginx的核心负责提供web服务器、web和邮件反向代理功能的基础；它支持使用底层网络协议，构建必要的
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/04/23/Nginx-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/04/21/Git-%E8%A3%B8%E4%BB%93%E5%BA%93%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2022/04/21/Git-%E8%A3%B8%E4%BB%93%E5%BA%93%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">Git 裸仓库的技术分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2022-04-21 03:04:44" itemprop="dateCreated datePublished" datetime="2022-04-21T03:04:44+08:00">2022-04-21</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-17 08:48:07" itemprop="dateModified" datetime="2023-10-17T08:48:07+08:00">2023-10-17</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>64</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-
-
-[root@VM-0-17-centos git]# tree /home/git/blog.git -F
-/home/git/blog.git
-├── branches/
-├── config
-├── description
-├── HEAD
-├── hooks/
-├── index
-├── info/
-│   └── exclude
-├── objects/
-│   ├── info/
-│   └── pack/
-└── refs/
-    ├── heads/
-    │   └── master
- 
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2022/04/21/Git-%E8%A3%B8%E4%BB%93%E5%BA%93%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/5/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1286,14 +1261,14 @@ uid = Number(Math.random().toString().split('.')[1]).toString(36);
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">253k</span>
+    <span title="站点总字数">262k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">15:19</span>
+    <span title="站点阅读时长">15:54</span>
   </span>
 </div>
 <div class="busuanzi-count">

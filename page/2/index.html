@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">102</span>
+          <span class="site-state-item-count">107</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -174,6 +174,515 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/" class="post-title-link" itemprop="url">大模型学习笔记之二：激活函数</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-08-01 13:27:50" itemprop="dateCreated datePublished" datetime="2024-08-01T13:27:50+08:00">2024-08-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-08-07 08:18:14" itemprop="dateModified" datetime="2024-08-07T08:18:14+08:00">2024-08-07</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          一、概述
+神经网络中的每个神经元节点接受上一层神经元的输出值作为本神经元的输入值，并将输入值传递给下一层，输入层神经元节点会将输入属性直接传递到下一层（隐层或输出层）。在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数（activation function）。
+
+
+
+$\sum\limits_{i}{w_{i}x_{i}+b}$ 是线形组合部分，$f()$ 部分就是激活函数，核心用途是为神经元加入非线性因素！
+
+从哲学的角度看，线性组合解决的是描述问题，激励函数解决的是判断问题，就是价值观！
+
+在神经网络中，如果不对上一层结点的输出做非线性转换的话（即
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" class="post-title-link" itemprop="url">大模型学习笔记之一：基本知识</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-07-30 13:25:25" itemprop="dateCreated datePublished" datetime="2024-07-30T13:25:25+08:00">2024-07-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-08-30 12:30:39" itemprop="dateModified" datetime="2024-08-30T12:30:39+08:00">2024-08-30</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          一般认为，神经网络的三个核心要素是：
+
+ 1. 模型结构（Architecture）：这是指神经网络的拓扑结构，包括层数、每层的神经元数量、神经元之间的连接方式等。例如，一个简单的多层感知机（MLP）包含输入层、一个或多个隐藏层以及输出层。
+ 2. 学习策略（Learning Strategy）：涉及如何选择训练神经网络的方法，包括损失函数的选择、优化算法等。损失函数定义了模型预测与实际结果之间的差异如何计算，而优化算法则用于调整网络的权重以最小化损失函数。
+ 3. 激活函数（Activation Function）：决定了神经网络如何处理和传递信息。它们通常用于在网络的每个神经元中引入非线性
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/" class="post-title-link" itemprop="url">信息论基础 - 信息熵</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-07-16 20:26:44" itemprop="dateCreated datePublished" datetime="2024-07-16T20:26:44+08:00">2024-07-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-07-29 08:21:19" itemprop="dateModified" datetime="2024-07-29T08:21:19+08:00">2024-07-29</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>5.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>19 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          熵（Entropy）最早是物理学的概念，用于表示一个热力学系统的无序程度。1948年，美国数学家克劳德·香农发表论文《通信的数学理论》（A Mathematical Theory of Communication），将统计物理中熵的概念引申到信道通信的过程中，从而奠定了信息论的基础。
+
+信息论回答了通信理论的两个基本问题：一是数据压缩的极限（答案：熵$H$）；二是通信传输速率的临界（答案：信道容量$C$）
+
+ * 香农第一定理：无失真信源编码定理，或变长码信源编码定理
+   将原始信源符号转化为新的码符号，使码符号尽量服从等概分布，从而每个码符号所携带的信息量达到最大，进而可以用尽量少的码符号
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/05/26/CNN-%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/05/26/CNN-%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%80%E4%BB%8B/" class="post-title-link" itemprop="url">CNN 卷积神经网络简介</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-05-26 20:51:18" itemprop="dateCreated datePublished" datetime="2024-05-26T20:51:18+08:00">2024-05-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2024-05-28 19:14:18" itemprop="dateModified" datetime="2024-05-28T19:14:18+08:00">2024-05-28</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          一、基础知识
+卷积神经网络（Convolutional Neural Network，简称CNN），是一种前馈神经网络，人工神经元可以响应周围单元，可以进行大型图像处理。卷积神经网络包括卷积层和池化层。
+卷积神经网络是受到生物思考方式启发的MLPs（多层感知器），它有着不同的类别层次，并且各层的工作方式和作用也不同。这里提供一个较好的CNN教程（http://cs231n.github.io/convolutional-networks/）。文章中详细介绍了CNN的计算方式和数据的流动过程，这里只做简单的介绍。
+
+卷积神经网络是人工神经网络的一种，已成为当前语音分析和图像识别领域的研究热点。它
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/05/26/CNN-%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%80%E4%BB%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">Android 文件级加密技术分析</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2024-05-03 09:56:21 / 修改时间：13:35:59" itemprop="dateCreated datePublished" datetime="2024-05-03T09:56:21+08:00">2024-05-03</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          Full-Disk Encryption（全盘加密）是一种单密钥的加密系统，有硬件、软件两种实现方案。
+
+ * 硬件方案：也称为 Self Encryption Drive（自加密硬盘），一般由存储器件厂商、安全厂商提供，出厂时内嵌预启动环境 bootLoader，上电后先运行 Pre-Boot 程序并验证 AK（Authentication Key），再进行正常的加载引导。请参见Seagate 硬盘 的 NIST FIPS 140-2 认证报告。
+ * 软件方案：采用不加密boot分区的方式，一般在 initial ramdisk 集成 PBA 功能并完成验证。例如 Windows 的Bit
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -688,521 +1197,6 @@ MacOS 和 iOS 都是基于 FreeBSD 发展而来，基础架构是一个多用户
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">iPhone4 数据破解的技术分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-01-10 01:40:38" itemprop="dateCreated datePublished" datetime="2024-01-10T01:40:38+08:00">2024-01-10</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-05-28 19:14:18" itemprop="dateModified" datetime="2024-05-28T19:14:18+08:00">2024-05-28</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>14 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          Apple 起家的产品是个人电脑，操作系统是基于 BSD 的定制化Linux，使用的是 MFS 文件系统。
-
-1985年，Apple 发布了 HFS（Hierarchical File System）作为专用的文件系统，后续改进推出了 HFS+（扩展日志式）。HFS 的设计理念源自软盘和磁盘设备时代，为此饱受开发者吐槽，甚至被 Linus 痛斥为有史以来最烂的文件系统，突出的问题有以下几个方面：
-
- * 大小写不敏感（最新版本已支持大小写敏感，但默认配置仍未不敏感）
- * 不支持对数据内容进行 checksum 校验
- * timestamp 只支持到秒级
- * 不支持并发访问，不支持快照，不
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">Apple FileVault的技术分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2024-01-07 16:07:04" itemprop="dateCreated datePublished" datetime="2024-01-07T16:07:04+08:00">2024-01-07</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2024-01-29 08:17:58" itemprop="dateModified" datetime="2024-01-29T08:17:58+08:00">2024-01-29</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>6.1k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>22 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          FileVault 的意思是文件保管箱，是 Apple 公司为 Mac 电脑提供的、基于 MacOS 的加密技术方案，其本质归类于 FDE（Full Disk Encryption，全盘加密）。
-注意！与之对应的，为 iPhone 提供的、基于 iOS 的 DataProtect （数据保护）加密技术方案，其本质归类于 FBE（File Based Encryption，文件加密）。
-
-一、Legacy FileVault
-2003年，Mac OS X Panther (黑豹，10.3) 首次发布了 FileVault，当时的版本只加密了用户的主目录（不包含启动宗卷），方法是采用一个巨大的稀疏
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">GCM（Galois/Counter Mode）认证加密模式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-12-02 17:29:03" itemprop="dateCreated datePublished" datetime="2023-12-02T17:29:03+08:00">2023-12-02</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-11 20:13:59" itemprop="dateModified" datetime="2023-12-11T20:13:59+08:00">2023-12-11</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.9k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>7 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          一、背景
-研究分组密码工作模式的核心是机密性保护（Confidentiality），历史上曾经将完整性保护（Integrity，例如在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但在发现兼顾两个设计目标的难度之后，密码学社区已经普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标，并开始研究专门的认证加密模式（AE，Authenticated Encryption）。
-
-在密码学中，消息验证码（MAC，Message Authentication Code，也称为标签Tag）是用于验证消息的一小段信息。换句话说，用于确认消息来自指定的发送者（其真实性）并且没有被篡改
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/11/26/Hexo-%E6%94%AF%E6%8C%81-LaTeX-%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/11/26/Hexo-%E6%94%AF%E6%8C%81-LaTeX-%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/" class="post-title-link" itemprop="url">Hexo 支持 LaTeX 数学公式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-11-26 16:14:55" itemprop="dateCreated datePublished" datetime="2023-11-26T16:14:55+08:00">2023-11-26</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-11-27 08:39:16" itemprop="dateModified" datetime="2023-11-27T08:39:16+08:00">2023-11-27</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>621</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>2 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          LaTex 是一个创建专业文档的工具，在各类科学文献中得到了广泛的使用。它不仅可以创建出有着漂亮排版的文档，还可以让用户非常方便的处理排版中非常复杂的一些问题，例如输入数学公式、创建表格、引用、参考文献，以及全文统一的格式。
-LaTeX 是一种排版语言，并非所见即所得，而是基于 What You See Is What You Mean 的理念，用户需要输入特定的代码，保存在后缀为.tex的文件中，通过编译得到所需的pdf文件。
-
-配置方法
-Hexo博客中支持复杂数学公式的渲染，MathJax 和 KaTeX 是两个常见的渲染引擎。
-
-MathJax是一个开源JavaScript库。它支持La
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2023/11/26/Hexo-%E6%94%AF%E6%8C%81-LaTeX-%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/10/29/AES-XTS-%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2023/10/29/AES-XTS-%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">AES-XTS 磁盘加密模式的技术分析</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2023-10-29 20:51:15" itemprop="dateCreated datePublished" datetime="2023-10-29T20:51:15+08:00">2023-10-29</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-12-02 13:13:15" itemprop="dateModified" datetime="2023-12-02T13:13:15+08:00">2023-12-02</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>4.6k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>17 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          AES-XTS 的设计目标是解决磁盘文件的加密存储需求。
-ECB 模式存在明文攻击问题，磁盘文件中经常存在内容相同的分组，显然不适用。其他分组密码工作模式也有两个难题无法解决，一是如何存储初始向量IV，二是如何支持随机存取。
-
-CBC、CFB 和 OFB 模式都需要初始向量，因此每个文件都需要额外的空间用于存储 IV，不仅增加磁盘开销，而且破坏了明文和密文在扇区存储上的对应关系，给底层技术实现带来了很大麻烦。
-
-CBC、CFB 和 OFB 模式的分组之间存在依赖关系，不能实现完全的并行计算（CBC、CFB 模式仅支持解密的并行计算，并需要额外读取上一个分组的密文；OFB 模式完全不支持并行计算
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2023/10/29/AES-XTS-%E7%A3%81%E7%9B%98%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
     <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
@@ -1227,14 +1221,14 @@ CBC、CFB 和 OFB 模式的分组之间存在依赖关系，不能实现完全�
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">253k</span>
+    <span title="站点总字数">262k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">15:19</span>
+    <span title="站点阅读时长">15:54</span>
   </span>
 </div>
 <div class="busuanzi-count">
