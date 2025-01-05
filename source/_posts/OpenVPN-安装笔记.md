@@ -3,6 +3,17 @@ title: OpenVPN 安装笔记
 date: 2025-01-04 22:43:47
 tags:
 ---
+
+OpenVPN 是一种开源的 VPN 软件应用程序，它允许远程访问或连接到私有网络，其关键特点和功能包括：
+
+- 支持多种加密算法，包括 AES、DES、3DES 等
+- 支持多种网络协议，如 UDP 和 TCP
+- 支持多种认证方式，包括预共享密钥、证书、用户名和密码
+- 支持多种操作系统，包括 Windows、Linux、macOS、Android 和 iOS 等，并提供 GUI 工具帮助用户更方便地配置和管理
+
+Easy-RSA 是一个用于管理 X.509 PKI（公钥基础设施）的工具，主要用于生成和管理数字证书。它提供了创建证书颁发机构（CA）、生成服务器和客户端证书、管理证书吊销列表（CRL）等功能。
+Easy-RSA 通过脚本封装了 OpenSSL 的复杂命令，使得证书的生成和管理过程更加简单和自动化。例如，使用 Easy-RSA 可以通过简单的命令来初始化 PKI 目录、生成 CA 证书、生成服务器和客户端证书等
+
 ## 一、服务器环境准备
 
 选择一台有公网地址的服务器，本次安装的操作系统为 CentOS 9 Stream x64。
@@ -72,9 +83,9 @@ Copyright (C) 2002-2023 OpenVPN Inc <sales@openvpn.net>
 Compile time defines: enable_async_push=no enable_comp_stub=no enable_crypto_ofb_cfb=yes enable_dco=no enable_debug=yes enable_dlopen=unknown enable_dlopen_self=unknown enable_dlopen_self_static=unknown enable_fast_install=yes enable_fragment=yes enable_iproute2=no enable_libtool_lock=yes enable_lz4=yes enable_lzo=yes enable_management=yes enable_pam_dlopen=no enable_pedantic=no enable_pkcs11=no enable_plugin_auth_pam=yes enable_plugin_down_root=yes enable_plugins=yes enable_port_share=yes enable_selinux=no enable_shared=yes enable_shared_with_static_runtimes=no enable_small=no enable_static=yes enable_strict=no enable_strict_options=no enable_systemd=no enable_werror=no enable_win32_dll=yes enable_wolfssl_options_h=yes enable_x509_alt_username=no with_aix_soname=aix with_crypto_library=openssl with_gnu_ld=yes with_mem_check=no with_openssl_engine=auto with_sysroot=no
 ```
 
-## 三、Server 证书制作
+## 三、证书制作
 
-### 1. 证书制作环境准备
+### 1. 环境准备
 
 前面安装的 easy-rsa 位于 `/usr/share/easy-rsa`，可能有多个版本的目录。
 当前版本是 3.1.6，复制代码到 openvpn 的安装目录，便于后续制作证书。
@@ -112,13 +123,16 @@ IMPORTANT:
 
 ### 2. 创建 CA 证书
 
-设置 CA 机构名称为`caogo`，无密码登录。
+以 自定义 CA 的名义，为 caogo 颁布 CA 证书，无密码登录方式。
 
 ```bash
-root@vultr easy-rsa]# ./easyrsa build-ca nopass
+ ./easyrsa build-ca nopass
 ```
 
-生成 CA 证书：`/usr/local/openvpn/easy-rsa/pki/ca.crt`，输出信息如下：
+处理结果：
+
+- CA 证书文件：`/usr/local/openvpn/easy-rsa/pki/ca.crt`
+- CA 私钥文件：`/usr/local/openvpn/easy-rsa/pki/issued/ca.key`
 
 ```console
 Using Easy-RSA 'vars' configuration:
@@ -150,13 +164,16 @@ CA creation complete. Your new CA certificate is at:
 
 ### 3. 生成 Server 证书
 
-为 caogo 生成服务器证书。
+为 Server 创建非对称密钥对，并使用 caogo 的 CA 证书 为公钥签名。
 
 ```bash
-[root@vultr easy-rsa]# ./easyrsa build-server-full caogo nopass
+./easyrsa build-server-full caogo nopass
 ```
 
-生成服务器证书：`/usr/local/openvpn/easy-rsa/pki/issued/caogo.crt`，输出信息如下：
+处理结果：
+
+- 服务器证书文件：`/usr/local/openvpn/easy-rsa/pki/issued/caogo.crt`
+- 服务器私钥文件：`/usr/local/openvpn/easy-rsa/pki/private/caogo.key`
 
 ```console
 Using Easy-RSA 'vars' configuration:
@@ -210,15 +227,127 @@ Inline file created:
 * /usr/local/openvpn/easy-rsa/pki/inline/caogo.inline
 ```
 
-### 4. 生成 Diffie-Hellman 文件
+### 4. 制作 Client 证书
 
-秘钥交换时的Diffie-Hellman算法
+对于一个 Server 可以为不同用户分别制作 Client 证书。
+注意，你可以将一份证书提供给多人，他们可以同时使用 VPN，但无法相互连通（IP地址相同）。
+当然，OpenVPN 也可以将 MySQL 作为后端，提供大量用户的证书管理功能，这里就不介绍了！
+
+#### 创建 x-client 用户
+
+为 x 用户创建客户端证书，名字就是 x-client，未设密码。
+对于不同用户，可以再来一个 y-client，或者 z-client。
 
 ```bash
-[root@vultr easy-rsa]# ./easyrsa gen-dh
+./easyrsa gen-req x-client nopass
 ```
 
-生成 DH 文件：`/usr/local/openvpn/easy-rsa/pki/dh.pem`，输出信息如下：
+处理结果：
+
+- Client 私钥文件：`/usr/local/openvpn/easy-rsa/pki/private/x-client.key`
+- Client 中间文件：`/usr/local/openvpn/easy-rsa/pki/reqs/x-client.req`
+
+```console
+Using Easy-RSA 'vars' configuration:
+* /usr/local/openvpn/easy-rsa/vars
+
+IMPORTANT:
+  The preferred location for 'vars' is within the PKI folder.
+  To silence this message move your 'vars' file to your PKI
+  or declare your 'vars' file with option: --vars=<FILE>
+
+Using SSL:
+* openssl OpenSSL 3.2.2 4 Jun 2024 (Library: OpenSSL 3.2.2 4 Jun 2024)
+.+...................+++++++++++++++++++++++++++++++++++++++*.+......+......+......+.......+..+....+.....+....+..+...+.......+.........+..+...+.+.........+..+....+...+..+.+...
+-----
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Common Name (eg: your user, host, or server name) [x-client]:x
+
+Notice
+------
+Private-Key and Public-Certificate-Request files created.
+Your files are:
+* req: /usr/local/openvpn/easy-rsa/pki/reqs/x-client.req
+* key: /usr/local/openvpn/easy-rsa/pki/private/x-client.key
+```
+
+#### 制作 x-client 证书
+
+使用 caogo 的 CA 证书为 x-client 的公钥文件签名。
+
+```bash
+./easyrsa sign client  x-client
+```
+
+处理结果：
+
+- Client 签名证书：`/usr/local/openvpn/easy-rsa/pki/issued/x-client.crt`
+
+```console
+Using Easy-RSA 'vars' configuration:
+* /usr/local/openvpn/easy-rsa/vars
+
+IMPORTANT:
+  The preferred location for 'vars' is within the PKI folder.
+  To silence this message move your 'vars' file to your PKI
+  or declare your 'vars' file with option: --vars=<FILE>
+
+Using SSL:
+* openssl OpenSSL 3.2.2 4 Jun 2024 (Library: OpenSSL 3.2.2 4 Jun 2024)
+You are about to sign the following certificate:
+Please check over the details shown below for accuracy. Note that this request
+has not been cryptographically verified. Please be sure it came from a trusted
+source or that you have verified the request checksum with the sender.
+Request subject, to be signed as a client certificate 
+for '825' days:
+
+subject=
+    commonName                = x
+
+Type the word 'yes' to continue, or any other input to abort.
+  Confirm request details: yes
+
+Using configuration from /usr/local/openvpn/easy-rsa/pki/openssl-easyrsa.cnf
+Check that the request matches the signature
+Signature ok
+The Subject's Distinguished Name is as follows
+commonName            :ASN.1 12:'x'
+Certificate is to be certified until Apr  9 11:21:39 2027 GMT (825 days)
+
+Write out database with 1 new entries
+Database updated
+
+Notice
+------
+Certificate created at:
+* /usr/local/openvpn/easy-rsa/pki/issued/x-client.crt
+```
+
+#### 创建 y-client 用户 & 证书签名
+
+```bash
+./easyrsa gen-req y-client nopass
+./easyrsa sign client y-client
+```
+
+### 5. 生成 Diffie-Hellman 文件
+
+Diffie-Hellman (DH) 是一种密钥交换协议，用于在不安全的通信渠道上安全地交换密钥。
+dh.pem 文件的主要信息是用于用于模运算的大素数 $p$ 和 生成元 $g$。
+
+```bash
+./easyrsa gen-dh
+```
+
+处理结果：
+
+- DH 文件：`/usr/local/openvpn/easy-rsa/pki/dh.pem`，输出信息如下：
 
 ```console
 Using Easy-RSA 'vars' configuration:
@@ -248,10 +377,13 @@ DH parameters of size 2048 created at:
 
 ```bash
 mkdir /etc/openvpn
-cp pki/ca.crt /etc/openvpn/
-cp pki/issued/caogo.crt /etc/openvpn/
-cp pki/private/caogo.key /etc/openvpn/
-cp pki/dh.pem /etc/openvpn/
+mkdir /etc/openvpn/server
+mkdir /var/log/openvpn
+
+cp pki/ca.crt /etc/openvpn/server/
+cp pki/issued/caogo.crt /etc/openvpn/server/
+cp pki/private/caogo.key /etc/openvpn/server/
+cp pki/dh.pem /etc/openvpn/server/
 ```
 
 ### 2. 生成 TA 验证文件
@@ -259,7 +391,7 @@ cp pki/dh.pem /etc/openvpn/
 在 OpenVPN 中，ta.key（tls-auth） 是一个密钥文件，用于 HMAC 签名和验证，以提供额外的安全层，防止重放攻击和中间人攻击。这个密钥文件由 EasyRSA 工具生成，并在 OpenVPN 的配置文件中被引用。
 
 ```bash
-openvpn --genkey secret /etc/openvpn/ta.key
+openvpn --genkey secret /etc/openvpn/server/ta.key
 ```
 
 ### 3. 编辑 Server 配置文件
@@ -268,7 +400,7 @@ openvpn --genkey secret /etc/openvpn/ta.key
 
 ```config
 port 1194
-proto tcp
+proto udp
 dev tun
 
 server 10.8.0.0 255.255.255.0
@@ -276,11 +408,11 @@ push "route 10.8.0.0 255.255.255.0"
 client-to-client
 duplicate-cn
 
-ca /etc/openvpn/ca.crt
-cert /etc/openvpn/caogo.crt
-key /etc/openvpn/caogo.key
-dh /etc/openvpn/dh.pem
-tls-auth /etc/openvpn/ta.key 0
+ca /etc/openvpn/server/ca.crt
+cert /etc/openvpn/server/caogo.crt
+key /etc/openvpn/server/caogo.key
+dh /etc/openvpn/server/dh.pem
+tls-auth /etc/openvpn/server/ta.key 0
 
 cipher AES-256-CBC
 keepalive 10 120
@@ -292,9 +424,9 @@ verb 3
 explicit-exit-notify 1
 ```
 
-> log /var/log/openvpn/server.log
-> log-append /var/log/openvpn/server.log
-> status /var/log/openvpn/status.log
+log /var/log/openvpn/server.log
+log-append /var/log/openvpn/server.log
+status /var/log/openvpn/status.log
 
 前台启动 openvpn，结果如下：
 
@@ -385,7 +517,7 @@ Jan 04 10:56:45 vultr.guest openvpn[67546]: 2025-01-04 10:56:45 Initialization S
 
 ```console
 [root@vultr openvpn]# netstat -tunpl
-Active Internet connections (only servers)
+Active Internet connections (only se:xrvers)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
 tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1426/sshd: /usr/sbi 
 tcp        0      0 0.0.0.0:1194            0.0.0.0:*               LISTEN      17191/openvpn       
@@ -400,103 +532,6 @@ udp6       0      0 ::1:323                 :::*                                
 journalctl -u openvpn -f
 ```
 
-## 五、Client 证书制作
-
-对于一个 Server 可以为不同用户分别制作 Client 证书。
-注意，你可以将一份证书提供给多人，他们可以同时使用 VPN，但无法相互连通（IP地址相同）。
-当然，OpenVPN 也可以将 MySQL 作为后端，提供大量用户的证书管理功能，这里就不介绍了！
-
-### 1. 创建 x-client 用户
-
-为 x 用户创建客户端证书，名字就是 x-client，未设密码。
-对于不同用户，可以再来一个 y-client，或者 z-client。
-
-```console
-[root@vultr easy-rsa]# ./easyrsa gen-req x-client nopass
-```
-
-成功获得 Client 证书：`/usr/local/openvpn/easy-rsa/pki/private/x-client.key`。
-
-```console
-Using Easy-RSA 'vars' configuration:
-* /usr/local/openvpn/easy-rsa/vars
-
-IMPORTANT:
-  The preferred location for 'vars' is within the PKI folder.
-  To silence this message move your 'vars' file to your PKI
-  or declare your 'vars' file with option: --vars=<FILE>
-
-Using SSL:
-* openssl OpenSSL 3.2.2 4 Jun 2024 (Library: OpenSSL 3.2.2 4 Jun 2024)
-.+...................+++++++++++++++++++++++++++++++++++++++*.+......+......+......+.......+..+....+.....+....+..+...+.......+.........+..+...+.+.........+..+....+...+..+.+...
------
-You are about to be asked to enter information that will be incorporated
-into your certificate request.
-What you are about to enter is what is called a Distinguished Name or a DN.
-There are quite a few fields but you can leave some blank
-For some fields there will be a default value,
-If you enter '.', the field will be left blank.
------
-Common Name (eg: your user, host, or server name) [x-client]:x
-
-Notice
-------
-Private-Key and Public-Certificate-Request files created.
-Your files are:
-* req: /usr/local/openvpn/easy-rsa/pki/reqs/x-client.req
-* key: /usr/local/openvpn/easy-rsa/pki/private/x-client.key
-```
-
-### 2. 制作 x-client 证书
-
-使用 CA 证书为 x-client 签名。
-
-```console
-[root@vultr easy-rsa]# ./easyrsa sign client  x-client
-```
-
-成功获得 Client 证书：`/usr/local/openvpn/easy-rsa/pki/issued/x-client.crt`。
-
-```console
-Using Easy-RSA 'vars' configuration:
-* /usr/local/openvpn/easy-rsa/vars
-
-IMPORTANT:
-  The preferred location for 'vars' is within the PKI folder.
-  To silence this message move your 'vars' file to your PKI
-  or declare your 'vars' file with option: --vars=<FILE>
-
-Using SSL:
-* openssl OpenSSL 3.2.2 4 Jun 2024 (Library: OpenSSL 3.2.2 4 Jun 2024)
-You are about to sign the following certificate:
-Please check over the details shown below for accuracy. Note that this request
-has not been cryptographically verified. Please be sure it came from a trusted
-source or that you have verified the request checksum with the sender.
-Request subject, to be signed as a client certificate 
-for '825' days:
-
-subject=
-    commonName                = x
-
-Type the word 'yes' to continue, or any other input to abort.
-  Confirm request details: yes
-
-Using configuration from /usr/local/openvpn/easy-rsa/pki/openssl-easyrsa.cnf
-Check that the request matches the signature
-Signature ok
-The Subject's Distinguished Name is as follows
-commonName            :ASN.1 12:'x'
-Certificate is to be certified until Apr  9 11:21:39 2027 GMT (825 days)
-
-Write out database with 1 new entries
-Database updated
-
-Notice
-------
-Certificate created at:
-* /usr/local/openvpn/easy-rsa/pki/issued/x-client.crt
-```
-
 ## 五、启动 Client
 
 不同客户端的配置文件有差别，但CA证书和ta证书是一致的，以 x-client 为例，需要以下操作：
@@ -507,8 +542,8 @@ Certificate created at:
 
 - /usr/local/openvpn/easy-rsa/pki/private/x-client.key
 - /usr/local/openvpn/easy-rsa/pki/issued/x-client.crt
-- /etc/openvpn/ca.crt
-- /etc/openvpn/ta.key
+- /etc/openvpn/server/ca.crt
+- /etc/openvpn/server/ta.key
 
 ### 2. 编辑 Client 配置文件
 
@@ -517,7 +552,7 @@ Client 的配置文件一般以`.ovpn`命名，例如`x.ovpn`，并与上面的�
 ```config
 client
 dev tun
-proto tcp
+proto udp
 remote <Server IP> 1194
 
 resolv-retry infinite
@@ -549,9 +584,11 @@ OpenVPN 开发了适配各种桌面系统的 UI，下载页面位于：[https://
 
 ## 六、简要分析
 
-1. Server启动后，第一次可以成功连接 Client，但不久就中断无法连接，为什么呢？
+### 1. Server启动后，客户端无法连接，或者几分钟后就无法连接
 
-改成 udp 协议，再试试。。。
+服务端配置应采用 udp 协议，性能更好，也是官方推荐方案！
+在 TX 服务器上，必须手工配置系统防火墙，打开 1194 端口。
+在 VL 服务器上，发现修改默认端口号就可以恢复连接！！！
 
 ---
 
