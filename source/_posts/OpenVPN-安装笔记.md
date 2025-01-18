@@ -11,7 +11,7 @@ OpenVPN 是一种开源的 VPN 软件应用程序，它允许远程访问或连�
 - 支持多种认证方式，包括预共享密钥、证书、用户名和密码
 - 支持多种操作系统，包括 Windows、Linux、macOS、Android 和 iOS 等，并提供 GUI 工具帮助用户更方便地配置和管理
 
-Easy-RSA 是一个用于管理 X.509 PKI（公钥基础设施）的工具，主要用于生成和管理数字证书。它提供了创建证书颁发机构（CA）、生成服务器和客户端证书、管理证书吊销列表（CRL）等功能。
+Easy-RSA 是一个用于管理 X.509 PKI（公钥基础设施）的工具，主要用于生成和管理数字证书。它提供了创建证书颁发机构（CA）、生成服务器和客户端证书、管理证书注销列表（CRL）等功能。
 Easy-RSA 通过脚本封装了 OpenSSL 的复杂命令，使得证书的生成和管理过程更加简单和自动化。例如，使用 Easy-RSA 可以通过简单的命令来初始化 PKI 目录、生成 CA 证书、生成服务器和客户端证书等
 
 ## 一、服务器环境准备
@@ -399,34 +399,43 @@ openvpn --genkey secret /etc/openvpn/server/ta.key
 定义 Server 位于：`/etc/openvpn/server.conf`，详细参数为：
 
 ```config
+# 基础配置
 port 1194
 proto udp
 dev tun
 
+# 配置 DHCP 信息
 server 10.8.0.0 255.255.255.0
-push "route 10.8.0.0 255.255.255.0"
-client-to-client
-duplicate-cn
 
+# 向客户端推送路由数据
+push "route 10.8.0.0 255.255.255.0"
+
+client-to-client        # 允许客户端之间通信
+duplicate-cn            # 允许统一客户端证书多人共用
+
+# 密钥和证书文件信息
 ca /etc/openvpn/server/ca.crt
 cert /etc/openvpn/server/caogo.crt
 key /etc/openvpn/server/caogo.key
 dh /etc/openvpn/server/dh.pem
+
+# 要求使用 tls-auth 密钥
 tls-auth /etc/openvpn/server/ta.key 0
 
-cipher AES-256-CBC
-keepalive 10 120
-ifconfig-pool-persist ipp.txt
-persist-key
+# 参数设定
+cipher AES-256-CBC                # 设定数据传输的加密模式
+persist-key                       # 持久化存储，用于重启恢复
 persist-tun
-status openvpn-status.log
-verb 3
-explicit-exit-notify 1
-```
+keepalive 10 120
+ifconfig-pool-persist ipp.txt     # 客户端重新连接时，可以继续使用上次的 IP 地址
+explicit-exit-notify 1            # 服务器重启时，客户端可以自动重连，仅限 UDP 协议
 
-log /var/log/openvpn/server.log
-log-append /var/log/openvpn/server.log
-status /var/log/openvpn/status.log
+# 日志级别和路径
+verb 3
+; status openvpn-status.log
+; log /var/log/openvpn/server.log
+; log-append /var/log/openvpn/server.log
+```
 
 前台启动 openvpn，结果如下：
 
@@ -550,23 +559,30 @@ journalctl -u openvpn -f
 Client 的配置文件一般以`.ovpn`命名，例如`x.ovpn`，并与上面的证书文件放在同一目录下。
 
 ```config
+# 基础配置
 client
 dev tun
 proto udp
 remote <Server IP> 1194
 
-resolv-retry infinite
-nobind
-persist-key
+resolv-retry infinite   # 自动重新连接
+nobind                  # 无需绑定本地特定端口         
+persist-key             # 持久化
 persist-tun
 
+# 证书和密钥文件信息，在当前目录下
 ca ca.crt
 cert x-client.crt
 key x-client.key
+
+# 如果服务器使用 tls-auth 密钥，客户端也必须使用
 remote-cert-tls server
 tls-auth ta.key 1
 
+# 指定传输数据的加密方式
 cipher AES-256-CBC
+
+# 日志级别
 verb 3
 ```
 
@@ -590,6 +606,29 @@ OpenVPN 开发了适配各种桌面系统的 UI，下载页面位于：[https://
 在 TX 服务器上，必须手工配置系统防火墙，打开 1194 端口。
 在 VL 服务器上，发现修改默认端口号就可以恢复连接！！！
 
+### 2. 如何在客户端 OVPN 配置文件附加证书和密钥文件
+
+```config
+# 服务端的 CA 证书，CERTIFICATE 段落
+<ca>
+<\ca>
+
+# 某一客户端的私钥文件数据，PRIVATE KEY 段落
+<key>
+<\key>
+
+# 某一客户端的证书文件数据，仅需 CERTIFICATE 段落即可！
+<cert>
+<\cert>
+
+;tls-auth ta.key 1    # 不再需要，改成下一行直接添加
+key-direction 1
+
+# 服务端的 ta.key 文件，OpenVPN Static key v1 段落
+<tls-auth>
+<\tls-auth>
+```
+
 ---
 
 ## 附录一：easy-rsa 配置文件
@@ -611,16 +650,24 @@ easy-rsa 的配置样本位于：`/usr/share/doc/easy-rsa/vars.example`，默认
 # 服务器证书的有效期，默认为2年半
 #set_var EASYRSA_CERT_EXPIRE    825
 
-# 证书吊销列表（CRL）的发布间隔，默认为半年
+# 证书注销列表（CRL）的发布间隔，默认为半年
 #set_var EASYRSA_CRL_DAYS       180
 ```
 
-## 附录二：关于 CRL 吊销证书
+## 附录二：关于 CRL 注销证书
 
-### 生成 CRL 吊销证书 ./easyrsa gen-crl
+OpenVPN 服务器与 VPN 客户端之间的身份验证, 主要是通过证书来进行的。有时我们需要禁止某个用户连接 VPN 服务器，则将其证书注销即可。
+
+### 生成 CRL 注销证书
+
+```bash
+./vars
+./easyrsa gen-crl
+```
+
+处理信息如下：
 
 ```console
-[root@vultr easy-rsa]# ./easyrsa gen-crl
 Using Easy-RSA 'vars' configuration:
 * /usr/local/openvpn/easy-rsa/vars
 
@@ -639,20 +686,19 @@ An updated CRL has been created:
 * /usr/local/openvpn/easy-rsa/pki/crl.pem
 ```
 
-### 吊销 x-client 证书（备用）
+### 注销某个 x-client 证书
 
 ```bash
-./easyrsa revoke 证书名字
-./easyrsa gen-crl
+. ./vars
+./revoke-full x-client
 ```
 
-### 拷贝CRL吊销证书
+执行后会在`keys\`目录生成一个`crl.pem 文件`，这个文件中包含了注销证书的名单。
+将该文件复制到 OpenVPN 服务器可以访问的目录（例如 ssl），然后就可以启用 CRL 验证。
 
-cp pki/crl.pem ../ssl/
+`crl-verify /usr/local/openvpn/ssl/crl.pem`
 
-### sever.conf
-
-crl-verify /usr/local/openvpn/ssl/crl.pem
+最后，重启服务即可生效。
 
 ## 附录三：TinyProxy 代理服务
 
@@ -678,6 +724,62 @@ systemctl enable --now tinyproxy
 systemctl status tinyproxy
 ```
 
+## 附录四： OPVN 配置文件生成脚本
+
+OpenWrt 环境下运行本脚本，可以生成带证书信息的 OVPN 客户端配置文件。
+
+```bash
+# Fetch WAN IP address
+source /lib/functions/network.sh
+network_find_wan NET_IF
+network_get_ipaddr VPN_SERV "${NET_IF}"
+ 
+# Fetch FQDN from DDNS client
+VPN_FQDN="$(uci -q get "$(uci -q show ddns \
+| sed -n -e "/\.enabled='1'$/s//.lookup_host/p" \
+| sed -n -e "1p")")"
+if [ -n "${VPN_FQDN}" ]
+then
+  VPN_SERV="${VPN_FQDN}"
+fi
+ 
+# Configuration parameters
+VPN_CONF="/etc/openvpn/vpnserver.conf"
+VPN_PORT="$(sed -n -e "/^port\s/s///p" "${VPN_CONF}")"
+VPN_PROTO="$(sed -n -e "/^proto\s/s///p" "${VPN_CONF}")"
+VPN_DEV="$(sed -n -e "/^dev\s/s///p" "${VPN_CONF}")"
+EASYRSA_PKI="/etc/easy-rsa/pki"
+TC_KEY="$(sed -e "/^#/d;/^\w/N;s/\n//" "${EASYRSA_PKI}/tc.pem")"
+CA_CERT="$(openssl x509 -in "${EASYRSA_PKI}/ca.crt")"
+NL=$'\n'
+ 
+# Generate VPN client profiles
+grep -l -r -e "TLS Web Client Authentication" "${EASYRSA_PKI}/issued" \
+| sed -e "s/^.*\///;s/\.\w*$//" \
+| while read VPN_ID
+do
+  VPN_CONF="/etc/openvpn/${VPN_ID}.ovpn"
+  VPN_CERT="$(openssl x509 -in "${EASYRSA_PKI}/issued/${VPN_ID}.crt")"
+  VPN_KEY="$(cat "${EASYRSA_PKI}/private/${VPN_ID}.key")"
+  cat << EOF > "${VPN_CONF}"
+verb 3
+dev ${VPN_DEV%%[0-9]*}
+nobind
+client
+remote ${VPN_SERV} ${VPN_PORT} ${VPN_PROTO}
+auth-nocache
+remote-cert-tls server
+<tls-crypt>${NL}${TC_KEY}${NL}</tls-crypt>
+<ca>${NL}${CA_CERT}${NL}</ca>
+<cert>${NL}${VPN_CERT}${NL}</cert>
+<key>${NL}${VPN_KEY}${NL}</key>
+EOF
+  chmod "u=rw,g=,o=" "${VPN_CONF}"
+done
+
+ls /etc/openvpn/*.ovpn
+```
+
 ---
 
 ## 参考文献
@@ -694,31 +796,6 @@ systemctl status tinyproxy
 - [OpenVPN 官方下载](https://community.openvpn.net/openvpn/wiki/Downloads)
 - [OpenVPN Github 下载](https://github.com/OpenVPN/openvpn/releases)
 - [OpenVPN Client UI](https://openvpn.net/client/)
-
----
-
+- [Client 配置文件](https://github.com/OpenVPN/openvpn/blob/master/sample/sample-config-files/client.conf)
+- [Server 配置文件](https://github.com/OpenVPN/openvpn/blob/master/sample/sample-config-files/server.conf)
 - [OpenVPN 操作方法](https://openvpn.net/community-resources/how-to/#examples)
-
-您收到错误消息：TLS 错误：TLS 密钥协商在 60 秒内发生失败（检查您的网络连接）。此错误表示客户端无法与服务器建立网络连接。解决方案：
-确保客户端使用正确的主机名/IP 地址和端口号，这将允许它访问 OpenVPN 服务器。
-如果 OpenVPN 服务器机器是受保护 LAN 内的单 NIC 盒，请确保您在服务器的网关防火墙上使用了正确的端口转发规则。例如，假设您的 OpenVPN 机器位于防火墙内的 192.168.4.4 处，侦听 UDP 端口 1194 上的客户端连接。为 192.168.4.x 子网提供服务的 NAT 网关应具有端口转发规则，该规则指示将 UDP 端口 1194 从我的公有 IP 地址转发到 192.168.4.4。
-打开服务器的防火墙以允许到 UDP 端口 1194（或您在服务器配置文件中配置的任何 TCP/UDP 端口）的传入连接。
-
-[Client 配置文件](https://github.com/OpenVPN/openvpn/blob/master/sample/sample-config-files/client.conf)
-[Server 配置文件](https://github.com/OpenVPN/openvpn/blob/master/sample/sample-config-files/server.conf)
-
-### test
-
-这边测试了两个版本的 OpenVPN 客户端。
-
-在 OpenVPN 2.4 版本客户端的 ovpn 配置中需要添加
-
-tls-cipher DEFAULT:!EXP:!LOW
-
-在 OpenVPN 2.6 版本客户端的 ovpn 配置中需要添加
-
-tls-cipher DEFAULT:!EXP:!LOW
-data-ciphers BF-CBC
-providers legacy default
-
-即可正常连接 2.3 及更老版本的 OpenVPN，可能需要根据服务端配置进行更多的调整，以实际情况为准。
