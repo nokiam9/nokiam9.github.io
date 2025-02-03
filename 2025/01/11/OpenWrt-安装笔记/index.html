@@ -27,7 +27,7 @@
 <meta property="og:description" content="一、概述 OpenWrt 是一个为嵌入式设备（通常是无线路由器）开发的高扩展度的 GNU&#x2F;Linux 发行版。与许多其他路由器的发行版不同，OpenWrt 是一个完全为嵌入式设备构建的功能全面、易于修改、由现代 Linux 内核驱动的操作系统。在实践中，这意味着您可以得到需要的所有功能，却仍能避免臃肿。  LEDE（Linux Embedded Development Environment）曾经">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-01-11T10:42:26.000Z">
-<meta property="article:modified_time" content="2025-01-12T11:17:58.197Z">
+<meta property="article:modified_time" content="2025-02-01T03:03:25.245Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 
@@ -151,7 +151,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-count">109</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -225,7 +225,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-01-12 19:17:58" itemprop="dateModified" datetime="2025-01-12T19:17:58+08:00">2025-01-12</time>
+      <time title="修改时间：2025-02-01 11:03:25" itemprop="dateModified" datetime="2025-02-01T11:03:25+08:00">2025-02-01</time>
     </span>
 
   
@@ -268,9 +268,15 @@
 <blockquote>
 <p>Squashfs 是一个<strong>开源、只读、压缩</strong>的文件系统，常被用于 Linux 发行版的 LiveCD 中。</p>
 </blockquote>
-<h3 id="2-opkg-包管理器"><a href="#2-opkg-包管理器" class="headerlink" title="2. opkg 包管理器"></a>2. opkg 包管理器</h3><p>OpenWrt 的软件包管理工具是 opkg，功能与 dpkg 基本一致，其软件仓库大约有 3500 个包。<br>opkg 系统源的配置文件：<code>/etc/opkg/distfeeds.conf</code>，默认指向<a target="_blank" rel="noopener" href="https://downloads.openwrt.org/releases/23.05.3/packages/x86_64">https://downloads.openwrt.org</a><br>手工替换为国内镜像源，以加快软件安装速度。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">src/gz openwrt_core https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/targets/x86/64/packages</span><br><span class="line">src/gz openwrt_base https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/base</span><br><span class="line">src/gz openwrt_luci https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/luci</span><br><span class="line">src/gz openwrt_packages https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/packages</span><br><span class="line">src/gz openwrt_routing https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/routing</span><br><span class="line">src/gz openwrt_telephony https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/telephony</span><br></pre></td></tr></table></figure>
+<h3 id="2-opkg-包管理器"><a href="#2-opkg-包管理器" class="headerlink" title="2. opkg 包管理器"></a>2. opkg 包管理器</h3><p>OpenWrt 的软件包管理工具是 opkg，功能与 dpkg 基本一致，其软件仓库大约有 3500 个包。<br>opkg 系统源的配置文件：<code>/etc/opkg/distfeeds.conf</code>，默认指向<a target="_blank" rel="noopener" href="https://downloads.openwrt.org/releases/23.05.3/packages/x86_64">https://downloads.openwrt.org</a><br>手工替换为阿里云的镜像源，以加快软件安装速度。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">&#x27;s_downloads.openwrt.org_mirrors.aliyun.com/openwrt_&#x27;</span> /etc/opkg/distfeeds.conf</span><br></pre></td></tr></table></figure>
 
+<p>处理结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">src/gz openwrt_core https://mirrors.aliyun.com/openwrt/releases/23.05.3/targets/x86/64/packages</span><br><span class="line">src/gz openwrt_base https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/base</span><br><span class="line">src/gz openwrt_luci https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/luci</span><br><span class="line">src/gz openwrt_packages https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/packages</span><br><span class="line">src/gz openwrt_routing https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/routing</span><br><span class="line">src/gz openwrt_telephony https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/telephony</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>清华源似乎有点问题，PassWall 安装时有兼容性问题</p>
+</blockquote>
 <h3 id="3-LuCI-Lua-UCI"><a href="#3-LuCI-Lua-UCI" class="headerlink" title="3. LuCI &#x3D; Lua + UCI"></a>3. LuCI &#x3D; Lua + UCI</h3><p><a target="_blank" rel="noopener" href="https://openwrt.org/zh/docs/guide-user/base-system/uci">UCI（Unified Configuration Interface）</a>是 Openwrt 中为实现所有系统配置的统一配置接口，只包括一个精简的核心和最基本的库，体积小、启动速度快，意在 实现 OpenWrt 整个系统的配置集中化。<br>LuCI 是一个使用 Lua 语言开发的 Web UI，采用 MVC 三层架构，提供 OpenWrt 的系统管理功能。<br>LuCI 的统一配置文件目录：<code>/etc/config/</code>，登录方式为 <code>http://&lt;LAN IP&gt;:80</code>。</p>
 <h2 id="二、基础系统安装"><a href="#二、基础系统安装" class="headerlink" title="二、基础系统安装"></a>二、基础系统安装</h2><p>准备好基础镜像后，就可以创建一个虚拟机准备安装了。</p>
 <h3 id="1-VM-准备"><a href="#1-VM-准备" class="headerlink" title="1. VM 准备"></a>1. VM 准备</h3><p>建议配置 1C + 1G、默认硬盘（无所谓，后面会删除）、默认 Lan 端口（因为是旁路无需增加 Wan 端口）。</p>
@@ -554,6 +560,9 @@
                 </a>
             </div>
             <div class="post-nav-item">
+                <a href="/2025/01/22/OpenVPN-OpenWrt-%E7%9A%84%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E6%96%B9%E6%A1%88/" rel="next" title="OpenVPN + OpenWrt 的内网穿透方案">
+                  OpenVPN + OpenWrt 的内网穿透方案 <i class="fa fa-angle-right"></i>
+                </a>
             </div>
           </div>
     </footer>
@@ -592,7 +601,7 @@
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">16:25</span>
+    <span title="站点阅读时长">16:27</span>
   </span>
 </div>
 <div class="busuanzi-count">

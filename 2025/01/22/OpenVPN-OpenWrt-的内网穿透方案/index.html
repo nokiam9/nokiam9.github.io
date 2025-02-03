@@ -19,23 +19,27 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
 
-    <meta property="og:type" content="website">
-<meta property="og:title" content="Alex的技术博客">
-<meta property="og:url" content="https://nokiam9.github.io/archives/2023/04/index.html">
+    <meta name="description" content="二、Home Client 安装 路由器 IP 地址配置 1 2 3 4 5 6 7   uci set network.lan.proto&#x3D;&#39;static&#39; uci set network.lan.ipaddr&#x3D;&#39;192.168.73.3&#39; uci set network.lan.netmask&#x3D;&#39;255.255.255.0&#39; uci set network.lan.gateway&#x3D;&#39;192.1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenVPN + OpenWrt 的内网穿透方案">
+<meta property="og:url" content="https://nokiam9.github.io/2025/01/22/OpenVPN-OpenWrt-%E7%9A%84%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E6%96%B9%E6%A1%88/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="二、Home Client 安装 路由器 IP 地址配置 1 2 3 4 5 6 7   uci set network.lan.proto&#x3D;&#39;static&#39; uci set network.lan.ipaddr&#x3D;&#39;192.168.73.3&#39; uci set network.lan.netmask&#x3D;&#39;255.255.255.0&#39; uci set network.lan.gateway&#x3D;&#39;192.1">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-22T12:11:04.000Z">
+<meta property="article:modified_time" content="2025-02-03T06:24:47.164Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://nokiam9.github.io/archives/2023/04/">
+<link rel="canonical" href="https://nokiam9.github.io/2025/01/22/OpenVPN-OpenWrt-%E7%9A%84%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E6%96%B9%E6%A1%88/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"archives/2023/04/index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2025/01/22/OpenVPN-OpenWrt-%E7%9A%84%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E6%96%B9%E6%A1%88/","path":"2025/01/22/OpenVPN-OpenWrt-的内网穿透方案/","title":"OpenVPN + OpenWrt 的内网穿透方案"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>归档 | Alex的技术博客</title>
+<title>OpenVPN + OpenWrt 的内网穿透方案 | Alex的技术博客</title>
   
 
 
@@ -68,7 +72,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">Alex的技术博客</h1>
+      <p class="site-title">Alex的技术博客</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -121,7 +125,7 @@
   
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -134,6 +138,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Home-Client-%E5%AE%89%E8%A3%85"><span class="nav-text">二、Home Client 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%99%A8-IP-%E5%9C%B0%E5%9D%80%E9%85%8D%E7%BD%AE"><span class="nav-text">路由器 IP 地址配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B7%AF%E7%94%B1%E5%99%A8-Firewall-%E6%94%BE%E9%80%9A"><span class="nav-text">路由器 Firewall 放通</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MacOS-%E6%B8%85%E7%90%86-DNS-%E7%BC%93%E5%AD%98%E7%9A%84%E5%91%BD%E4%BB%A4"><span class="nav-text">MacOS 清理 DNS 缓存的命令</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -173,50 +178,120 @@
 
     </div>
 
-    <div class="main-inner archive posts-collapse">
+    <div class="main-inner post posts-expand">
 
 
   
+
+
+<div class="post-block">
   
   
-  <div class="post-block">
-    <div class="post-content">
-      <div class="collection-title">
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2025/01/22/OpenVPN-OpenWrt-%E7%9A%84%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="OpenVPN + OpenWrt 的内网穿透方案 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenVPN + OpenWrt 的内网穿透方案
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-01-22 20:11:04" itemprop="dateCreated datePublished" datetime="2025-01-22T20:11:04+08:00">2025-01-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2025-02-03 14:24:47" itemprop="dateModified" datetime="2025-02-03T14:24:47+08:00">2025-02-03</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>100</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>1 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="二、Home-Client-安装"><a href="#二、Home-Client-安装" class="headerlink" title="二、Home Client 安装"></a>二、Home Client 安装</h2><h3 id="路由器-IP-地址配置"><a href="#路由器-IP-地址配置" class="headerlink" title="路由器 IP 地址配置"></a>路由器 IP 地址配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">uci <span class="built_in">set</span> network.lan.proto=<span class="string">&#x27;static&#x27;</span></span><br><span class="line">uci <span class="built_in">set</span> network.lan.ipaddr=<span class="string">&#x27;192.168.73.3&#x27;</span></span><br><span class="line">uci <span class="built_in">set</span> network.lan.netmask=<span class="string">&#x27;255.255.255.0&#x27;</span></span><br><span class="line">uci <span class="built_in">set</span> network.lan.gateway=<span class="string">&#x27;192.168.73.1&#x27;</span></span><br><span class="line">uci <span class="built_in">set</span> network.lan.dns=<span class="string">&#x27;192.168.73.1&#x27;</span></span><br><span class="line">uci commit network</span><br><span class="line">service network restart</span><br></pre></td></tr></table></figure>
+
+<h3 id="路由器-Firewall-放通"><a href="#路由器-Firewall-放通" class="headerlink" title="路由器 Firewall 放通"></a>路由器 Firewall 放通</h3><figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">config zone</span><br><span class="line">    option name &#x27;wan&#x27;</span><br><span class="line">    option input &#x27;REJECT&#x27;</span><br><span class="line">    option output &#x27;ACCEPT&#x27;</span><br><span class="line">    option forward &#x27;REJECT&#x27;</span><br><span class="line">    option masq &#x27;1&#x27;</span><br><span class="line">    option mtu_fix &#x27;1&#x27;</span><br><span class="line">    list device &#x27;tun0&#x27;</span><br><span class="line"></span><br><span class="line">config forwarding</span><br><span class="line">    option src &#x27;lan&#x27;</span><br><span class="line">    option dest &#x27;wan&#x27;</span><br><span class="line"></span><br><span class="line">config forwarding</span><br><span class="line">    option src &#x27;wan&#x27;</span><br><span class="line">    option dest &#x27;lan&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacOS-清理-DNS-缓存的命令"><a href="#MacOS-清理-DNS-缓存的命令" class="headerlink" title="MacOS 清理 DNS 缓存的命令"></a>MacOS 清理 DNS 缓存的命令</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo killall -HUP mDNSResponder</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
         
-        <span class="collection-header">很好! 目前共计 109 篇日志。 继续努力。</span>
-      </div>
 
-      
-    <div class="collection-year">
-      <span class="collection-header">2023</span>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2023-04-16T17:05:41+08:00"
-              content="2023-04-16">
-          04-16
-        </time>
-      </div>
-
-      <div class="post-title">
-        <a class="post-title-link" href="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/" itemprop="url">
-          <span itemprop="name">移动通信网的鉴权认证技术</span>
-        </a>
-      </div>
-
-      
-    </header>
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/01/11/OpenWrt-%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/" rel="prev" title="OpenWrt 安装笔记">
+                  <i class="fa fa-angle-left"></i> OpenWrt 安装笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
   </article>
+</div>
 
 
-    </div>
-  </div>
-  
-  
-  
+
+
+
 
 </div>
   </main>
