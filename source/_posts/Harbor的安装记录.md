@@ -194,6 +194,7 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
     Type=simple
     Restart=on-failure
     RestartSec=5
+    ExecStartPre=/usr/bin/docker-compose -f /opt/harbor/docker-compose.yml down
     ExecStart=/usr/bin/docker-compose -f /root/harbor/docker-compose.yml up
     ExecStop=/usr/bin/docker-compose -f /root/harbor/docker-compose.yml down
 
@@ -206,6 +207,8 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
     systemctl enable harbor
     systemctl status harbor
     ```
+
+> 启动时，增加了 ExecStartPre 环节，以防止异常退出时大量 exit 状态的容器无法关闭！
 
 ## 参考资料
 

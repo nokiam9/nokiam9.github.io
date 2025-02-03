@@ -22,16 +22,24 @@ OpenWrt 是为嵌入式设备设计的，其支持的 CPU 架构非常广泛，�
 
 OpenWrt 的软件包管理工具是 opkg，功能与 dpkg 基本一致，其软件仓库大约有 3500 个包。
 opkg 系统源的配置文件：`/etc/opkg/distfeeds.conf`，默认指向[https://downloads.openwrt.org](https://downloads.openwrt.org/releases/23.05.3/packages/x86_64)
-手工替换为国内镜像源，以加快软件安装速度。
+手工替换为阿里云的镜像源，以加快软件安装速度。
+
+```bash
+sed -i 's_downloads.openwrt.org_mirrors.aliyun.com/openwrt_' /etc/opkg/distfeeds.conf
+```
+
+处理结果如下：
 
 ```config
-src/gz openwrt_core https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/targets/x86/64/packages
-src/gz openwrt_base https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/base
-src/gz openwrt_luci https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/luci
-src/gz openwrt_packages https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/packages
-src/gz openwrt_routing https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/routing
-src/gz openwrt_telephony https://mirrors.tuna.tsinghua.edu.cn/openwrt/releases/23.05.5/packages/x86_64/telephony
+src/gz openwrt_core https://mirrors.aliyun.com/openwrt/releases/23.05.3/targets/x86/64/packages
+src/gz openwrt_base https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/base
+src/gz openwrt_luci https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/luci
+src/gz openwrt_packages https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/packages
+src/gz openwrt_routing https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/routing
+src/gz openwrt_telephony https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/telephony
 ```
+
+> 清华源似乎有点问题，PassWall 安装时有兼容性问题
 
 ### 3. LuCI = Lua + UCI
 
