@@ -784,6 +784,7 @@ ls /etc/openvpn/*.ovpn
 
 ## 参考文献
 
+- [安卓版 OpenVPN 的下载地址](https://vpn.shu.edu.cn/index/OpenVPNsysm/Android.htm)
 - [Centos7 上 OpenVPN 2.6服务安装部署](https://lolicp.com/linux/202326135.html)
 - [Centos7 使用 OpenVPN 实现内网穿透和代理服务](http://minglog.hzbmmc.com/2023/09/20/Centos7使用OpenVPN实现内网穿透/)
 - [阿里云 ECS上 搭建 OpenVPN 服务器](https://www.gaoyufu.cn/archives/openvpn)
