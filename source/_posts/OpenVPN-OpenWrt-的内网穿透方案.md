@@ -44,3 +44,5 @@ config forwarding
 ``` sh
 sudo killall -HUP mDNSResponder
 ```
+
+[OpenWrt：关于 OpenVPN 扩展的说明](https://openwrt.org/docs/guide-user/services/vpn/openvpn/extras)
