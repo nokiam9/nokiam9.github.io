@@ -260,7 +260,8 @@ drwxr-xr-x    2 root     root          4096 Jan 12 02:29 torrents
 
 ## 六、Passwall 部署
 
-本文略。注意需要通过 SCP 拷贝 ipk 文件，并在本地手工安装。
+本文略，如有兴趣可以参见[OpenWrt 官方固件安装使用 passwall 详解](https://www.rultr.com/tutorials/68311.html)。
+注意需要通过 SCP 拷贝 ipk 文件，并在本地手工安装。
 
 ## 七、简要分析
 
