@@ -45,4 +45,7 @@ config forwarding
 sudo killall -HUP mDNSResponder
 ```
 
+[如何在OpenWrt上配置运行OpenVPN服务器](https://openwrt.org/zh/docs/guide-user/services/vpn/openvpn/basic)
 [OpenWrt：关于 OpenVPN 扩展的说明](https://openwrt.org/docs/guide-user/services/vpn/openvpn/extras)
+[Mac OS路由设置常用命令](http://www.edulinks.cn/2020/05/19/20200519-macos-route/)
+[抓包工具tcpdump用法说明](https://www.cnblogs.com/f-ck-need-u/p/7064286.html)
