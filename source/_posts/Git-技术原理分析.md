@@ -11,6 +11,12 @@ tags:
 - Git 的核心是一个键值对数据库，通过唯一的键值可以随时取回数据。它使用三种对象类型：数据对象（blob）存储文件内容，树对象（tree）组织文件，提交对象（commit）保存快照信息，包括指向树对象的指针、作者信息、提交信息和父对象指针。
 - Git 的分支是指向提交对象的可变指针，默认分支为 Master。创建分支实际上是在提交对象上创建一个新的指针。HEAD 指针指向当前所在的本地分支。通过 `git checkout` 命令可以在不同分支之间切换，并最终合并它们。
 
+Git 常用命令如下，全部命令的中文资料参见[https://git-scm.com/book/zh/v2](https://git-scm.com/book/zh/v2)。
+
+![command](commands.jpg)
+
+下面设置一个代码库，实际看看其如何实现的。
+
 ![pic01](pic01.png)
 
 ```console
@@ -80,3 +86,4 @@ tags:
 - [Git 命令大全](https://git-scm.com/docs)
 - [pro Git Book](https://git-scm.com/book/en/v2)
 - [pro Git Book 第二版 - PDF](progit.pdf)
+
