@@ -31,14 +31,14 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 
 2. 下载harbor安装包
 
-    这里是[Harbor v1.10.3 下载地址](https://github.com/goharbor/harbor/releases/tag/v1.10.3)，解压后放在目录`/root/harbor/`下。
+    这里是[Harbor v1.10.3 下载地址](https://github.com/goharbor/harbor/releases/tag/v1.10.3)，解压后放在目录`/opt/harbor/`下。
     离线方式的安装包有600M+，其中包含了全部所需的镜像文件，后续安装中通过`docker load`方式直接读取压缩包，就不需要联网了。
 
     > v1.10.2有个bug无法正常安装，表现是log容器启动时，爆出sudo权限过期，可能是基础镜像的问题)
 
 3. 配置并安装harbor
 
-    在启动目录`/root/harbor/`下，编辑Harbor配置文件`harbor.yml`，关键信息如下：
+    在启动目录`/opt/harbor/`下，编辑Harbor配置文件`harbor.yml`，关键信息如下：
 
         ``` yaml
         hostname：192.168.0.130
@@ -52,8 +52,8 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
     最后，Harbor主目录的结构是这样的：
 
         ``` sh
-        [root@dnsmasq harbor]# tree /root/harbor -L 2
-        /root/harbor                    ## Harbor Sever的主目录
+        [root@dnsmasq harbor]# tree /opt/harbor -L 2
+        /opt/harbor                    ## Harbor Sever的主目录
         ├── common
         │   └── config
         ├── common.sh   
@@ -174,11 +174,11 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 
 由于Harbor是采用docker-compose方式启动的，因此关机之前最好手工停止服务，输入：
 
-`cd /root/harbor && docker-compose down`
+`cd /opt/harbor && docker-compose down`
 
 开机后，启动Harbor服务的方式也类似，执行命令:
 
-`cd /root/harbor && docker-compose up -d --build`
+`cd /opt/harbor && docker-compose up -d --build`
 
 ### 通过Systemd设置Harbor开机自启动
 
@@ -195,8 +195,8 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
     Restart=on-failure
     RestartSec=5
     ExecStartPre=/usr/bin/docker-compose -f /opt/harbor/docker-compose.yml down
-    ExecStart=/usr/bin/docker-compose -f /root/harbor/docker-compose.yml up
-    ExecStop=/usr/bin/docker-compose -f /root/harbor/docker-compose.yml down
+    ExecStart=/usr/bin/docker-compose -f /opt/harbor/docker-compose.yml up
+    ExecStop=/usr/bin/docker-compose -f /opt/harbor/docker-compose.yml down
 
     [Install]
     WantedBy=multi-user.target
