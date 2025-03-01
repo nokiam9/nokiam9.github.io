@@ -76,6 +76,7 @@ Git 常用命令如下，全部命令的中文资料参见[https://git-scm.com/b
 
 ## 参考文献
 
+- [Git内部存储原理](https://www.zhaohuabing.com/post/2019-01-21-git/)
 - [git原理学习记录：从基本指令到背后原理，实现一个简单的git](https://www.cnblogs.com/tanshaoshenghao/p/14200420.html)
 - [Git 图文教程](https://www.cnblogs.com/anding/p/16987769.html)
 
@@ -86,4 +87,3 @@ Git 常用命令如下，全部命令的中文资料参见[https://git-scm.com/b
 - [Git 命令大全](https://git-scm.com/docs)
 - [pro Git Book](https://git-scm.com/book/en/v2)
 - [pro Git Book 第二版 - PDF](progit.pdf)
-
