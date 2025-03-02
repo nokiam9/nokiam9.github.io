@@ -146,7 +146,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">109</span>
+          <span class="site-state-item-count">113</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -174,6 +174,445 @@
     </div>
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/09/01/%E5%85%B3%E4%BA%8ESelinux%E7%9A%84%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/09/01/%E5%85%B3%E4%BA%8ESelinux%E7%9A%84%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87/" class="post-title-link" itemprop="url">关于Selinux的疑难杂症</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-09-01 20:42:17" itemprop="dateCreated datePublished" datetime="2020-09-01T20:42:17+08:00">2020-09-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-15 23:01:44" itemprop="dateModified" datetime="2023-10-15T23:01:44+08:00">2023-10-15</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>475</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>2 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          版本的，每次使用都会遇到一些那些不知道的问题。记录下来过程，学习中遇到的一些坑。
+
+ * 系统版本：CentOS Linux release 7.3.1611 (Core)
+ * 系统内核：3.10.0-514.el7.x86_64
+
+#获取selinux状态信息
+[root@17-Cobbler ~]# getenforce
+Enforcing
+#临时关闭selinux，跟原来的版本一样的
+[root@17-Cobbler ~]# setenforce 0
+[root@17-Cobbler ~]# getenforce
+Permissive
+
+#问题就是在修改配置文件
+#按照CentOS 6
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/09/01/%E5%85%B3%E4%BA%8ESelinux%E7%9A%84%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/08/22/NTP%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/08/22/NTP%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" class="post-title-link" itemprop="url">NTP时间同步服务器的安装记录</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-22 18:58:34" itemprop="dateCreated datePublished" datetime="2020-08-22T18:58:34+08:00">2020-08-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-15 23:01:43" itemprop="dateModified" datetime="2023-10-15T23:01:43+08:00">2023-10-15</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          网络时间协议（英语：Network Time Protocol，缩写：NTP）是在数据网络潜伏时间可变的计算机系统之间通过分组交换进行时钟同步的一个网络协议，位于 OSI 模型的应用层。自 1985 年以来，NTP 是当前仍在使用的最古老的互联网协议之一。NTP 由特拉华大学的 David L. Mills 设计。
+计算机主机一般同多个时钟服务器连接，利用统计学的算法过滤来自不同服务器的时间，以选择最佳的路径和来源以便校正主机时间。即使在主机长时间无法与某一时钟服务器联系的情况下，NTP 服务依然可以有效运转。
+
+NTP Server的安装步骤
+ 1. 安装NTP软件，并做一次手工时间校准。
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/22/NTP%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/08/16/Kubetnetes%E9%9B%86%E7%BE%A4%E9%85%8D%E7%BD%AENFS-StorageClass%E7%9A%84%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/08/16/Kubetnetes%E9%9B%86%E7%BE%A4%E9%85%8D%E7%BD%AENFS-StorageClass%E7%9A%84%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95/" class="post-title-link" itemprop="url">Kubetnetes集群配置NFS StorageClass的操作记录</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-16 11:44:35" itemprop="dateCreated datePublished" datetime="2020-08-16T11:44:35+08:00">2020-08-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-15 23:01:43" itemprop="dateModified" datetime="2023-10-15T23:01:43+08:00">2023-10-15</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          关于Kubernetes Volume
+Kubernetes 和 Docker 类似，也是通过 Volume 的方式提供对存储的支持，Volume 被定义在 Pod 上，可以被 Pod 里的多个容器挂载到相同或不同的路径下。
+但是，Kubernetes 中 Volume 的 概念与Docker 中的 Volume 也存在重大区别，具体区别如下：
+
+ * Kubernetes 中的 Volume 与 Pod 的生命周期相同，但与容器的生命周期不相关。当容器终止或重启时，Volume 中的数据也不会丢失。
+ * 当 Pod 被删除时，Volume 才会被清理。并且数据是否丢失取决于 Volume 
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/16/Kubetnetes%E9%9B%86%E7%BE%A4%E9%85%8D%E7%BD%AENFS-StorageClass%E7%9A%84%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" class="post-title-link" itemprop="url">Proxmox VE虚拟机的Cloud-init安装记录</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-02 10:31:45" itemprop="dateCreated datePublished" datetime="2020-08-02T10:31:45+08:00">2020-08-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-10-15 23:01:43" itemprop="dateModified" datetime="2023-10-15T23:01:43+08:00">2023-10-15</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          概述
+Cloud-init的原理，就是给VM增加一个CDROM设备，配合操作系统安装的cloud-init软件包，以便在启动时自动读取网络设置参数。
+
+这个Cloud-init设备的路径一般为/dev/sr0, 大小约为4M，其中包含三个文件，这就是元数据了。
+
+1
+2
+3
+4
+5
+
+
+[root@localhost ~]# tree /mnt
+/mnt
+├── meta-data
+├── network-config
+└── user-data
+
+
+下图就标注了Cloud-init所有可以配置的参数信息。
+
+安装步骤
+1. 安装Centos 7.8操作系统
+首先创建一个虚拟机并加载Cento
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -329,7 +768,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2025-02-03 14:21:38" itemprop="dateModified" datetime="2025-02-03T14:21:38+08:00">2025-02-03</time>
+      <time title="修改时间：2025-03-02 00:17:03" itemprop="dateModified" datetime="2025-03-02T00:17:03+08:00">2025-03-02</time>
     </span>
 
   
@@ -841,441 +1280,8 @@ BROWSER_ONLY=no
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/" class="post-title-link" itemprop="url">Ubuntu的DNS服务</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-06-20 22:41:00" itemprop="dateCreated datePublished" datetime="2020-06-20T22:41:00+08:00">2020-06-20</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-15 23:01:43" itemprop="dateModified" datetime="2023-10-15T23:01:43+08:00">2023-10-15</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.8k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>6 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          DNS概述
-DNS（Domain Name Server，域名服务器）是进行域名(domain name)和与之相对应的IP地址 (IP address)转换的服务器。DNS中保存了一张域名(domain name)和与之相对应的IP地址 (IP address)的表，以解析消息的域名。
-
-DNS服务是一件很复杂的事情，有很多不同来源的设置途径相互影响，主要包括：
-
- * 全局配置文件: /etc/systemd/resolved.conf
- * 单个连接的静态配置文件：通过/etc/netplan/*.yaml对单个网卡配置nameserver，还有/etc/systemd/network/
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/06/20/%E7%A1%AC%E7%9B%98%E5%88%86%E5%8C%BA%E8%A1%A8%E4%B9%8BMBR%E5%92%8CGPT/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/06/20/%E7%A1%AC%E7%9B%98%E5%88%86%E5%8C%BA%E8%A1%A8%E4%B9%8BMBR%E5%92%8CGPT/" class="post-title-link" itemprop="url">硬盘分区表之MBR和GPT</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-06-20 22:39:03" itemprop="dateCreated datePublished" datetime="2020-06-20T22:39:03+08:00">2020-06-20</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-15 23:01:44" itemprop="dateModified" datetime="2023-10-15T23:01:44+08:00">2023-10-15</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.2k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>4 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          名词解释
-磁盘管理模式：
-
- * MBR（Master Boot Record）：即硬盘的主引导记录分区列表，在主引导扇区，位于硬盘的cylinder 0， head 0， sector 1 （Sector是从1开始的）。
-   
-   
- * GPT（GUID Partition Table）：即全局唯一标识分区列表，是一个物理硬盘的分区结构。它用来替代BIOS中的主引导记录分区表（MBR）。
-   
-   
-
-主板接口标准：
-
- * BIOS（Basic Input Output System）：它的全称应该是ROM－BIOS，意思是只读存储器基本输入输出系统。其实，它是一组固化到计算机内
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/06/20/%E7%A1%AC%E7%9B%98%E5%88%86%E5%8C%BA%E8%A1%A8%E4%B9%8BMBR%E5%92%8CGPT/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/" class="post-title-link" itemprop="url">Ubuntu 18.04.4的安装步骤</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-06-20 16:10:49" itemprop="dateCreated datePublished" datetime="2020-06-20T16:10:49+08:00">2020-06-20</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-15 23:01:43" itemprop="dateModified" datetime="2023-10-15T23:01:43+08:00">2023-10-15</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>1.8k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>6 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          这几天折腾NUC主机，在安装Ubuntu 18.04.4 LTS（长期支持的稳定版本）的过程中遇到不少坑，立此存照吧。
-
-Step 0：安装前的准备工作
-已安装内存和硬盘的NUC主机之外，还需要：
-
- * 独立显示器：感谢LP赞助的DELL S2319SP
-   
-   
- * USB键盘 + USB鼠标：开机BIOS设置硬件启动顺序时键盘操作不方便
-   
-   
- * 有线网络接口：备用先不接
-   
-   
- * Ubuntu启动U盘：制作方法参见如何制作Ubuntu的USB启动盘，Server版本912M，Desktop版本2.13G
-   
-   
-
-Step 1: 安装Ubuntu
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Alex Sun">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="undefined | Alex的技术博客">
-      <meta itemprop="description" content="">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">基于ssh加密隧道的三种端口转发模式</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-06-13 14:17:30" itemprop="dateCreated datePublished" datetime="2020-06-13T14:17:30+08:00">2020-06-13</time>
-    </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar-check"></i>
-      </span>
-      <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2023-10-15 23:01:44" itemprop="dateModified" datetime="2023-10-15T23:01:44+08:00">2023-10-15</time>
-    </span>
-
-  
-    <span class="post-meta-break"></span>
-    <span class="post-meta-item" title="本文字数">
-      <span class="post-meta-item-icon">
-        <i class="far fa-file-word"></i>
-      </span>
-      <span class="post-meta-item-text">本文字数：</span>
-      <span>2.3k</span>
-    </span>
-    <span class="post-meta-item" title="阅读时长">
-      <span class="post-meta-item-icon">
-        <i class="far fa-clock"></i>
-      </span>
-      <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>8 分钟</span>
-    </span>
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          去年购入的腾讯云ECS服务器虽然只有1vCpu、1G内存、40G硬盘，但是Linux服务器的效率就是高，跑个小网站那是杠杠的，不过XunSearch中文索引的磁盘消耗比较大，存储利用率超过95%，需要考虑扩容了。
-
-本着可劲折腾的原则，最近入手了一台Intel NUC主机，开始琢磨把Linux服务器搬到自己家里的宽带上，ECS只保留一个公网入口（家里宽带都是运营商的浮动私网IP地址，需要保留公网入口作为跳板机），为此潜心研究基于ssh加密隧道实现端口转发。
-
-实际在咸鱼上剁手了两台NUC，新的八代i3作为开发机，二手五代i3作为生产机
-另外，感谢LP赞助了一台Huawei AR111 Acce
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/8/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/10/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" title="上一页" aria-label="上一页" href="/page/8/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" title="下一页" aria-label="下一页" href="/page/10/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 </div>
@@ -1298,14 +1304,14 @@ Step 1: 安装Ubuntu
       <i class="fa fa-chart-line"></i>
     </span>
       <span>站点总字数：</span>
-    <span title="站点总字数">272k</span>
+    <span title="站点总字数">276k</span>
   </span>
   <span class="post-meta-item">
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
       <span>站点阅读时长 &asymp;</span>
-    <span title="站点阅读时长">16:27</span>
+    <span title="站点阅读时长">16:44</span>
   </span>
 </div>
 <div class="busuanzi-count">
