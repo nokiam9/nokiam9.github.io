@@ -36,7 +36,8 @@ Runner 能够连接到 Gitea 实例是必须的，互联网访问是可选的。
 ## 三、安装步骤
 
 二进制代码下载页面：[https://gitea.com/gitea/act_runner/releases](https://gitea.com/gitea/act_runner/releases)
-镜像地址： dockhub.com/gitea/act_runner:0.2.11
+act runner 镜像地址： gitea/act_runner:0.2.11
+runner 镜像地址：gitea/runner-images:ubuntu-22.04，还有 ubuntu-20.04 等其他 tag
 
 ### 1. 在 Gitea 注册
 
