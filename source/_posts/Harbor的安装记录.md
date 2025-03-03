@@ -213,6 +213,7 @@ Harbor用户数据的存放目录：`/data/harbor`。为避免重装系统造成
 ## 参考资料
 
 - [Harbor的官方网站](https://github.com/goharbor/harbor)
+- [Harbor 配置文件参数说明](https://blog.59izt.com/2023/10/18/Docker/020-Harbor-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E/)
 - [Image-syncer：阿里云提供的另一个镜像同步工具](https://github.com/AliyunContainerService/image-syncer/blob/master/README-zh_CN.md)
 - [很全面的Harbor系统集成方法](https://blog.csdn.net/hxpjava1/article/details/79308890)
 - [Harbor与Nginx的集成中发现的问题](https://blog.csdn.net/weixin_33736048/article/details/92953567?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-7.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-7.nonecase)
