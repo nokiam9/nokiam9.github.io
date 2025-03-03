@@ -35,9 +35,13 @@ Runner 能够连接到 Gitea 实例是必须的，互联网访问是可选的。
 
 ## 三、安装步骤
 
-二进制代码下载页面：[https://gitea.com/gitea/act_runner/releases](https://gitea.com/gitea/act_runner/releases)
-act runner 镜像地址： gitea/act_runner:0.2.11
-runner 镜像地址：gitea/runner-images:ubuntu-22.04，还有 ubuntu-20.04 等其他 tag
+Act Runner 二进制代码下载页面：[https://gitea.com/gitea/act_runner/releases](https://gitea.com/gitea/act_runner/releases)
+Act Runner 镜像地址： gitea/act_runner:0.2.11
+
+Act Runner 需要创建并调用 Runner 作为 Job 的工作负载，支持 Ubuntu、MacOS 和 Windows2019 等操作系统。
+Runner 镜像地址：gitea/runner-images:ubuntu-22.04
+
+Ubuntu 的 Runner 镜像支持最新的 3 个 LTS 版本（20.04，22.04，24.04），并进一步分为 slim、standard、full 等子版本，区别就是预装 node、jvm、gcc、go 等常用软件的数量，详细软件清单参见[Ubuntu 22.04 版本说明](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md)
 
 ### 1. 在 Gitea 注册
 
@@ -233,3 +237,8 @@ jobs:
 
 - [Gitea Actions 入门手册](https://docs.gitea.com/usage/actions/quickstart)
 - [Gitea Actions 入门手册 - 中文版](https://docs.gitea.cn/usage/actions/quickstart)
+- [GitHub Actions 的工作流程语法](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions)
+- [Runner Ubuntu 2204 预装软件清单](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md)
+- [nektosact act 主页](https://nektosact.com/introduction.html)
+- [GitHub Actions 使用介绍](https://oragekk.me/tutorial/github/github-action.html)
+- [Gitlab-CICD最简单明了的入门教程](https://cloud.tencent.com/developer/article/2098099)
