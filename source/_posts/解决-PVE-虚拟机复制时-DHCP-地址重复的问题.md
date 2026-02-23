@@ -100,7 +100,7 @@ root@Copy-of-VM-Debian12-cloudinit-v2:/var/lib/cloud/instances# networkctl statu
 
 ***一句话总结***：RFC 4361 是 DHCPv4 的身份标准化补丁：用 DHCPv6 的 DUID 做全局唯一 ID，搭配 IAID 区分网卡，让设备在 IPv4/IPv6、多网卡、多启动阶段都保持同一个网络身份，解决租约与配置的一致性难题。
 
-### 三、解决方案
+## 三、解决方案
 
 解决办法是修改 Debian 12 的基线模版，在最后清理阶段增加如下步骤：
 
