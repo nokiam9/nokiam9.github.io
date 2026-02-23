@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="在密码学中，熵（entropy，指不可预测的随机性）扮演了一个非常重要的角色，许多算法都要求使用一个不可预测的随机数，只有在生成的随机数不可预测时，这些算法才能保证其安全性，典型应用包括：   * 密钥生成  * 生成初始化向量，IV，用于分组密码的 CBC，CFB，OFB 模式  * 某些签名方案中的盐，如 ECDSA， RSASSA-PSS  一、伪随机数生成器 - PRNG PRNG（Pse">
+<meta property="og:type" content="article">
+<meta property="og:title" content="随机数生成技术概述">
+<meta property="og:url" content="https://nokiam9.github.io/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="在密码学中，熵（entropy，指不可预测的随机性）扮演了一个非常重要的角色，许多算法都要求使用一个不可预测的随机数，只有在生成的随机数不可预测时，这些算法才能保证其安全性，典型应用包括：   * 密钥生成  * 生成初始化向量，IV，用于分组密码的 CBC，CFB，OFB 模式  * 某些签名方案中的盐，如 ECDSA， RSASSA-PSS  一、伪随机数生成器 - PRNG PRNG（Pse">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/random.jpeg">
+<meta property="article:published_time" content="2022-10-05T14:02:34.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.300Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/random.jpeg">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/","path":"2022/10/05/随机数生成技术概述/","title":"随机数生成技术概述"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>随机数生成技术概述 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BC%AA%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E5%99%A8-PRNG"><span class="nav-text">一、伪随机数生成器 - PRNG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E7%9C%9F%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E5%99%A8-TRNG"><span class="nav-text">二、真随机数生成器 - TRNG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%AF%86%E7%A0%81%E5%AD%A6%E5%AE%89%E5%85%A8%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E5%99%A8-CSPRNG"><span class="nav-text">三、密码学安全随机数生成器 - CSPRNG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90"><span class="nav-text">四、对比分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81Unix%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%8A%80%E6%9C%AF%E5%AE%9E%E7%8E%B0"><span class="nav-text">五、Unix系统的技术实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-text">常用命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E7%A8%8B%E6%8E%A5%E5%8F%A3"><span class="nav-text">编程接口</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9AApple-%E6%8F%90%E4%BE%9B%E7%9A%84CSPRNG"><span class="nav-text">附录一：Apple 提供的CSPRNG</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9ADUAL-EC-DRBG-%E7%9A%84%E5%AE%89%E5%85%A8%E6%BC%8F%E6%B4%9E"><span class="nav-text">附录二：DUAL_EC_DRBG 的安全漏洞</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">技术分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="随机数生成技术概述 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          随机数生成技术概述
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-10-05 22:02:34" itemprop="dateCreated datePublished" datetime="2022-10-05T22:02:34+08:00">2022-10-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>在密码学中，熵（entropy，指不可预测的随机性）扮演了一个非常重要的角色，许多算法都要求使用一个不可预测的随机数，只有在生成的随机数不可预测时，这些算法才能保证其安全性，典型应用包括：</p>
+<ul>
+<li>密钥生成</li>
+<li>生成初始化向量，IV，用于分组密码的 CBC，CFB，OFB 模式</li>
+<li>某些签名方案中的盐，如 ECDSA， RSASSA-PSS</li>
+</ul>
+<h2 id="一、伪随机数生成器-PRNG"><a href="#一、伪随机数生成器-PRNG" class="headerlink" title="一、伪随机数生成器 - PRNG"></a>一、伪随机数生成器 - PRNG</h2><p>PRNG（Pseudo-Random Number Generators）是一种数字序列的生成算法，它生成出的数字序列的统计学属性跟真正的随机数序列非常相似，但它生成的伪随机数序列并不是真正的随机数序列！<br>换句话说，如果输入的初始种子是相同的，PRNG 总是会生成出相同的伪随机数序列，因此也被称为<strong>确定性随机比特生成器</strong>（DRBG，Deterministic Random Bit Generator）。</p>
+<p>伪随机数通常来源于某个生成算法（例如，C库中提供的rand函数），尽管存在可复现的问题，但由于 PRNG 的成本低和速度快，仍然广泛用于现代软件开发中。NIST SP 800-90A规范中描述了三种产生伪随机数的算法：</p>
+<ul>
+<li>Hash_DRBG：使用单向散列算法作为伪随机数生成的基础算法</li>
+<li>HMAC_DRBG：使用消息认证码算法作为随机数生成的基础算法</li>
+<li>CTR_DRBG：使用分组密码算法的计数器模式作为随机数生成的基础算法，可选算法包括 3DES 、AES128 、 AES192 或 AES256 等</li>
+</ul>
+<p>实际运用中，我们经常使用 PRNG 从一个很小的初始随机性（熵）生成出大量的伪随机性，这被称做<strong>密钥拉伸</strong>（Key Stretching）。</p>
+<h2 id="二、真随机数生成器-TRNG"><a href="#二、真随机数生成器-TRNG" class="headerlink" title="二、真随机数生成器 - TRNG"></a>二、真随机数生成器 - TRNG</h2><p>TRNG（True Random Number Generators）作为“真正的随机数，需要具备<strong>不可重现性</strong>（不能通过给定同样的数据而演算出同一串比特序列），由于计算机算法均具备确定的特性，所以真随机数无法由算法来生成，只能基于硬件设备通过对物理过程的测量来实现，因此也被称为<strong>硬件随机数生成器</strong>（HRNG，Hardware Random Number Generator）。</p>
+<p>TRNG 通常基于一些能生成低等级、统计学随机的“噪声”信号的微观现象，包括：基于环形振荡器采样、直接放大热噪声、基于亚稳态电路Ell、光电效应、利用放射性元素衰变等量子力学的基本量等，这些物理过程在理论上是完全不可预测的，并且已经得到了实验的证实。<br>TRNG 通常由换能器、放大器和模拟数字转换器组成。其中换能器将物理过程中的某些效果转换为电信号，放大器将随机扰动的振幅放大到宏观级别，而模拟数字转换器则将输出变成数字。<br>TRNG 从随机过程中收获熵之后，还需要通过后处理技术（诺伊曼校正、异或链、线性反馈移位寄存器、异或周期序列等）消除随机位的概率偏差，并重复重采样过程以满足随机数的长度需求，最后输出高质量的随机数。Apple 安全隔区和恩智浦 STM32 系列安全芯片等都内置了 TRNG 组件。</p>
+<ul>
+<li>TRNG 满足“完全随机性”，即：不可预测性、均匀性、独立性，并具备保密性要求</li>
+<li>由于 TRNG 来源于物理过程，生成速度很慢，通常每秒只能产生很有限的随机比特</li>
+<li>为了提高数据产生效率，TRNG 通常用于生成伪随机数生成器的“种子”，也就是<strong>熵源（熵池）</strong></li>
+</ul>
+<h2 id="三、密码学安全随机数生成器-CSPRNG"><a href="#三、密码学安全随机数生成器-CSPRNG" class="headerlink" title="三、密码学安全随机数生成器 - CSPRNG"></a>三、密码学安全随机数生成器 - CSPRNG</h2><p>由于 PRNG 无法为随机数提供<strong>不可预测性</strong>，存在安全隐患，但是 TRNG 的生成速度又太慢，无法及时提供大量随机数，怎么解决这个矛盾呢？答案就是CSPRNG。</p>
+<p>CSPRNG（Cryptography Secure Random Number Generators）是一种满足密码学安全要求的 PRNG，需要同时满足以下条件：</p>
+<ul>
+<li>不可预测性：即使有人获知了该 PRNG 的 k 位，他也无法使用合理的资源预测第 k+1 位的值</li>
+<li>不可回溯性：如果攻击者猜出了 PRNG 的内部状态或该状态因某种原因而泄漏，攻击者也无法重建出内部状态泄漏之前生成的所有随机数</li>
+</ul>
+<p>美国国家标准和技术研究所(NIST)制定了随机数发生器的技术规范，称为<code>NIST SP 800 - 22</code>和<code>SP 800 - 90</code>，其推荐的技术路线是 TRNG + PRNG，即 TRNG 作为熵源提供少量且高质量的随机数，通过 PRNG 进行提供大量随机数，这就是 CSPRNG 最常用的设计方法。</p>
+<p>大多数的 CSPRNG 结合使用来自 OS 的熵与高质量的 PRNG，并且一旦系统生成了新的熵（这可能来自用户输入、磁盘 IO、系统中断、或者硬件 RNG），CSPRNG 会立即使用新的熵来作为 PRNG 新的种子。 这种不断重置 PRNG 种子的行为，使随机数变得非常难以预测。</p>
+<ul>
+<li>基于计数器(CTR)模式下的安全分组密码、流密码或安全散列函数的 CSPRNG</li>
+<li>基于数论设计的 CSPRNG，它依靠整数分解问题（IFP）、离散对数问题（DLP）或椭圆曲线离散对数问题（ECDLP）的高难度来确保安全性</li>
+<li>CSPRNG 基于加密安全随机性的特殊设计，例如 Yarrow algorithm 和 Fortuna，这俩分别被用于 MacOS 和 FreeBSD.</li>
+</ul>
+<h2 id="四、对比分析"><a href="#四、对比分析" class="headerlink" title="四、对比分析"></a>四、对比分析</h2><table>
+<thead>
+<tr>
+<th align="center">TRNG</th>
+<th align="center">CSPRNG</th>
+<th align="center">PRNG</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">不可重现性</td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">不可预测性</td>
+<td align="center">不可预测性</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">不可回溯性</td>
+<td align="center">不可回溯性</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">无偏性</td>
+<td align="center">无偏性</td>
+<td align="center">无偏性</td>
+</tr>
+</tbody></table>
+<ul>
+<li>不可重现性：相同的输入必须生成不同的输出</li>
+<li>不可预测性：即使有人获知了该 PRNG 的 k 位，他也无法使用合理的资源预测第 k+1 位的值</li>
+<li>不可回溯性：如果攻击者猜出了 PRNG 的内部状态或该状态因某种原因而泄漏，攻击者也无法重建出内部状态泄漏之前生成的所有随机数</li>
+<li>无偏性：任何数均有平等出现的机会</li>
+</ul>
+<h2 id="五、Unix系统的技术实现"><a href="#五、Unix系统的技术实现" class="headerlink" title="五、Unix系统的技术实现"></a>五、Unix系统的技术实现</h2><p>随机数在操作系统中非常重要，TCP&#x2F;IP 序列号、密码盐和 DNS 源端口号都依赖于随机数。CSPRNG 经常被用于以下场景：</p>
+<ul>
+<li>随机密钥的产生。比如为对称密码算法加密提供随机密钥。</li>
+<li>一次性随机序列的产生。比如用于通信协议，可以防止回放攻击。</li>
+<li>用于口令保护的盐(salt)的产生，可以防止口令的预计算攻击（也叫字典攻击）</li>
+<li>一次一密。比如直接拿来跟明文异或生成密文，但是只能用一次</li>
+</ul>
+<p>类Unix系统通过如下两个虚拟设备提供 CSPRNG:</p>
+<ul>
+<li><code>/dev/random</code>（受限阻塞随机生成器）: 从这个设备中读取到的是内核熵池中已经收集好的熵，如果熵池空了，此设备会一直阻塞，直到收集到新的环境噪声。</li>
+<li><code>/dev/urandom</code>（不受限非阻塞随机生成器）: 它可能会返回内核熵池中的熵，也可能返回使用<code>之前收集的熵 + CSPRNG</code>计算出的安全伪随机数。它不会阻塞。</li>
+</ul>
+<p><img src="/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/random.jpeg" alt="random"></p>
+<p>注意！两者产生的随机数都是从同一个熵池（主熵池）中提取的，只有当各自的熵池耗尽了，它们的行为才有所不同。</p>
+<p>一般有个规则，&#x2F;dev&#x2F;random 产生的随机数质量高，主要用于一些安全方面，而且，它是阻塞的，对于大部分应用来说，这是不能接受的</p>
+<p>对于 &#x2F;dev&#x2F;urandom ，当熵池计数器足够的时候，产生真随机数，计数不够的时候，产生伪随机数，最重要的是 它不会阻塞，而且，对于绝大多数的应用来说，伪随机数也能很好的满足需求了</p>
+<h3 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h3><p>在 Linux上，可以通过下面的命令查看当前系统主熵池大小, 单位是二进制位的数量</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat /proc/sys/kernel/random/poolsize</span><br><span class="line">4096</span><br></pre></td></tr></table></figure>
+
+<p>提取随机数并转换为 Base64 编码<br><code>head -c 32 /dev/random | base64</code></p>
+<p>随机转换为md5（20位）：<br><code>head /dev/urandom | md5sum | head -c 20</code></p>
+<p>随机纯数字（20位）：<br><code>head /dev/urandom | tr -dc 0-9 | head -c 20</code></p>
+<p>随机小写字母+数字（20位）：<br><code>head /dev/urandom | tr -dc a-z0-9 | head -c 20</code></p>
+<p>随机大小写字母+数字（20位）：<br><code>head /dev/urandom | tr -dc A-Za-z0-9 | head -c 20</code></p>
+<p>使用系统环境变量($RANDOM)生成随机数<br><code>echo $RANDOM | md5sum | cut -c 5-11</code></p>
+<h3 id="编程接口"><a href="#编程接口" class="headerlink" title="编程接口"></a>编程接口</h3><p>常见编程语言的 CSPRNG 接口或库如下：</p>
+<ul>
+<li>Java: <code>java.security.SecureRandom</code></li>
+<li>Python: <code>secrets</code> 库或者 <code>os.urandom()</code></li>
+<li>C#: <code>System.Security.Cryptography.RandomNumberGenerator.Create()</code></li>
+<li>JavaScript: 客户端可使用 <code>window.crypto.getRandomValues(Uint8Array)</code>，服务端可使用 <code>crypto.randomBytes()</code></li>
+</ul>
+<hr>
+<h2 id="附录一：Apple-提供的CSPRNG"><a href="#附录一：Apple-提供的CSPRNG" class="headerlink" title="附录一：Apple 提供的CSPRNG"></a>附录一：Apple 提供的CSPRNG</h2><p>Apple 为此提供了运行在 iOS、iPadOS、macOS、Apple tvOS 和 watchOS 内核中的受信任软件 CPRNG（&#x3D; CSPRNG）。它负责聚合系统中的原始熵并为内核和用户空间的使用者提供安全的随机数。</p>
+<p>内核 CPRNG 源自启动过程中的多个熵源并存在于设备的整个生命周期。这些来源包括（取决于可用性）：</p>
+<ul>
+<li>安全隔区硬件 TRNG</li>
+<li>启动过程中所收集基于时序的时间误差</li>
+<li>从硬件中断收集的熵</li>
+<li>用于启动过程中保持熵的种子文件</li>
+<li>Intel 随机指令，例如 RDSEED 和 RDRAND（仅限基于 Intel 的 Mac）</li>
+</ul>
+<p>内核 CPRNG 的设计源自 Fortuna 算法，旨在满足 256 位安全级别。它使用以下 API 为用户空间使用者提供高质量的随机数：</p>
+<ul>
+<li>getentropy(2) 系统调用</li>
+<li>随机设备 (&#x2F;dev&#x2F;random)</li>
+</ul>
+<p>内核 CPRNG 通过写入随机设备接受用户提供的熵。</p>
+<h2 id="附录二：DUAL-EC-DRBG-的安全漏洞"><a href="#附录二：DUAL-EC-DRBG-的安全漏洞" class="headerlink" title="附录二：DUAL_EC_DRBG 的安全漏洞"></a>附录二：DUAL_EC_DRBG 的安全漏洞</h2><p>2005年，NIST SP 800-90A草案公开发布，其包含四个随机数生成算法：HASH_DRBG, HMAC_DRBG, CTR_DRBG, DUAL_EC_DRBG。</p>
+<p>2006年，NTNU（挪威科技大学）的 Kristian Gjøsteen 公开宣称“<strong>Dual_EC_DRBG is not cryptographically sound</strong>”，并构造了一个具有 0.0011 优势的 bit-predictor，证明了其不满足 CSPRNG 的随机数发生器设计原理。</p>
+<p>在 Crypto 2007（原美密会，现为国际密码会议）会议上，Bruce Schneier 宣布该标准中存在技术后门，使得拥有某特殊资源的攻击者能够轻而易举地攻击其中的 Dual ECC DRBG 随机数产生器算法，从而得到该算法后续的所有随机数值。</p>
+<p>2013年，Edward Snowden 泄露的内部备忘录曝光了 NSA 的 Bullrun 项目，显示该项目在 Dual_EC_DRBG 中植入了一个后门。</p>
+<p>2013年9月19日，EMC 公司的 RSA 事业本部宣布，该公司已向 BSAFE（一个用于开发安全应用的工具套件） 及 Data Protection Manager（一个用于数据加密的工具）的客户发出呼吁，不要使用其默认的 Dual_EC_DRBG 技术标准，RSA 目前正在审查其所有的产品。</p>
+<p>路透社报道，NSA 向 RSA 支付了一千万美元，要求其在 BSAFE 中将 Dual_EC_DRBG 设为默认的 CSPRNG。随后，RSA公司发表声明否认与 NSA 有任何的秘密接触，以便在BSAFE加密库中放置有缺陷的随机数生成器算法，但并未否认或者解释之前与 NSA 之间的大额交易。</p>
+<p>行业普遍认为，Dual_EC_DRBG 算法可能潜伏着一个后门，如果以特定方式选择定义算法的一个参数，NSA 将可能预测出算法产生的随机数。</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><h3 id="技术分析"><a href="#技术分析" class="headerlink" title="技术分析"></a>技术分析</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://thiscute.world/posts/practical-cryptography-basics-4-secure-random-generators/">写给开发人员的实用密码学（四）—— 安全随机数生成器 CSPRNG</a></li>
+<li><a target="_blank" rel="noopener" href="https://securitygossip.com/blog/2020/03/16/pseudorandom-black-swans-cache-attacks-on-ctr-drbg/">CTR-DRBG的缓存侧信道攻击方法</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_13640625/3027985">伪随机数生成器（ctr_drbg）的配置与使用</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/a00553344/article/details/3978312">随机数发生器设计原理及实现</a></li>
+<li><a target="_blank" rel="noopener" href="https://ms2008.github.io/2017/10/24/PRNG/">正确认识随机数 - 北京车牌摇号的算法是公平的</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/384238870">让你彻底理解Base64算法</a></li>
+</ul>
+<h3 id="文档下载"><a href="#文档下载" class="headerlink" title="文档下载"></a>文档下载</h3><ul>
+<li><a href="%E5%9F%BA%E4%BA%8E%E5%A4%9A%E7%BA%A7%E5%8F%8D%E9%A6%88%E7%8E%AF%E5%BD%A2%E6%8C%AF%E8%8D%A1%E5%99%A8%E7%9A%84%E7%9C%9F%E9%9A%8F%E6%9C%BA%E6%95%B0%E5%8F%91%E7%94%9F%E5%99%A8%E8%AE%BE%E8%AE%A1.pdf">基于多级反馈环形振荡器的真随机数发生器设计</a></li>
+<li><a href="%E5%AE%89%E5%85%A8%E7%B3%BB%E7%BB%9F%E7%9A%84%E7%9C%9F%E9%9A%8F%E6%9C%BA%E6%95%B0%E5%8F%91%E7%94%9F%E5%99%A8.pdf">安全系统的真随机数发生器</a></li>
+<li><a href="%E7%9C%9F%E9%9A%8F%E6%9C%BA%E6%95%B0%E5%8F%91%E7%94%9F%E5%99%A8%E7%9A%84%E5%90%8E%E5%A4%84%E7%90%86%E6%96%B9%E6%B3%95.pdf">真随机数发生器的后处理方法</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/10/03/Apple%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%EF%BC%88Secure-Encalve%EF%BC%89%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/" rel="prev" title="Apple安全隔区（Secure Encalve）技术概览">
+                  <i class="fa fa-angle-left"></i> Apple安全隔区（Secure Encalve）技术概览
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/" rel="next" title="密钥派生函数（KDF）概述">
+                  密钥派生函数（KDF）概述 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

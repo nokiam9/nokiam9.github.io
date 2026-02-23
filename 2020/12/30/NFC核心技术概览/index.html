@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="NFC简介 NFC(近场通信，Near Field Communication）是一种短距高频的无线电技术，由非接触式射频识别(RFID)演变而来。 NFC工作频率为13.56Hz，通常只有在距离不超过4厘米时才能启动连接，其传输速度有106 Kbit&#x2F;秒、212 Kbit&#x2F;秒或者424 Kbit&#x2F;秒三种。 NFC有3种工作模式：读卡器模式、点对点模式、卡模拟模式。   * 读取器&#x2F;写入器模式（R">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NFC核心技术概览">
+<meta property="og:url" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="NFC简介 NFC(近场通信，Near Field Communication）是一种短距高频的无线电技术，由非接触式射频识别(RFID)演变而来。 NFC工作频率为13.56Hz，通常只有在距离不超过4厘米时才能启动连接，其传输速度有106 Kbit&#x2F;秒、212 Kbit&#x2F;秒或者424 Kbit&#x2F;秒三种。 NFC有3种工作模式：读卡器模式、点对点模式、卡模拟模式。   * 读取器&#x2F;写入器模式（R">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/3.png">
+<meta property="og:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/2.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/SE.png">
+<meta property="og:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/HCE.png">
+<meta property="og:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/dual-mode.png">
+<meta property="og:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/hce-se.png">
+<meta property="og:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/protocol-stack.png">
+<meta property="og:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/swp.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/sim.jpeg">
+<meta property="article:published_time" content="2020-12-30T09:20:41.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.870Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/3.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/","path":"2020/12/30/NFC核心技术概览/","title":"NFC核心技术概览"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>NFC核心技术概览 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#NFC%E7%AE%80%E4%BB%8B"><span class="nav-text">NFC简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8EAndroid%E7%9A%84NFC%E7%BB%88%E7%AB%AF"><span class="nav-text">基于Android的NFC终端</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%A1%AC%E4%BB%B6%E7%9A%84%E8%99%9A%E6%8B%9F%E5%8D%A1%E6%A8%A1%E5%BC%8F-Virtual-Card-Mode"><span class="nav-text">基于硬件的虚拟卡模式(Virtual Card Mode)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E8%BD%AF%E4%BB%B6%E7%9A%84%E4%B8%BB%E6%9C%BA%E5%8D%A1%E6%A8%A1%E5%BC%8F-Host-Card-Mode"><span class="nav-text">基于软件的主机卡模式(Host Card Mode)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E6%A8%A1%EF%BC%88Dual-Mode%EF%BC%89"><span class="nav-text">双模（Dual Mode）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90"><span class="nav-text">对比分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HCE%E7%9A%84%E5%8D%8F%E8%AE%AE%E6%A0%88"><span class="nav-text">HCE的协议栈</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-IEC-14443"><span class="nav-text">ISO&#x2F;IEC 14443</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SWP%E5%8D%95%E7%BA%BF%E5%8D%8F%E8%AE%AE-Single-Wire-Protocol"><span class="nav-text">SWP单线协议(Single Wire Protocol)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-IEC-7816"><span class="nav-text">ISO&#x2F;IEC 7816</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E9%80%89%E6%8B%A9AID"><span class="nav-text">服务选择AID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AID%E7%BB%84"><span class="nav-text">AID组</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AID%E7%BB%84%E5%92%8C%E7%B1%BB%E5%88%AB"><span class="nav-text">AID组和类别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B6%85%E7%BA%A7SIM%E5%8D%A1%E7%9A%84%E9%80%9A%E4%BF%A1%E6%8E%A5%E5%8F%A3"><span class="nav-text">超级SIM卡的通信接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%B1%82%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86"><span class="nav-text">应用层的技术标准</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9ASIM%E5%8D%A1%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86"><span class="nav-text">附录一：SIM卡的技术标准</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9A%E4%B8%BB%E6%B5%81NFC%E7%A1%AC%E4%BB%B6%E5%8E%82%E5%95%86%E5%92%8C%E8%8A%AF%E7%89%87%E5%9E%8B%E5%8F%B7"><span class="nav-text">附录二：主流NFC硬件厂商和芯片型号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-text">参考资料</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="NFC核心技术概览 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          NFC核心技术概览
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-30 17:20:41" itemprop="dateCreated datePublished" datetime="2020-12-30T17:20:41+08:00">2020-12-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>16 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="NFC简介"><a href="#NFC简介" class="headerlink" title="NFC简介"></a>NFC简介</h2><p>NFC(近场通信，Near Field Communication）是一种短距高频的无线电技术，由非接触式射频识别(RFID)演变而来。<br>NFC工作频率为13.56Hz，通常只有在距离不超过4厘米时才能启动连接，其传输速度有106 Kbit&#x2F;秒、212 Kbit&#x2F;秒或者424 Kbit&#x2F;秒三种。<br>NFC有3种工作模式：读卡器模式、点对点模式、卡模拟模式。</p>
+<ul>
+<li>读取器&#x2F;写入器模式（Reader&#x2F;writer mode）：NFC设备产生射频场从外部采用相同标准的NFC标签中读写数据，支持 NFC 设备读取和&#x2F;或写入被动 NFC 标签和贴纸。</li>
+<li>点对点模式（P2P mode）：支持 NFC 设备与其他 NFC 对等设备交换数据，Android Beam 使用的就是此操作模式。</li>
+<li>卡模拟模式（Card emulation mode）：读卡器是主动设备，产生射频场；NFC设备为被动设备，模拟一张符合NFC标准的非接触式卡片与读卡器进行交互。</li>
+</ul>
+<img src="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/3.png" class="" title="NFC的三种工作模式">
+
+<h2 id="基于Android的NFC终端"><a href="#基于Android的NFC终端" class="headerlink" title="基于Android的NFC终端"></a>基于Android的NFC终端</h2><p>Android 4.4版本开始，通过HCE(host-based card emulation，基于主机的卡模拟)，方式提供NFC功能支持。</p>
+<p>NFC终端主要包括非接触性前端CLF(也叫NFC控制器)、天线(Antenna)、安全模块(Secure Element,SE)三个主要部件，其中，非接前端、天线一般都集成在手机终端中，而安全模块可根据情况存放在不同的位置。</p>
+<img src="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/2.jpg" class="" title="典型的NFC终端架构">
+
+<ul>
+<li>CLF：非接触性前端，也称为NFC控制器，其功能包括射频信号的调制解调，非接触通信的协议处理。<br>  非接触前端一方面连接射频天线，实现13.56MHz信号的发送与接收，另一方面与安全模块通信。在CLF中提供了识读接口、P2P接口、卡模拟接口，分别对应上面所说的三种工作模式。</li>
+<li>天线，通常集成在终端内部，与非接前端相连，实现13.56MHz射频信号的发送与接收。</li>
+<li>安全模块SE，主要功能是实现应用和数据的安全存储，对外提供安全运算服务，它是卡模拟的核心。<br>  安全模块还通过非接前端与外部读写设备进行通信，实现数据存储及交易过程的安全性。</li>
+</ul>
+<p>根据安全模块存放的位置不同，NFC可分为不同的实现方案。</p>
+<h3 id="基于硬件的虚拟卡模式-Virtual-Card-Mode"><a href="#基于硬件的虚拟卡模式-Virtual-Card-Mode" class="headerlink" title="基于硬件的虚拟卡模式(Virtual Card Mode)"></a>基于硬件的虚拟卡模式(Virtual Card Mode)</h3><p>在虚拟卡模式下，需要提供安全模块SE(Secure Elemen)，SE提供对敏感信息的安全存储和对交易事务提供一个安全的执行环境。NFC芯片作为非接触通讯前端，将从外部读写器接收到的命令转发到SE，然后由SE处理，并通过NFC控制器回复。</p>
+<img src="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/SE.png" class="" title="基于安全芯片SE的方式">
+
+<h3 id="基于软件的主机卡模式-Host-Card-Mode"><a href="#基于软件的主机卡模式-Host-Card-Mode" class="headerlink" title="基于软件的主机卡模式(Host Card Mode)"></a>基于软件的主机卡模式(Host Card Mode)</h3><p>在主机卡模式下，不需要提供SE，而是由在手机中运行的一个应用或云端的服务器完成SE的功能，此时NFC芯片接收到的数据由操作系统或发送至手机中的应用，或通过移动网络发送至云端的服务器来完成交互。两种方式的特点都是绕过了手机内置的SE的限制。</p>
+<p>那么，如何通过HCE技术在手机上实现NFC卡模拟呢？首先要创建一个处理交易事务的HCE 服务，Android4.4为HCE服务提供了一个非常方便的基类，我们可以通过继承基类来实现自己的HCE服务。如果要开发已存在的NFC系统，我们只需要在 HCE 服务中实现NFC 读卡器期望的应用层协议。反之如果要开发自己的新的NFC 系统，我们就需要定义自己的协议和APDU 序列。一般而言我们应该保证数据交换时使用很少的APDU包数量和很小的数据量，这样用户就不必花很长时间将手机放在NFC 读卡器上。</p>
+<p>HCE 技术只是实现了将NFC 读卡器的数据送至操作系统的HCE 服务或者将回复数据返回给NFC 读卡器，而对于数据的处理和敏感信息的存储则没有具体实现细，所以说到底HCE 技术是模拟NFC 和SE 通信的协议和实现。但是HCE 并没有实现SE，只是用NFC 与SE 通信的方式告诉NFC 读卡器后面有SE的支持，从而以虚拟SE 的方式完成NFC 业务的安全保证。既然没有SE，那么HCE 用什么来充当SE 呢，解决方案要么是本地软件的模拟，要么是云端服务器的模拟。负责安全的SE如何通过本地化的软件或者远程的云端实现，并且能够保障安全性，需要HCE厂商自己考虑和实现。</p>
+<img src="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/HCE.png" class="" title="基于主机的模拟卡方式">
+
+<blockquote>
+<p>超级SIM卡是基于SIM SE芯片的技术方案，因此属于<strong>基于硬件的虚拟卡模式</strong>，但同时也可以为HCE提供支持。</p>
+</blockquote>
+<h3 id="双模（Dual-Mode）"><a href="#双模（Dual-Mode）" class="headerlink" title="双模（Dual Mode）"></a>双模（Dual Mode）</h3><img src="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/dual-mode.png" class="" title="双模方式">
+
+<h3 id="对比分析"><a href="#对比分析" class="headerlink" title="对比分析"></a>对比分析</h3><img src="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/hce-se.png" class="" title="对比分析">
+
+<h2 id="HCE的协议栈"><a href="#HCE的协议栈" class="headerlink" title="HCE的协议栈"></a>HCE的协议栈</h2><p>为支持NFC射频卡，HCE主要实现了两个ISO协议，分别是硬件标准<code>ISO/IEC 14443</code>和应用协议<code>ISO/IEC 7816</code>。</p>
+<img src="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/protocol-stack.png" class="" title="NFC的核心协议栈">
+
+<h3 id="ISO-IEC-14443"><a href="#ISO-IEC-14443" class="headerlink" title="ISO&#x2F;IEC 14443"></a>ISO&#x2F;IEC 14443</h3><p>Android 4.4 支持基于<code>NFC-Forum ISO-DEP</code>规范（基于<code>ISO/IEC 14443-4</code>）的模拟卡，要求仅使用 Nfc-A (<code>ISO/IEC 14443-3 Type A</code>) 技术模拟 ISO-DEP，但也可以支持 Nfc-B (<code>ISO/IEC 14443-4 Type B</code>) 技术。</p>
+<p>该标准包含四个部分：</p>
+<ul>
+<li><code>ISO/IEC14443-1</code>:制定了有关非接触卡的物理特性；</li>
+<li><code>ISO/IEC14443-2</code>:制定了有关射频功率及信号界面的特性；</li>
+<li><code>ISO/IEC14443-3</code>:则为非接触卡的初始化及防冲突机制；</li>
+<li><code>ISO/IEC14443-4</code>:位有关的交易协定。</li>
+</ul>
+<p>ISO&#x2F;IEC14443-3 定义了 TYPE A、TYPEB 两种卡型（与飞利浦的 Mifare 标准兼容），均通过13.56Mhz的射频载波传送信号，此外索尼公司开发了FeliCa 标准，也成为TYPE F。<br>不同TYPE的主要的区别在于信号发送的载波调制深度、二进制数编码方式存在差异。<br>此外，防冲突机制的原理也完全不同，TYPE A是基于 BIT 冲突检测协议，TYPE B则是通过字节、帧及命令完成防冲突。</p>
+<h3 id="SWP单线协议-Single-Wire-Protocol"><a href="#SWP单线协议-Single-Wire-Protocol" class="headerlink" title="SWP单线协议(Single Wire Protocol)"></a>SWP单线协议(Single Wire Protocol)</h3><p>手机与普通非接触IC卡最大的不同体现在拥有网络功能和人机交互两部分，因此，NFC手机可以从事传统非接触IC所不能完成的丰富业务，如空中充值、余额查询。所有这些业务均需要一个技术前提即需要一个标准的SIM卡访问接口，能够使得应用客户端访问SIM卡并与SIM卡中的applet进行通信。具体讲，需要在手机中支持三个标准：</p>
+<ol>
+<li><p>SIM Alliance Open Mobile API：为应用客户端提供与SIM卡通信的通道</p>
+</li>
+<li><p>Global Platform&#x2F;GSMA：Secure Element Access Control：授权应用客户端访问SIM卡中对应的applet</p>
+</li>
+<li><p>Modem：需完全支持3GPP 27.007标准，支持打开SIM卡逻辑通道，并能够在逻辑通信上真正实现APDU的透传</p>
+</li>
+</ol>
+<img src="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/swp.jpg" class="" title="对比分析">
+
+<p>SWP(Single Wire Protocol)是采用C6引脚的单线连接方案。在SWP方案中，接口界面包括三根线：VCC(C1)、GND(C5)和SWP(C6)，其中SWP一根信号线上基于电压和负载调制原理实现全双工通讯，这样可以实现SIM卡在ISO7816界面定义下同时支持7816和SWP两个接口，并预留了扩展第三个高速(USB)接口的引脚。支持SWP的SIM卡必须同时支持ISO和SWP两个协议栈，需要SIM的COS是多任务的OS系统，并且这两部分需要独立管理的，ISO界面的RST信号不能对SWP部分产生影响。</p>
+<p>　　SWP是在一根单线上实现全双工通讯，定义了S1和S2两个方向的信号， SWP传输的波特率可以从106KBPS最高上升至2MBPS。从SWP的定义看，SWP方案同时满足ISO7816、NFC和大容量高速接口，并且是全双工通讯，可以实现较高波特率。SWP系统地定义了从物理层、链路层到应用层的多层协议，并已经上升成为ETSI的标准，正在争取成为ISO的标准，目前得到业界较多的支持。从另一个角度看，SWP方案要求SIM卡和NFC模拟前端芯片同时重新设计，涉及的面比较广，市场推进的难度较大。另外，NFC应用非常关注掉电模式下的应用，SWP的S2负载调制通讯方式带来接口的功耗损失，对掉电模式下的性能有不利影响。</p>
+<h3 id="ISO-IEC-7816"><a href="#ISO-IEC-7816" class="headerlink" title="ISO&#x2F;IEC 7816"></a>ISO&#x2F;IEC 7816</h3><p>Android处理应用协议数据单元 (APDU)遵循的是<code>ISO/IEC 7816-4</code>规范。</p>
+<p>Android系统上的HCE技术是通过系统服务实现的(HCE服务)。使用服务的一大优势是它可以一直在后台运行而不需要有用户界面。这个特点就使得HCE技术非常适合像会员卡、交通卡、门禁卡这类的交易，当用户使用时无需打开程序，只需要将手机放到NFC读卡器的识别范围内，交易就会在后台进行。当然如果有必要的话，用户也可以打开UI界面。这时的手机和普通的智能卡片已经没有区别了。</p>
+<h4 id="服务选择AID"><a href="#服务选择AID" class="headerlink" title="服务选择AID"></a>服务选择AID</h4><p>交易中我们有一个重要问题需要解决，当用户将手机放到NFC读卡器的识别范围时,Android系统需要知道读卡器真正想要和哪个HCE服务交互，这样它才能将接收到的数据发送至相应的服务。ISO&#x2F;IEC 7816-4规范正是解决服务选择的问题，它定义了一种通过应用程序ID(AID)来选择相应服务的方法。</p>
+<p>一个AID占16位，如果手机模拟的是一个已经存在的NFC读卡设施，那么这些NFC读卡设施会去寻找那些经公共注册而广为人知的AID(类似于端口号)。像Visa卡和万事达卡等这些智能卡可以注册 AID号作为他们专用的识别标志。反之，如果要为自己的新的读卡设施部署NFC应用，你就需要注册自己的AID。AID注册过程在ISO&#x2F;IEC 7816-5规格中定义，为防止和其他的Android程序冲突，Google建议AID号按此规格中推荐的注册。</p>
+<p>当用户将设备接近 NFC 读写器时，Android 系统需要知道 NFC 读写器实际上想要与哪个 HCE 服务对话。这就是<code>ISO/IEC 7816-4</code>规范的来源：它定义了一种以应用程序 ID（AID）为中心的选择应用程序的方法。</p>
+<p>AID 由 16 个字节组成。如果您正在为现有的 NFC 读写器基础设施模拟卡片，这些读者正在寻找的 AID 通常是众所周知的和公开注册的（例如，支付网络的 AID，如 Visa 和 MasterCard）。</p>
+<p>如果您想为自己的应用程序部署新的读取器基础设施，则需要注册您自己的 AID。AID 的注册过程在<code>ISO/IEC 7816-5</code>规范中定义。谷歌建议，如果您正在为 Android 部署 HCE 应用程序，可以按照 7816-5 注册一个 AID，它可避免与其他应用程序发生冲突。</p>
+<h4 id="AID组"><a href="#AID组" class="headerlink" title="AID组"></a>AID组</h4><p>在某些情况下，HCE 服务可能需要注册多个 AID 才能实现某个应用程序，并且需要确保它是所有这些 AID 的默认处理程序（与另一服务的组中的某些 AID 相反）。</p>
+<p>AID 组是一系列被视为属于共同的操作系统 AID 。对于一个 AID 组中的 AID，Android 可以保证以下一项：</p>
+<p>组中的所有 AID 都被路由至此 HCE 服务。<br>组中没有任何 AID 被路由至此 HCE 服务（例如，服务请求组中的一个或多个 AID，而用户优先选择另一服务）。<br>换句话说，不存在中间状态，其中该组中的一些 AID 可以被路由到一个 HCE 服务，而另一些可以路由到另一个 HCE 服务。</p>
+<h4 id="AID组和类别"><a href="#AID组和类别" class="headerlink" title="AID组和类别"></a>AID组和类别</h4><p>每个 AID 组都与一个类别关联。这使得 Android 可以按类别将 HCE 服务分组，并且反过来允许用户在类别级别上设置默认值而不是 AID 级别。通常，避免在应用程序中任何面向用户的部分中提到 AID：它们对普通用户没有任何意义。</p>
+<p>Android 4.4 支持两种类别：<code>CATEGORY_PAYMENT</code>（覆盖行业标准支付应用）和<code>CATEGORY_OTHER</code>（对应于所有其它 HCE 应用）。</p>
+<p>注意：在任何给定时间，在系统中只能启用CATEGORY_PAYMENT类别中的一个 AID 组。通常，这将是一个应用程序，了解主要的信用卡支付协议，可以在任何商家工作。</p>
+<p>对于仅在一个商家（例如储值卡）工作的闭环支付应用，您应该使用CATEGORY_OTHER。该类别中的 AID 组可以总是活动的，并且在必要时可以在 AID 选择期间由 NFC 读写器给予优先级。</p>
+<h2 id="超级SIM卡的通信接口"><a href="#超级SIM卡的通信接口" class="headerlink" title="超级SIM卡的通信接口"></a>超级SIM卡的通信接口</h2><p>通信接口指的是 SIM 卡与外部终端设备进行通信的接口，应支持 ISO7816 和 SWP 两种接口。</p>
+<ul>
+<li>ISO7816 接口是 SIM 卡与外部终端设备进行通信的接触式 I&#x2F;O 接口，遵循 ETSI 102.221 的要求。</li>
+<li>SWP 接口是 SIM 卡与外部非接触终端设备进行通信，实现近场通信相关业务 的物理接口。<br>  超级 SIM 卡支持 SWP 协议，遵循 ETSI TS 102.613 的要求。支持卡 模拟模式、读卡器模式，可选支持点对点传输模式。</li>
+</ul>
+<p>移动终端若支持 NFC 功能，则应支持 SWP 接口，与超级 SIM 卡协同实现刷卡 操作，为用户提供基于非接触感应的线下应用场景。</p>
+<h3 id="应用层的技术标准"><a href="#应用层的技术标准" class="headerlink" title="应用层的技术标准"></a>应用层的技术标准</h3><p>NFC手机可以从事传统非接触IC所不能完成的丰富业务，如空中充值、余额查询。所有这些业务均需要一个技术前提即需要一个标准的SIM卡访问接口，能够使得应用客户端访问SIM卡并与SIM卡中的applet进行通信。具体讲，需要在手机中支持三个标准：</p>
+<ol>
+<li><p>SIM Alliance Open Mobile API：为应用客户端提供与SIM卡通信的通道</p>
+</li>
+<li><p>Global Platform&#x2F;GSMA：Secure Element Access Control：授权应用客户端访问SIM卡中对应的applet</p>
+</li>
+<li><p>Modem：需完全支持3GPP 27.007标准，支持打开SIM卡逻辑通道，并能够在逻辑通信上真正实现APDU的透传</p>
+</li>
+</ol>
+<hr>
+<h2 id="附录一：SIM卡的技术标准"><a href="#附录一：SIM卡的技术标准" class="headerlink" title="附录一：SIM卡的技术标准"></a>附录一：SIM卡的技术标准</h2><p>SIM卡是一个装有微处理器的芯片卡，它的内部有5个模块，并且每个模块都对应一个功能：、</p>
+<ul>
+<li>微处理器CPU（8位）</li>
+<li>程序存储器ROM（3–8kbit）</li>
+<li>工作存储器RAM（6–16kbit）</li>
+<li>数据存储器EEPROM（128–256kbit）</li>
+<li>串行通信单元。</li>
+</ul>
+<img src="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/sim.jpeg" class="" title="对比分析">
+
+<p>这5个模块被胶封在SIM卡铜制接口后与普通IC卡封装方式相同。这五个模块必须集成在一块集成电路中，否则其安全性会受到威胁。因为，芯片间的连线可能成为非法存取和盗用SIM卡的重要线索。</p>
+<p>SIM卡同手机连接时至少需要5条连接线（通常编程口未定义）</p>
+<ul>
+<li>数据I&#x2F;O口（Data）</li>
+<li>复位（RST）</li>
+<li>接地端（GND）</li>
+<li>电源（Vcc）</li>
+<li>时钟（CLK）</li>
+</ul>
+<p>如上图所示。</p>
+<p>SIM卡的供电分为5V（1998年前发行）、5V与3V兼容、3V、1.8V等，当然这些卡必须与相应的移动电话机配合使用，即移动电话机产生的SIM卡供电电压与该SIM卡所需的电压相匹配。卡电路中的电源VCC、地GND是卡电路工作的必要条件。卡电源用万用表就可以检测到。SIM卡插入移动电话机后，电源端口提供电源给SIM卡内各模块。</p>
+<h2 id="附录二：主流NFC硬件厂商和芯片型号"><a href="#附录二：主流NFC硬件厂商和芯片型号" class="headerlink" title="附录二：主流NFC硬件厂商和芯片型号"></a>附录二：主流NFC硬件厂商和芯片型号</h2><table>
+<thead>
+<tr>
+<th align="center">射频前端芯片</th>
+<th align="center">读卡器&#x2F;NFC芯片</th>
+<th align="center">卡芯片</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">德州仪器：TI TRF7970A</td>
+<td align="center">恩智浦：NXP PN532</td>
+<td align="center">复旦微电子：FMSH FM1208</td>
+</tr>
+<tr>
+<td align="center">复旦微电子：FMSH FM11NC08S</td>
+<td align="center">恩智浦：NXP PN7150</td>
+<td align="center">华翼微电子 HYm4616A1&#x2F;2&#x2F;3&#x2F;4&#x2F;5&#x2F;6</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="center">意法半导体：ST CR95HF</td>
+<td align="center">华翼微电子： HYm4616A7</td>
+</tr>
+<tr>
+<td align="center">-</td>
+<td align="center">华大电子：HED CIE72D01</td>
+<td align="center">-</td>
+</tr>
+</tbody></table>
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/icycityone/article/details/17358357">NFC-SWP终端架构与标准</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.android.com/guide/topics/connectivity/nfc/hce?hl=zh-cn">Android的NFC官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.mpaypass.com.cn/news/201307/12110718.html">NFC SWP移动支付解决方案技术分析</a></li>
+<li><a target="_blank" rel="noopener" href="http://tech.rfidworld.com.cn/2010_07/04cd42c1fd6aac1d.html">近距离通信的SWP方案及其在SIM卡的实现</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/xiaoxik/article/details/82156455">SIM卡详解</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.jiajuhf.com/zxxw_8/42705634.html">关于HCE的NFC支付研究报告及其安全性探讨</a></li>
+<li><a target="_blank" rel="noopener" href="http://article.iotxfd.cn/RFID/Host-based%20card%20emulation">基于主机的卡模拟概览</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/wwww1988600/article/details/69523369">HCE基础知识普及</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/liwei16611/article/details/85209361">NFC之 Type A 与 TYpe B 卡区别</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.cmricloud.com/pdf/07/1.pdf">超级SIM卡的技术白皮书</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?src=3&timestamp=1625732247&ver=1&signature=YhDcKm20OjT1SqXPV4ZZjLRQtlP42pVugJP77ZqfP6lSnDV7-d-WYWFpxgd-qXkSJ7EwF-g7TpH2pu5MDifsfvGJsEF1yY9jmRZa*elztII6P9xrvmw53XvWBsp-ztpwDYuS4VXwrXgHrA4p4NpNaQ==">基于HCE移动支付研究报告</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.nfcin.com.cn/news/201403/11110054.html">NFC-SWP连接方案在SIM卡中的实现方法</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/16/Sqlalchemy%E7%9A%84%E5%87%A0%E4%B8%AA%E5%B0%8F%E9%97%AE%E9%A2%98/" rel="prev" title="Sqlalchemy的几个小问题">
+                  <i class="fa fa-angle-left"></i> Sqlalchemy的几个小问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/" rel="next" title="Proxmox-VE的存储管理小结">
+                  Proxmox-VE的存储管理小结 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

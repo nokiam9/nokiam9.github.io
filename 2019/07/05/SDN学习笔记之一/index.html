@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="传统的三层网络架构 特点：   * 每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用  * 汇聚层和接入层走二层交换，和核心层走三层路由  * 所有 OpenStack 网关配置在核心层路由器  * 防火墙和核心路由器直连，做一些安全策略  简化的大二层网络架构 Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：   * 转发路径更短。以图 7 的 Spine-L">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SDN学习笔记之一">
+<meta property="og:url" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="传统的三层网络架构 特点：   * 每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用  * 汇聚层和接入层走二层交换，和核心层走三层路由  * 所有 OpenStack 网关配置在核心层路由器  * 防火墙和核心路由器直连，做一些安全策略  简化的大二层网络架构 Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：   * 转发路径更短。以图 7 的 Spine-L">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/core-aggregate-access.png">
+<meta property="og:image" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/spine-leaf.png">
+<meta property="og:image" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/spine-leaf-2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/SDN%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%A8%A1%E5%BC%8F.png">
+<meta property="og:image" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/openstack-provider-network.png">
+<meta property="og:image" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/%E7%AE%80%E5%8C%96%E7%9A%84openstack-provider-network.png">
+<meta property="article:published_time" content="2019-07-05T03:38:52.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.892Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/core-aggregate-access.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/","path":"2019/07/05/SDN学习笔记之一/","title":"SDN学习笔记之一"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>SDN学习笔记之一 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E7%9A%84%E4%B8%89%E5%B1%82%E7%BD%91%E7%BB%9C%E6%9E%B6%E6%9E%84"><span class="nav-text">传统的三层网络架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8C%96%E7%9A%84%E5%A4%A7%E4%BA%8C%E5%B1%82%E7%BD%91%E7%BB%9C%E6%9E%B6%E6%9E%84"><span class="nav-text">简化的大二层网络架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDN%E7%9A%84%E6%8E%A7%E5%88%B6%E5%B9%B3%E9%9D%A2%E5%92%8C%E6%95%B0%E6%8D%AE%E5%B9%B3%E9%9D%A2"><span class="nav-text">SDN的控制平面和数据平面</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SDN%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%A8%A1%E5%BC%8F"><span class="nav-text">SDN控制器的两种模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%B1%E6%8E%A7%E5%88%B6%E6%A8%A1%E5%BC%8F"><span class="nav-text">弱控制模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%BA%E6%8E%A7%E5%88%B6%E6%A8%A1%E5%BC%8F"><span class="nav-text">强控制模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%951-%E6%A0%87%E5%87%86%E7%9A%84openstack-provider-network"><span class="nav-text">附录1:标准的openstack-provider-network</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%952-%E7%AE%80%E5%8C%96%E7%9A%84openstack-provider-network"><span class="nav-text">附录2:简化的openstack-provider-network</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="SDN学习笔记之一 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SDN学习笔记之一
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-07-05 11:38:52" itemprop="dateCreated datePublished" datetime="2019-07-05T11:38:52+08:00">2019-07-05</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>976</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="传统的三层网络架构"><a href="#传统的三层网络架构" class="headerlink" title="传统的三层网络架构"></a>传统的三层网络架构</h2><img src="/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/core-aggregate-access.png" class="" title="传统的三层网络架构">
+
+<p>特点：</p>
+<ul>
+<li>每个服务器两个物理网卡，直连到两个置顶交换机做物理高可用</li>
+<li>汇聚层和接入层走二层交换，和核心层走三层路由</li>
+<li>所有 OpenStack 网关配置在核心层路由器</li>
+<li>防火墙和核心路由器直连，做一些安全策略</li>
+</ul>
+<h2 id="简化的大二层网络架构"><a href="#简化的大二层网络架构" class="headerlink" title="简化的大二层网络架构"></a>简化的大二层网络架构</h2><img src="/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/spine-leaf.png" class="" title="简化的大二层网络架构">
+
+<p>Spine-Leaf 是 full-mesh 连接，它可以带来如下几个好处：</p>
+<ul>
+<li><p>转发路径更短。以图 7 的 Spine-Leaf（两级 Clos 架构）为例，任何两台服务器经过三跳（Leaf1 -&gt; Spine -&gt; Leaf2）就可以到达，延迟更低，并且可保障（可以按跳数精确计算出来）。</p>
+</li>
+<li><p>水平可扩展性更好，任何一层有带宽或性能瓶颈，只需新加一台设备，然后跟另一层的所有设备直连。</p>
+</li>
+<li><p>所有设备都是 active 的，一个设备挂掉之后，影响面比三层模型里挂掉一个设备小得多。</p>
+</li>
+</ul>
+<p>宿主机方面，我们升级到了 10G 和 25G 的网卡。</p>
+<h2 id="SDN的控制平面和数据平面"><a href="#SDN的控制平面和数据平面" class="headerlink" title="SDN的控制平面和数据平面"></a>SDN的控制平面和数据平面</h2><ul>
+<li>数据平面基于 VxLAN，控制平面基于 MP-BGP EVPN 协议，在设备之间同步控制平面信息。</li>
+<li>网关是分布式的，每个 leaf 节点都是网关。</li>
+<li>VxLAN 和 MP-BGP EVPN 都是 RFC 标准协议，更多信息参考 [2]。</li>
+<li>VxLAN 的封装和解封装都在 leaf 完成，leaf 以下是 VLAN 网络，以上是 VxLAN 网络。</li>
+<li>这套方案在物理上支持真正的租户隔离。</li>
+</ul>
+<img src="/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/spine-leaf-2.png" class="" title="大二层网络的整体架构">
+
+<p>图 9 是我们软件 + 硬件的网络拓扑：</p>
+<p>1）以 leaf 为边界，leaf 以下是 underlay，走 VLAN；上面 overlay，走 VxLAN</p>
+<p>2）underlay 由 neutron、OVS 和 neutron OVS agent 控制；overlay 是 CNC 控制</p>
+<p>3）Neutron 和 CNC 之间通过 plugin 集成</p>
+<h2 id="SDN控制器的两种模式"><a href="#SDN控制器的两种模式" class="headerlink" title="SDN控制器的两种模式"></a>SDN控制器的两种模式</h2><img src="/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/SDN%E6%8E%A7%E5%88%B6%E5%99%A8%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%A8%A1%E5%BC%8F.png" class="" title="SDN控制器的两种工作模式对比">
+
+<p>从控制器是否参与转发设备的的转发控制来看，当前主要有两种控制器类型:</p>
+<h3 id="弱控制模式"><a href="#弱控制模式" class="headerlink" title="弱控制模式"></a>弱控制模式</h3><ul>
+<li><p>弱控制模式下，控制平面基于网络设备自学习，控制器不在转发平面，仅负责配 置下发，实现自动部署。主要解决网络虚拟化，提供适应应用的虚拟网络。</p>
+</li>
+<li><p>弱控制模式的优点是转发控制面下移，减轻和减少对控制器的依赖。</p>
+</li>
+</ul>
+<h3 id="强控制模式"><a href="#强控制模式" class="headerlink" title="强控制模式"></a>强控制模式</h3><ul>
+<li><p>在强控制模式下，控制器负责整个网络的集中控制，体现SDN集中管理的优势。</p>
+</li>
+<li><p>基于openflow的强控制使得网络具备更多的灵活性和可编程性。除了能够给用 户提供适合应用需要的网络，还可以集成FW等提供安全方案;可以支持混合 Overlay 模型，通过控制器同步主机和拓扑信息, 将各种异构的转发模型同一处理;可以提供基于 openflow 的服务链功能对安全服务进行编排，可以提供更为灵活的网络诊断手段，如虚机仿真和雷达探测等。</p>
+</li>
+</ul>
+<p>用户可能会担心强控制模式下控制器全部故障对网络转发功能的影响，这个影响因素可以通过下述两点来降低和消除:</p>
+<ol>
+<li>通过控制器集群增加控制器可靠性，避免单点故障</li>
+<li>逃生机制:设备与所有控制器失联后，切换为自转模式，业务不受影响。</li>
+</ol>
+<hr>
+<h2 id="附录1-标准的openstack-provider-network"><a href="#附录1-标准的openstack-provider-network" class="headerlink" title="附录1:标准的openstack-provider-network"></a>附录1:标准的openstack-provider-network</h2><img src="/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/openstack-provider-network.png" class="" title="标准的Openstack Provider Network的整体架构">
+
+<h2 id="附录2-简化的openstack-provider-network"><a href="#附录2-简化的openstack-provider-network" class="headerlink" title="附录2:简化的openstack-provider-network"></a>附录2:简化的openstack-provider-network</h2><img src="/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/%E7%AE%80%E5%8C%96%E7%9A%84openstack-provider-network.png" class="" title="简化的Openstack Provider Network的整体架构">
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/05/28/%E5%8F%88%E6%90%AC%E5%AE%B6%E4%BA%86/" rel="prev" title="又搬家了">
+                  <i class="fa fa-angle-left"></i> 又搬家了
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/08/29/%E5%9B%BD%E5%AF%86%E6%A0%87%E5%87%86%E7%9A%84%E7%AE%80%E4%BB%8B/" rel="next" title="国密标准的简介">
+                  国密标准的简介 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="北斗卫星导航系统（Beidou Navigation Satellite System）是中国自主研发和建设的全球卫星导航系统。该系统由一系列卫星、地面监控站和用户终端组成，旨在提供高精度、高可靠性的定位、导航和授时服务。北斗卫星导航系统的发展始于 20世纪 90 年代，经过多年的努力，目前已经成为全球四大卫星导航系统之一，与美国的 GPS、俄罗斯的 GLONASS 和欧盟的 Galilei 并列">
+<meta property="og:type" content="article">
+<meta property="og:title" content="北斗卫星导航系统概述">
+<meta property="og:url" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="北斗卫星导航系统（Beidou Navigation Satellite System）是中国自主研发和建设的全球卫星导航系统。该系统由一系列卫星、地面监控站和用户终端组成，旨在提供高精度、高可靠性的定位、导航和授时服务。北斗卫星导航系统的发展始于 20世纪 90 年代，经过多年的努力，目前已经成为全球四大卫星导航系统之一，与美国的 GPS、俄罗斯的 GLONASS 和欧盟的 Galilei 并列">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/222.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/854.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd123.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/871.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-freq.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-rdss.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-sim.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-sms.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-sms-level.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/GPS24goldenSML.gif">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/GPS.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/signal-1.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/signal-3.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/signal-2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/air.jpeg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/Comparison_satellite_navigation_orbits_zh.svg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/syn2.jpeg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/IGSO.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/fushe.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/Earth_Orbits.svg">
+<meta property="article:published_time" content="2024-08-18T06:55:31.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.099Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/222.jpg">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/","path":"2024/08/18/北斗卫星导航系统概述/","title":"北斗卫星导航系统概述"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>北斗卫星导航系统概述 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%97%E6%96%97%E4%B8%80%E5%8F%B7%EF%BC%88%E9%AA%8C%E8%AF%81%E7%B3%BB%E7%BB%9F%EF%BC%89"><span class="nav-text">北斗一号（验证系统）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%97%E6%96%97%E4%BA%8C%E5%8F%B7%EF%BC%88%E6%89%A9%E5%B1%95%E7%9A%84%E5%8C%BA%E5%9F%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%EF%BC%89"><span class="nav-text">北斗二号（扩展的区域导航系统）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8C%97%E6%96%97%E4%B8%89%E5%8F%B7%EF%BC%88%E5%85%A8%E7%90%83%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%EF%BC%89"><span class="nav-text">北斗三号（全球卫星导航系统）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8C%97%E6%96%97%E7%9A%84%E4%BF%A1%E5%8F%B7%E4%BD%93%E5%88%B6"><span class="nav-text">二、北斗的信号体制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8C%97%E6%96%97%E7%9A%84%E4%BF%A1%E5%8F%B7%E4%BD%93%E7%B3%BB"><span class="nav-text">二、北斗的信号体系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8C%97%E6%96%97%E7%9A%84%E5%AE%9A%E4%BD%8D%E6%9C%8D%E5%8A%A1"><span class="nav-text">二、北斗的定位服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%8C%97%E6%96%97%E7%9A%84%E7%9F%AD%E6%8A%A5%E6%96%87%E6%9C%8D%E5%8A%A1"><span class="nav-text">四、北斗的短报文服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%B8%8E-GPS-%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90"><span class="nav-text">五、与 GPS 系统的对比分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9A%E5%9C%B0%E7%90%83%E5%A4%A7%E6%B0%94%E5%B1%82%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-text">附录一：地球大气层的结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9A%E5%9C%B0%E7%90%83%E5%8D%AB%E6%98%9F%E8%BD%A8%E9%81%93"><span class="nav-text">附录二：地球卫星轨道</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%BF%91%E5%9C%B0%E8%BD%A8%E9%81%93%EF%BC%88LEO%EF%BC%89"><span class="nav-text">1. 近地轨道（LEO）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%B8%AD%E5%9C%86%E5%9C%B0%E7%90%83%E8%BD%A8%E9%81%93%EF%BC%88MEO%EF%BC%89"><span class="nav-text">2. 中圆地球轨道（MEO）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%9C%B0%E7%90%83%E9%9D%99%E6%AD%A2%E8%BD%A8%E9%81%93%EF%BC%88GEO%EF%BC%89"><span class="nav-text">3. 地球静止轨道（GEO）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%80%BE%E6%96%9C%E5%9C%B0%E7%90%83%E5%90%8C%E6%AD%A5%E8%BD%A8%E9%81%93%EF%BC%88IGSO%EF%BC%89"><span class="nav-text">4. 倾斜地球同步轨道（IGSO）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%9E%81%E5%9C%B0%E8%BD%A8%E9%81%93%E5%90%8C%E6%AD%A5%E8%BD%A8%E9%81%93%EF%BC%88SSO%EF%BC%89"><span class="nav-text">5. 极地轨道同步轨道（SSO）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E5%9C%B0%E7%90%83%E5%90%8C%E6%AD%A5%E8%BD%AC%E7%A7%BB%E8%BD%A8%E9%81%93%EF%BC%88GTO%EF%BC%89"><span class="nav-text">6. 地球同步转移轨道（GTO）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%89%EF%BC%9A%E8%8C%83%E8%89%BE%E4%BC%A6%E8%BE%90%E5%B0%84%E5%B8%A6"><span class="nav-text">附录三：范艾伦辐射带</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E7%9A%84%E5%8D%AB%E6%98%9F%E7%B3%BB%E7%BB%9F"><span class="nav-text">相关的卫星系统</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="北斗卫星导航系统概述 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          北斗卫星导航系统概述
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-08-18 14:55:31" itemprop="dateCreated datePublished" datetime="2024-08-18T14:55:31+08:00">2024-08-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>北斗卫星导航系统（Beidou Navigation Satellite System）是中国自主研发和建设的全球卫星导航系统。该系统由一系列卫星、地面监控站和用户终端组成，旨在提供高精度、高可靠性的定位、导航和授时服务。北斗卫星导航系统的发展始于 20世纪 90 年代，经过多年的努力，目前已经成为全球四大卫星导航系统之一，与美国的 GPS、俄罗斯的 GLONASS 和欧盟的 Galilei 并列。</p>
+<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>卫星导航系统通常包含多种类型的卫星：</p>
+<ul>
+<li>MEO 中圆轨道卫星负责提供最基础的服务，但精度有限，主要作用是完成信号地标无死角的卫星信号覆盖。</li>
+<li>GEO 地球静止卫星在区域导航服务方面具有明显优势，卫星利用率高，属于导航系统中的增强系统，可以起到星间通信和地表通信功能，是提高导航定位精度的杀手锏。</li>
+<li>IGSO 倾斜地球同步轨道卫星是延伸补充，重点解决高纬度（尤其南北极地区）低仰角的问题。低仰角下的卫星信号受到大气延迟、多路径效应和观测噪声的严重影响，从而导致产生较大的误差。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="center">类型</th>
+<th align="center">轨道高度</th>
+<th align="center">轨道倾角</th>
+<th align="center">运行周期</th>
+<th align="center">技术特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">GEO</td>
+<td align="center">35786 km</td>
+<td align="center">$0^o$</td>
+<td align="center">23h56m</td>
+<td align="center">位置固定，随时可用，单颗覆盖全球40%，支持短报文；<br>高纬度覆盖差，信号弱</td>
+</tr>
+<tr>
+<td align="center">IGSO</td>
+<td align="center">35786 km</td>
+<td align="center">$55^o$</td>
+<td align="center">23h56m</td>
+<td align="center">与GEO相似，但可以间断性覆盖极地和高纬度地区；<br>不支持短报文，利用率略低</td>
+</tr>
+<tr>
+<td align="center">MEO</td>
+<td align="center">21528 km</td>
+<td align="center">$55^o$</td>
+<td align="center">12h50m</td>
+<td align="center">高度、运行周期、信号覆盖和强度等都较为适中，<br>大气阻力略有影响，利用率一般</td>
+</tr>
+</tbody></table>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/222.jpg" alt="123"><br><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/854.jpg" alt="123"></p>
+<h3 id="北斗一号（验证系统）"><a href="#北斗一号（验证系统）" class="headerlink" title="北斗一号（验证系统）"></a>北斗一号（验证系统）</h3><p>1994 年开始建设，2000 年建成，共有 2 颗 GEO 卫星。2003 年又发射了一颗补充卫星。<br>北斗一号使用的有源定位，仅为中国境内服务。<br>2013 年，北斗一号已经光荣退休！</p>
+<h3 id="北斗二号（扩展的区域导航系统）"><a href="#北斗二号（扩展的区域导航系统）" class="headerlink" title="北斗二号（扩展的区域导航系统）"></a>北斗二号（扩展的区域导航系统）</h3><p>2004 年开始建设，2012 年建成，包含 14 颗卫星（ <code>GEO * 5 + MEO * 4 + ISGO * 5</code>），此外还有 6 颗试验或备份卫星。<br>北斗二号采取有源与无源相结合体制，服务范围为整个亚太地区。定位精度为 10 米，测速精度为 0.2 米&#x2F;秒，授时精度为 50 纳秒，短信字数每次为 120 个字。<br>目前，北斗二号与北斗三号同时使用，并完全兼容北斗三号的信号。</p>
+<h3 id="北斗三号（全球卫星导航系统）"><a href="#北斗三号（全球卫星导航系统）" class="headerlink" title="北斗三号（全球卫星导航系统）"></a>北斗三号（全球卫星导航系统）</h3><p>2009 年开始建设，2020 年建成，包含 30 颗卫星（ <code>GEO * 3 + MEO * 24 + ISGO * 3</code>），此外还有 5 颗试验或备份卫星。<br>北斗三号采取有源与无源相结合体制，服务范围为全球。定位精度为 10 米，测速精度为 0.2 米&#x2F;秒，授时精度为 20纳秒，每次短信字数也增加了。付费用户提供更高精度等级（2.5～5 米）的定位服务。<br>此外，北斗三号在载荷、星间链路、激光通信等方面也有进步。如北斗三号采用星载氢原子钟，其精度将比北斗二号的星载铷原子钟提高一个数量级。又如，北斗三号增加了卫星搜救功能和全球位置报告功能。</p>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd123.jpg" alt="3"></p>
+<h2 id="二、北斗的信号体制"><a href="#二、北斗的信号体制" class="headerlink" title="二、北斗的信号体制"></a>二、北斗的信号体制</h2><p>信号体制的英文名是 signal system，它主要指的是卫星导航信号，分为四个部分，一是载波频率，二是调制方式，三是测距码，四是导航电文。信号体制是我们国内的说法，实际上它研究的是信号体制的设计、产生、实现、处理等技术。</p>
+<p>北斗-M1 是一个实验性的卫星，用于发射信号的测试和验证，并能以先占的原则确定对相应频率的使用权。北斗-M1 卫星在E2、E5B、E6频段进行信号传输，传输的信号分成2类，分别被称作“I”和“Q”。“I”的信号具有较短的编码，可能会被用来作开放服务（民用）， 而“Q”部分的编码更长，且有更强的抗干扰性，可能会被用作需要授权的服务（军用）。</p>
+<p>1 ）星座类似，均有24~30 颗卫星组成，实现全球覆盖；<br>2 ）工作频率类似，均工作在 L 波段，频率在 1164 ~ 1610 MHz 范围内；<br>3 ）采用 PRN 码进行测距定位，有粗码和精码两种码。码速率越高，定位精度越高，信号带宽越宽。<br>4 ）信号发射功率相近，信号最小接收功率在 -161 ~ -150 dBW 之间。<br>5 ）极化方式相同，发射信号均采用右旋圆极化方式。</p>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/871.jpg" alt="871"></p>
+<p>北斗卫星提供不同频段的信号，主要包括以下频段：</p>
+<ul>
+<li>B1 频段（标准的民用定位和导航服务）：中心频率为 1561.098 MHz<ul>
+<li>B1I 频段：中心频率为 1561.098 MHz，三代、二代都支持的基础信号，简写为 B1，后续可能被 B1C 替代</li>
+<li>B1C 频段：中心频率为 1575.420 MHz，三代 M&#x2F;I 星的<strong>主推信号</strong>，适配中高档移动终端；与 GPS L1C（基础频率），Galileo E1，SBAS，日本 QZSS 信号频率一致</li>
+</ul>
+</li>
+<li>B2 频段（高精度的定位和导航服务）：中心频率为 1207.14 MHz<ul>
+<li>B2a 频段：中心频率为 1176.450 MHz，三代 M&#x2F;I 星的<strong>主推信号</strong>，适配中高档移动终端；与 GPS L5（民航导航专用）,Galileo E5a 信号频率一致。</li>
+<li>B2b 频段：中心频率为 1207.14 MHz，三代的 M&#x2F;I 星支持，适配部分 HUAWEI 移动终端；与 Galileo E5b 信号频率一致，功能相当于 GPS L2（也是双频模式，但频率不同）。</li>
+<li>B2I 频段（正在退出）：中心频率为 1207.140 MHz，仅二代星支持</li>
+</ul>
+</li>
+<li>B3 频段（特种增强型信号）：中心频率为 1268.52 MHz，三代、二代都支持</li>
+</ul>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-freq.png" alt="1"></p>
+<h2 id="二、北斗的信号体系"><a href="#二、北斗的信号体系" class="headerlink" title="二、北斗的信号体系"></a>二、北斗的信号体系</h2><h2 id="二、北斗的定位服务"><a href="#二、北斗的定位服务" class="headerlink" title="二、北斗的定位服务"></a>二、北斗的定位服务</h2><p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-rdss.png" alt="5"></p>
+<h2 id="四、北斗的短报文服务"><a href="#四、北斗的短报文服务" class="headerlink" title="四、北斗的短报文服务"></a>四、北斗的短报文服务</h2><p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-sim.png" alt="2"><br><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-sms.png" alt="3"><br><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/bd-sms-level.png" alt="4"></p>
+<h2 id="五、与-GPS-系统的对比分析"><a href="#五、与-GPS-系统的对比分析" class="headerlink" title="五、与 GPS 系统的对比分析"></a>五、与 GPS 系统的对比分析</h2><p>GPS 由美国政府拥有和运营，国防部是 GPS 的管理者，参见 <a target="_blank" rel="noopener" href="https://www.gps.gov/">www.gps.gov</a>。<br>GPS 初始设计为 24 个卫星，每个 8 个，位于 3 个 MEO 轨道平面，但后来修改为 6 个轨道平面，每个轨道平面有 4 颗卫星。下图以美国科罗拉多州的戈尔登市为例，显示可以看到的卫星数量如何随时间变化。</p>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/GPS24goldenSML.gif" alt="GPS-2"></p>
+<p>影响卫星导航精度的几个关键指标：</p>
+<ul>
+<li>PDOP（Positional Dilution of Precision，位置精度因子）：描述导航卫星与用户之间相对定位关系的参数，它反映了卫星的几何分布对定位精度的影响。<br>PDOP可以按照由接收机和观测到的四颗卫星连线所组成的锥体体积来计算。一个好的定位通常要求 PDOP 值不大于 3，而大于 7 则被认为是较差的定位精度。</li>
+<li>VSN（Visible Satellite Number，可见卫星数量）：用户设备能够接收到信号并用于定位的卫星数量。为了确定三维空间中的位置和时间，VSN 必须大于或等于 4。</li>
+</ul>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/GPS.png" alt="GPS"></p>
+<p>GPS 信号有 5 个频段：</p>
+<ul>
+<li>L1：中心频率 1575.42 MHz，早期承载民用粗略码 C&#x2F;A 和加密精度码 P(Y)，现代版本采用民用码 L1C（CM+CL）和军用码 M</li>
+<li>L2：中心频率 1227.60 MHz，是第二个民用信号，承载加密精度码 P(Y)，现代版本采用民用码 L2C 和军用码 M</li>
+<li>L3：中心频率 1381.05 MHz，用于核爆炸检测项目</li>
+<li>L4：中心频率 1379.913 MHz，用于电离层误差校正的研究</li>
+<li>L5：中心频率 1176.45 MHz，是第三个民用信号。该频率属于航空导航的国际保护范围，确保没有干扰。</li>
+</ul>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/signal-1.png" alt="S1"><br><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/signal-3.png" alt="S2"><br><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/signal-2.png" alt="S3"></p>
+<p>主要技术标准如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.gps.gov/technical/icwg/IS-GPS-200K.pdf">GPS-IS-200K 接口规范，描述 L1、L2C 和 P</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.gps.gov/technical/icwg/IS-GPS-705F.pdf">GPS-IS-705F 接口规范，描述 L5</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.gps.gov/technical/icwg/IS-GPS-800E.pdf">GPS-IS-800E 接口规范，描述 L1C</a></li>
+</ul>
+<blockquote>
+<p>基于美国政府的“选择性可用性政策（SA）”，最初民用信号引入了故意的误差数据（军用接收器可以纠正），仅限于 100 米的平均精度。2000年，美国总统克林顿取消了该政策，民用接收机的精度提升为 5 米，双频设备可提升为 1 米。</p>
+</blockquote>
+<hr>
+<h2 id="附录一：地球大气层的结构"><a href="#附录一：地球大气层的结构" class="headerlink" title="附录一：地球大气层的结构"></a>附录一：地球大气层的结构</h2><p>按照温度来划分，地球大气层分为四个主要的层级（Layer），即：对流层、平流层、中间层和热成层。</p>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/air.jpeg" alt="air"></p>
+<ul>
+<li>对流层（Troposphere）：是最接近地球表面的层，其高度约为 10 公里，温度为 $15^\circ ～ -56^\circ$。其包含了地球大气中 75% 的质量和大部分的水蒸气，天气现象主要发生在这一层。</li>
+<li>平流层（Stratosphere）：也称同温层，位于对流层之上，其高度约为 10～50 公里，温度为 $-65^\circ ～ -2^\circ$。其特点是<strong>温度随高度升高而增加</strong>，主要原因是臭氧层吸收太阳紫外线辐射。平流层中没有对流，风向和风速相对稳定，很适合民用飞机的巡航，军用飞机的高度也难以超过 30 公里。</li>
+<li>中间层（Mesosphere）：位于平流层之上，其高度约为 50～85 公里，温度为 $-2^\circ ～ -86^\circ$。其特点是<strong>温度随高度升高而降低</strong>，因为臭氧层的加热作用减弱。</li>
+<li>热成层（Thermosphere）：也称暖层，或者热层，是最外层的大气层，其高度约为 1,000 公里，温度为 $-86^\circ ～ 1200^\circ$。其特点是<strong>温度高达几千度</strong>，因为气体分子受到太阳紫外线辐射的强烈加热。这也是极光发生的地方。</li>
+</ul>
+<blockquote>
+<p>一般认为，100 公里高度的卡门线（Kármán line）是国家领空的上限，超过此高度的飞行器被认为是航天器</p>
+</blockquote>
+<p>热成层之上是外层空间（Exosphere），大气逐渐变得非常稀薄，直到与外太空的真空相接。外层空间没有明确的边界，气体分子可以逃逸到太空中。</p>
+<p>从其他角度看，还有几个重要的层级概念：</p>
+<ul>
+<li>臭氧层（Ozone Layer）：主要位于平流层，高度大约在 15～35 公里之间。在某些地区和条件下，臭氧分布可能延伸到对流层顶部或平流层更高处。<br>臭氧层主要由臭氧（$O_3$）分子组成，这些分子吸收太阳紫外线辐射，保护地球表面免受有害紫外线的直接照射。臭氧层的温度相对较低，但由于臭氧分子吸收紫外线辐射，这一层的温度可以比周围的大气层温度高。</li>
+<li>电离层（Ionosphere）：主要位于热成层（部分位于中间层），高度大约在 60～1000 公里，是大气层中气体分子被太阳辐射电离，形成带电粒子（离子和自由电子）的区域。<br>电离层中最显著的部分是 D层、E层和 F层，它们分别对应不同的高度和电离程度。电离层对无线电通信非常重要，因为它可以反射或折射无线电波，使得无线电信号能够跨越大距离传播。太阳活动强烈时对无线电波的传播有显著影响。</li>
+</ul>
+<h2 id="附录二：地球卫星轨道"><a href="#附录二：地球卫星轨道" class="headerlink" title="附录二：地球卫星轨道"></a>附录二：地球卫星轨道</h2><p>地球卫星作为航天器的一种，其最低轨道高度一般在 1000 公里以上。</p>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/Comparison_satellite_navigation_orbits_zh.svg" alt="轨道分布图"></p>
+<h3 id="1-近地轨道（LEO）"><a href="#1-近地轨道（LEO）" class="headerlink" title="1. 近地轨道（LEO）"></a>1. 近地轨道（LEO）</h3><p>LEO（Low  Orbit，近地轨道，也称低地轨道），一般高度在 300～2000 公里，卫星运转周期从大约 90 分钟到几小时不等，轨道形状接近圆形。</p>
+<p>由于近地轨道卫星离地面较近，绝大多数对地观测卫星、测地卫星、空间站以及一些新的通信卫星系统（马斯克的星链、中国的星网等）都采用近地轨道。在近地轨道的物体仍然受到热气体阻力影响，因此高度通常不低于 300 公里，同时还要考虑尽量避开范艾伦辐射带。</p>
+<h3 id="2-中圆地球轨道（MEO）"><a href="#2-中圆地球轨道（MEO）" class="headerlink" title="2. 中圆地球轨道（MEO）"></a>2. 中圆地球轨道（MEO）</h3><p>MEO（Medium Earth Orbit，中地球轨道，也称中圆轨道），一般高度在 2,000~35,786 公里，卫星运转周期在 2～24 小时之间，但大部分在 12 小时左右，轨道形状接近正圆形。</p>
+<p>运行于中地球轨道的卫星大都是导航卫星，例如，格洛纳斯系统位于 19,100 公里，GPS 位于 20,200 公里，北斗卫星导航系统位于 21,500 公里，伽利略定位系统位于 23,222 公里。部分跨越南北极的通信卫星也使用中地球轨道，最早的通信卫星 Telstar 也是使用的这条轨道。</p>
+<h3 id="3-地球静止轨道（GEO）"><a href="#3-地球静止轨道（GEO）" class="headerlink" title="3. 地球静止轨道（GEO）"></a>3. 地球静止轨道（GEO）</h3><p>GEO（Geostationary Orbit，地球静止轨道，也称地球赤道同步轨道，或者正圆轨道），是指地球赤道面上方 35,786 公里的圆形轨道，卫星运转周期和地球自转周期（一恒星日，即 23 时 56 分 4 秒）相同，绕行速度约为 3.1 公里&#x2F;秒，运行方向和地球自转方向一致。<br>GEO 是地球同步轨道（Geosynchronous orbit，GSO）的一个特例，强调其相对静止的特性。</p>
+<p>在地面观测者看来，地球静止轨道卫星在天空固定不动的，因此布设 3 颗通讯卫星，即可实现除两极外的全球通讯，地面站天线只要对准卫星的定点位置就可以通讯，而不用转动天线，因此通信卫星、气象卫星和海洋监测卫星一般都运行在这个轨道。</p>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/syn2.jpeg" alt="SYN2"></p>
+<h3 id="4-倾斜地球同步轨道（IGSO）"><a href="#4-倾斜地球同步轨道（IGSO）" class="headerlink" title="4. 倾斜地球同步轨道（IGSO）"></a>4. 倾斜地球同步轨道（IGSO）</h3><p>IGSO（Inclined Geosynchronous Orbit，倾斜地球同步轨道），也是一种地球同步轨道，其轨道高度和运转周期与 GEO 卫星相同，但其与地球赤道面的倾角不为 0 ，因此星下点轨迹是一个跨南北半球的 “8”字，与赤道相交于一点，该点常称之为交叉点。</p>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/IGSO.png" alt="IGSO"></p>
+<h3 id="5-极地轨道同步轨道（SSO）"><a href="#5-极地轨道同步轨道（SSO）" class="headerlink" title="5. 极地轨道同步轨道（SSO）"></a>5. 极地轨道同步轨道（SSO）</h3><p>SSO（Sun-synchronous Orbit，极地轨道同步轨道，也称太阳同步轨道），也是一种地球同步轨道，其轨道平面和太阳始终保持相对固定的取向，轨道倾角接近 90 度。</p>
+<p>SSO 卫星运行时能到达南北极区上空，即卫星能飞经全球范围的上空。需要在全球范围内进行观测和应用的气象卫星、导航卫星、地球资源卫星等都采用这种轨道。<br>倾斜轨道和极地轨道同步卫星从地球上看是移动的，但每天的同一时间可以经过特定的地区，因此通常用于科研、气象或军事情报的搜集，以及两极地区和高纬度地区的通信。</p>
+<h3 id="6-地球同步转移轨道（GTO）"><a href="#6-地球同步转移轨道（GTO）" class="headerlink" title="6. 地球同步转移轨道（GTO）"></a>6. 地球同步转移轨道（GTO）</h3><p>GTO（Geostationary Transfer Orbit，地球同步转移轨道），是指近地点在 1,000 公里以下、远地点为地球同步轨道高度（约36,000 公里）的<strong>椭圆轨道</strong>。</p>
+<p>GTO 轨道是霍曼转移轨道的运用之一，经加速后可达地球静止轨道 GEO。</p>
+<h2 id="附录三：范艾伦辐射带"><a href="#附录三：范艾伦辐射带" class="headerlink" title="附录三：范艾伦辐射带"></a>附录三：范艾伦辐射带</h2><p>范艾伦辐射带，指在地球附近的近层宇宙空间中包围着地球的高能粒子辐射带，主要由地磁场中捕获的高达几兆电子伏的电子以及高达几百兆电子伏的质子组成，这些辐射会对人类身体和卫星设备造成巨大伤害。</p>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/fushe.jpg" alt="范艾伦辐射带"></p>
+<p>范艾伦辐射带位于南北纬 $40 ^\circ ～ 50 ^\circ$ 之间，高度范围分两段：<strong>内辐射带</strong>的高能电子多，高度为 1,500～5,000 公里；<strong>外辐射带</strong>的高能质子多，高度为 13,000～20,000 公里，内外层之间存在范艾伦带缝，缝中辐射很少。</p>
+<p><img src="/2024/08/18/%E5%8C%97%E6%96%97%E5%8D%AB%E6%98%9F%E5%AF%BC%E8%88%AA%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0/Earth_Orbits.svg" alt="demo"></p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/w2rS1gADCV9N_l9FI00DMQ">北斗卫星之杨元喜院士访谈录 - 格致论道讲坛</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/n6KjKdJiM7dNz6lJ-FUJyg">北斗卫星之徐颖访谈录 - 格致论道讲坛</a></li>
+<li><a target="_blank" rel="noopener" href="https://web.stanford.edu/group/scpnt/pnt/PNT11/2011_presentation_files/10_Lu-PNT2011.pdf">北斗二号性能分析报告 - 清华大学</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/Gou_Hailong/article/details/106294886">“北斗”知多少？</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/u010783226/article/details/108057660">北斗一号、北斗二号、北斗三号的区别</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.thepaper.cn/newsDetail_forward_7979721">北斗简史：一文读懂国产导航的26年成长路</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/698874681">GPS 和相对论修正</a></li>
+</ul>
+<h3 id="相关的卫星系统"><a href="#相关的卫星系统" class="headerlink" title="相关的卫星系统"></a>相关的卫星系统</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/CIDejfzHBN-hslckMozzhw">星链卫星(STARLINK)通信系统介绍</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Global_Positioning_System">GPS 系统 - Wiki</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/GPS_signals">GPS 信号 - Wiki</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.thepaper.cn/newsDetail_forward_2240440">美持续升级GPS系统，为导航授时战做准备</a></li>
+<li><a href="GPS%E5%8D%AB%E6%98%9F%E4%BF%A1%E5%8F%B7%E5%8E%9F%E7%90%86.pdf">GPS卫星信号原理</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/08/05/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E5%85%AD%EF%BC%9ATransformer/" rel="prev" title="大模型学习笔记之六：Transformer">
+                  <i class="fa fa-angle-left"></i> 大模型学习笔记之六：Transformer
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/09/15/QAM-%E6%AD%A3%E4%BA%A4%E6%8C%AF%E5%B9%85%E8%B0%83%E5%88%B6%E7%9A%84%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86/" rel="next" title="QAM - 正交振幅调制的技术原理">
+                  QAM - 正交振幅调制的技术原理 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

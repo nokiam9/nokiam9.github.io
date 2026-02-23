@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="AFPS（Apple File System）是 Apple 平台上使用的默认文件格式。APFS 继承自 HFS+，因此其设计的某些方面有意遵循 HFS+ 以便于历史数据的迁移。  Apple File System 支持对容器、卷和文件使用的数据结构进行加密。当一个卷被加密时，它的文件系统树和该卷中的文件内容都被加密。根据设备的能力，苹果文件系统使用硬件或软件加密：   * 硬件加密：用于支持硬">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apple File System的软件加密分析">
+<meta property="og:url" content="https://nokiam9.github.io/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="AFPS（Apple File System）是 Apple 平台上使用的默认文件格式。APFS 继承自 HFS+，因此其设计的某些方面有意遵循 HFS+ 以便于历史数据的迁移。  Apple File System 支持对容器、卷和文件使用的数据结构进行加密。当一个卷被加密时，它的文件系统树和该卷中的文件内容都被加密。根据设备的能力，苹果文件系统使用硬件或软件加密：   * 硬件加密：用于支持硬">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/arch.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/level0.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/btree.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/keybag.png">
+<meta property="article:published_time" content="2024-02-11T10:44:09.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.676Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/arch.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/","path":"2024/02/11/Apple-File-System的软件加密分析/","title":"Apple File System的软件加密分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Apple File System的软件加密分析 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-text">一、总体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%B9%E5%99%A8%E5%B1%82-Container-Layer"><span class="nav-text">1. 容器层 - Container Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Container-Superblock"><span class="nav-text">Container Superblock</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%8D%B7%E5%AE%97%E5%B1%82-Volume-Layer"><span class="nav-text">2. 卷宗层 - Volume Layer</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Volume-Superblock"><span class="nav-text">Volume Superblock</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-ExtentRef-Tree-%E7%9A%84%E8%AE%A8%E8%AE%BA"><span class="nav-text">关于 ExtentRef Tree 的讨论</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%80%9A%E7%94%A8%E7%BB%84%E4%BB%B6"><span class="nav-text">二、通用组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Object-%E5%AF%B9%E8%B1%A1"><span class="nav-text">1. Object - 对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-B-Tree"><span class="nav-text">2. B-Tree</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81-OMAP"><span class="nav-text">三、 OMAP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OMAP-%E7%9A%84%E6%9F%A5%E8%AF%A2%E6%B5%81%E7%A8%8B"><span class="nav-text">OMAP 的查询流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81File-System"><span class="nav-text">四、File System</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%96%87%E4%BB%B6%E5%92%8C%E7%9B%AE%E5%BD%95"><span class="nav-text">1. 文件和目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#INODE-%E8%AE%B0%E5%BD%95"><span class="nav-text">INODE 记录</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Extended-Fields%EF%BC%88%E6%89%A9%E5%B1%95%E5%AD%97%E6%AE%B5%EF%BC%89"><span class="nav-text">Extended Fields（扩展字段）</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DIR-REC-%E8%AE%B0%E5%BD%95"><span class="nav-text">DIR_REC 记录</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="nav-text">2. 数据流</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DSTREAM-%E8%AE%B0%E5%BD%95"><span class="nav-text">DSTREAM 记录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#XATTR-%E8%AE%B0%E5%BD%95"><span class="nav-text">XATTR 记录</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AF%86%E9%92%A5%E7%AE%A1%E7%90%86"><span class="nav-text">3. 密钥管理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CRYPTO-STATE-%E8%AE%B0%E5%BD%95"><span class="nav-text">CRYPTO_STATE 记录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FILE-EXTENT-%E8%AE%B0%E5%BD%95"><span class="nav-text">FILE_EXTENT 记录</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E-crypto-id-%E7%9A%84%E8%AE%A8%E8%AE%BA"><span class="nav-text">关于 crypto_id 的讨论</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81Keybag"><span class="nav-text">五、Keybag</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Keybag-%E7%9A%84%E5%AD%98%E5%82%A8%E6%96%B9%E5%BC%8F"><span class="nav-text">1. Keybag 的存储方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-VEK-%E7%9A%84%E8%A7%A3%E5%B0%81%E6%B5%81%E7%A8%8B"><span class="nav-text">2. VEK 的解封流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-1-%E8%A7%A3%E5%B0%81-Container-Keybag"><span class="nav-text">Step 1: 解封 Container Keybag</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-2-%E6%89%BE%E5%88%B0-wrapped-VEK"><span class="nav-text">Step 2: 找到 wrapped VEK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-3-%E8%A7%A3%E5%B0%81-Volume-Keybag"><span class="nav-text">Step 3: 解封 Volume Keybag</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-4-%E6%89%BE%E5%88%B0-wrapped-KEK"><span class="nav-text">Step 4: 找到 wrapped KEK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-5-%E8%A7%A3%E5%B0%81-KEK"><span class="nav-text">Step 5: 解封 KEK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Step-6-%E8%A7%A3%E5%B0%81-VEK"><span class="nav-text">Step 6: 解封 VEK</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%96%87%E4%BB%B6%E8%A7%A3%E5%AF%86%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-text">3. 文件解密的流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%85%83%E6%95%B0%E6%8D%AE%E7%9A%84%E8%A7%A3%E5%AF%86"><span class="nav-text">文件元数据的解密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E5%86%85%E5%AE%B9%E7%9A%84%E8%A7%A3%E5%AF%86"><span class="nav-text">文件内容的解密</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81Snapshot"><span class="nav-text">六、Snapshot</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Snapshot-Metadata-Record"><span class="nav-text">1. Snapshot Metadata Record</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Snapshot-Name-Records"><span class="nav-text">2. Snapshot Name Records</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Snapshot-Extended-Reference-Metadata-Object"><span class="nav-text">3. Snapshot Extended Reference Metadata Object</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E9%81%97%E7%95%99%E9%97%AE%E9%A2%98"><span class="nav-text">七、遗留问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-AFPS-%E7%99%BD%E7%9A%AE%E4%B9%A6%E4%B8%AD%E4%BB%8B%E7%BB%8D%E7%9A%84-media-keybag-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">1. AFPS 白皮书中介绍的 media_keybag 是什么？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9A%E4%B8%80%E4%BA%9B%E9%87%8D%E8%A6%81%E7%9A%84%E7%B1%BB%E5%9E%8B%E5%AE%9A%E4%B9%89"><span class="nav-text">附录一：一些重要的类型定义</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Object-Type-%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-text">1. Object Type 的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Object-Flag-%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-text">2. Object Flag 的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Volume-Flag-%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-text">3. Volume Flag 的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Volume-Role-%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-text">4. Volume Role 的定义</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-text">官方文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81"><span class="nav-text">源码</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Apple File System的软件加密分析 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Apple File System的软件加密分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-02-11 18:44:09" itemprop="dateCreated datePublished" datetime="2024-02-11T18:44:09+08:00">2024-02-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>9.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>33 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>AFPS（Apple File System）是 Apple 平台上使用的默认文件格式。APFS 继承自 HFS+，因此其设计的某些方面有意遵循 HFS+ 以便于历史数据的迁移。</p>
+<p>Apple File System 支持对容器、卷和文件使用的数据结构进行加密。当一个卷被加密时，它的文件系统树和该卷中的文件内容都被加密。根据设备的能力，苹果文件系统使用硬件或软件加密：</p>
+<ul>
+<li>硬件加密：用于支持硬件加密的设备的内部存储，包括macOS(带T2安全芯片)和iOS设备。<br>  当使用硬件加密时，只有内核（安全隔区）可以与内部存储交互。<br>  既支持 FDE 单密钥模式，也支持 FBE 多密钥模式。</li>
+<li>软件加密：用于外部存储（U盘或外接硬盘），以及不支持硬件加密的设备（Intel CPU的Macbook）上的内部存储。<br>  当使用软件加密时，<strong>仅支持 FDE 单密钥模式</strong>。</li>
+</ul>
+<p>大多数应用程序可以使用 Apple 提供的高级接口与文件系统交互，无需自行处理加密和解密，但为了支持跨操作系统的应用（如磁盘备份恢复、Linux系统读取APFS磁盘数据），Apple 提供了<a href="Apple-File-System-Reference.pdf">Apple File System Reference</a>，公开了技术实现细节，开发者可以自行实现加密和解密处理。</p>
+<h2 id="一、总体架构"><a href="#一、总体架构" class="headerlink" title="一、总体架构"></a>一、总体架构</h2><p>APFS 在概念上分为两层，容器层（Container Layer）和文件系统层（Filesystem Layer）。<br><img src="/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/arch.png" alt="ARCG"></p>
+<h3 id="1-容器层-Container-Layer"><a href="#1-容器层-Container-Layer" class="headerlink" title="1. 容器层 - Container Layer"></a>1. 容器层 - Container Layer</h3><p>一个 APFS 分区有一个单独的容器，容器可以包含多个 volume（也称为 filesystem），每个卷都包含一个目录结构，用于管理 file 和 folder。</p>
+<p><img src="/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/level0.png" alt="L0"></p>
+<ul>
+<li>Superblock：一个容器有多个超级块的副本，这些副本保存了容器在过去时间点的状态。Block 0 通常是最新的副本，用于在挂载过程中查找检查点。</li>
+<li>Checkpoint：建立崩溃保护机制，每个事务结束时将临时对象写入磁盘并存储超级块的副本</li>
+<li>Space manager：跟踪容器内的可用空间，并用于分配和释放存储对象和文件数据的块</li>
+<li>OMAP（Object Map）：基于B-树管理虚拟对象标识符和事务标识符的物理地址映射</li>
+<li>Reaper：一种允许在跨越多个事务的时间段内删除大型对象的机制，单一容器内唯一实例</li>
+</ul>
+<h4 id="Container-Superblock"><a href="#Container-Superblock" class="headerlink" title="Container Superblock"></a>Container Superblock</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">nx_superblock</span> &#123;</span> </span><br><span class="line">    <span class="type">obj_phys_t</span> nx_o; </span><br><span class="line">    <span class="type">uint32_t</span> nx_magic;                      <span class="comment">// magic ‘NXSB’</span></span><br><span class="line">    <span class="type">uint32_t</span> nx_block_size;                 <span class="comment">// 容器的已使用的逻辑块数量</span></span><br><span class="line">    <span class="type">uint64_t</span> nx_block_count;                <span class="comment">// 容器的逻辑块总数</span></span><br><span class="line">    <span class="type">uint64_t</span> nx_features;                   <span class="comment">// 标记位，0x00000004 = NX_CRYPTO_SW，软件加密</span></span><br><span class="line">    <span class="type">uint64_t</span> nx_readonly_compatible_features; </span><br><span class="line">    <span class="type">uint64_t</span> nx_incompatible_features; </span><br><span class="line">    <span class="type">uuid_t</span> nx_uuid;                         <span class="comment">// 容器 UUID</span></span><br><span class="line">    <span class="type">oid_t</span> nx_next_oid;                      <span class="comment">// 下一个要使用的 oid</span></span><br><span class="line">    <span class="type">xid_t</span> nx_next_xid;                      <span class="comment">// 下一个要使用的 xid</span></span><br><span class="line">    <span class="type">uint32_t</span> nx_xp_desc_blocks; </span><br><span class="line">    <span class="type">uint32_t</span> nx_xp_data_blocks; </span><br><span class="line">    <span class="type">paddr_t</span> nx_xp_desc_base; </span><br><span class="line">    <span class="type">paddr_t</span> nx_xp_data_base; </span><br><span class="line">    <span class="type">uint32_t</span> nx_xp_desc_next; </span><br><span class="line">    <span class="type">uint32_t</span> nx_xp_data_next; </span><br><span class="line">    <span class="type">uint32_t</span> nx_xp_desc_index; </span><br><span class="line">    <span class="type">uint32_t</span> nx_xp_desc_len; </span><br><span class="line">    <span class="type">uint32_t</span> nx_xp_data_index; </span><br><span class="line">    <span class="type">uint32_t</span> nx_xp_data_len; </span><br><span class="line">    <span class="type">oid_t</span> nx_spaceman_oid;                  <span class="comment">// 空间管理器（临时对象） 的 oid</span></span><br><span class="line">    <span class="type">oid_t</span> nx_omap_oid;                      <span class="comment">// 对象映射（物理对象）的 oid</span></span><br><span class="line">    <span class="type">oid_t</span> nx_reaper_oid;                    <span class="comment">// 收割机（临时对象）的 oid</span></span><br><span class="line">    <span class="type">uint32_t</span> nx_test_type; </span><br><span class="line">    <span class="type">uint32_t</span> nx_max_file_systems; </span><br><span class="line">    <span class="type">oid_t</span> nx_fs_oid[NX_MAX_FILE_SYSTEMS];   <span class="comment">// Filesystem superblock （虚拟对象）oid 数组</span></span><br><span class="line">    <span class="type">uint64_t</span> nx_counters[NX_NUM_COUNTERS]; </span><br><span class="line">    <span class="type">prange_t</span> nx_blocked_out_prange; </span><br><span class="line">    <span class="type">oid_t</span> nx_evict_mapping_tree_oid; </span><br><span class="line">    <span class="type">uint64_t</span> nx_flags; </span><br><span class="line">    <span class="type">paddr_t</span> nx_efi_jumpstart; </span><br><span class="line">    <span class="type">uuid_t</span> nx_fusion_uuid; </span><br><span class="line">    <span class="type">prange_t</span> nx_keylocker;                  <span class="comment">// 指向容器密钥包的物理位置</span></span><br><span class="line">    <span class="type">uint64_t</span> nx_ephemeral_info[NX_EPH_INFO_COUNT]; </span><br><span class="line">    <span class="type">oid_t</span> nx_test_oid; </span><br><span class="line">    <span class="type">oid_t</span> nx_fusion_mt_oid; </span><br><span class="line">    <span class="type">oid_t</span> nx_fusion_wbc_oid; </span><br><span class="line">    <span class="type">prange_t</span> nx_fusion_wbc; </span><br><span class="line">    <span class="type">uint64_t</span> nx_newest_mounted_version; </span><br><span class="line">    <span class="type">prange_t</span> nx_mkb_locker;                 <span class="comment">// Wrapped media key</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-卷宗层-Volume-Layer"><a href="#2-卷宗层-Volume-Layer" class="headerlink" title="2. 卷宗层 - Volume Layer"></a>2. 卷宗层 - Volume Layer</h3><p>Volume 是真正存储数据的，每个卷宗都有一个文件系统，核心组件包括：</p>
+<ul>
+<li>Superblock：负责管理 volume 自己的一些配置信息，包含了各个组件的入口</li>
+<li>Root Directory：负责以 B-树 方式存储文件结构信息，如目录结构、文件元数据和文件内容</li>
+<li>OMAP：卷宗的大部分数据都是基于对象存储，因此每个卷宗都需要自己管理 OMAP</li>
+<li>SNAP META Tree：负责管理快照的元数据，也是一个 B-树</li>
+<li>Extentref Tree：负责管理快照扩展数据，还是一个 B-树</li>
+</ul>
+<h4 id="Volume-Superblock"><a href="#Volume-Superblock" class="headerlink" title="Volume Superblock"></a>Volume Superblock</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">apfs_superblock</span> &#123;</span> </span><br><span class="line">    <span class="type">obj_phys_t</span>  apfs_o;</span><br><span class="line">    <span class="type">uint32_t</span> apfs_magic;                <span class="comment">// magic &#x27;BSPA&#x27;</span></span><br><span class="line">    <span class="type">uint32_t</span> apfs_fs_index;             <span class="comment">// container Superblock 的 nx_fs_oid 数组的序号</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_features;</span><br><span class="line">    <span class="type">uint64_t</span> apfs_readonly_compatible_features;</span><br><span class="line">    <span class="type">uint64_t</span> apfs_incompatible_features;</span><br><span class="line">    <span class="type">uint64_t</span> apfs_unmount_time;</span><br><span class="line">    <span class="type">uint64_t</span> apfs_fs_reserve_block_count;</span><br><span class="line">    <span class="type">uint64_t</span> apfs_fs_quota_block_count;</span><br><span class="line">    <span class="type">uint64_t</span> apfs_fs_alloc_count;</span><br><span class="line">    <span class="type">wrapped_meta_crypto_state_t</span> apfs_meta_crypto;   <span class="comment">// 仅有密钥版本信息，因为VEK在密钥包！</span></span><br><span class="line">    <span class="type">uint32_t</span> apfs_root_tree_type;</span><br><span class="line">    <span class="type">uint32_t</span> apfs_extentref_tree_type;</span><br><span class="line">    <span class="type">uint32_t</span> apfs_snap_meta_tree_type;</span><br><span class="line">    <span class="type">oid_t</span> apfs_omap_oid;                <span class="comment">// 对象映射（物理对象）oid</span></span><br><span class="line">    <span class="type">oid_t</span> apfs_root_tree_oid;           <span class="comment">// Root 文件系统树（虚拟对象）oid</span></span><br><span class="line">    <span class="type">oid_t</span> apfs_extentref_tree_oid;      <span class="comment">// ？扩展参考树（物理对象）的 oid </span></span><br><span class="line">    <span class="type">oid_t</span> apfs_snap_meta_tree_oid;      <span class="comment">// 快照元数据树（物理对象）的 oid</span></span><br><span class="line">    <span class="type">xid_t</span> apfs_revert_to_xid;           <span class="comment">// 将要恢复到快照的 xid</span></span><br><span class="line">    <span class="type">oid_t</span> apfs_revert_to_sblock_oid;    <span class="comment">// 将要恢复到快照的超级块副本的 oid</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_next_obj_id;          <span class="comment">// 下一个要分配的对象 oid</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_num_files;            <span class="comment">// 此卷宗的普通文件总数</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_num_directories;      <span class="comment">// 此卷宗的目录总数</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_num_symlinks;         <span class="comment">// 此卷宗的符号链接件总数</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_num_other_fsobjects;  <span class="comment">// 此卷宗的其他类型文件总数</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_num_snapshots;        <span class="comment">// 此卷宗的快照件总数</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_total_blocks_alloced;</span><br><span class="line">    <span class="type">uint64_t</span> apfs_total_blocks_freed;</span><br><span class="line">    <span class="type">uuid_t</span> apfs_vol_uuid;               <span class="comment">// Volume UUID</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_last_mod_time;</span><br><span class="line">    <span class="type">uint64_t</span> apfs_fs_flags;             <span class="comment">// Flag定义，必须是 APFS_FS_ONEKEY</span></span><br><span class="line">    <span class="type">apfs_modified_by_t</span> apfs_formatted_by;</span><br><span class="line">    <span class="type">apfs_modified_by_t</span> apfs_modified_by[APFS_MAX_HIST];</span><br><span class="line">    <span class="type">uint8_t</span> apfs_volname[APFS_VOLNAME_LEN];</span><br><span class="line">    <span class="type">uint32_t</span> apfs_next_doc_id;</span><br><span class="line">    <span class="type">uint16_t</span> apfs_role;                 <span class="comment">// volume角色，定义见下</span></span><br><span class="line">    <span class="type">uint16_t</span> reserved;</span><br><span class="line">    <span class="type">xid_t</span> apfs_root_to_xid;             <span class="comment">// 快照的事务标识符，通常为零</span></span><br><span class="line">    <span class="type">oid_t</span> apfs_er_state_oid;</span><br><span class="line">    <span class="type">uint64_t</span> apfs_cloneinfo_id_epoch;   <span class="comment">// MacOS 10.13.3 之后，用于卷宗克隆</span></span><br><span class="line">    <span class="type">uint64_t</span> apfs_cloneinfo_xid;</span><br><span class="line">    <span class="type">oid_t</span> apfs_snap_meta_ext_oid;       <span class="comment">// 快照元数据扩展（虚拟对象）的 oid</span></span><br><span class="line">    <span class="type">uuid_t</span> apfs_volume_group_id;        <span class="comment">// 归属 Volume Group 的 id</span></span><br><span class="line">    <span class="type">oid_t</span> apfs_integrity_meta_oid;      <span class="comment">// 完整性元数据（虚拟对象）的 oid，MacOS 11 之后，用于 Sealed Volume</span></span><br><span class="line">    <span class="type">oid_t</span> apfs_fext_tree_oid;           <span class="comment">// FILE EXTENT 树（虚拟对象）的 oid</span></span><br><span class="line">    <span class="type">uint32_t</span> apfs_fext_tree_type;</span><br><span class="line">    <span class="type">uint32_t</span> reserved_type;</span><br><span class="line">    <span class="type">oid_t</span> reserved_oid;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>至少有 4 个物理对象的 B-树 ：ROOT DIRECTORY、EXTENT REFRENCE、SNAP METADATA、FILE EXTENT；还有一个虚拟对象的 OMAP B-树。</p>
+</blockquote>
+<h4 id="关于-ExtentRef-Tree-的讨论"><a href="#关于-ExtentRef-Tree-的讨论" class="headerlink" title="关于 ExtentRef Tree 的讨论"></a>关于 ExtentRef Tree 的讨论</h4><p>此问题已解决。<strong>ExtentRef Tree（范围参照树是）一个物理对象，就是当前正在构建的快照！</strong><br>APFS 技术白皮书指出：</p>
+<blockquote>
+<p>When a snapshot is created, the current extent-reference tree is moved to the snapshot.<br>A new, empty, extent-reference tree is created and its object identifier becomes the new value of this field.</p>
+</blockquote>
+<p>当一个快照被创建时，当前的范围参照树就被移动到这个快照；同时，一个新的、空的范围参照树被创建，并将 volume superblock 的<code>apfs_extentref_tree_oid</code>置为这个新的 oid。</p>
+<ul>
+<li>Object Type 定义 extent-reference tree 为<code>OBJECT_TYPE_EXTENT_LIST_TREE</code></li>
+<li>Volume Flag 的定义中，也有一个标记<code>APFS_FS_ALWAYS_CHECK_EXTENTREF</code></li>
+<li>j_snap_metadata_val_t 的结构中，包含<code>extentref_tree_oid</code> 和 <code>extentref_tree_type</code> 字段</li>
+<li>volume superblock 的结构中，包含<code>extentref_tree_oid</code> 和 <code>extentref_tree_type</code> 字段</li>
+</ul>
+<p>此外，APFS 白皮书还有一个勘误信息。</p>
+<blockquote>
+<p>Corrected the discussion of object identifiers in j_snap_metadata_val_t.<br>The extentref_tree_oid and sblock_oid fields contain a physical object identifier, not a virtual object identifier.</p>
+</blockquote>
+<h2 id="二、通用组件"><a href="#二、通用组件" class="headerlink" title="二、通用组件"></a>二、通用组件</h2><h3 id="1-Object-对象"><a href="#1-Object-对象" class="headerlink" title="1. Object - 对象"></a>1. Object - 对象</h3><p>APFS 的对象（Object）都有一个用于查找的唯一标识符<code>oid</code>，有三种不同的存储方法：</p>
+<ul>
+<li>Ephemeral object（临时对象）：当一个容器被加载后，临时对象存储在内存中。临时对象通常用于一些很少更新的数据，出于性能考虑允许在内存中修改，并在 checkpoint 时被持久化存储</li>
+<li>Phycial Object（物理对象）：存储在磁盘上的一个已知的物理块地址。物理对象被修改时，一个新副本将写入磁盘上的新位置，并携带一个不同的<code>oid</code></li>
+<li>Virtual Object（虚拟对象）：同样存储在磁盘上的一个物理块地址。虚拟对象被修改时，一个新副本也将写入磁盘上的新位置，但是<code>oid</code>保持一致；通过 OMAP 可以查询虚拟对象，但必须提供一个事务标识符<code>xid</code>以指定您想要的时间点。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 所有对象的 header 定义 */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">obj_phys</span> &#123;</span> </span><br><span class="line">    <span class="type">uint8_t</span>     o_cksum[MAX_CKSUM_SIZE];    <span class="comment">// 对象的64位弗莱彻校验值，类似 CRC 校验</span></span><br><span class="line">    <span class="type">oid_t</span>       o_oid;</span><br><span class="line">    <span class="type">xid_t</span>       o_xid;</span><br><span class="line">    <span class="type">uint32_t</span>    o_type;                     <span class="comment">// 分成两部分，低16位是对象类型，高16位是存储方法</span></span><br><span class="line">    <span class="type">uint32_t</span>    o_subtype;                  <span class="comment">// 对象在 B-树 的节点类型，借用 Object Types 定义</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">obj_phys</span> <span class="title">obj_phys_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<p>当对象存储在磁盘上时，APFS 规定统一采用<strong>小端字节顺序</strong>，但设计思路有一些不同。容器对象以 block 为单位，并且包含填充字段使得数据长度是64的倍数，以避免内存访问对齐的性能损失；而文件系统对象以 byte 为单位，并且尽量最小化所使用的空间，因此很多 struct 定义都有<code>__attribute__((aligned(8),packed))</code>的编译标识。</p>
+<h3 id="2-B-Tree"><a href="#2-B-Tree" class="headerlink" title="2. B-Tree"></a>2. B-Tree</h3><p>B树（B-tree）是一种泛化的二叉搜索树（binary search tree），特点是每个节点具有两个以上的子节点，从而增加了键&#x2F;值对的数量，减少定位记录时所经历的中间过程，从而加快访问速度；此外，B-树具备自平衡性，可以自动调整其结构以保持特定的平衡因子，从而保证在对数时间内进行操作，因此广泛应用于读写相对较大的数据块的存储系统。</p>
+<p>HFS+ 是基于 B-树 设计的，APFS 也继承下来，其系统组件大量采用 B-树，例如 Filesystem、OMAP 和 snapshot 等。在 APFS 中，B-树 的节点对象称为 Node，分为根节点、中间节点和叶子节点，根节点 Root 是遍历整个树的起点。</p>
+<p>Node 的内部存储空间分为3个部分：TOC（table of content，表空间）、key area 和 vaule area，其中表空间保存了每个键值对的位置信息，Key 和 Value 从节点内部存储区域的首端和尾端开始分别存储，两者之间是共享的自由空间，这种以 offset 的形式存储，比存储完整位置使用更少的磁盘空间。</p>
+<blockquote>
+<p>root 节点尾部增加了统计信息<code>btree_info_t</code>，为此可用存储空间少了 0x28 个字节。</p>
+</blockquote>
+<p><img src="/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/btree.png" alt="B-Tree"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* B-树的定位信息 */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">nloc</span> &#123;</span></span><br><span class="line">    <span class="type">uint16_t</span> off;                   <span class="comment">// 偏移量（字节单位）</span></span><br><span class="line">    <span class="type">uint16_t</span> len;                   <span class="comment">// 长度（字节单位）</span></span><br><span class="line">&#125; <span class="type">nloc_t</span>;  </span><br><span class="line"></span><br><span class="line"><span class="comment">/* 普通 Node 的定义 */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">btree_node_phys</span> &#123;</span></span><br><span class="line">    <span class="type">obj_phys_t</span>  btn_o;              <span class="comment">// 节点对象的头部</span></span><br><span class="line">    <span class="type">uint16_t</span>    btn_flags;          <span class="comment">// 标识位，区分 ROOT 或 LEAF</span></span><br><span class="line">    <span class="type">uint16_t</span>    btn_level;          <span class="comment">// 节点的等级</span></span><br><span class="line">    <span class="type">uint32_t</span>    btn_nkeys;          <span class="comment">// 存储了几个键值对</span></span><br><span class="line">    <span class="type">nloc_t</span>      btn_table_space;    <span class="comment">// 有数据区域的空间大小   </span></span><br><span class="line">    <span class="type">nloc_t</span>      btn_free_space;     <span class="comment">// 空闲区域的空间大小</span></span><br><span class="line">    <span class="type">nloc_t</span>      btn_key_free_list;  <span class="comment">// Key 的可用空间列表</span></span><br><span class="line">    <span class="type">nloc_t</span>      btn_val_free_list;  <span class="comment">// Vaule 的可用空间列表</span></span><br><span class="line">    <span class="type">uint64_t</span>    btn_data[];         <span class="comment">// 节点内部的存储空间</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">btree_node_phys</span> <span class="title">btree_node_phys_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 仅 Root Node */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">btree_info</span> &#123;</span> </span><br><span class="line">    <span class="type">btree_info_fixed_t</span>  bt_fixed;           <span class="comment">// 配置信息，如 Node、Key和Value的长度等</span></span><br><span class="line">    <span class="type">uint32_t</span>            bt_longest_key;     <span class="comment">// 最大 Key 的长度（字节单位）</span></span><br><span class="line">    <span class="type">uint32_t</span>            bt_longest_val;     <span class="comment">// 最大 Value 的长度（字节单位）</span></span><br><span class="line">    <span class="type">uint64_t</span>            bt_key_count;       <span class="comment">// Key 的总数量</span></span><br><span class="line">    <span class="type">uint64_t</span>            bt_node_count;      <span class="comment">// node 的总数量</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">btree_info</span> <span class="title">btree_info_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>B+树是一个变种，区别是内部节点不存储任何指向记录的指针，这些指针仅存储在叶子节点，因此节点容量更大，树也更浅</p>
+</blockquote>
+<h2 id="三、-OMAP"><a href="#三、-OMAP" class="headerlink" title="三、 OMAP"></a>三、 OMAP</h2><p>在 APFS 中，OMAP（Object Maps，对象映射）扮演两个重要角色。一是负责根据 oid（虚拟对象标识符）和 xid（事务标识符）找到磁盘物理地址，二是提供快照功能，可以立即将虚拟对象回滚到较早的时间点。<br>Object Map 的定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">omap_phys</span> &#123;</span>                      </span><br><span class="line">    <span class="type">obj_phys_t</span>  om_o;                       <span class="comment">// 标头</span></span><br><span class="line">    <span class="type">uint32_t</span>    om_flags;                   <span class="comment">// OMAP 标识，见附表。注意对象内容可能被加密！</span></span><br><span class="line">    <span class="type">uint32_t</span>    om_snap_count;              <span class="comment">// 快照数量</span></span><br><span class="line">    <span class="type">uint32_t</span>    om_tree_type;               <span class="comment">// 目前是B-树</span></span><br><span class="line">    <span class="type">uint32_t</span>    om_snapshot_tree_type;      <span class="comment">// 目前是B-树</span></span><br><span class="line">    <span class="type">oid_t</span>       om_tree_oid;                <span class="comment">// 当前使用的 OMAP B-树的 （root）oid</span></span><br><span class="line">    <span class="type">oid_t</span>       om_snapshot_tree_oid;       <span class="comment">// 当前使用的 快照 B-树的 （root）oid</span></span><br><span class="line">    <span class="type">xid_t</span>       om_most_recent_snap;        <span class="comment">// 最新快照的 xid</span></span><br><span class="line">    <span class="type">xid_t</span>       om_pending_revert_min;      <span class="comment">// 正在回滚事务的 min xid</span></span><br><span class="line">    <span class="type">xid_t</span>       om_pending_revert_max;      <span class="comment">// 正在回滚事务的 max xid</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">omap_phys</span> <span class="title">omap_phys_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<p>容器和每个卷都维护自己的 OAMP，每个 OMAP 都有自己的虚拟地址空间，因此对象定义要明确归属哪一个 B-Tree ！<br>OMAP 使用 B-树 存储映射关系，其 Key &#x2F; Value 的定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">omap_key</span> &#123;</span></span><br><span class="line">    <span class="type">oid_t</span> ok_oid;       <span class="comment">// 映射对象的虚拟对象标识符</span></span><br><span class="line">    <span class="type">xid_t</span> ok_xid;       <span class="comment">// 映射对象的事务标识符</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">omap_key</span> <span class="title">omap_key_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">omap_val</span> &#123;</span> </span><br><span class="line">    <span class="type">uint32_t</span> ov_flags;  <span class="comment">// 标记位，见附录。注意物理存储可能被加密！！！</span></span><br><span class="line">    <span class="type">uint32_t</span> ov_size;   <span class="comment">// 映射对象的大小（字节单位）</span></span><br><span class="line">    <span class="type">paddr_t</span> ov_paddr;   <span class="comment">// 映射对象起点的物理地址</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">omap_val</span> <span class="title">omap_val_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<p>有意思的是，OMAP 本身也有一个快照，定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">omap_snapshot</span> &#123;</span> </span><br><span class="line">    <span class="type">uint32_t</span> oms_flags;     <span class="comment">// OMAP_SNAPSHOT_DELETED or OMAP_SNAPSHOT_REVERTED</span></span><br><span class="line">    <span class="type">uint32_t</span> oms_pad; </span><br><span class="line">    <span class="type">oid_t</span> oms_oid;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">omap_snapshot</span> <span class="title">omap_snapshot_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="OMAP-的查询流程"><a href="#OMAP-的查询流程" class="headerlink" title="OMAP 的查询流程"></a>OMAP 的查询流程</h3><p>使用 OMAP 访问虚拟对象时，应遵循如下流程：</p>
+<ol>
+<li>确定对象映射的入口。<br> volume 的对象使用该卷宗的 OMAP，入口是<code>apfs_superblock_t</code>的<code>apfs_omap_oid</code>字段；<br> 否则，所有其他对象应使用容器的 OMAP，入口是<code>nx_superblock_t</code>的<code>nx_omap_oid</code>字段</li>
+<li>读取<code>omap_phys_t</code>的<code>om_tree_oid</code>字段用于定位对象映射的 B-树</li>
+<li>在 B-树 中搜索<code>ok_oid</code> &#x3D;&#x3D; 期望的<code>oid</code>，而且<code>ok_xid</code> &lt;&#x3D; 期望的<code>xid</code> 的 key。如果有多个 key 满足要求，则使用具有最大<code>xid</code>的 key</li>
+<li>使用 Node 节点的 TOC，读取这个 key 对应的 value，其中包含物理地址<code>ov_addr</code>和<code>ov_size</code></li>
+<li>从磁盘的物理地址获得对象数据</li>
+</ol>
+<h2 id="四、File-System"><a href="#四、File-System" class="headerlink" title="四、File System"></a>四、File System</h2><p>每个 APFS 卷宗（Volume）都有一个文件系统（Filesystem）。<br>与其他 APFS 对象（Object）不同，文件系统对象由一个或多个文件系统记录（Record）组成，这些记录存储在 Volume 的 FileSystem Tree 上，每条记录都存储有关 file 或 directory 的特定信息。<br>所有文件系统对象是基于一个专用的 B-Tree 来组织的，并具有以下特点：</p>
+<ul>
+<li>文件系统树是虚拟的，其每个节点都是基于 Volume 的 OMAP 映射出来的虚拟对象。这意味着，检索文件系统树必须依赖 OMAP 定位以查找每个节点</li>
+<li>文件系统树支持快照功能，即充分利用 OMAP 的快照功能将其状态恢复到以前的时间点，Time Machine 的增量备份功能就是一个典型应用</li>
+<li>可以选择对文件系统的节点进行加密，不仅可以加密文件内容，还可以加密文件元数据</li>
+<li>文件系统树存储了一组异构记录，也即是说，多种类型的键和值都存储在同一树中</li>
+</ul>
+<p>文件系统树的每个节点都有唯一标识<code>j_key</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> OBJ_ID_MASK     0x0fffffff<span class="string">&#x27;ffffffff</span></span></span><br><span class="line"><span class="string"><span class="meta">#define OBJ_TYPE_MASK   0xf0000000&#x27;</span>00000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJ_TYPE_SHIFT  60</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_key</span> &#123;</span></span><br><span class="line">    <span class="type">uint64_t</span> obj_id_and_type;</span><br><span class="line">&#125; <span class="type">j_key_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>为了充分利用内存空间，前 4 个字节是记录（Record）的类型定义，包括：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> &#123;</span> </span><br><span class="line">    APFS_TYPE_ANY               = <span class="number">0</span>,</span><br><span class="line">    APFS_TYPE_SNAP_METADATA     = <span class="number">1</span>,        <span class="comment">// 快照的元数据</span></span><br><span class="line">    APFS_TYPE_EXTENT            = <span class="number">2</span>,        <span class="comment">// 物理扩展信息</span></span><br><span class="line">    APFS_TYPE_INODE             = <span class="number">3</span>,        <span class="comment">// 必选项！最核心的元数据</span></span><br><span class="line">    APFS_TYPE_XATTR             = <span class="number">4</span>,        <span class="comment">// TODO：似乎用于支持文件系统Fork的功能</span></span><br><span class="line">    APFS_TYPE_SIBLING_LINK      = <span class="number">5</span>,        <span class="comment">// 标记一个 inode 节点被那些硬链接所引用的映射          </span></span><br><span class="line">    APFS_TYPE_DSTREAM_ID        = <span class="number">6</span>,        <span class="comment">// 重要！默认数据流的入口和调用计数器 rfcnt</span></span><br><span class="line">    APFS_TYPE_CRYPTO_STATE      = <span class="number">7</span>,        <span class="comment">// 重要！数据保护等级</span></span><br><span class="line">    APFS_TYPE_FILE_EXTENT       = <span class="number">8</span>,        <span class="comment">// 重要！文件扩展信息，crypto_id 就在这里</span></span><br><span class="line">    APFS_TYPE_DIR_REC           = <span class="number">9</span>,        <span class="comment">// 保存该目录的成员信息，filename 就在这里</span></span><br><span class="line">    APFS_TYPE_DIR_STATS         = <span class="number">10</span>,       <span class="comment">// 目录的统计信息，包括成员数量、总容量、父目录oid等</span></span><br><span class="line">    APFS_TYPE_SNAP_NAME         = <span class="number">11</span>,       <span class="comment">// 快照名称</span></span><br><span class="line">    APFS_TYPE_SIBLING_MAP       = <span class="number">12</span>,       <span class="comment">// 标记一个硬链接文件的目标 inode 节点的映射</span></span><br><span class="line">    APFS_TYPE_FILE_INFO         = <span class="number">13</span>,  </span><br><span class="line"></span><br><span class="line">    APFS_TYPE_MAX_VALID         = <span class="number">13</span>,    </span><br><span class="line">    APFS_TYPE_MAX               = <span class="number">15</span>,    </span><br><span class="line">    APFS_TYPE_INVALID           = <span class="number">15</span>,    </span><br><span class="line">&#125; j_obj_types;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-文件和目录"><a href="#1-文件和目录" class="headerlink" title="1. 文件和目录"></a>1. 文件和目录</h3><p>文件系统树的每个节点都必须有 inode 记录，第一条记录就是 Root Directory。</p>
+<h4 id="INODE-记录"><a href="#INODE-记录" class="headerlink" title="INODE 记录"></a>INODE 记录</h4><p>inode 负责管理最核心的元数据，例如时间戳、类型、所有者和权限等，都是固定长度的标准格式，其他信息将被存入 inode 的扩展字段，或者其他类型的 Record 中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* inode 数据结构 */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_inode_key</span> &#123;</span> </span><br><span class="line">    <span class="type">j_key_t</span> hdr;                                <span class="comment">// = header, key &amp; value</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_inode_val</span> &#123;</span> </span><br><span class="line">    <span class="type">uint64_t</span> parent_id;                         <span class="comment">// 所在目录的ID</span></span><br><span class="line">    <span class="type">uint64_t</span> private_id;                        <span class="comment">// 默认数据流的ID！</span></span><br><span class="line">    <span class="type">uint64_t</span> create_time;</span><br><span class="line">    <span class="type">uint64_t</span> mod_time;</span><br><span class="line">    <span class="type">uint64_t</span> change_time;</span><br><span class="line">    <span class="type">uint64_t</span> access_time;</span><br><span class="line">    <span class="type">uint64_t</span> internal_flags;                    <span class="comment">// 标志位</span></span><br><span class="line">    <span class="class"><span class="keyword">union</span> &#123;</span>                                     <span class="comment">// 仅用于目录</span></span><br><span class="line">        <span class="type">int32_t</span> nchildren;</span><br><span class="line">        <span class="type">int32_t</span> nlink;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="type">cp_key_class_t</span> default_protection_class;    <span class="comment">// 默认数据保护级别</span></span><br><span class="line">    <span class="type">uint32_t</span> write_generation_counter;</span><br><span class="line">    <span class="type">uint32_t</span> bsd_flags;</span><br><span class="line">    <span class="type">uid_t</span> owner;</span><br><span class="line">    <span class="type">gid_t</span> group;</span><br><span class="line">    <span class="type">mode_t</span> mode;</span><br><span class="line">    <span class="type">uint16_t</span> pad1;</span><br><span class="line">    <span class="type">uint64_t</span> uncompressed_size;</span><br><span class="line">    <span class="type">uint8_t</span> xfields[];                          <span class="comment">// 扩展字段的入口</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_inode_val</span> <span class="title">j_inode_val_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="Extended-Fields（扩展字段）"><a href="#Extended-Fields（扩展字段）" class="headerlink" title="Extended Fields（扩展字段）"></a>Extended Fields（扩展字段）</h5><p>inode 记录支持有限的扩展字段（Extended Fields），入口就在<code>uint8_t xfield[]</code>，其类型定义包括：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_SNAP_XID           1       <span class="comment">// 快照的事物标识符xid</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_DELTA_TREE_OID     2       <span class="comment">// 与快照的增量列表对应的文件系统B-树的虚拟对象标识符</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_DOCUMENT_ID        3       <span class="comment">// 文档标识符，用于大量文件的目录更改期间的事务完整性</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_NAME               4       <span class="comment">// 硬链接指向的文件名！</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_PREV_FSIZE         5       <span class="comment">// 文件以前的长度</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_RESERVED_6         6       </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_FINDER_INFO        7       <span class="comment">// Finder的提示信息，Apple自定义</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_DSTREAM            8       <span class="comment">// 数据流，即文件内容数据</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_RESERVED_9         9 </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_DIR_STATS_KEY      10      <span class="comment">// 有关目录的统计信息</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_FS_UUID            11      <span class="comment">// 自动挂载到该目录的文件系统UUID（考虑/etc/fstab）</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_RESERVED_12        12 </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_SPARSE_BYTES       13      <span class="comment">// 数据流中的稀疏字节数量</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_RDEV               14      <span class="comment">// 块设备或字符专用设备的标识符</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_PURGEABLE_FLAGS    15 </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INO_EXT_TYPE_ORIG_SYNC_ROOT_ID  16</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>inode 记录的扩展字段<code>INO_EXT_TYPE_NAME</code>，存储的并不是该节点的文件名，而是在该节点是一个硬链接的场景下，其对应的源目标文件名</p>
+</blockquote>
+<h4 id="DIR-REC-记录"><a href="#DIR-REC-记录" class="headerlink" title="DIR_REC 记录"></a>DIR_REC 记录</h4><p>当我们新建一个文件目录时，当然必须创建一个 inode 记录，此时它是一个空目录。<br>然后，我们继续在该目录下新建一个文件时，需要新增 2 条记录，一是新文件的 inode 记录，二是 DIR_REC 记录，用于该目录管理其子对象，也就是说，一个目录下有几个文件或子目录，就有几条 DIR_REC 记录。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_drec_hashed_key</span> &#123;</span> </span><br><span class="line">    <span class="type">j_key_t</span> hdr;</span><br><span class="line">    <span class="type">uint32_t</span> name_len_and_hash;     <span class="comment">// 最低10位是 filename 的长度，前面是文件名的哈希值</span></span><br><span class="line">    <span class="type">uint8_t</span> name[<span class="number">0</span>];                <span class="comment">// filename！UTF-8编码格式，NULL结尾</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_drec_hashed_key</span> <span class="title">j_drec_hashed_key_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> J_DREC_LEN_MASK     0x000003ff</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> J_DREC_HASH_MASK    0xfffff400</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> J_DREC_HASH_SHIFT   10</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_drec_val</span> &#123;</span> </span><br><span class="line">    <span class="type">uint64_t</span> file_id;               <span class="comment">// 子成员的ID</span></span><br><span class="line">    <span class="type">uint64_t</span> date_added;            <span class="comment">// 添加到该目录的时间戳</span></span><br><span class="line">    <span class="type">uint16_t</span> flags;                 <span class="comment">// 标记该成员的类型，例如普通文件、目录、块设备、软连接、Socket等</span></span><br><span class="line">    <span class="type">uint8_t</span> xfields[];</span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_drec_val</span> <span class="title">j_drec_val_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>找了很久 filename 的存储方式，最后发现不在 File 的 inode 记录中，而是藏在归属目录的 DIR_REC 记录中！因为操作系统处理时只需要唯一标识符<code>j_key</code>，其实文件名只是提供用户查询显示的</li>
+<li>早期版本的 APFS 使用<code>j_drec_key</code>，后来升级为<code>j_drec_hashed_key</code>，区别就是增加了文件名的哈希值，这个变化非常有利于提高<strong>长文件名</strong>的搜索效率，即不用逐一比较字符串，而是直接比较哈希值即可</li>
+<li>DIR_REC 记录同样支持扩展字段，其定义与 inode 记录保持一致</li>
+</ul>
+<h3 id="2-数据流"><a href="#2-数据流" class="headerlink" title="2. 数据流"></a>2. 数据流</h3><p>类似 filename 的<strong>短数据</strong>可以存储在 metadata 之中，但是文件内容和一些属性值的数据量不固定而且可能很大，基于性能考虑，APFS 将这些数据存储在 Data Stream 数据流之中。</p>
+<h4 id="DSTREAM-记录"><a href="#DSTREAM-记录" class="headerlink" title="DSTREAM 记录"></a>DSTREAM 记录</h4><p>每个文件都有一个默认数据流，存储我们通常所说的文件内容。<br>还记得 inode 记录中的<code>private_id</code>吗？这就是每个文件的默认数据流（Data Stream）。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_dstream_id_key</span> &#123;</span> </span><br><span class="line">    <span class="type">j_key_t</span> hdr;</span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_dstream_id_key</span> <span class="title">j_dstream_id_key_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_dstream_id_val</span> &#123;</span> </span><br><span class="line">    <span class="type">uint32_t</span> refcnt;                <span class="comment">// 如果数据流的引用计数清零时，可以删除之</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_dstream_id_val</span> <span class="title">j_dstream_id_val_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<p>默认数据流的统计信息保存在 inode 记录的<code>APFS_TYPE_EXTENT</code>扩展字段。<br>数据流的占用空间和分配空间可能不一致，例如文件内容没有完全填满最后一个块，此外，由于 AFPS 支持稀疏分配，重复出现的零字节可能不会实际占用存储空间。<br>对于使用<strong>软件加密</strong>的 volume，<code>default_crypto_id</code>字段的值始终为<code>CRYPTO_SW_ID</code>&#x3D;4。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_dstream</span> &#123;</span></span><br><span class="line">    <span class="type">uint64_t</span> size;                  <span class="comment">// 逻辑数据的大小（以字节为单位）</span></span><br><span class="line">    <span class="type">uint64_t</span> alloced_size;          <span class="comment">// 为数据流分配的总空间（以字节为单位），包括未使用的空间</span></span><br><span class="line">    <span class="type">uint64_t</span> default_crypto_id;     <span class="comment">// <span class="doctag">TODO:</span> 此数据流中使用的默认加密密钥,或 Tweak 密钥</span></span><br><span class="line">    <span class="type">uint64_t</span> total_bytes_written;   <span class="comment">// 已写入此数据流的总字节数</span></span><br><span class="line">    <span class="type">uint64_t</span> total_bytes_read;      <span class="comment">// 已从此数据流读取的总字节数</span></span><br><span class="line">&#125; __attribute__((aligned(<span class="number">8</span>),packed)); </span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_dstream</span> <span class="title">j_dstream_t</span>;</span> </span><br></pre></td></tr></table></figure>
+
+<h4 id="XATTR-记录"><a href="#XATTR-记录" class="headerlink" title="XATTR 记录"></a>XATTR 记录</h4><p>古老的 HFS+ 提供了文件系统的<strong>fork</strong>功能，最初设计是为了保存 GUI 使用的非编译数据，例如文件图标、缩略图和应用程序相关的菜单提示信息等，这个功能 AFPS 继承下来，并基于<code>APFS_TYPE_XATTR</code>记录实现。</p>
+<blockquote>
+<p>微软的 NTFS 也有类似功能，称为 ADS（Alternate data stream，替代数据流）</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_xattr_key</span> &#123;</span> </span><br><span class="line">    <span class="type">j_key_t</span> hdr;</span><br><span class="line">    <span class="type">uint16_t</span> name_len;              <span class="comment">// 扩展属性名称的长度（字节单位）</span></span><br><span class="line">    <span class="type">uint8_t</span> name[<span class="number">0</span>];                <span class="comment">// 以NULL结尾的UTF-8编码</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_xattr_key</span> <span class="title">j_xattr_key_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_xattr_val</span> &#123;</span></span><br><span class="line">    <span class="type">uint16_t</span> flags;                 <span class="comment">// 数据存储位置标记：数据流、记录、文件系统</span></span><br><span class="line">    <span class="type">uint16_t</span> xdata_len;             <span class="comment">// 扩展属性的内联数据长度</span></span><br><span class="line">    <span class="type">uint8_t</span> xdata[<span class="number">0</span>];               <span class="comment">// 扩展属性的内容，或者数据流的标识符</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_xattr_val</span> <span class="title">j_xattr_val_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-密钥管理"><a href="#3-密钥管理" class="headerlink" title="3. 密钥管理"></a>3. 密钥管理</h3><p>早期的 HFS+ 采用 AES-CBC 工作模式，存在明文和密文不等长、需要额外存储初始变量等诸多问题，后续改为 AES-XTS 磁盘加密模式，APFS 也是如此，这就需要妥善保管好 Ciper 分组密钥和 Tweak 可调整密钥。</p>
+<h4 id="CRYPTO-STATE-记录"><a href="#CRYPTO-STATE-记录" class="headerlink" title="CRYPTO_STATE 记录"></a>CRYPTO_STATE 记录</h4><p>请注意！本文讨论的是软件加密，也就是单一密钥的 FDE，并不需要管理每个文件的 AES-XTS的主密钥，但 APFS 的设计目标是原生支持 FBE（当然前提是采用硬件加密），因此数据结构的设计目标就是每个文件都有独立的 per-file key，就保存在<code>APFS_TYPE_CRYPTO_STATE</code>记录。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_crypto_key</span> &#123;</span> </span><br><span class="line">    <span class="type">j_key_t</span> hdr;</span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_crypto_val</span> &#123;</span></span><br><span class="line">    <span class="type">uint32_t</span> refcnt; </span><br><span class="line">    <span class="type">wrapped_crypto_state_t</span> state;</span><br><span class="line">&#125; __attribute__((aligned(<span class="number">4</span>),packed)); </span><br></pre></td></tr></table></figure>
+
+<p>进一步，我们来分析<code>wrapped_crypto_state_t</code>的数据结构，可以看到 per-file key 始终是以包裹状态存储的，需要通过安全隔区保存的 Class Key 来解密。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 持久化存储 per-file key，包含：版本信息 + warpped key data */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">wrapped_crypto_state</span> &#123;</span>               <span class="comment">// </span></span><br><span class="line">    <span class="type">uint16_t</span> major_version;                 <span class="comment">// default = 5，iOS 5开始支持 FBE</span></span><br><span class="line">    <span class="type">uint16_t</span> minor_version;                 <span class="comment">// default = 0</span></span><br><span class="line">    <span class="type">crypto_flags_t</span> cpflags;</span><br><span class="line">    <span class="type">cp_key_class_t</span> persistent_class;        <span class="comment">// 数据保护等级：A/B/C/D</span></span><br><span class="line">    <span class="type">cp_key_os_version_t</span> key_os_version;     <span class="comment">// OS版本号，例如：18-A-391</span></span><br><span class="line">    <span class="type">cp_key_revision_t</span> key_revision;</span><br><span class="line">    <span class="type">uint16_t</span> key_len；</span><br><span class="line">    <span class="type">uint8_t</span> persistent_key[<span class="number">0</span>];              <span class="comment">// warpped per-file key ！！！</span></span><br><span class="line">&#125; __attribute__((aligned(<span class="number">2</span>), packed));</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 结构相似，但没有密钥数据！仅用于 AFPS Superblock，因为总是使用单一密钥 VEK */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">wrapped_meta_crypto_state</span> &#123;</span>          </span><br><span class="line">    <span class="type">uint16_t</span> major_version;                 </span><br><span class="line">    <span class="type">uint16_t</span> minor_version;                 </span><br><span class="line">    <span class="type">crypto_flags_t</span> cpflags;</span><br><span class="line">    <span class="type">cp_key_class_t</span> persistent_class;        </span><br><span class="line">    <span class="type">cp_key_os_version_t</span> key_os_version;     </span><br><span class="line">    <span class="type">cp_key_revision_t</span> key_revision;</span><br><span class="line">    <span class="type">uint16_t</span>  unused;</span><br><span class="line">&#125; __attribute__((aligned(<span class="number">2</span>), packed));</span><br></pre></td></tr></table></figure>
+
+<h4 id="FILE-EXTENT-记录"><a href="#FILE-EXTENT-记录" class="headerlink" title="FILE_EXTENT 记录"></a>FILE_EXTENT 记录</h4><p>还记得 HFS+ 是如何实现 HBE 的吗？就是将<code>per-file key</code>保存在文件扩展信息中。APFS 继承了这种方式，将 Tweak key 保存在<code>APFS_TYPE_FILE_EXTENT</code>记录中。</p>
+<p>需要注意的是，由于APFS 支持 COW（Copy On Write，写入时拷贝），可以实现零损耗的大文件快速克隆。但是，如果一个文件被 Clone 以后，每个副本都会获得一个新密钥以接受后续可能的数据写入，久而久之，一个文件可能会由不同的范围（或片段）组成，每个映射到不同的密钥，为此可能需要多个<code>AFPS_FILE_EXTENT</code>记录。</p>
+<p>此外，由于 Tweak Key 属于密钥白化技术，不允许重复使用，但可以被公开，因此 crypto_id 可以明文存储。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_file_extent_key</span> &#123;</span> </span><br><span class="line">    <span class="type">j_key_t</span> hdr;</span><br><span class="line">    <span class="type">uint64_t</span> logical_addr;</span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_file_extent_val</span> &#123;</span> </span><br><span class="line">    <span class="type">uint64_t</span> len_and_flags;         <span class="comment">// 最高8位是标记位（当前未使用），后续56位是数据块长度（字节单位）</span></span><br><span class="line">    <span class="type">uint64_t</span> phys_block_num;        <span class="comment">// 第一个块的物理块号</span></span><br><span class="line">    <span class="type">uint64_t</span> crypto_id;             <span class="comment">// FDE 模式下存储 Tweak Key！如果未加密，置为0</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_file_extent_val</span> <span class="title">j_file_extent_val_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> J_FILE_EXTENT_LEN_MASK      0x00ffffffffffffffULL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> J_FILE_EXTENT_FLAG_MASK     0xff00000000000000ULL      </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> J_FILE_EXTENT_FLAG_SHIFT    56</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="关于-crypto-id-的讨论"><a href="#关于-crypto-id-的讨论" class="headerlink" title="关于 crypto_id 的讨论"></a>关于 crypto_id 的讨论</h5><ul>
+<li>该字段的默认值是此区段所属的数据流的<code>j_dstream_t</code>的<code>default_crypto_id</code>字段的值</li>
+<li>如果在 Volume 设置了<code>APFS_FS_ONEKEY</code>标志，即单一密钥模式，该字段存储 AES-XTS 的 Tweak key</li>
+<li>否则，该字段存储数据与<code>j_crypto_key_t</code>记录的<code>obj_id</code>字段保持一致，表明将采用 FBE 模式，此时这里不需要存储 Tweak key</li>
+</ul>
+<blockquote>
+<p>根据 Apple 安全隔区白皮书的说明：<br>在搭载 A14 和 M1 的设备上， 加密在 XTS 模式中使用 AES-256， 其中 256 位文件独有密钥通过密钥派生功能 (NIST Special Publication 800-108) 派生出一个 256 位 tweak 密钥和一个 256 位 cipher 密钥。<br>采用 A9 到 A13、 S5 和 S6 的每一代硬件在 XTS 模式中使用 AES-128， 其中 256 位文件独有密钥会被拆分， 以提供一个 128 位 tweak 密钥和一个 128 位 cipher 密钥。</p>
+</blockquote>
+<h2 id="五、Keybag"><a href="#五、Keybag" class="headerlink" title="五、Keybag"></a>五、Keybag</h2><p>APFS 的设计原生支持加密，不再需要 HFS+ 上叠加的 CoreStorge 虚拟存储层，但具体加密方式取决于硬件设备的功能。硬件加密用于具备 Secure Encalve 安全隔区的内部存储设备，软件加密用于不支持硬件加密的外部和内部存储设备。需要注意的是，当使用硬件加密时，数据无法在任何其他设备上解密，安全芯片必须代理所有解密操作。</p>
+<p>对于 macOS，APFS 使用单一密钥 VEK（Volume Encryption Key，卷宗加密密钥）访问宗卷上的加密内容（也就是<strong>所有文件的 AES-XTS 分组密钥</strong>），VEK 以 Warpped 状态存储在磁盘，封装在多层加密中。</p>
+<p>KEK（Key Encryption Key，密钥加密密钥）是用于打开 VEK 的包裹密钥，以加密形式存储在磁盘上。每个 Volume 都有自己的 KEK ，而且还有多个副本以提供不同场景下的用户访问，这些副本都使用不同的密钥进行加密（包装），包括：</p>
+<ul>
+<li>User Password：用户输入登录密码</li>
+<li>Personal recovery key：个人备份密钥，该密钥在驱动器格式化时生成，并由用户纸质保存</li>
+<li>Institutional recovery key：授权的外部机构恢复密钥</li>
+<li>iCloud recovery key：客户与 Apple 技术支持配合使用</li>
+</ul>
+<p><img src="/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/keybag.png" alt="L1"></p>
+<h3 id="1-Keybag-的存储方式"><a href="#1-Keybag-的存储方式" class="headerlink" title="1. Keybag 的存储方式"></a>1. Keybag 的存储方式</h3><p>早期的 iOS 将密钥包存储在一个普通的数据文件中（<code>/private/var/keybags/systembag.kb</code>），虽然做了很复杂的加密处理，但由于缺少防重放机制，无法有效抵御暴力破解。APFS 是基于文件系统的全新设计，密钥包不再依赖于数据文件，而是被设计为一个特殊的对象（Object）。</p>
+<p>Container Keybag 的入口在其超级块<code>nx_superblock_t</code>的<code>prangnx_keylocker</code>字段，数据类型是<code>prange_t</code>，保存着容器密钥包的物理地址，其数据结构是：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* keybag 的头部 */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">kb_locker</span> &#123;</span> </span><br><span class="line">    <span class="type">uint16_t</span> kl_version;            <span class="comment">// 版本号，目前为 2</span></span><br><span class="line">    <span class="type">uint16_t</span> kl_nkeys;              <span class="comment">// 包含了几个条目</span></span><br><span class="line">    <span class="type">uint32_t</span> kl_nbytes;</span><br><span class="line">    <span class="type">uint8_t</span> padding[<span class="number">8</span>]; </span><br><span class="line">    <span class="type">keybag_entry_t</span> kl_entries[];    <span class="comment">// 密钥条目数组，结构见下</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">kb_locker</span> <span class="title">kb_locker_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* keybag 的各个条目 */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">keybag_entry</span> &#123;</span> </span><br><span class="line">    <span class="type">uuid_t</span> ke_uuid;                 <span class="comment">// 如果是容器，存储Volume UUID；如果是Volume，存储User UUID</span></span><br><span class="line">    <span class="type">uint16_t</span> ke_tag;                <span class="comment">// 标签，定义见下</span></span><br><span class="line">    <span class="type">uint16_t</span> ke_keylen;             <span class="comment">// </span></span><br><span class="line">    <span class="type">uint8_t</span> padding[<span class="number">4</span>]; </span><br><span class="line">    <span class="type">uint8_t</span> ke_keydata[];           <span class="comment">// 内容数据块!!!</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">keybag_entry</span> <span class="title">keybag_entry_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_KEYBAG_ENTRY_MAX_SIZE 512</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FV_PERSONAL_RECOVERY_KEY_UUID ”EBC6C064-0000-11AA-AA11-00306543ECAC”</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* keybag 的标签定义 */</span></span><br><span class="line"><span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">    KB_TAG_UNKNOWN = <span class="number">0</span>, </span><br><span class="line">    KB_TAG_RESERVED_1 = <span class="number">1</span>, </span><br><span class="line">    KB_TAG_VOLUME_KEY = <span class="number">2</span>,              <span class="comment">// 标记是wrapped VEK，仅用于容器密钥包</span></span><br><span class="line">    KB_TAG_VOLUME_UNLOCK_RECORDS = <span class="number">3</span>,   <span class="comment">// MacOS专用！容器和卷宗的解锁信息，具体见下文</span></span><br><span class="line">    KB_TAG_VOLUME_PASSPHRASE_HINT = <span class="number">4</span>,  <span class="comment">// MacOS专用！user password的提示语（明文）</span></span><br><span class="line">    KB_TAG_WRAPPING_M_KEY = <span class="number">5</span>,          <span class="comment">// iOS专用！media key 的包裹密钥</span></span><br><span class="line">    KB_TAG_VOLUME_M_KEY = <span class="number">6</span>,            <span class="comment">// iOS专用！本volume的media key</span></span><br><span class="line">    KB_TAG_RESERVED_F8 = <span class="number">0xF8</span> </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>对于 Container Keybag，容器包含了几个加密的 Volume，就有几个 entry：</p>
+<ul>
+<li>每个 entry 的<code>ke_uuid</code>存储了这个 volume 的 UUID，也是后续用于解封 volume keybag 的钥匙</li>
+<li>每个 entry 的<code>ke_keydata</code>存储了这个 volume keybag 的物理地址</li>
+</ul>
+<p>对于 Volume Keybag ，卷宗包含了几个 User，就有几个 entry</p>
+<ul>
+<li>每个 entry 的<code>ke_uuid</code>存储了这个 User 的 UUID</li>
+<li>每个 entry 的<code>ke_keydata</code>存储了这个 User 的 wrapped KEK</li>
+</ul>
+<h3 id="2-VEK-的解封流程"><a href="#2-VEK-的解封流程" class="headerlink" title="2. VEK 的解封流程"></a>2. VEK 的解封流程</h3><p>要完成数据文件的解密，是一个漫长而复杂的流程。</p>
+<h4 id="Step-1-解封-Container-Keybag"><a href="#Step-1-解封-Container-Keybag" class="headerlink" title="Step 1: 解封 Container Keybag"></a>Step 1: 解封 Container Keybag</h4><ul>
+<li>读取容器超级块的<code>nx_keylocker</code>字段，找到容器密钥包的物理位置。然而你不能直接看到数据，因为密钥包的内容被加密了。</li>
+<li>执行解密算法<a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc3394">RFC 3394 - AES密钥包裹算法</a>，密钥就是该容器的 UUID，即容器超级块的<code>nx_uuid</code>字段。</li>
+</ul>
+<p>现在，你就能看到容器密钥包的数据内容了。</p>
+<blockquote>
+<p>此处<a target="_blank" rel="noopener" href="https://jtsylve.blog/post/2022/12/21/APFS-Keybags">JOE 的参考文档</a>和 APFS 官方文档不一致</p>
+</blockquote>
+<h4 id="Step-2-找到-wrapped-VEK"><a href="#Step-2-找到-wrapped-VEK" class="headerlink" title="Step 2: 找到 wrapped VEK"></a>Step 2: 找到 wrapped VEK</h4><p>分析容器密钥包，找到一个标记为<code>KB_TAG_VOLUME_KEY</code>的 entry，其<code>ke_keydata</code>字段就是 wrapped VEK。<br>先保存下来，后面还要用。</p>
+<h4 id="Step-3-解封-Volume-Keybag"><a href="#Step-3-解封-Volume-Keybag" class="headerlink" title="Step 3: 解封 Volume Keybag"></a>Step 3: 解封 Volume Keybag</h4><ul>
+<li>继续分析容器密钥包，找出标记为<code>KB_TAG_VOLUME_KEY</code>的 entry，可能有多个分别对应不同的卷宗.<br>  每个 entry 的<code>ke_uuid</code>字段是 volume UUID，<code>ke_keydata</code>字段是 volume keybag 的物理地址</li>
+<li>根据 Volume keybag 的物理地址读取数据，然而你还是看不到内容，因为又被加密了。<br>  仍然执行解密算法 RFC 3394，密钥是该 volume 的 UUID</li>
+<li>标记为<code>KB_TAG_VOLUME_PASSPHRASE_HINT</code>的 entry，其<code>ke_keydata</code>存储人类可读的密码提示信息</li>
+</ul>
+<p>现在，你就能看到卷宗密钥包的数据内容了，示例如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">名字</th>
+<th align="center">UUID</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">INSTITUTIONAL_RECOVERY_UUID</td>
+<td align="center">{C064EBC6-0000-11AA-AA11-00306543ECAC}</td>
+</tr>
+<tr>
+<td align="center">INSTITUTIONAL_USER_UUID</td>
+<td align="center">{2FA31400-BAFF-4DE7-AE2A-C3AA6E1FD340}</td>
+</tr>
+<tr>
+<td align="center">PERSIONAL_RECOVERY_UUID</td>
+<td align="center">{EBC6C064-0000-11AA-AA11-00306543ECAC}</td>
+</tr>
+<tr>
+<td align="center">ICLOUD_RECOVERY_UUID</td>
+<td align="center">{64C0C6EB-0000-11AA-AA11-00306543ECAC}</td>
+</tr>
+<tr>
+<td align="center">ICLOUD_USER_UUID</td>
+<td align="center">{EC1C2AD9-B618-4ED6-BD8D-50F361C27507}</td>
+</tr>
+</tbody></table>
+<h4 id="Step-4-找到-wrapped-KEK"><a href="#Step-4-找到-wrapped-KEK" class="headerlink" title="Step 4: 找到 wrapped KEK"></a>Step 4: 找到 wrapped KEK</h4><p>分析卷宗密钥包，包含了多个 entry，分别对应不同的 User，也是不同的业务场景。</p>
+<p>以用户密码方式为例，你需要找出一条 entry，其<code>ke_uuid</code>是某个<code>User Open Directory UUID</code>，而且标记为<code>KB_TAG_VOLUME_UNLOCK_RECORDS</code>，其<code>ke_keydata</code>字段就是这个场景的 wrapped KEK。</p>
+<h4 id="Step-5-解封-KEK"><a href="#Step-5-解封-KEK" class="headerlink" title="Step 5: 解封 KEK"></a>Step 5: 解封 KEK</h4><p>KEK 是基于 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X.690#DER_encoding">DER 编码</a>的数据块，其结构为：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">KEKBLOB ::= SEQUENCE &#123;</span><br><span class="line">    unknown [<span class="number">0</span>] INTEGER</span><br><span class="line">    hmac    [<span class="number">1</span>] OCTET STRING                <span class="comment">// 校验值</span></span><br><span class="line">    salt    [<span class="number">2</span>] OCTET STRING</span><br><span class="line">    keyblob [<span class="number">3</span>] SEQUENCE &#123;</span><br><span class="line">        unknown     [<span class="number">0</span>] INTEGER</span><br><span class="line">        uuid        [<span class="number">1</span>] OCTET STRING        <span class="comment">// Volume User UUID</span></span><br><span class="line">        flags       [<span class="number">2</span>] INTEGER             <span class="comment">// 标记是基于CoreStorage，APFS软件加密，或硬件加密</span></span><br><span class="line">        wrapped_key [<span class="number">3</span>] OCTET STRING        <span class="comment">// </span></span><br><span class="line">        iterations  [<span class="number">4</span>] INTEGER             <span class="comment">// 迭代次数</span></span><br><span class="line">        salt        [<span class="number">5</span>] OCTET STRING        <span class="comment">// 盐值</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>数据块的头部有一个 基于 HMAC-SHA256 算法的校验值，算法是：<br><code>hmac_key := SHA256(&quot;\x01\x16\x20\x17\x15\x05&quot; + salt)</code></p>
+<p>Flags 标记了 KEK 的包裹方式，格式如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">Name</th>
+<th align="center">Value</th>
+<th align="center">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">KEK_FLAG_CORESTORAGE</td>
+<td align="center">0x00010000’0000000000</td>
+<td align="center">Key is a legacy CoreStorage KEK</td>
+</tr>
+<tr>
+<td align="center">KEK_FLAG_HARDWARE</td>
+<td align="center">0x00020000’0000000000</td>
+<td align="center">Key is hardware encrypted</td>
+</tr>
+</tbody></table>
+<p>解密算法是 PBKDF2 和 RFC 3394，你必须知道 User Password 并计算出 Passcode Key，才能正确解封 wrapped KEK，算法是：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Calculate size of wrapping key (in bytes)</span></span><br><span class="line">key_size := (flags &amp; KEK_FLAG_CORESTORAGE) ? <span class="number">16</span> : <span class="number">32</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Generate unwrapping key from user&#x27;s password</span></span><br><span class="line">key := pbkdf2_hmac_sha256(password, salt, iterations, key_size)</span><br><span class="line"></span><br><span class="line"><span class="comment">// Unwrap the encrypted KEK</span></span><br><span class="line">kek := rfc3394_unwrap(key, wrapped_key);</span><br></pre></td></tr></table></figure>
+
+<h4 id="Step-6-解封-VEK"><a href="#Step-6-解封-VEK" class="headerlink" title="Step 6: 解封 VEK"></a>Step 6: 解封 VEK</h4><p>KEK 也是基于 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X.690#DER_encoding">DER 编码</a>的数据块，结构更简单：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">VEKBLOB ::= SEQUENCE &#123;</span><br><span class="line">    unknown [<span class="number">0</span>] INTEGER</span><br><span class="line">    hmac    [<span class="number">1</span>] OCTET STRING</span><br><span class="line">    salt    [<span class="number">2</span>] OCTET STRING</span><br><span class="line">    keyblob [<span class="number">3</span>] SEQUENCE &#123;</span><br><span class="line">        unknown     [<span class="number">0</span>] INTEGER</span><br><span class="line">        uuid        [<span class="number">1</span>] OCTET STRING</span><br><span class="line">        flags       [<span class="number">2</span>] INTEGER</span><br><span class="line">        wrapped_key [<span class="number">3</span>] OCTET STRING</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>解密算法就是简单的 RFC 3394。<br><code>vek = rfc3394_unwrap(vek, wrapped_key)</code></p>
+<p>至此，我们终于获得了核心密钥 VEK ！！！</p>
+<h3 id="3-文件解密的流程"><a href="#3-文件解密的流程" class="headerlink" title="3. 文件解密的流程"></a>3. 文件解密的流程</h3><p>APFS 采用 XTS-AES-128 磁盘加密模式，该密码使用 256 位分组密钥和 64 位调整值。此调整值取决于位置。它允许对相同的明文进行加密并存储在磁盘上的不同位置，并且在使用相同的 AES 密钥时具有截然不同的密文。每 512 字节的加密数据使用基于块初始存储的容器偏移量的调整。</p>
+<p>要顺利完成文件内容解密，前提条件包括：</p>
+<ol>
+<li>准确解析文件系统的B-Tree</li>
+<li>解析密钥包，找到分组密钥 Ciper Key，也即是 VEK</li>
+<li>找到文件密钥，也就是 Tweak key</li>
+</ol>
+<h4 id="文件元数据的解密"><a href="#文件元数据的解密" class="headerlink" title="文件元数据的解密"></a>文件元数据的解密</h4><p>卷的对象映射永远不会加密，但其引用的虚拟对象可能会加密，就像加密卷上的 FS 树节点一样。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">omap_val</span> &#123;</span></span><br><span class="line">    <span class="type">uint32_t</span> ov_flags; <span class="comment">// 0x00</span></span><br><span class="line">    <span class="type">uint32_t</span> ov_size;  <span class="comment">// 0x04</span></span><br><span class="line">    <span class="type">paddr_t</span> ov_paddr;  <span class="comment">// 0x08</span></span><br><span class="line">&#125; <span class="type">omap_val_t</span>;        <span class="comment">// 0x10</span></span><br></pre></td></tr></table></figure>
+
+<p>如果<code>ov_flags</code>设置了<code>OMAP_VAL_ENCRYPTED</code>标志位，则位于<code>ov_paddr</code>的虚拟对象已经被加密，<br>对于第一个512字节的数据块，可以基于物理位置确定 Tweak value，后续512字节的数据块则依次递增。</p>
+<p><code>uint64_t tweak0 = (ov_paddr * block_size) / 512;</code></p>
+<h4 id="文件内容的解密"><a href="#文件内容的解密" class="headerlink" title="文件内容的解密"></a>文件内容的解密</h4><ol>
+<li>基于 Volume Superblock 的<code>apfs_root_tree_oid</code>字段找到 Root Directory 的对象映射</li>
+<li>使用 VEK 作为AES-XTS 主密钥，解封并访问文件系统树</li>
+<li>查找加密文件的文件范围记录<code>APFS_TYPE_FILE_EXTENT</code></li>
+<li>查找加密状态记录<code>APFS_TYPE_CRYPTO_STATE</code>，其标识符等于<code>j_file_extent_val.crypto_id</code></li>
+<li>使用 VEK 作为主密钥，<code>Crypto_id</code>的值作为 Tweak key，执行 AES-XTS 解密相应的数据块</li>
+</ol>
+<blockquote>
+<p>TODO: 第四步来自 APFS白皮书，似乎 FDE 模式不需要？</p>
+</blockquote>
+<h2 id="六、Snapshot"><a href="#六、Snapshot" class="headerlink" title="六、Snapshot"></a>六、Snapshot</h2><p>快照（Snapshot）是现代文件系统的重要功能，可以在给定时间点获得一个稳定的、只读的文件系统副本，例如用于硬盘的增量备份。快照的设计目标是可以快速而且低成本的创建，但付出的代价是删除快照需要更多的工作。</p>
+<h3 id="1-Snapshot-Metadata-Record"><a href="#1-Snapshot-Metadata-Record" class="headerlink" title="1. Snapshot Metadata Record"></a>1. Snapshot Metadata Record</h3><p>快照也是一个基于 B-树 的应用，鉴于快照的数据量可能较大，因此又建立了一个名为<code>Extent Reference</code>的 B-树 用于保存实际的内容数据，而在 snapshot 记录中仅保存其元数据 metadata ，定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_snap_metadata_key</span> &#123;</span> </span><br><span class="line">    <span class="type">j_key_t</span> hdr;                        <span class="comment">// 就是这个快照对应的 xid</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_snap_metadata_key</span> <span class="title">j_snap_metadata_key_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_snap_metadata_val</span> &#123;</span></span><br><span class="line">    <span class="type">oid_t</span>       extentref_tree_oid;     <span class="comment">// 内容数据的 oid，保存在 ExtentRef tree</span></span><br><span class="line">    <span class="type">oid_t</span>       sblock_oid;             <span class="comment">// 快照为卷宗超级块建立副本，这是超级块的 oid</span></span><br><span class="line">    <span class="type">uint64_t</span>    create_time;</span><br><span class="line">    <span class="type">uint64_t</span>    change_time;</span><br><span class="line">    <span class="type">uint64_t</span>    inum;</span><br><span class="line">    <span class="type">uint32_t</span>    extentref_tree_type;    <span class="comment">// 默认就是 B-树</span></span><br><span class="line">    <span class="type">uint32_t</span>    flags;</span><br><span class="line">    <span class="type">uint16_t</span>    name_len;</span><br><span class="line">    <span class="type">uint8_t</span>     name[<span class="number">0</span>];                <span class="comment">// 快照名称，UTF-8编码</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_snap_metadata_val</span> <span class="title">j_snap_metadata_val_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Snapshot-Name-Records"><a href="#2-Snapshot-Name-Records" class="headerlink" title="2. Snapshot Name Records"></a>2. Snapshot Name Records</h3><p>快照名称记录用于将快照名称映射到其事务标识符。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_snap_name_key</span> &#123;</span> </span><br><span class="line">    <span class="type">j_key_t</span> hdr;</span><br><span class="line">    <span class="type">uint16_t</span> name_len;</span><br><span class="line">    <span class="type">uint8_t</span> name[<span class="number">0</span>];</span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_snap_name_key</span> <span class="title">j_snap_name_key_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">j_snap_name_val</span> &#123;</span> </span><br><span class="line">    <span class="type">xid_t</span> snap_xid;                     <span class="comment">// 快照中最后一个事务的 xid</span></span><br><span class="line">&#125; __attribute__((packed));</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">j_snap_name_val</span> <span class="title">j_snap_name_val_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Snapshot-Extended-Reference-Metadata-Object"><a href="#3-Snapshot-Extended-Reference-Metadata-Object" class="headerlink" title="3. Snapshot Extended Reference Metadata Object"></a>3. Snapshot Extended Reference Metadata Object</h3><p>每个快照都有一个虚拟对象，用于保存快照扩展信息的元数据，其 oid 保存在该卷宗超级块的<code>apfs_snap_meta_ext_oid</code>字段中，映射关系记录在该卷宗的 OMAP 上。快照的虚拟对象有多个版本，其事务标识符 xid 对应每个版本。</p>
+<blockquote>
+<p>Each snapshot has a virtual Snapshot Extended Metadata Object in the volume’s Object Map. The virtual object identifier of this object is stored in the apfs_snap_meta_ext_oid field of the Volume Superblock. There are multiple versions of this object whose transaction identifiers correspond to each snapshot.</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">snap_meta_ext_obj_phys</span> &#123;</span> </span><br><span class="line">    <span class="type">obj_phys_t</span>      smeop_o; </span><br><span class="line">    <span class="type">snap_meta_ext_t</span> smeop_sme;      <span class="comment">// 具体结构在下面</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">snap_meta_ext_obj_phys_t</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">snap_meta_ext</span> &#123;</span></span><br><span class="line">    <span class="type">uint32_t</span>    sme_version;        <span class="comment">// 当前版本号=1</span></span><br><span class="line">    <span class="type">uint32_t</span>    sme_flags;</span><br><span class="line">    <span class="type">xid_t</span>       sme_snap_xid;       <span class="comment">// 快照对应的 xid</span></span><br><span class="line">    <span class="type">uuid_t</span>      sme_uuid;           <span class="comment">// 快照的 UUID</span></span><br><span class="line">    <span class="type">uint64_t</span>    sme_token;</span><br><span class="line">&#125; __attribute__((packed))</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">snap_meta_ext</span> <span class="title">snap_meta_ext_t</span>;</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="七、遗留问题"><a href="#七、遗留问题" class="headerlink" title="七、遗留问题"></a>七、遗留问题</h2><h3 id="1-AFPS-白皮书中介绍的-media-keybag-是什么？"><a href="#1-AFPS-白皮书中介绍的-media-keybag-是什么？" class="headerlink" title="1. AFPS 白皮书中介绍的 media_keybag 是什么？"></a>1. AFPS 白皮书中介绍的 media_keybag 是什么？</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">media_keybag</span> &#123;</span></span><br><span class="line">    <span class="type">obj_phys_t</span> mk_obj;</span><br><span class="line">    <span class="type">kb_locker_t</span> mk_locker;          <span class="comment">// 密钥包入口，结构见下！</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>2020年6月，增加定义：<code>#define OBJECT_TYPE_MEDIA_KEYBAG &#39;mkey&#39;</code><br>APFS 的描述：A keybag, wrapped up as a container-layer object.<br>nx_mkb_locker : Wrapped media key.</p>
+<p>KB_TAG_WRAPPING_M_KEY:<br>The key data stores a key thatʼs used to wrap a media key.</p>
+<p>初步分析，media key 应该是 2020年 Apple 版本升级的产物，负责封装数据宗卷上的元数据。</p>
+<p>Apple 安全白皮书介绍：</p>
+<blockquote>
+<p>When deleting a volume, its volume encryption key is securely deleted by the Secure Enclave.<br>This helps prevent future access with this key even by the Secure Enclave.<br>In addition, all volume encryption keys are wrapped with a media key.<br>The media key doesn’t provide additional confidentiality of data; instead, it’s designed to enable swift and secure deletion of data because without it decryption is impossible.<br>On a Mac with Apple silicon and those with the T2 chip, the media key is guaranteed to be erased by the Secure Enclave supported technology—for example by remote MDM commands.<br>Erasing the media key in this manner renders the volume cryptographically inaccessible.<br>media key Part of the encryption key hierarchy that helps provide for a secure and instant wipe.<br>In iOS, iPadOS, tvOS, and watchOS, the media key wraps the metadata on the data volume (and thus without it access to all per-file keys is impossible, rendering files protected with Data Protection inaccessible).<br>In macOS, the media key wraps the keying material, all metadata, and data on the FileVault protected volume. In either case, wipe of the media key renders encrypted data inaccessible.</p>
+</blockquote>
+<hr>
+<h2 id="附录一：一些重要的类型定义"><a href="#附录一：一些重要的类型定义" class="headerlink" title="附录一：一些重要的类型定义"></a>附录一：一些重要的类型定义</h2><h3 id="1-Object-Type-的定义"><a href="#1-Object-Type-的定义" class="headerlink" title="1. Object Type 的定义"></a>1. Object Type 的定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_NX_SUPERBLOCK       0x00000001  <span class="comment">// Container superblock</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_BTREE               0x00000002  <span class="comment">// Root node</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_BTREE_NODE          0x00000003  <span class="comment">// inode</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_SPACEMAN            0x00000005  <span class="comment">// Space Manager</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_SPACEMAN_CAB        0x00000006</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_SPACEMAN_CIB        0x00000007</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_SPACEMAN_BITMAP     0x00000008</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_SPACEMAN_FREE_QUEUE 0x00000009</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_EXTENT_LIST_TREE    0x0000000a</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_OMAP                0x0000000b  <span class="comment">// Object Map, B-Tree</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_CHECKPOINT_MAP      0x0000000c  <span class="comment">// Checkpoint</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_FS                  0x0000000d  </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_FSTREE              0x0000000e</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_BLOCKREFTREE        0x0000000f</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_SNAPMETATREE        0x00000010</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_NX_REAPER           0x00000011</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_NX_REAP_LIST        0x00000012</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_OMAP_SNAPSHOT       0x00000013</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_EFI_JUMPSTART       0x00000014</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_FUSION_MIDDLE_TREE  0x00000015  <span class="comment">// Fusion是Apple开发的混合磁盘技术</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_NX_FUSION_WBC       0x00000016</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_NX_FUSION_WBC_LIST  0x00000017</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_GBITMAP             0x00000019</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_GBITMAP_TREE        0x0000001a</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_GBITMAP_BLOCK       0x0000001b</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_ER_RECOVERY_BLOCK   0x0000001c</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_SNAP_META_EXT       0x0000001d</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_INTEGRITY_META      0x0000001e</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_FEXT_TREE           0x0000001f</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_RESERVED_20         0x00000020</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_INVALID             0x00000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_TEST                0x000000ff</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_CONTAINER_KEYBAG    <span class="string">&#x27;keys&#x27;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_VOLUME_KEYBAG       <span class="string">&#x27;recs&#x27;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJECT_TYPE_MEDIA_KEYBAG        <span class="string">&#x27;mkey&#x27;</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Object-Flag-的定义"><a href="#2-Object-Flag-的定义" class="headerlink" title="2. Object Flag 的定义"></a>2. Object Flag 的定义</h3><p>区分存储方式，即：虚拟对象、物理对象、或临时对象</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> OBJ_VIRTUAL         0x00000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJ_EPHEMERAL       0x80000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJ_PHYSICAL        0x40000000</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJ_NOHEADER        0x20000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJ_ENCRYPTED       0x10000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OBJ_NONPERSISTENT   0x08000000   </span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Volume-Flag-的定义"><a href="#3-Volume-Flag-的定义" class="headerlink" title="3. Volume Flag 的定义"></a>3. Volume Flag 的定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_UNENCRYPTED                 0x00000001LL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_RESERVED_2                  0x00000002LL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_RESERVED_4                  0x00000004LL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_ONEKEY                      0x00000008LL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_SPILLEDOVER                 0x00000010LL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_RUN_SPILLOVER_CLEANER       0x00000020LL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_ALWAYS_CHECK_EXTENTREF      0x00000040LL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_RESERVED_80                 0x00000080LL</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_RESERVED_100                0x00000100LL</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_FLAGS_VALID_MASK            (APFS_FS_UNENCRYPTED \</span></span><br><span class="line"><span class="meta">                                            | APFS_FS_RESERVED_2 \</span></span><br><span class="line"><span class="meta">                                            | APFS_FS_RESERVED_4 \</span></span><br><span class="line"><span class="meta">                                            | APFS_FS_ONEKEY \</span></span><br><span class="line"><span class="meta">                                            | APFS_FS_SPILLEDOVER \</span></span><br><span class="line"><span class="meta">                                            | APFS_FS_RUN_SPILLOVER_CLEANER \</span></span><br><span class="line"><span class="meta">                                            | APFS_FS_ALWAYS_CHECK_EXTENTREF \</span></span><br><span class="line"><span class="meta">                                            | APFS_FS_RESERVED_80 \</span></span><br><span class="line"><span class="meta">                                            | APFS_FS_RESERVED_100)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_FS_CRYPTOFLAGS                 (APFS_FS_UNENCRYPTED \</span></span><br><span class="line"><span class="meta">                                            | APFS_FS_ONEKEY)</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Volume-Role-的定义"><a href="#4-Volume-Role-的定义" class="headerlink" title="4. Volume Role 的定义"></a>4. Volume Role 的定义</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_NONE 0x0000</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_SYSTEM 0x0001</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_USER 0x0002</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_RECOVERY 0x0004</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_VM 0x0008</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_PREBOOT 0x0010</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_INSTALLER 0x0020</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* macOS 10.15、iOS 13 重新定义了 Volume 角色 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_DATA (1 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_BASEBAND (2 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_UPDATE (3 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_XART  (4 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_HARDWARE (5 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_BACKUP (6 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_RESERVED_7 (7 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_RESERVED_8 (8 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_ENTERPRISE (9 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_RESERVED_10 (10 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOL_ROLE_PRELOGIN (11 &lt;&lt; APFS_VOLUME_ENUM_SHIFT)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> APFS_VOLUME_ENUM_SHIFT 6</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://jtsylve.blog/post/2022/12/26/APFS-Decryption">APFS 深度分析系列 - Dr. Joe T.Sylve</a></li>
+<li><a target="_blank" rel="noopener" href="https://static.ernw.de/whitepaper/ERNW_Whitepaper65_APFS-forensics_signed.pdf">APFS 技术白皮书 - ERNW.de</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ntfs.com/apfs-structure.htm">ApFS Structure - NTFS.com</a></li>
+<li><a href="APFS-ref.pdf">APFS 数据结构参考图</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Fork_(file_system)">Fork (file system) - Wiki</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/33656976">谈谈 Mac OS 的文件系统</a></li>
+</ul>
+<h3 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a>官方文档</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc3394">RFC 3394 - AES密钥包裹算法</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X.690#DER_encoding">X.690 DER编码 - Wiki</a></li>
+</ul>
+<h3 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/libyal/libfsapfs/blob/main/documentation/Apple%20File%20System%20(APFS).asciidoc">libfsapfs 源代码的技术文档 - Github</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/linux-apfs/apfsprogs">apfsprogs：Experimental APFS tools for linux - Github</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/01/27/Apple%20Data%20Protection%E7%9A%84%E5%8A%9F%E8%83%BD%E6%A6%82%E8%A7%88/" rel="prev" title="Apple Data Protection的功能概览">
+                  <i class="fa fa-angle-left"></i> Apple Data Protection的功能概览
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/" rel="next" title="Common Criteria 国际安全认证体系">
+                  Common Criteria 国际安全认证体系 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

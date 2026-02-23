@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、安全元件 - SE（Secure Element） 19世纪70年代就出现了安全元件Secure Element，其外在表现就是一块物理上独立的芯片卡，负责提供私密信息的安全存储、重要程序的安全执行等功能。  按照Global Platform的定义，SE具有自己独立的执行环境和安全存储，采用安全协议与外部通讯，支持软件防篡改和硬件防篡改，其内部组件包含有：CPU、RAM、ROM、加密引擎、传">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ARM TrustZone的技术概述">
+<meta property="og:url" content="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、安全元件 - SE（Secure Element） 19世纪70年代就出现了安全元件Secure Element，其外在表现就是一块物理上独立的芯片卡，负责提供私密信息的安全存储、重要程序的安全执行等功能。  按照Global Platform的定义，SE具有自己独立的执行环境和安全存储，采用安全协议与外部通讯，支持软件防篡改和硬件防篡改，其内部组件包含有：CPU、RAM、ROM、加密引擎、传">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/SE.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/vs.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/TEE.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/el3-aarch64.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/soc.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/kunpeng.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/finger.png">
+<meta property="article:published_time" content="2022-09-25T10:23:58.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.621Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/SE.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/","path":"2022/09/25/ARM-TrustZone的技术概述/","title":"ARM TrustZone的技术概述"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ARM TrustZone的技术概述 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%AE%89%E5%85%A8%E5%85%83%E4%BB%B6-SE%EF%BC%88Secure-Element%EF%BC%89"><span class="nav-text">一、安全元件 - SE（Secure Element）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81TEE-%E5%8F%AF%E4%BF%A1%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="nav-text">二、TEE - 可信执行环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81ARM-TrustZone"><span class="nav-text">三、ARM TrustZone</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9AAndroid%E8%AE%BE%E5%A4%87%E7%9A%84%E6%8C%87%E7%BA%B9%E8%AF%86%E5%88%AB"><span class="nav-text">附录一：Android设备的指纹识别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9A%E5%BE%AE%E5%86%85%E6%A0%B8"><span class="nav-text">附录二：微内核</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ARM TrustZone的技术概述 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ARM TrustZone的技术概述
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-09-25 18:23:58" itemprop="dateCreated datePublished" datetime="2022-09-25T18:23:58+08:00">2022-09-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>11 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、安全元件-SE（Secure-Element）"><a href="#一、安全元件-SE（Secure-Element）" class="headerlink" title="一、安全元件 - SE（Secure Element）"></a>一、安全元件 - SE（Secure Element）</h2><p>19世纪70年代就出现了安全元件Secure Element，其外在表现就是一块物理上独立的芯片卡，负责提供私密信息的安全存储、重要程序的安全执行等功能。</p>
+<p>按照Global Platform的定义，SE具有自己独立的执行环境和安全存储，采用安全协议与外部通讯，支持软件防篡改和硬件防篡改，其内部组件包含有：CPU、RAM、ROM、加密引擎、传感器等。<br><img src="/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/SE.png" alt="SE.png"></p>
+<p>从产品形态上，SE可以分为三种：</p>
+<ul>
+<li>UICC：也称通用集成电路卡，就是电信运营商发布和使用的手机SIM卡</li>
+<li>Embedded SE：嵌入式SE，以一个独立芯片的形式集成在设备的主板上，例如iPhone手机上集成的NXP SN200系列芯片（带NFC功能）</li>
+<li>Micro SD：以SD存储卡的形式存在，通过插入SD卡槽集成到手机上，由独立的SE制造商制造和销售，由于安全和性能问题现已基本淘汰</li>
+</ul>
+<p>此外，银行系统的U盾也被认为是SE的一种形态，其核心就是一块智能卡芯片，但是集成了电子数字证书与签名秘钥等更多安全能力。<br>SE提供了非常可靠的安全等级，但保存在其中的数据和程序需要有更新机制，一般是通过TSM（Trusted Service Manager）来实现的。</p>
+<h2 id="二、TEE-可信执行环境"><a href="#二、TEE-可信执行环境" class="headerlink" title="二、TEE - 可信执行环境"></a>二、TEE - 可信执行环境</h2><p>随着智能终端的普及发展，越来越多的终端设备运行在复杂的开放环境之中，仅仅依赖Android等软件技术显然无法提供足够的安全强度，但基于Secure Element的安全技术在集成难度和成本上也存在困难，例如小额支付、版权保护、企业VPN等典型应用的安全保护强度并不高，为此迫切需要在安全性能和成本之间找到平衡点，开发一种“合适强度”的安全架构。<br><img src="/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/vs.png" alt="vs.png"></p>
+<p>2006年，OMTP工作组智能终端的安全率先提出了一种双系统解决方案：即在同一个智能终端下，除了多媒体操作系统外再提供一个隔离的安全操作系统，这一运行在隔离的硬件之上的隔离安全操作系统用来专门处理敏感信息以保证信息的安全。该方案即TEE的前身。</p>
+<p>2013年，Global Platform（GP）提出了可信执行环境（TEE，Trusted Execution Environment）的概念，即不需要独立的物理芯片，而是在通用CPU内核上扩展出的安全可执行模式。</p>
+<p>与REE (Rich Execution Environment)对应，TEE是与设备上的Rich OS（通常是Android等）并存的运行环境，通常具有其自身的执行空间，为Rich OS运行某些关键操作（指纹验证、PIN码输入、私钥存储、证书存储、数字版权保护等）提供安全服务，例如：</p>
+<p><img src="/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/TEE.png" alt="TEE.png"></p>
+<p>GP在TEE的标准化方面下足了工夫，定义了一系列技术规范：</p>
+<ul>
+<li>Internal API：负责为可信应用TA提供对安全资源和服务的访问，包括密钥注入和管理、加密、安全存储、安全时钟、可信用户界面（UI）和可信键盘等</li>
+<li>Client API：是让运行在Rich OS中的客户端应用（CA）访问TA服务和数据的底层通信接口</li>
+<li>Functional API：包括应用管理、调试功能、安全保护轮廓等</li>
+</ul>
+<p>TEE环境比Rich OS(普通操作系统)的安全级别更高，略差于安全元件SE，但成本显著降低，其核心特征是：</p>
+<ul>
+<li>TEE具有其自身的执行空间，也就是说在TEE的环境下有一个独立的操作系统，如seL4微内核</li>
+<li>TEE所能访问的硬件资源是与Rich OS分离的，拥有独立的MCU、DRAM、SRAM等</li>
+<li>TEE提供了授权安全软件(TrustApp可信应用，简称TA)的安全执行环境，同时也保护TA的资源和数据的保密性、完整性和访问权限。为了保证TEE本身的可信根，TEE在安全启动过程中是要通过验证并且与Rich OS隔离的</li>
+<li>在TEE中，每个TA是相互独立的，而且不能在未授权的情况下互相访问。简而言之就是在TEE环境的操作系统上同样有相应的应用程序(TA)，除了TEE的运行环境与普通操作系统相互独立外，TEE里的每一个TA也是需要授权并相互独立运行的。</li>
+</ul>
+<h2 id="三、ARM-TrustZone"><a href="#三、ARM-TrustZone" class="headerlink" title="三、ARM TrustZone"></a>三、ARM TrustZone</h2><p>TEE是一种基于通用CPU内核的嵌入式硬件技术，因此不同CPU指令集上必然有着相应的技术实现，包括：</p>
+<ul>
+<li>AMD PSP（Platform Security Processor）处理器</li>
+<li>ARM TrustZone技术（支持TrustZone的所有ARM处理器）</li>
+<li>Intel x86-64指令集：SGX Software Guard Extensions</li>
+<li>MIPS：虚拟化技术Virtualization</li>
+</ul>
+<p>ARM架构的处理器是智能终端市场的绝对霸主，也是TEE技术的主导者之一。2006年，ARM提出了硬件虚拟化技术<strong>TrustZone</strong>，通过引入安全扩展成为所有Cortex-A 类处理器的基本功能，随后ARM将其 TrustZone API 提供给 GlobalPlatform，也就是 TEE 的 Client API。</p>
+<p><img src="/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/el3-aarch64.png" alt="el3-aarch64.png"><br>TrustZone-A引入了安全世界（secure world）和非安全世界（none secure world）的概念，并且能够通过读取SCR（Secure Configuration Register）寄存器的第33位NS（None Secure）比特位进行判断。并且该值可用于外设总线（即通过NS比特位判断哪些设备是安全设备，只能在安全世界进行访问，在硬件层面对外设寄存器的访问进行了限制），以及管控对内存区域的访问（哪片地址空间只能够在安全世界访问，而非安全世界无权访问）。</p>
+<p>此外，Cortex-A为CPU引入了新的Monitor Mode模式。Monitor模式是作为安全世界和非安全世界间沟通的存在，无论是从安全世界退出到非安全世界，还是从非安全世界进入安全世界都要经过Monitor模式。从官方的介绍可知，从非安全世界和安全世界进入Monitor Mode有两种方式，一种是通过SMC（Secure Monitor Call）指令，另一种方式是通过在安全世界注册的中断。</p>
+<pre><code>从成本的角度出发，大多数支持TrustZone的CPU芯片采用虚拟化的方案，即将全部或某些物理核虚拟为一个非安全核和一个安全核，以基于时间片的方式轮流占用物理核，并通过Monitor Mode在安全世界和非安全世界之间切换。当然，如果不差钱也可以指定若干内核专门运行安全世界，也就是协处理器的方案
+</code></pre>
+<p>总结一下，ARM Trustzone不具体指一个硬件或软件，而是一个技术架构，在支持ARM Trustzone的SOC中，需按照ARM Trustzone技术对各个子模块进行设计。下图就是一个支持Trustzone架构的SOC设计框图。</p>
+<p><img src="/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/soc.png" alt="soc.png"></p>
+<p>需要指出的是，由于Apple、华为、高通等公司的自研CPU芯片都是基于ARM授权，由此Apple的Secure Enclave、高通的QSE等技术就是TrustZone的变种。<br>例如，华为鲲鹏服务器推出的TrustZone套件，就是一个以ARM TrustZone为技术实现基础，由硬件(包括BIOS、BMC)、机密计算运行环境，以及配套的 patch、应用开发指导和应用打包工具等组成的端到端的解决方案。<br><img src="/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/kunpeng.png" alt="kunpeng.png"></p>
+<hr>
+<h2 id="附录一：Android设备的指纹识别"><a href="#附录一：Android设备的指纹识别" class="headerlink" title="附录一：Android设备的指纹识别"></a>附录一：Android设备的指纹识别</h2><p>Android设备的指纹识别，依赖TEE来实现用户指纹认证，要求指纹采集、注册和识别都必须在TEE内部进行，已保证安全。</p>
+<p>Android从4.0开始引入了KeyStore，开发者可以使用KeyStore API生成密钥、使用密钥签名、使用密钥加解密、获取密钥的属性信息，但无法将密钥本身从KeyStore中取出。因为密钥不进入应用进程，这大大提高了密钥的安全性。随着Android版本更迭，KeyStore的实现不断进化得更加安全，在有些设备上，不仅密钥不进入应用进程，甚至不进入Android OS只存储在TEE或SE中，接下来我们大概列举下KeyStore的进化。</p>
+<ul>
+<li>4.0：创世版本，密钥使用用户的passcde加密后存储，支持RSA、ECDSA</li>
+<li>4.1：增加了使用安全硬件的基础设施，在可能的情况下密钥会被存储到安全硬件中</li>
+<li>6.0：增加支持AES、HMAC；增加了密钥绑定用户认证的能力，即可以指定某些密钥，在每一次使用时，必须由用户进行认证（指纹、passcode等）</li>
+<li>7.0：强制要求预装7.0系统的设备必须拥有安全硬件并且支持基于安全硬件的KeyStore</li>
+<li>8.0：增加了设备证明（Key Attestation）能力，开发者可通过验证Key Attestation的证书链，来确认密钥的确保存在了安全硬件中</li>
+</ul>
+<p><img src="/2022/09/25/ARM-TrustZone%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/finger.png" alt="finger.png"></p>
+<h2 id="附录二：微内核"><a href="#附录二：微内核" class="headerlink" title="附录二：微内核"></a>附录二：微内核</h2><p>与微内核对应的是宏内核，典型产品就是Linux。</p>
+<p>宏内核被视作为运行在单一地址空间的单一的进程，内核提供的所有服务，都以特权模式，在这个大型的内核地址空间中运作，这个地址空间被称为内核态（kernel space）。<br>宏内核通常以单一静态二进制文件的方式被存储在磁盘，或是缓冲存储器上，在引导之后被加载存储器中的内核态，开始运作。<br>宏内核的优点是设计简单。在内核之中的通信成本很小，内核可以直接调用内核态内的函数，跟用户态的应用程序调用函数一样，因此它的性能很好。在1980年代之前，所有的操作系统都采用这个方式实现；即使到了现在，主要的操作系统也多采用这个方式。</p>
+<p>与之相对，微内核的支持者认为，宏内核的移植性不佳，操作系统的代码高度耦合，很难适配不同的CPU架构，此外，所有的模块也都在同一块寻址空间内执行，倘若某个模块有错误，执行时就会损及整个操作系统运作。<br>微内核的设计理念，是将系统服务的实现，与系统的基本操作规则区分开来。它实现的方式，是将核心功能模块化，划分成几个独立的进程，各自运行，这些进程被称为服务（service）。所有的服务进程，都运行在不同的地址空间。只有需要绝对特权的进程，才能在具特权的执行模式下运行，其余的进程则在用户空间运行。</p>
+<p>第一代微内核，在内核提供了较多的服务，因此被称为“胖微内核”，它的典型代表是Mach，它既是GNU HURD也是Mac OS X的内核。<br>第二代微内核只提供最基本的OS服务，典型的OS是QNX，QNX在黑莓手机BlackBerry 10系统中被采用。L4微内核系列也是著名的微核心</p>
+<table>
+<thead>
+<tr>
+<th align="center">微内核OS</th>
+<th align="center">通信机制</th>
+<th align="center">性能</th>
+<th align="center">安全性</th>
+<th align="center">可靠性</th>
+<th align="center">可拓展性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Mach</td>
+<td align="center">共享内存，同步</td>
+<td align="center">☆☆</td>
+<td align="center">×</td>
+<td align="center">☆☆</td>
+<td align="center">☆</td>
+</tr>
+<tr>
+<td align="center">L4</td>
+<td align="center">共享内存，异步</td>
+<td align="center">☆☆☆</td>
+<td align="center">×</td>
+<td align="center">☆☆</td>
+<td align="center">☆☆</td>
+</tr>
+<tr>
+<td align="center">seL4</td>
+<td align="center">同步和异步端点</td>
+<td align="center">☆☆☆☆</td>
+<td align="center">√</td>
+<td align="center">☆☆☆</td>
+<td align="center">☆☆☆</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/blogernice/articles/14942270.html">ARM TrustZone的深度解析</a></li>
+<li><a target="_blank" rel="noopener" href="https://aijishu.com/a/1060000000320633">ARM Trustzone的安全扩展资料大全</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/471110552">从可信计算到机密计算 - 冯登国</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/34813040">网银U盾安全认证原理解析</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/384966998">隐私计算技术之可信执行环境（TEE）</a></li>
+<li><a target="_blank" rel="noopener" href="https://hack-big.tech/2021/01/23/Microcontroller-TrustZone%E9%9A%94%E7%A6%BB%E6%8A%80%E6%9C%AF%E7%AE%80%E4%BB%8B/">TrustZone-M简介</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.laoyaoba.com/html/share/news?source=pc&news_id=583957">从TrustZone建置安全验证硬件基础 - FIDO联盟</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/hjbf/p/13298964.html">ARM cortex三个版本A，R, M之间区别</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/xiasli123/article/details/105191368">微内核发展史与Mach、L4、seL4微内核OS的比较</a></li>
+</ul>
+<h3 id="文档下载"><a href="#文档下载" class="headerlink" title="文档下载"></a>文档下载</h3><ul>
+<li><a href="%E5%88%9B%E6%96%B0%E5%8F%91%E5%B1%95%E4%B8%AD%E7%9A%84%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97%E7%90%86%E8%AE%BA%E4%B8%8E%E6%8A%80%E6%9C%AF-%E5%86%AF%E7%99%BB%E5%9B%BD.pdf">创新发展中的可信计算理论与技术 - 冯登国</a></li>
+<li><a href="%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E9%9A%94%E7%A6%BB%E6%8A%80%E6%9C%AF%E7%A0%94%E7%A9%B6%E7%BB%BC%E8%BF%B0.pdf">系统安全隔离技术研究综述 - 郑显义</a></li>
+<li><a target="_blank" rel="noopener" href="https://res-www.zte.com.cn/mediares/magazine/publication/com_cn/article/201505/445481/P020151028370420765032.pdf">安全可信智能移动终端研究 - 张大伟</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.trustkernel.com/uploads/pubs/TEE-%E4%BB%8E%E6%89%8B%E6%9C%BA%E7%AB%AF%E5%88%B0%E4%BA%91%E7%AB%AF%E7%9A%84%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8%E5%A2%9E%E5%BC%BA.pdf">TEE：从手机端到云端的系统安全增强</a></li>
+<li><a target="_blank" rel="noopener" href="https://support.huaweicloud.com/twp-kunpengcctrustzone/twp-kunpengcctrustzone.pdf">鲲鹏 BoostKit 机密计算 TrustZone 套件 技术白皮书</a></li>
+<li><a href="%E4%BD%BF%E7%94%A8NXP_%E5%AE%89%E5%85%A8MCU_LPC54S0xx_%E6%9E%84%E5%BB%BA%E5%AE%89%E5%85%A8%E7%B3%BB%E7%BB%9F.pdf">使用NXP 安全MCU LPC54S0xx 构建安全系统</a></li>
+<li><a href="seL4-whitepaper.pdf">SEL4技术白皮书-英文版</a></li>
+<li><a href="RISC-V%E8%8A%AF%E7%89%87%E7%9A%84%E5%8A%A0%E5%AF%86%E5%8D%8F%E5%A4%84%E7%90%86%E5%99%A8%E8%AE%BE%E8%AE%A1%E6%96%B9%E6%A1%88.pdf">RISC-V芯片的加密协处理器设计方案</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/06/05/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%BA%8C%EF%BC%9Athis%E6%8C%87%E5%90%91%E5%93%AA%E9%87%8C/" rel="prev" title="JavaScript技术分析之二：this指向哪里">
+                  <i class="fa fa-angle-left"></i> JavaScript技术分析之二：this指向哪里
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/10/03/Apple%E5%AE%89%E5%85%A8%E9%9A%94%E5%8C%BA%EF%BC%88Secure-Encalve%EF%BC%89%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/" rel="next" title="Apple安全隔区（Secure Encalve）技术概览">
+                  Apple安全隔区（Secure Encalve）技术概览 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、概述 cloud-init 最初由 ubuntu 的母公司 Canonical 开发，基本设计思路是：   * 当用户首次创建虚拟机时，将前台设置的主机名，密码或者秘钥等存入后台的元数据服务器 - metadata server  * 当 cloud-init 随虚拟机启动而运行时，通过 http 协议访问 metadata server  * 虚拟机根据预设的元数据信息修改主机配置，从而完成">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟机管理软件cloud-init技术分析">
+<meta property="og:url" content="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、概述 cloud-init 最初由 ubuntu 的母公司 Canonical 开发，基本设计思路是：   * 当用户首次创建虚拟机时，将前台设置的主机名，密码或者秘钥等存入后台的元数据服务器 - metadata server  * 当 cloud-init 随虚拟机启动而运行时，通过 http 协议访问 metadata server  * 虚拟机根据预设的元数据信息修改主机配置，从而完成">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/pve-cloudinit.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/nova.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/workflow.png">
+<meta property="article:published_time" content="2023-09-10T09:05:26.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.266Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/pve-cloudinit.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/","path":"2023/09/10/虚拟机管理软件cloud-init技术分析/","title":"虚拟机管理软件cloud-init技术分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>虚拟机管理软件cloud-init技术分析 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-text">二、工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Local-Stage"><span class="nav-text">1. Local Stage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Init-Stage"><span class="nav-text">2. Init Stage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Config-Stage"><span class="nav-text">3. Config Stage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Final-Stage"><span class="nav-text">4. Final Stage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-cloud-cfg-%E7%A4%BA%E4%BE%8B"><span class="nav-text">5. cloud.cfg 示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81PVE-%E7%9A%84-config-drive-%E5%AE%9E%E7%8E%B0"><span class="nav-text">三、PVE 的 config drive 实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%83%E6%95%B0%E6%8D%AE%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%EF%BC%9Ameta-data"><span class="nav-text">元数据配置文件：meta-data</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%EF%BC%9Anetwork-config"><span class="nav-text">网络配置文件：network-config</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E6%96%87%E4%BB%B6%EF%BC%9Auser-data"><span class="nav-text">用户数据文件：user-data</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81openStack-%E7%9A%84-Metadata-RESTful-%E6%9C%8D%E5%8A%A1%E6%9C%BA%E5%88%B6"><span class="nav-text">四、openStack 的 Metadata RESTful 服务机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87"><span class="nav-text">五、疑难杂症</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-cloud-init-%E4%B8%8E-NetworkManager-%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-text">1. cloud-init 与 NetworkManager 的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-openEuler-%E7%9A%84%E7%BD%91%E5%8D%A1%E5%90%8D%E7%A7%B0%E8%A2%AB%E4%BF%AE%E6%94%B9"><span class="nav-text">2. openEuler 的网卡名称被修改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-BCLinux-oe21-10-%E5%AE%89%E8%A3%85-cloud-init-%E5%90%8E%E5%90%AF%E5%8A%A8%E5%A4%B1%E8%B4%A5%EF%BC%8C%E6%8F%90%E7%A4%BA%E9%94%99%E8%AF%AF%E4%BF%A1%E6%81%AFhosts-redhat%E6%96%87%E4%BB%B6%E4%B8%8D%E5%AD%98%E5%9C%A8"><span class="nav-text">3. BCLinux oe21.10 安装 cloud-init 后启动失败，提示错误信息hosts.redhat文件不存在</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="虚拟机管理软件cloud-init技术分析 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          虚拟机管理软件cloud-init技术分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-09-10 17:05:26" itemprop="dateCreated datePublished" datetime="2023-09-10T17:05:26+08:00">2023-09-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>cloud-init 最初由 ubuntu 的母公司 Canonical 开发，基本设计思路是：</p>
+<ul>
+<li>当用户首次创建虚拟机时，将前台设置的主机名，密码或者秘钥等存入后台的元数据服务器 - metadata server</li>
+<li>当 cloud-init 随虚拟机启动而运行时，通过 http 协议访问 metadata server</li>
+<li>虚拟机根据预设的元数据信息修改主机配置，从而完成系统的环境初始化</li>
+</ul>
+<p>目前大部分公有云（openstack, AWS, Aliyun）都在使用 cloud-init , 已经成为事实的工业标准。<br>开源代码： <a target="_blank" rel="noopener" href="https://github.com/cloud-init/cloud-init">https://github.com/cloud-init/cloud-init</a><br>官方文档： <a target="_blank" rel="noopener" href="https://cloudinit.readthedocs.io/en/latest/">https://cloudinit.readthedocs.io/en/latest/</a></p>
+<p>cloud-init 基于 Python 开发，可以通过<code>yum install cloud-init</code>进行安装，此外还有2个辅助软件包，<code>cloud-utils-growpart</code>用于磁盘空间自动扩容，<code>cloud-utils</code>用于镜像格式转换等。</p>
+<ul>
+<li>程序入口：<code>/usr/bin/cloud-init</code></li>
+<li>代码安装目录：<code>/usr/lib/python2.7/site-packages/cloudinit/</code></li>
+<li>核心配置文件：<code>/etc/cloud/cloud.cfg</code></li>
+<li>日志文件位于：<code>/var/log/cloud-init.log</code></li>
+<li>模版文件目录：<code>/etc/cloud/templates/</code></li>
+<li>缓存数据位于：<code>/var/lib/cloud/</code></li>
+<li>系统服务目录：<code>/usr/lib/systemd/system/</code></li>
+</ul>
+<p>本文以 centos7.8 + cloud-init 19.4 为例，分析其工作原理和实现方式。</p>
+<blockquote>
+<p>cloud-init 版本从 0.7.9 突变为 17.1，最新版本为 23.3.1，测试版本为 19.4.0<br>早期版本基于 Python2.7 开发，后来改为 Python3，因此代码安装目录可能有变化</p>
+</blockquote>
+<h2 id="二、工作原理"><a href="#二、工作原理" class="headerlink" title="二、工作原理"></a>二、工作原理</h2><p>cloud-init 对系统的初始化分为四个阶段，分别是：local、init、config、final。<br>一般通过 systemd 进行管理，通过命令<code>systemctl list-unit-files |grep cloud</code>，可以列出四个阶段对应的 cloud-init-local、cloud-init、cloud-config、cloud-final 等4个 service 文件。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cloud-config.service                          enabled </span><br><span class="line">cloud-final.service                           enabled </span><br><span class="line">cloud-init-local.service                      enabled </span><br><span class="line">cloud-init.service                            enabled </span><br><span class="line">cloud-config.target                           static  </span><br><span class="line">cloud-init.target                             static </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>.target 是静态定义，一般只有描述服务之间依赖关系的 Unit 段，不包含执行命令</p>
+</blockquote>
+<p>systemd 服务启动时会有一个简单的 generator stage，其任务是检查系统状态检查，并读取主配置文件<code>cloud.cfg</code>。<br>如果满足以下情况，cloud-init 将不在开机时启动，本组内其他 service 也遵循该规则：</p>
+<ul>
+<li><code>/etc/cloud/cloud-init.disabled</code> 文件存在时</li>
+<li>当内核命令发现文件 <code>/proc/cmdline</code>包含 <code>cloud-init=disabled</code>时</li>
+</ul>
+<blockquote>
+<p>当在容器中运行时，内核命令可能会被忽略，但是 cloud-init 会读取<code>KERNEL_CMDLINE</code>环境变量</p>
+</blockquote>
+<h3 id="1-Local-Stage"><a href="#1-Local-Stage" class="headerlink" title="1. Local Stage"></a>1. Local Stage</h3><p>作为虚拟机实例启动 cloud-init 的第一个阶段，其任务是：查找<strong>本地</strong>数据源，并应用于网络配置！<br>分析 systemd 配置文件<code>cloud-init-local.service</code>，发现：</p>
+<ul>
+<li>依赖于 systemd-remount-fs.service，即需要加载 root 文件系统</li>
+<li>检查是否存在缓存文件目录<code>/var/lib/cloud</code></li>
+<li>核心执行代码：<code>/usr/bin/cloud-init init --local</code></li>
+</ul>
+<p>所谓本地数据源，有以下几种方式：</p>
+<ul>
+<li>datasource：本机的config drive（例如 PVE 的Cloud-init CDROM），或者 Openstack、EC2 提供的云网络配置</li>
+<li>fallback：默认方式，相当于<code>dhcp on eth0</code>，即直接通过 DHCP 服务获得网络配置信息</li>
+<li>none：禁用网络。可以通过在<code>/etc/cloud/cloud.cfg</code>中，添加内容<code>network: &#123;config: disabled&#125;</code>实现</li>
+</ul>
+<blockquote>
+<p>所支持的数据源定义位于：<code>/usr/lib/python2.7/site-packages/cloudinit/settings.py</code>中的变量<code>CFG_BUILTIN.datasource_list</code></p>
+</blockquote>
+<p>如果是该实例的第一次启动，那么被选中的网络配置会被应用，所有老旧的配置都会会清除。<br>该阶段需要阻止网络服务启动以及老的配置被应用，这可能带来一些负面的影响，比如 DHCP 服务挂起，或者已经广播了老的 hostname，这可能导致系统进入一个奇怪的状态需要重启网络设备。</p>
+<h3 id="2-Init-Stage"><a href="#2-Init-Stage" class="headerlink" title="2. Init Stage"></a>2. Init Stage</h3><p>在官方文档中，也称为 Network Stage。<br>分析 systemd 配置文件<code>cloud-init.service</code>，发现：</p>
+<ul>
+<li>依赖于 cloud-init-local.service 和 NetworkManager.service</li>
+<li>核心执行代码：<code>/usr/bin/cloud-init init</code></li>
+</ul>
+<p>此阶段运行核心配置文件中名为<code>cloud_init_modules下</code>的所有module，主要包括：</p>
+<ul>
+<li>文件系统配置：包括 disk_setup 、resizefs、growpart 等<br>由于 nfs 等依赖于网络配置，这些模块不能过早启动。</li>
+<li>主机网络配置：包括 set_hostname、update_hostname、update_etc_hosts等</li>
+<li>辅助功能实现：包括 migrator、bootcmd、write-files、rsyslog、user-groups、ssh等</li>
+</ul>
+<h3 id="3-Config-Stage"><a href="#3-Config-Stage" class="headerlink" title="3. Config Stage"></a>3. Config Stage</h3><p>分析 systemd 配置文件<code>cloud-config.service</code>和<code>cloud-config.target</code>，发现：</p>
+<ul>
+<li>依赖于 cloud-init-local.service 和 cloud-init.service</li>
+<li>核心执行代码：<code>/usr/bin/cloud-init modules --mode=config</code></li>
+</ul>
+<p>此阶段运行核心配置文件中名为<code>cloud_config_modules下</code>的所有module，主要包括：</p>
+<ul>
+<li>文件系统挂载：包括 mounts 等</li>
+<li>主机环境配置：包括 locale、timezone、set-password、rh_subscription等</li>
+<li>系统软件处理：包括 yum-add-repo、package-update-upgrade-install</li>
+<li>辅助功能实现：包括 runcmd、puppet等</li>
+</ul>
+<h3 id="4-Final-Stage"><a href="#4-Final-Stage" class="headerlink" title="4. Final Stage"></a>4. Final Stage</h3><p>分析 systemd 配置文件<code>cloud-final.service</code>，发现：</p>
+<ul>
+<li>依赖于 cloud-config.service</li>
+<li>核心执行代码：<code>/usr/bin/cloud-init modules --mode=final</code></li>
+</ul>
+<p>此阶段运行核心配置文件中名为<code>cloud_final_modules下</code>的所有module，主要包括：</p>
+<ul>
+<li>用户脚本处理：包括 scripts-per-once、scripts-per-boot、scripts-per-instance、scripts-user 等</li>
+<li>用户登录配置：包括 ssh-authkey-fingerprints、keys-to-console等</li>
+<li>系统软件处理：包括 yum-add-repo、package-update-upgrade-install</li>
+<li>辅助功能实现：包括 final-message、phone-home等</li>
+</ul>
+<h3 id="5-cloud-cfg-示例"><a href="#5-cloud-cfg-示例" class="headerlink" title="5. cloud.cfg 示例"></a>5. cloud.cfg 示例</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">users:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">default</span></span><br><span class="line"></span><br><span class="line"><span class="attr">disable_root:</span> <span class="number">1</span>                             <span class="comment"># 禁止root登录，默认true，一般需修改！</span></span><br><span class="line"><span class="attr">ssh_pwauth:</span>   <span class="number">0</span>                             <span class="comment"># 允许密码登录，默认false，一般需修改！</span></span><br><span class="line"></span><br><span class="line"><span class="attr">mount_default_fields:</span> [<span class="string">~</span>, <span class="string">~</span>, <span class="string">&#x27;auto&#x27;</span>, <span class="string">&#x27;defaults,nofail,x-systemd.requires=cloud-init.service&#x27;</span>, <span class="string">&#x27;0&#x27;</span>, <span class="string">&#x27;2&#x27;</span>]</span><br><span class="line"><span class="attr">resize_rootfs_tmp:</span> <span class="string">/dev</span></span><br><span class="line"><span class="attr">ssh_deletekeys:</span>   <span class="number">1</span></span><br><span class="line"><span class="attr">ssh_genkeytypes:</span>  <span class="string">~</span></span><br><span class="line"><span class="attr">syslog_fix_perms:</span> <span class="string">~</span></span><br><span class="line"><span class="attr">disable_vmware_customization:</span> <span class="literal">false</span></span><br><span class="line"></span><br><span class="line"><span class="attr">cloud_init_modules:</span>                         <span class="comment"># 定义init阶段需要执行的模块</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">disk_setup</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">migrator</span>                                 <span class="comment"># 迁移老的cloud-init数据</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">bootcmd</span>                                  <span class="comment"># 启动时执行相关命令</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">write-files</span>                              <span class="comment"># 根据cloud.cfg的配置写数据到文件里</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">growpart</span>                                 <span class="comment"># 扩展分区到硬盘的大小 ，默认对根分区执行。需要调用 growpart ！</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">resizefs</span>                                 <span class="comment"># resize文件系统，适配新的大小。默认对根目录执行</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">set_hostname</span>                             <span class="comment"># 根据元数据设置主机名</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">update_hostname</span>                          <span class="comment"># 更新主机名，适用于当用户自定义主机名时</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">update_etc_hosts</span>                         <span class="comment"># 更新 /etc/hosts</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">rsyslog</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">users-groups</span>                             <span class="comment"># 根据cloud.cfg的配置创建用户组和用户</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">ssh</span>                                      <span class="comment"># 配置sshd</span></span><br><span class="line"></span><br><span class="line"><span class="attr">cloud_config_modules:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">mounts</span>                                   <span class="comment"># 加载自定义的磁盘，/etc/fstab ？</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">locale</span>                                   <span class="comment"># 设置语言</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">set-passwords</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">rh_subscription</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">yum-add-repo</span>                             <span class="comment"># 添加自定义 YUM 源，好像只能加1个？</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">package-update-upgrade-install</span>           <span class="comment"># 安装完成后自动升级软件包，一般需关闭！</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">timezone</span>                                 <span class="comment"># 设置时区</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">puppet</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">chef</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">salt-minion</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">mcollective</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">disable-ec2-metadata</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">runcmd</span>                                   <span class="comment"># 执行自定义的命令行</span></span><br><span class="line"></span><br><span class="line"><span class="attr">cloud_final_modules:</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">rightscale_userdata</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">scripts-per-once</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">scripts-per-boot</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">scripts-per-instance</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">scripts-user</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">ssh-authkey-fingerprints</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">keys-to-console</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">phone-home</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">final-message</span></span><br><span class="line"> <span class="bullet">-</span> <span class="string">power-state-change</span></span><br><span class="line"></span><br><span class="line"><span class="attr">system_info:</span></span><br><span class="line">  <span class="attr">default_user:</span>                             <span class="comment"># 自动创建默认用户，可修改！</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">centos</span></span><br><span class="line">    <span class="attr">lock_passwd:</span> <span class="literal">true</span></span><br><span class="line">    <span class="attr">gecos:</span> <span class="string">Cloud</span> <span class="string">User</span></span><br><span class="line">    <span class="attr">groups:</span> [<span class="string">adm</span>, <span class="string">systemd-journal</span>]</span><br><span class="line">    <span class="attr">sudo:</span> [<span class="string">&quot;ALL=(ALL) NOPASSWD:ALL&quot;</span>]</span><br><span class="line">    <span class="attr">shell:</span> <span class="string">/bin/bash</span></span><br><span class="line">  <span class="attr">distro:</span> <span class="string">rhel</span>                              <span class="comment"># Linux发行版类型是 redhat</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="attr">cloud_dir:</span> <span class="string">/var/lib/cloud</span>               <span class="comment"># 缓存数据目录</span></span><br><span class="line">    <span class="attr">templates_dir:</span> <span class="string">/etc/cloud/templates</span>     <span class="comment"># 模版文件目录</span></span><br><span class="line">  <span class="attr">ssh_svcname:</span> <span class="string">sshd</span></span><br></pre></td></tr></table></figure>
+
+<p>官方文档提供了配置文件的自定义规则方法，参见<a target="_blank" rel="noopener" href="https://cloudinit.readthedocs.io/en/latest/reference/examples.html">Cloud config examples</a></p>
+<h2 id="三、PVE-的-config-drive-实现"><a href="#三、PVE-的-config-drive-实现" class="headerlink" title="三、PVE 的 config drive 实现"></a>三、PVE 的 config drive 实现</h2><p>Config drive 机制是将 metadata 信息写入虚拟机的一个特殊的配置设备（例如 CDROM ）中，然后在虚拟机启动时，自动挂载并读取 metadata 信息，从而达到获取 metadata 的目的。</p>
+<blockquote>
+<p>光盘作为存储介质，也需要安装特定的文件系统来管理数据和文件，这就是 <a target="_blank" rel="noopener" href="https://www.iso.org/obp/ui/#iso:std:iso:9660:ed-1:v1:en">ISO 9660</a>，别名是 CDFS</p>
+</blockquote>
+<p>PVE 的虚拟机模版通过增加一个专用的 Cloud-init CDROM 设备实现 config drive。</p>
+<p>例如，我们从前台界面配置了 一个虚拟机 VM 511。<br><img src="/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/pve-cloudinit.png" alt="PVE"></p>
+<p>第一步，将配置信息存储在<code>/etc/pve/qemu-server/511.conf</code>，内容是：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">agent:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">bootdisk:</span> <span class="string">scsi0</span></span><br><span class="line"><span class="attr">cores:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">ide2:</span> <span class="string">local-lvm:vm-511-cloudinit,media=cdrom</span></span><br><span class="line"><span class="attr">ipconfig0:</span> <span class="string">ip=192.168.0.223/24,gw=192.168.0.8</span></span><br><span class="line"><span class="attr">memory:</span> <span class="number">1024</span></span><br><span class="line"><span class="attr">name:</span> <span class="string">cloud-init</span></span><br><span class="line"><span class="attr">nameserver:</span> <span class="number">192.168</span><span class="number">.0</span><span class="number">.144</span></span><br><span class="line"><span class="attr">net0:</span> <span class="string">virtio=DA:41:A4:42:9C:DB,bridge=vmbr0,firewall=1</span></span><br><span class="line"><span class="attr">numa:</span> <span class="number">0</span></span><br><span class="line"><span class="attr">ostype:</span> <span class="string">l26</span></span><br><span class="line"><span class="attr">scsi0:</span> <span class="string">local-lvm:vm-511-disk-0,size=10G</span></span><br><span class="line"><span class="attr">scsihw:</span> <span class="string">virtio-scsi-pci</span></span><br><span class="line"><span class="attr">searchdomain:</span> <span class="string">caogo.local3</span></span><br><span class="line"><span class="attr">smbios1:</span> <span class="string">uuid=5584c7ed-76f4-4b6d-a6fe-cb10a8b220fc</span></span><br><span class="line"><span class="attr">sockets:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">vmgenid:</span> <span class="string">297abc09-fa0f-46b0-b9ad-ae3195110f2a</span></span><br></pre></td></tr></table></figure>
+
+<p>第二步，PVE 控制台将 VM 相关的 metadata 信息写入 libvirt 的虚拟磁盘文件中，并指示 libvirt 将其虚拟为 cdrom 设备。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@nuc5i3:/dev/pve# ls -l /dev/pve/vm-511-cloudinit</span><br><span class="line">lrwxrwxrwx 1 root root 8 Sep 17 23:11 /dev/pve/vm-511-cloudinit -&gt; ../dm-24</span><br></pre></td></tr></table></figure>
+
+<p>这样，当该虚拟机启动时，Guest 操作系统中的 cloud-init 会去挂载该 cloud-init 设备，然后根据所读取出的内容对虚拟机进行配置。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@copy-of-vm-centos7 ~]# mount /dev/sr0 /mnt</span><br><span class="line">mount: /dev/sr0 写保护，将以只读方式挂载</span><br><span class="line">[root@copy-of-vm-centos7 ~]# ls -l /mnt</span><br><span class="line">总用量 2</span><br><span class="line">-rw-r--r--. 1 root root  54 9月  17 12:08 meta-data</span><br><span class="line">-rw-r--r--. 1 root root 227 9月  17 12:08 network-config</span><br><span class="line">-rw-r--r--. 1 root root 170 9月  17 12:08 user-data</span><br></pre></td></tr></table></figure>
+
+<p>第三步，虚拟机启动 cloud-init 时，将读取<code>/dev/sr0</code>的全部文件并加载到缓存。</p>
+<p>cloud-init 支持四种配置文件，其中：</p>
+<ul>
+<li><code>meta-data</code>（必须）: 一般是 instance id，唯一的一个机器标识符</li>
+<li><code>network-config</code>: 关于网络如 ip、nameserver、dns等的定义</li>
+<li><code>user-data</code>（可选）: 我们定义的大多数配置都放在这里</li>
+<li><code>vendor-data</code>（可选）: 是供应商（云）定义的如 user-data 类似数据，如果定义为 NoCloud 时该文件不存在</li>
+</ul>
+<h3 id="元数据配置文件：meta-data"><a href="#元数据配置文件：meta-data" class="headerlink" title="元数据配置文件：meta-data"></a>元数据配置文件：meta-data</h3><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义了一个实例instance，并设置了唯一ID</span></span><br><span class="line"><span class="attr">instance-id:</span> <span class="string">5be815eb6375dae4bfdd91471def3f8415521f1d</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="网络配置文件：network-config"><a href="#网络配置文件：network-config" class="headerlink" title="网络配置文件：network-config"></a>网络配置文件：network-config</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="number">1</span></span><br><span class="line"><span class="attr">config:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">physical</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">eth0</span></span><br><span class="line">      <span class="attr">mac_address:</span> <span class="string">&#x27;da:41:a4:42:9c:db&#x27;</span></span><br><span class="line">      <span class="attr">subnets:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">static</span></span><br><span class="line">        <span class="attr">address:</span> <span class="string">&#x27;192.168.0.223&#x27;</span></span><br><span class="line">        <span class="attr">netmask:</span> <span class="string">&#x27;255.255.255.0&#x27;</span></span><br><span class="line">        <span class="attr">gateway:</span> <span class="string">&#x27;192.168.0.8&#x27;</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">nameserver</span></span><br><span class="line">      <span class="attr">address:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&#x27;192.168.0.144&#x27;</span></span><br><span class="line">      <span class="attr">search:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&#x27;caogo.local3&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="用户数据文件：user-data"><a href="#用户数据文件：user-data" class="headerlink" title="用户数据文件：user-data"></a>用户数据文件：user-data</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义了大多数配置信息</span></span><br><span class="line"><span class="attr">hostname:</span> <span class="string">cloud-init</span></span><br><span class="line"><span class="attr">manage_etc_hosts:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment"># 完全合格域名 FQDN (Fully Qualified Domain Name)是一个包含了主机名和域名的完整标识符</span></span><br><span class="line"><span class="attr">fqdn:</span> <span class="string">cloud-init.caogo.local3</span></span><br><span class="line"><span class="attr">chpasswd:</span></span><br><span class="line">  <span class="attr">expire:</span> <span class="literal">False</span></span><br><span class="line"><span class="attr">users:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">default</span></span><br><span class="line"><span class="attr">package_upgrade:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="四、openStack-的-Metadata-RESTful-服务机制"><a href="#四、openStack-的-Metadata-RESTful-服务机制" class="headerlink" title="四、openStack 的 Metadata RESTful 服务机制"></a>四、openStack 的 Metadata RESTful 服务机制</h2><p>OpenStack 提供了 RESTful 接口，虚拟机可以通过 REST API 来获取 metadata 信息，具体包含了三个服务组件，其中<code>Nova-api-metadata</code>运行在云平台的控制节点，<code>neutron-metadata-agent</code>和<code>Neutron-ns-metadata-proxy</code>运行在网络节点，分别位于 openstack 管理网络和 租户所在的用户网络。</p>
+<p><img src="/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/nova.jpg" alt="nova"></p>
+<p>首先要解决一个问题，在虚拟机尚未配置网络的情况下，往哪里发送 REST API 请求呢？<br>最早由亚马逊公司提出了 metadata 方案，利用 IPv4 保留的本地链路地址段，规定服务地址为 <code>169.254.169.254:80</code>，后来 OpenStack 沿用了这一规定。</p>
+<blockquote>
+<p>Link Local Address 遵循<a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc3927">RFC 3927标准</a>，地址范围是：169.254.0.0&#x2F;16</p>
+</blockquote>
+<p>在具体实现上，Neutron 有两种方式：</p>
+<ul>
+<li>通过 router 发送请求<br>如果虚拟机所在 subnet 连接在了 router 上，那么发向 169.254.169.254 的报文会被发至 router，而 neutron-ns-metadata-proxy 就监听着该端口</li>
+<li>通过 DHCP 发送请求<br>通过 DHCP 协议的选项 121 来为虚拟机设置静态路由，此时虚拟机所在 subnet 不需连接任何 router。此方式更为常见！！！</li>
+</ul>
+<p>虚拟机获取 metadata 的大致流程为：<br><img src="/2023/09/10/%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%AE%A1%E7%90%86%E8%BD%AF%E4%BB%B6cloud-init%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/workflow.png" alt="workflow"></p>
+<ol>
+<li>首先，请求被发送至<code>neutron-ns-metadata-proxy</code>，此时会在请求中添加<code>X-Neutron-Router-ID</code>和<code>X-Neutron-Network-ID</code>信息。</li>
+<li>该请求通过 unix domian socket 被转发给 <code>neutron-metadata-agent</code>。</li>
+<li><code>neutron-metadata-agent</code>根据请求中的 router-id、network-id 和 IP，获取 port 信息，从而拿到 instance-id 和 tenant-id 加入请求中。</li>
+<li>请求被转发给<code>nova-api-metadata</code>。</li>
+<li><code>nova-api-metadata</code>其利用 instance-id 和 tenant-id 获取虚拟机的 metadata，返回相应的结果信息。</li>
+</ol>
+<p>注意！为了解决网络节点的网段和租户的虚拟网段重复的问题，OpenStack 引入了网络命名空间，Neutron 中的路由和 DHCP 服务器都在各自独立的命名空间中。由于虚拟机获取 metadata 的请求都是以路由和 DHCP 服务器作为网络出口，所以需要通过 neutron-ns-metadata-proxy 利用基于 unix domain socket 的 HTTP 技术打通不同的网络命名空间，将请求在网络命名空间之间转发。</p>
+<h2 id="五、疑难杂症"><a href="#五、疑难杂症" class="headerlink" title="五、疑难杂症"></a>五、疑难杂症</h2><h3 id="1-cloud-init-与-NetworkManager-的关系"><a href="#1-cloud-init-与-NetworkManager-的关系" class="headerlink" title="1. cloud-init 与 NetworkManager 的关系"></a>1. cloud-init 与 NetworkManager 的关系</h3><p>通过源代码分析，在 Local Stage 从 datasource 里读取网络配置信息，处理逻辑是：</p>
+<ul>
+<li>如果发现使用的是静态地址，cloud-init 就会将 datasource 定义的配置信息写入<code>/etc/network/interfaces</code>目录下的配置文件</li>
+<li>如果发现使用的是 DHCP，cloud-init 并不会创建刷新网卡配置文件，配置ip的工作就交由 NetworkManager 自动获取</li>
+</ul>
+<p>从以信息可知，如果创建静态ip的虚拟机，NetworkManager 这个服务必须在 cloudinit-local 之后启动才可正常从配置文件中读取 ip 并配置。而当你在镜像里安装 NetworkManager后，默认情况下它的启动顺序是会在 cloudinit-local 之前的。</p>
+<h3 id="2-openEuler-的网卡名称被修改"><a href="#2-openEuler-的网卡名称被修改" class="headerlink" title="2. openEuler 的网卡名称被修改"></a>2. openEuler 的网卡名称被修改</h3><p>openEuler 初始化安装时，NetworkManager 采用的是 net.ifnames 命名规范，初始网卡被命名为<code>ens18</code>。<br>安装 cloud-init 之后，其强制改为 biosdevname 命名规范，因此默认网卡被改名为<code>eth0</code>。<br>注意，老的网卡配置文件依然存在！具体实现原理参见<a target="_blank" rel="noopener" href="http://pythontime.iswbm.com/en/latest/c08/c08_06.html#centos-6-x">CentOS 6.x 如何更改网卡名</a></p>
+<h3 id="3-BCLinux-oe21-10-安装-cloud-init-后启动失败，提示错误信息hosts-redhat文件不存在"><a href="#3-BCLinux-oe21-10-安装-cloud-init-后启动失败，提示错误信息hosts-redhat文件不存在" class="headerlink" title="3. BCLinux oe21.10 安装 cloud-init 后启动失败，提示错误信息hosts.redhat文件不存在"></a>3. BCLinux oe21.10 安装 cloud-init 后启动失败，提示错误信息<code>hosts.redhat</code>文件不存在</h3><p>BCLinux oe21.10 提供的 cloud-init 版本，并未建立模版目录<code>/etc/cloud/templates</code>，也找不到<code>hosts.redhat.tmpl</code>文件。<br>根本原因是 cloud-init 目前适配了 Centos 和 openEuler 等主流版本，配置信息在 distor 中，但 BCLinux 不再其中。<br>临时解决办法是，手工建模版目录，并拷贝相应的模版文件，凑合着使吧！！！</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="http://pythontime.iswbm.com/en/latest/c08/c08_06.html#">cloud-init 源码解读</a></li>
+<li><a target="_blank" rel="noopener" href="https://xixiliguo.github.io/linux/cloud-init.html">cloud-init 介绍</a></li>
+<li><a target="_blank" rel="noopener" href="https://einverne.github.io/post/2020/03/cloud-init.html">Cloud-init 初始化虚拟机配置</a></li>
+<li><a target="_blank" rel="noopener" href="https://gameapp.club/post/2022-07-30-custom-cloud-init-for-pve/">基于 Cloud-init 定制化 PVE 虚拟机</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/gushiren/p/9511234.html">cloud-init简介及组件说明</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/55078689">深度解析 OpenStack metadata 服务架构</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/cd8f60e30034">OpenStack 的 metadata 服务机制</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/311493">Metadata Service 架构详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/38774639">OpenStack虚拟机如何获取metadata</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/09/03/Chrony%E6%97%B6%E9%97%B4%E5%90%8C%E6%AD%A5%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" rel="prev" title="Chrony时间同步服务器的安装记录">
+                  <i class="fa fa-angle-left"></i> Chrony时间同步服务器的安装记录
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/10/18/HEXO-6-3-NEXT-8-18-2-%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7%E8%AE%B0%E5%BD%95/" rel="next" title="HEXO 6.3 &amp; NEXT 8.18.2 版本升级记录">
+                  HEXO 6.3 & NEXT 8.18.2 版本升级记录 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

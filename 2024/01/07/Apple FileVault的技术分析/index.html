@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="FileVault 的意思是文件保管箱，是 Apple 公司为 Mac 电脑提供的、基于 MacOS 的加密技术方案，其本质归类于 FDE（Full Disk Encryption，全盘加密）。 注意！与之对应的，为 iPhone 提供的、基于 iOS 的 DataProtect （数据保护）加密技术方案，其本质归类于 FBE（File Based Encryption，文件加密）。  一、Leg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apple FileVault的技术分析">
+<meta property="og:url" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="FileVault 的意思是文件保管箱，是 Apple 公司为 Mac 电脑提供的、基于 MacOS 的加密技术方案，其本质归类于 FDE（Full Disk Encryption，全盘加密）。 注意！与之对应的，为 iPhone 提供的、基于 iOS 的 DataProtect （数据保护）加密技术方案，其本质归类于 FBE（File Based Encryption，文件加密）。  一、Leg">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/recovery-key.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/apfs.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/apfs_concepts.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/m1.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/filevault-on.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/filevault-off.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS-Header.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS3.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS4.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/VMK.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS6.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS7.png">
+<meta property="article:published_time" content="2024-01-07T08:07:04.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.669Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/recovery-key.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/","path":"2024/01/07/Apple FileVault的技术分析/","title":"Apple FileVault的技术分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Apple FileVault的技术分析 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Legacy-FileVault"><span class="nav-text">一、Legacy FileVault</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E4%BA%8E-CoreStorage-%E7%9A%84-FileVault-2"><span class="nav-text">二、基于 CoreStorage 的 FileVault 2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%90%AF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-text">1. 启用方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8A%80%E6%9C%AF%E5%AE%9E%E7%8E%B0"><span class="nav-text">2. 技术实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%9F%BA%E4%BA%8E-APFS-%E7%9A%84-FileVault"><span class="nav-text">三、基于 APFS 的 FileVault</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%EF%BC%88Intel-CPU%EF%BC%89"><span class="nav-text">1. 技术分析（Intel CPU）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%AD%BE%E5%90%8D%E7%B3%BB%E7%BB%9F%E5%8D%B7%EF%BC%88M1-CPU%EF%BC%89"><span class="nav-text">2. 签名系统卷（M1 CPU）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81FileVault%E7%9A%84%E5%AF%86%E9%92%A5%E5%B1%82%E7%BA%A7"><span class="nav-text">四、FileVault的密钥层级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%89%88%E6%9C%AC%E6%BC%94%E8%BF%9B"><span class="nav-text">1. 版本演进</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-KEK%E7%9A%84%E5%A4%9A%E5%89%AF%E6%9C%AC"><span class="nav-text">2. KEK的多副本</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81FileValut-2-%E7%9A%84%E8%A7%A3%E5%AF%86%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="nav-text">五、FileValut 2 的解密代码实例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-CoreStorage-Header"><span class="nav-text">1. CoreStorage Header</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-EncryptedRoot-plist"><span class="nav-text">2. EncryptedRoot.plist</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Volume-Master-Key"><span class="nav-text">3. Volume Master Key</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PassphraseWrappedKEKStruct"><span class="nav-text">PassphraseWrappedKEKStruct</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KEKWrappedVolumeKeyStruct"><span class="nav-text">KEKWrappedVolumeKeyStruct</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KeyWrappedKEK"><span class="nav-text">KeyWrappedKEK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%AA%E4%BB%A3%E7%A0%81%E5%AE%9E%E4%BE%8B"><span class="nav-text">伪代码实例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Volume-Tweak-Key"><span class="nav-text">4. Volume Tweak Key</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Apple FileVault的技术分析 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Apple FileVault的技术分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-01-07 16:07:04" itemprop="dateCreated datePublished" datetime="2024-01-07T16:07:04+08:00">2024-01-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>22 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>FileVault 的意思是文件保管箱，是 Apple 公司为 Mac 电脑提供的、基于 MacOS 的加密技术方案，其本质归类于 FDE（Full Disk Encryption，全盘加密）。<br>注意！与之对应的，为 iPhone 提供的、基于 iOS 的 DataProtect （数据保护）加密技术方案，其本质归类于 FBE（File Based Encryption，文件加密）。</p>
+<h2 id="一、Legacy-FileVault"><a href="#一、Legacy-FileVault" class="headerlink" title="一、Legacy FileVault"></a>一、Legacy FileVault</h2><p>2003年，Mac OS X Panther (黑豹，10.3) 首次发布了 FileVault，当时的版本只加密了用户的主目录（不包含启动宗卷），方法是采用一个巨大的稀疏磁盘镜像文件（sparse disk image，区别于普通的磁盘镜像文件<code>.dmg</code>，其实际磁盘占用空间是根据使用情况动态扩展的）作为虚拟磁盘，负责存储加密后的文件数据。在启用 FileVault 功能时，系统会要求用户设置一个<strong>主密码</strong>，当用户忘记密码时，需要这个主密码或是恢复密钥直接解密文件。</p>
+<p>2006年，Mac OS X Leopard（花豹，10.5）做了少许改进，将虚拟磁盘改为稀疏绑定磁盘镜像（sparse bundle disk image，其特点是将文件分割为若干个 8MB 的 Band，在文件修改时无需复制全部内容，仅复制本次修改的 Band，因此备份速度更快，非常适合 Time Machine 的需求）。</p>
+<p>Apple 将上述两种版本的技术统称为 <strong>Legacy FileVault</strong> ，其存在很多严重问题，包括：</p>
+<ul>
+<li>仅加密用户目录<code>$home</code>是远远不够的，<code>/tmp</code>和<code>/var/log</code>等目录怎么办？</li>
+<li>主密钥存储在磁盘镜像文件的头部，密钥包裹算法 3DES-EDE 存在破解风险；恢复密钥的包裹算法是 1024-bit RSA，加密强度不高，也存在破解风险</li>
+<li>文件内容加密采用 AES-128 + CBC 工作模式，但初始向量 IV 没有随机性，设置算法被破解：$IV&#x3D;trunc_{128}(HMACSHA1(hmac-key||trunkno))$</li>
+<li>MacOS 置于睡眠模式时，内存数据直接写入磁盘文件<code>/var/vm/sleepimage</code>，缺乏加密保护存在密钥泄露风险</li>
+</ul>
+<p>这些问题的根源，还是由于底层文件系统 HFS+ 不支持 FDE 加密，只能基于“应用软件模拟 + 专用磁盘镜像”的替代方式实现，导致功能受限而且效率低下。</p>
+<h2 id="二、基于-CoreStorage-的-FileVault-2"><a href="#二、基于-CoreStorage-的-FileVault-2" class="headerlink" title="二、基于 CoreStorage 的 FileVault 2"></a>二、基于 CoreStorage 的 FileVault 2</h2><p>2010年，Mac OS X Lion (狮子，10.7) 发布了 FileVault 2，基于 CoreStorage 虚拟化技术推出一个重新设计的 FDE 方案，主要改造点包括：</p>
+<ul>
+<li>随着 NIST 技术标准的演进，将 AES-CBC 替换为 AES-XTS 磁盘加密模式，分组长度为128位，密钥长度为256位，并支持基于 AES 指令集的硬件解密（如Intel Broadwell 架构的CPU，加密模式只有3%的性能损耗）。</li>
+<li>在磁盘和文件系统之间增加了一个虚拟化层，也就是命名为 CoreStorage 的 LVM （Logic Volume Manager，逻辑卷管理器），类似于 Veritas Volume Manager 和 OSF LVM，但底层文件系统仍然是 HFS+。</li>
+<li>支持将<strong>User Password</strong>作为加密因子，而且支持 MacOS 的每个用户使用各自的用户密码来计算用户密钥，并解锁加密数据，非常有利于用户隐私保护！</li>
+</ul>
+<h3 id="1-启用方式"><a href="#1-启用方式" class="headerlink" title="1. 启用方式"></a>1. 启用方式</h3><p>当用户启用 FileVault 时，主要任务包括：</p>
+<ol>
+<li>系统自动生成并要求用户保存<code>Recovery password</code><br> <img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/recovery-key.png" alt="RE"></li>
+<li>自动将已有数据卷转换为 CoreStorage 加密卷，并将分区封装为 PV，将其导入 LVG，并设置 LVF 和 LV 以包含新的文件系统。</li>
+<li>新建一个 Recovery HD 分区卷，并将 CoreStorage 加密卷设置为启动分区。</li>
+</ol>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Mikes-MacBook-Pro-3:~ mikej$ diskutil list</span><br><span class="line">/dev/disk0 (internal, physical):</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">:                       TYPE NAME                    SIZE       IDENTIFIER</span></span><br><span class="line">   0:      GUID_partition_scheme                        *251.0 GB   disk0</span><br><span class="line">   1:                        EFI EFI                     209.7 MB   disk0s1</span><br><span class="line">   2:          Apple_CoreStorage Mike HD                 250.1 GB   disk0s2</span><br><span class="line">   3:                 Apple_Boot Recovery HD             650.1 MB   disk0s3</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-技术实现"><a href="#2-技术实现" class="headerlink" title="2. 技术实现"></a>2. 技术实现</h3><p>通过<code>diskutil corestorage list</code>命令，可以查看 CoreStorage 的层级结构为:<br><strong>Physical Volume -&gt; Logical Volume Group -&gt; Logical Volume Family -&gt; Logical Volume</strong></p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">CoreStorage logical volume groups (1 found)</span><br><span class="line">|</span><br><span class="line">+-- Logical Volume Group 5D6504C7-6C94-498E-B50C-64E3E4950AE0</span><br><span class="line">|   =========================================================</span><br><span class="line">|   Name:         Macintosh HD</span><br><span class="line">|   Status:       Online</span><br><span class="line">|   Size:         125318770688 B (125.3 GB)</span><br><span class="line">|   Free Space:   0 B (0 B)</span><br><span class="line">|   |</span><br><span class="line">|   +-&lt; Physical Volume 499AA4FC-31C1-47A3-8364-89A0C836125C        # 上层PV</span><br><span class="line">|   |   ----------------------------------------------------</span><br><span class="line">|   |   Index:    0</span><br><span class="line">|   |   Disk:     disk0s2</span><br><span class="line">|   |   Status:   Online</span><br><span class="line">|   |   Size:     125318770688 B (125.3 GB)</span><br><span class="line">|   |</span><br><span class="line">|   +-&gt; Logical Volume Family 163A0B82-4315-4C68-8403-52B5A918C57C  # 下层LVF</span><br><span class="line">|       ----------------------------------------------------------</span><br><span class="line">|       Encryption Status:       Unlocked</span><br><span class="line">|       Encryption Type:         AES-XTS</span><br><span class="line">|       Conversion Status:       Complete</span><br><span class="line">|       Conversion Direction:    -none-</span><br><span class="line">|       Has Encrypted Extents:   Yes</span><br><span class="line">|       Fully Secure:            Yes</span><br><span class="line">|       Passphrase Required:     Yes</span><br><span class="line">|       |</span><br><span class="line">|       +-&gt; Logical Volume 264CFBDC-8103-47E0-978E-738789320980     # 再下层LV</span><br><span class="line">|           ---------------------------------------------------</span><br><span class="line">|           Disk:                  disk1</span><br><span class="line">|           Status:                Online</span><br><span class="line">|           Size (Total):          124999999488 B (125.0 GB)</span><br><span class="line">|           Conversion Progress:   -none-</span><br><span class="line">|           Revertible:            Yes (unlock and decryption required)</span><br><span class="line">|           LV Name:               Macintosh HD</span><br><span class="line">|           Volume Name:           Macintosh HD</span><br><span class="line">|           Content Hint:          Apple_HFS</span><br></pre></td></tr></table></figure>
+
+<p>LVF- logical volume family 是 Apple 自定义的层级，用于 LV 逻辑卷特定属性的继承。<br>系统变量<code>com.apple.corestorage.lv.familyUUID</code>用于构造 AES-XTS 的 Tweak key 的加密因子。</p>
+<h2 id="三、基于-APFS-的-FileVault"><a href="#三、基于-APFS-的-FileVault" class="headerlink" title="三、基于 APFS 的 FileVault"></a>三、基于 APFS 的 FileVault</h2><p>2017年，MacOS High Sierra（内华达脊岭，10.13） 正式启用了 APFS（Apple FileSystem），用于替代古老的 HFS+。<br>作为新一代的文件系统，APFS 专门针对闪存&#x2F;SSD进行优化（但依然可用于传统机械硬盘），提供了更强大的加密、写入时复制元数据、空间分享、文件和目录克隆、快照、目录大小快速调整、原子级安全存储基元，以及改进的文件系统底层技术，将全面应用于该公司旗下 MacOS、iOS、iPadOS、tvOS、watchOS等所有设备中。其突出特点包括：</p>
+<ul>
+<li>inode编码长度提高到64位，单一Volume的文件数量大大增加；时间戳精度提高到纳秒，有助于实现原子性和原子事务；目录大小是单独存储的，无需每次实时计算目录容量；文件和文件夹名称被规范化，完全支持Unicode</li>
+<li>支持COW（Copy On Write，写入时复制）：几乎立即复制文件或目录，元数据多次存在于文件结构中，但共享相同的数据存储空间；修改克隆时，文件系统仅记录数据更改</li>
+<li>支持快照（Snapshot）：支持创建特点时间点、文件系统只读实例的快照</li>
+<li>支持空间共享：使用 GPT 分区方案，单一容器内部包含多个 Volume 共享物理存储容量，并可以相互访问，但不与其他容器共享数据</li>
+</ul>
+<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/apfs.png" alt="a"></p>
+<p>关于加密功能，APFS 引入 container（容器）并整合了 CoreStorage 技术，完全实现了文件系统层级的原生实现，包括：</p>
+<ol>
+<li>支持对容器、卷和文件使用的数据结构进行加密。当一个volume是加密的，它的文件系统树和该卷中的文件内容都是加密的</li>
+<li>统一实现了 FDE 和 FBE，支持三种加密模型：不加密、单密钥加密、多密钥加密，但<strong>MacOS 目前似乎仅支持 FDE 模式</strong></li>
+<li>支持硬件加密和软件加密。<br> 硬件加密适用于Apple提供的内置存储（例如带有T2安全芯片的 MacOS 和 iOS 设备）；<br> 软件加密适用于用于外部存储，以及不支持硬件加密的设备上的内部存储；<br> 使用硬件加密时，只有操作系统内核可以与内部存储交互；<br> 根据硬件的不同，可以使用 AES-XTS 或 AES-CBC 加密模式。</li>
+</ol>
+<p>层级结构也调整为：<strong>Physical Store -&gt; Contianer -&gt; （Volume Group） -&gt; Volume</strong></p>
+<h3 id="1-技术分析（Intel-CPU）"><a href="#1-技术分析（Intel-CPU）" class="headerlink" title="1. 技术分析（Intel CPU）"></a>1. 技术分析（Intel CPU）</h3><p>示例是一台 Intel CPU 的 iMac 设备，因此并没有安全隔区等 Apple 专用 Soc 设备。<br>命令行<code>df -h</code>查看文件系统</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sj@JiandeiMac ~ % df -h</span><br><span class="line">Filesystem      Size   Used  Avail Capacity iused      ifree %iused  Mounted on</span><br><span class="line">/dev/disk1s5   234Gi   10Gi   29Gi    27%  488433 2448636927    0%   /</span><br><span class="line">devfs          190Ki  190Ki    0Bi   100%     659          0  100%   /dev</span><br><span class="line">/dev/disk1s1   234Gi  191Gi   29Gi    87% 3218923 2445906437    0%   /System/Volumes/Data</span><br><span class="line">/dev/disk1s4   234Gi  2.0Gi   29Gi     7%       2 2449125358    0%   /private/var/vm</span><br><span class="line">map auto_home    0Bi    0Bi    0Bi   100%       0          0  100%   /System/Volumes/Data/home</span><br><span class="line">/dev/disk1s3   234Gi  505Mi   29Gi     2%      50 2449125310    0%   /Volumes/Recovery</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>diskutil list</code>，可以看到物理硬盘<code>disk0</code>包含了2个分区，分别是EFI启动分区<code>disk0-s1</code>和APFS分区<code>disk0-s2</code>，并将后者同步映射到<code>disk1</code>。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">j@JiandeiMac ~ % diskutil list</span><br><span class="line">/dev/disk0 (internal, physical):</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">:                       TYPE NAME                    SIZE       IDENTIFIER</span></span><br><span class="line">   0:      GUID_partition_scheme                        *251.0 GB   disk0</span><br><span class="line">   1:                        EFI EFI                     209.7 MB   disk0s1</span><br><span class="line">   2:                 Apple_APFS Container disk1         250.8 GB   disk0s2</span><br><span class="line"></span><br><span class="line">/dev/disk1 (synthesized):</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">:                       TYPE NAME                    SIZE       IDENTIFIER</span></span><br><span class="line">   0:      APFS Container Scheme -                      +250.8 GB   disk1</span><br><span class="line">                                 Physical Store disk0s2</span><br><span class="line">   1:                APFS Volume 未命名 - 数据           205.4 GB   disk1s1</span><br><span class="line">   2:                APFS Volume Preboot                 81.4 MB    disk1s2</span><br><span class="line">   3:                APFS Volume Recovery                530.0 MB   disk1s3</span><br><span class="line">   4:                APFS Volume VM                      5.4 GB     disk1s4</span><br><span class="line">   5:                APFS Volume 未命名                  11.2 GB    disk1s5</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/apfs_concepts.png" alt="AFPS"><br>用于启动 Mac 的 APFS 容器必须包含至少五个宗卷，其中前三个宗卷对用户隐藏 ：</p>
+<ul>
+<li>Preboot Volume：包含启动容器中每个系统宗卷所需的数据</li>
+<li>VM Volume：MacOS 用于交换文件储存</li>
+<li>Recovery Volume：包含 recoveryOS，进入Recovery模式可以清除用户密码</li>
+<li>System Volume：包含用于启动 Mac 的所有必要文件、macOS 原生安装的所有 App</li>
+<li>Data Volume：包含用户文件夹中的任何数据、用户安装的 App、第三方 App、用户拥有且能够写入的其他位置</li>
+</ul>
+<p>每增加一个系统宗卷， 便会创建一个数据宗卷。3个隐藏宗卷全为共享宗卷且无法复制。<br>通过<code>diskutil apfs list</code>，可以查看容器 disk1 的详细信息。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">sj@JiandeiMac ~ % diskutil apfs list</span><br><span class="line">APFS Container (1 found)</span><br><span class="line">|</span><br><span class="line">+-- Container disk1 0B311DB5-B224-4F51-AA7C-1211E5A2A994</span><br><span class="line">    ====================================================</span><br><span class="line">    APFS Container Reference:     disk1</span><br><span class="line">    Size (Capacity Ceiling):      250790436864 B (250.8 GB)</span><br><span class="line">    Capacity In Use By Volumes:   219201548288 B (219.2 GB) (87.4% used)</span><br><span class="line">    Capacity Not Allocated:       31588888576 B (31.6 GB) (12.6% free)</span><br><span class="line">    |</span><br><span class="line">    +-&lt; Physical Store disk0s2 4024090C-7938-4238-9772-192071FEDE07     # 上层物理设备</span><br><span class="line">    |   -----------------------------------------------------------</span><br><span class="line">    |   APFS Physical Store Disk:   disk0s2</span><br><span class="line">    |   Size:                       250790436864 B (250.8 GB)</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk1s1 925F8706-12D2-305B-B8E0-14201AF1D027             # 数据Volume</span><br><span class="line">    |   ---------------------------------------------------</span><br><span class="line">    |   APFS Volume Disk (Role):   disk1s1 (Data)</span><br><span class="line">    |   Name:                      未命名 - 数据 (Case-insensitive)</span><br><span class="line">    |   Mount Point:               /System/Volumes/Data                 # 加载用户数据目录</span><br><span class="line">    |   Capacity Consumed:         205089447936 B (205.1 GB)</span><br><span class="line">    |   FileVault:                 Yes (Unlocked)                       # 加密状态：已解锁</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk1s2 35818BF3-204E-4024-A049-FE5D61D96B74             # 预启动Volume</span><br><span class="line">    |   ---------------------------------------------------</span><br><span class="line">    |   APFS Volume Disk (Role):   disk1s2 (Preboot)</span><br><span class="line">    |   Name:                      Preboot (Case-insensitive)</span><br><span class="line">    |   Mount Point:               Not Mounted</span><br><span class="line">    |   Capacity Consumed:         81448960 B (81.4 MB)</span><br><span class="line">    |   FileVault:                 No</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk1s3 3873B186-B246-4F1D-8E7B-4E2515E4B838</span><br><span class="line">    |   ---------------------------------------------------</span><br><span class="line">    |   APFS Volume Disk (Role):   disk1s3 (Recovery)                   # 恢复Volume</span><br><span class="line">    |   Name:                      Recovery (Case-insensitive)</span><br><span class="line">    |   Mount Point:               /Volumes/Recovery</span><br><span class="line">    |   Capacity Consumed:         529969152 B (530.0 MB)</span><br><span class="line">    |   FileVault:                 No</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk1s4 F1A4B4C8-0360-4F92-8687-9BCE3F2F9134             # 虚拟内存Volume</span><br><span class="line">    |   ---------------------------------------------------</span><br><span class="line">    |   APFS Volume Disk (Role):   disk1s4 (VM)</span><br><span class="line">    |   Name:                      VM (Case-insensitive)</span><br><span class="line">    |   Mount Point:               /private/var/vm</span><br><span class="line">    |   Capacity Consumed:         2148556800 B (2.1 GB)</span><br><span class="line">    |   FileVault:                 No</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk1s5 7B89960E-7BBB-4012-BD70-27E4DE0A5ADC             # 系统Volume</span><br><span class="line">        ---------------------------------------------------</span><br><span class="line">        APFS Volume Disk (Role):   disk1s5 (System)</span><br><span class="line">        Name:                      未命名 (Case-insensitive)</span><br><span class="line">        Mount Point:               /                                    # 加载系统根目录</span><br><span class="line">        Capacity Consumed:         11213705216 B (11.2 GB)</span><br><span class="line">        FileVault:                 Yes (Unlocked)                       #加密状态：已解锁</span><br></pre></td></tr></table></figure>
+
+<p>通过<code>diskutil apfs listusers $Volume_ID</code>，查看当前有效的用户密钥信息，即有几个 KEK 副本。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">sj@JiandeiMac /Volumes % diskutil apfs listusers 925F8706-12D2-305B-B8E0-14201AF1D027</span><br><span class="line">Cryptographic users for disk1s1 (3 found)</span><br><span class="line">|</span><br><span class="line">+-- FBD4D606-E5F2-4FC5-B6C0-70E11D1A3FB1</span><br><span class="line">|   Type: Local Open Directory User</span><br><span class="line">|</span><br><span class="line">+-- EC1C2AD9-B618-4ED6-BD8D-50F361C27507</span><br><span class="line">|   Type: iCloud Recovery User</span><br><span class="line">|</span><br><span class="line">+-- 64C0C6EB-0000-11AA-AA11-00306543ECAC</span><br><span class="line">    Type: iCloud Recovery External Key</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-签名系统卷（M1-CPU）"><a href="#2-签名系统卷（M1-CPU）" class="headerlink" title="2. 签名系统卷（M1 CPU）"></a>2. 签名系统卷（M1 CPU）</h3><p>MacOS 10.15 Catalina 引入了 APFS Volume Group，系统卷和数据卷属于同一卷组，并且在 Finder 中被视为一个卷；引入了只读系统宗卷，这是一个专用于系统内容（通常名为“Macintosh HD”）的独立宗卷，默认不能写入数据，甚至 Apple 系统进程也不能。<br>MacOS 11 Big Sur 将只读系统宗卷升级为签名系统卷 (SSV，Sealed &amp; Signed System Volume)，进一步增加了操作系统的签名保护，甚至现在启动系统的都不是真实的 System 卷宗，而是启动时创建的一个快照。<br>SSV 具有的内核机制会在运行时验证系统内容的完整性，并拒绝不含来自 Apple 的有效加密签名的任何代码和非代码数据。此外，还有一个附带的优势，在进行操作系统更新时如果发生意外无法执行， 无需重新安装即可恢复到旧系统版本。</p>
+<blockquote>
+<p>SSV 签名系统卷依赖于 SKP 密钥（Sealed Key Prtection，密封密钥保护，也称为操作系统绑定密钥），也就是依赖于 Apple 安全隔区硬件，因此 Intel CPU 不适用。</p>
+</blockquote>
+<p>通过 <code>diskutil list</code>，可以看到物理硬盘<code>disk0</code>包含了3个容器：</p>
+<ul>
+<li>Apple_APFS_ISC 容器：ISC（iBoot System Container）容器负责在早期引导过程中支持 iBoot 固件，并为 M1 SoC 中的 Secure Enclave 提供可信存储。<br>  iSCPreboot 卷是指定的引导程序，空的 Recovery 卷用于恢复。xART 卷提供可信存储，Hardware 卷包含与硬件相关的文件。</li>
+<li>Apple_APFS_Recovery 容器：专用于提供 1TR，存储在其 Recovery 卷上。包括 iBoot 的第二部分以及 M1 的完整恢复模式所需的所有内容。<br>  该 Recovery 卷被指定用于恢复，但此该容器没有单独的引导程序卷。</li>
+<li>Apple_APFS 容器：M1 的引导容器 Apple_APFS 也与 Intel Mac 上的引导容器不太一样：一个细微但显著的区别是数据卷不是命名为“Macintosh HD - Data”，而是简单的“Data”。如果使用依赖于按名称查找数据卷的代码，则要重新检查它代码是否仍然有效。<br>  尽管此容器仍有一个 Recovery 卷，但该 Recovery 卷已经受到了一些限制，比如无法访问安全策略等，在引导到恢复模式时也没有使用该 Recovery 卷。</li>
+</ul>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">sj@SunJiandeMacBook-Air ~ % diskutil list     </span><br><span class="line">/dev/disk0 (internal, physical):</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">:                       TYPE NAME                    SIZE       IDENTIFIER</span></span><br><span class="line">   0:      GUID_partition_scheme                        *1.0 TB     disk0</span><br><span class="line">   1:             Apple_APFS_ISC Container disk1         524.3 MB   disk0s1</span><br><span class="line">   2:                 Apple_APFS Container disk3         994.7 GB   disk0s2</span><br><span class="line">   3:        Apple_APFS_Recovery Container disk2         5.4 GB     disk0s3</span><br><span class="line"></span><br><span class="line">/dev/disk3 (synthesized):</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">:                       TYPE NAME                    SIZE       IDENTIFIER</span></span><br><span class="line">   0:      APFS Container Scheme -                      +994.7 GB   disk3</span><br><span class="line">                                 Physical Store disk0s2</span><br><span class="line">   1:                APFS Volume Untitled - Data         397.7 GB   disk3s1</span><br><span class="line">   2:                APFS Volume Untitled                12.0 GB    disk3s3</span><br><span class="line">   3:              APFS Snapshot com.apple.os.update-... 12.0 GB    disk3s3s1</span><br><span class="line">   4:                APFS Volume Preboot                 10.0 GB    disk3s4</span><br><span class="line">   5:                APFS Volume Recovery                1.7 GB     disk3s5</span><br><span class="line">   6:                APFS Volume VM                      20.5 KB    disk3s6</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/m1.jpg" alt="M1"></p>
+<p>通过<code>diskutil apfs list</code>，可以发现增加了一个签名系统卷<code>disk3-s3</code>，隐藏了一个系统卷<code>disks3-s2</code>，实际指向了 SSV 的快照<code>disks3-s3-s1</code>。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">sj@SunJiandeMacBook-Air ~ % diskutil apfs list</span><br><span class="line">APFS Containers (3 found)</span><br><span class="line">|</span><br><span class="line">+-- Container disk3 F2E4F923-BAEF-4844-8720-A1E3C4A91D68</span><br><span class="line">    ====================================================</span><br><span class="line">    APFS Container Reference:     disk3</span><br><span class="line">    Size (Capacity Ceiling):      994662584320 B (994.7 GB)</span><br><span class="line">    Capacity In Use By Volumes:   422349295616 B (422.3 GB) (42.5% used)</span><br><span class="line">    Capacity Not Allocated:       572313288704 B (572.3 GB) (57.5% free)</span><br><span class="line">    |</span><br><span class="line">    +-&lt; Physical Store disk0s2 03B7C267-30AE-414D-93B3-82B5E6A7D794</span><br><span class="line">    |   -----------------------------------------------------------</span><br><span class="line">    |   APFS Physical Store Disk:   disk0s2</span><br><span class="line">    |   Size:                       994662584320 B (994.7 GB)</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk3s1 4C4F95CE-27C8-4CC8-9287-0746D8B6F445</span><br><span class="line">    |   ---------------------------------------------------</span><br><span class="line">    |   APFS Volume Disk (Role):   disk3s1 (Data)</span><br><span class="line">    |   Name:                      Untitled - Data (Case-insensitive)</span><br><span class="line">    |   Mount Point:               /System/Volumes/Data</span><br><span class="line">    |   Capacity Consumed:         397743120384 B (397.7 GB)</span><br><span class="line">    |   Sealed:                    No</span><br><span class="line">    |   FileVault:                 Yes (Unlocked)</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk3s3 2F5B627D-273D-43E1-B33D-11A51F2DD616</span><br><span class="line">    |   ---------------------------------------------------</span><br><span class="line">    |   APFS Volume Disk (Role):   disk3s3 (System)                         # SSV卷宗</span><br><span class="line">    |   Name:                      Untitled (Case-insensitive)</span><br><span class="line">    |   Mount Point:               /System/Volumes/Update/mnt1</span><br><span class="line">    |   Capacity Consumed:         12000673792 B (12.0 GB)</span><br><span class="line">    |   Sealed:                    Broken</span><br><span class="line">    |   FileVault:                 Yes (Unlocked)</span><br><span class="line">    |   Encrypted:                 No</span><br><span class="line">    |   |</span><br><span class="line">    |   Snapshot:                  888DEA8C-D791-4F5B-BC62-26E2D6A436E4     # 快照卷宗</span><br><span class="line">    |   Snapshot Disk:             disk3s3s1</span><br><span class="line">    |   Snapshot Mount Point:      /</span><br><span class="line">    |   Snapshot Sealed:           Yes                                      # 认证通过</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk3s4 C828BF80-F6B2-4370-8C12-5DC67A144D2A</span><br><span class="line">    |   ---------------------------------------------------</span><br><span class="line">    |   APFS Volume Disk (Role):   disk3s4 (Preboot)</span><br><span class="line">    |   Name:                      Preboot (Case-insensitive)</span><br><span class="line">    |   Mount Point:               /System/Volumes/Preboot</span><br><span class="line">    |   Capacity Consumed:         10008113152 B (10.0 GB)</span><br><span class="line">    |   Sealed:                    No</span><br><span class="line">    |   FileVault:                 No</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk3s5 48782923-A22F-45A8-A688-E4F72065E32B</span><br><span class="line">    |   ---------------------------------------------------</span><br><span class="line">    |   APFS Volume Disk (Role):   disk3s5 (Recovery)</span><br><span class="line">    |   Name:                      Recovery (Case-insensitive)</span><br><span class="line">    |   Mount Point:               Not Mounted</span><br><span class="line">    |   Capacity Consumed:         1675984896 B (1.7 GB)</span><br><span class="line">    |   Sealed:                    No</span><br><span class="line">    |   FileVault:                 No</span><br><span class="line">    |</span><br><span class="line">    +-&gt; Volume disk3s6 1793DE3F-A7B8-4103-A03A-91113BF324E7</span><br><span class="line">        ---------------------------------------------------</span><br><span class="line">        APFS Volume Disk (Role):   disk3s6 (VM)</span><br><span class="line">        Name:                      VM (Case-insensitive)</span><br><span class="line">        Mount Point:               /System/Volumes/VM</span><br><span class="line">        Capacity Consumed:         20480 B (20.5 KB)</span><br><span class="line">        Sealed:                    No</span><br><span class="line">        FileVault:                 No</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、FileVault的密钥层级"><a href="#四、FileVault的密钥层级" class="headerlink" title="四、FileVault的密钥层级"></a>四、FileVault的密钥层级</h2><p>对比 Data Protection 数据保护技术，FileVault 等价于 C 类，使用基于 AES-XTS 的 FDE 全盘加密模式保护卷宗数据。经过多年的技术演进，最新、最复杂的 Apple FileVault 密钥层级如下图。</p>
+<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/filevault-on.png" alt="SKP"></p>
+<ul>
+<li>SKP（Sealed Key Prtection，密封密钥保护，也称为操作系统绑定密钥）：Apple 为其设计的 SoC 设备开发的，旨在确保其专用设备被拆解、或使用未认证的操作系统版本等场景下，无法获取加密材料，目的是为系统密钥提供独立于安全隔区的额外保护。<br>  注意！SKP 功能<strong>不是由安全隔区提供的</strong>，而是由位于更底层的硬件寄存器支持，实际上是基于安全隔区操作系统 sepOS 加载时的测量值。这也意味着，其仅在搭载 Apple 设计的 SoC 的设备上提供。</li>
+<li>xART（eXtended Anti-Replay Technology，扩展反重放技术）：一组为具有反重放功能 (基于物理储存架构) 的安全隔区提供加密且经认证的永久储存区的服务。<br>  xART 是 Apple 设计的第二代安全存储组件，增加了一个计数器加密箱，包括：1个128位盐，1个128位密码验证器，1个8位计数器，1个8位最大尝试值。</li>
+<li>KEK（Key Encryption Key，密钥保护密钥）：派生密钥，基于用户口令、SKP密钥和硬件密钥（基于UID派生）进行密钥扩展生成</li>
+<li>VEK（Volume Encryption key，卷宗保护密钥）：随机生成密钥，基于 KEK 和 硬件密钥进行包裹，并被 xART 保护，就是用于卷宗数据加密的 AES-XTS 的分组密钥 key1。</li>
+</ul>
+<p>如上所述，搭载 Apple 芯片的 Mac 以及搭载 T2 芯片的 Mac 通过构建和管理密钥层级实施内部宗卷加密，基于芯片内建的硬件加密技术而构建。<br>在搭载 Apple 芯片的 Mac 以及搭载 T2 芯片的 Mac 上，所有文件保险箱密钥的处理都发生在安全隔区中；加密密钥绝不会直接透露给 Intel CPU。<br>所有 APFS 宗卷默认使用宗卷加密密钥创建。宗卷和元数据内容使用此宗卷加密密钥加密，此宗卷加密密钥使用类密钥封装。 文件保险箱启用时，类密钥受用户密码和硬件 UID 共同保护。<br>如果没有有效的登录凭证（User passcode）或加密恢复密钥（Recovery key），即使物理储存设备被移除并连接到其他电脑，内置 APFS 宗卷仍无法解密，以防止未经授权的访问。</p>
+<p>删除宗卷时，其宗卷加密密钥由安全隔区安全删除，这有助于防止以后使用此密钥进行访问 (即使是通过安全隔区)。另外，所有宗卷加密密钥都使用媒介密钥封装。媒介密钥不提供额外的数据机密性，而是旨在启用快速安全的数据删除，如果缺少了它，则不可能进行解密。<br>在搭载 Apple 芯片的 Mac 和搭载 T2 芯片的 Mac 上，媒介密钥一定是由受安全隔区支持的技术来抹掉，例如远程 MDM（Mobile Device Management，远程-移动设备管理） 命令。以这种方式抹掉媒介密钥将导致宗卷因存在加密而不可访问。</p>
+<p>可移除储存设备的加密不使用安全隔区的安全性功能，而是采用与基于 Intel 的 Mac (不搭载 T2 芯片) 相同的方式执行加密。</p>
+<h3 id="1-版本演进"><a href="#1-版本演进" class="headerlink" title="1. 版本演进"></a>1. 版本演进</h3><ul>
+<li>在 macOS 10.7 Lion 中，引入了 CoreStorage 管理卷，并规定 VEK 密钥的创建点是用户在 Mac 上<strong>启用FileVault</strong>的过程中。</li>
+<li>在 macOS 10.13 High Sierra 中，引入了 AFPS 文件系统，VEK 密钥的创建点调整为：<strong>用户创建过程中</strong>、 设定首位用户的密码或 Mac 用户首次登录过程中。换句话说，无论用户是否启用 FileVault，卷宗数据都会被加密，其区别仅在于：<ul>
+<li>如果没有启用 FileVault 功能，宗卷加密密钥仅由安全隔区中的硬件 UID 保护<br> <img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/filevault-off.png" alt="SKP"></li>
+<li>如果稍后启用了文件保险箱 (由于数据已加密，该过程可快速完成)，反重放机制会帮助阻止旧密钥 (仅基于硬件 UID) 被用于解密宗卷，然后宗卷将受用户密码和硬件 UID 共同保护</li>
+</ul>
+</li>
+<li>在 macOS 10.15 Catalina中，这是第一个仅支持 64 位应用程序的 macOS 版本！引入了 Bootstrap Token 功能，也就是为密钥层级增加了 SKP 保护层，并为后续签名系统卷宗 SSV 提供了技术基础。</li>
+<li>在 macOS 11 Big Sur 中，系统宗卷通过签名系统宗卷 SSV 功能进行保护（实际上仅提供操作系统的快照），而数据宗卷仍通过加密进行保护。</li>
+</ul>
+<h3 id="2-KEK的多副本"><a href="#2-KEK的多副本" class="headerlink" title="2. KEK的多副本"></a>2. KEK的多副本</h3><p>Apple公司定义了几种获得 KEK 的方式：</p>
+<ul>
+<li>用户口令（User password）：系统登录时用户输入口令。为保证必要的安全强度，系统实际使用的密钥必须经过密钥拉伸</li>
+<li>个人恢复密钥（Personal recovery key）：在格式化驱动器时生成的，并由用户保存在纸上或打印输出，系统或厂商并不留存</li>
+<li>机构恢复密钥（Institutional recovery key）：允许相应的公司获得 KEK，需要用户设置后生效，或者厂商偷偷强制设置！</li>
+<li>远程恢复密钥（iCloud recovery key）：用户在Apple公司的远程支持下进行系统恢复</li>
+</ul>
+<p>为支持不同的场景，keyBag 将同时存储多个 KEK 的副本，例如用户口令采用密钥包裹方式存储，而 iCloud 恢复密钥采用非对称的公钥加密存储，不同场景使用不同的包裹密钥，这也体现了多层级密钥管理的价值所在。</p>
+<h2 id="五、FileValut-2-的解密代码实例"><a href="#五、FileValut-2-的解密代码实例" class="headerlink" title="五、FileValut 2 的解密代码实例"></a>五、FileValut 2 的解密代码实例</h2><p>根据<a href="2012-374.pdf">Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary</a>，密钥层次如下图。<br>参考<a target="_blank" rel="noopener" href="https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc">FVDE工具包</a>，可以查看实现代码。</p>
+<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch.png" alt="密钥层次架构"></p>
+<h3 id="1-CoreStorage-Header"><a href="#1-CoreStorage-Header" class="headerlink" title="1. CoreStorage Header"></a>1. CoreStorage Header</h3><p>在 CoreStorage 加密卷的 Header，存储了核心的加密信息，包括：卷头部签名、块大小、卷大小、元数据大小、第一个元数据块块号、第二个元数据块块号、第三个元数据块块号、第四个元数据块块号、加密方法、Physical Volume UUID（用于解密加密的密钥文件）、Logiccal Volume Group UUID 等。<br><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS-Header.png" alt="CS"></p>
+<h3 id="2-EncryptedRoot-plist"><a href="#2-EncryptedRoot-plist" class="headerlink" title="2. EncryptedRoot.plist"></a>2. EncryptedRoot.plist</h3><p>在恢复数据卷 Recovery HD，有一个加密文件包含了提取 VMK 所需的全部信息，路径是：<code>com.apple.boot.X/System/Library/Caches/com.apple.corestorage/EncryptedRoot.plist.wipekey</code><br>这个文件本身也是基于 AES-XTS 加密的，分组密钥就是 CoreStorage 头部存储的<code>AES-XTS key1</code>，可调整密钥是 128 位的全零，解密成功后的内容实例：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">plist</span> <span class="keyword">PUBLIC</span> <span class="string">&quot;-//Apple//DTD PLIST 1.0//EN&quot;</span> <span class="string">&quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">plist</span> <span class="attr">version</span>=<span class="string">&quot;1.0&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>ConversionInfo<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">key</span>&gt;</span>ConversionStatus<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">string</span>&gt;</span>Complete<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">key</span>&gt;</span>TargetContext<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">integer</span>&gt;</span>1<span class="tag">&lt;/<span class="name">integer</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>CryptoUsers<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>PassphraseWrappedKEKStruct<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                        <span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                ...</span><br><span class="line">                <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>LastUpdateTime<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">integer</span>&gt;</span>1323243315<span class="tag">&lt;/<span class="name">integer</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">key</span>&gt;</span>WrappedVolumeKeys<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">array</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>BlockAlgorithm<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">string</span>&gt;</span>None<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>KEKWrappedVolumeKeyStruct<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">dict</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>BlockAlgorithm<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">string</span>&gt;</span>AES-XTS<span class="tag">&lt;/<span class="name">string</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">key</span>&gt;</span>KEKWrappedVolumeKeyStruct<span class="tag">&lt;/<span class="name">key</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                        <span class="tag">&lt;/<span class="name">data</span>&gt;</span></span><br><span class="line">                        ...</span><br><span class="line">                <span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">array</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dict</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plist</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Volume-Master-Key"><a href="#3-Volume-Master-Key" class="headerlink" title="3. Volume Master Key"></a>3. Volume Master Key</h3><p>解密后的 plist 文件是一个 XML 文件，其中的关键字段如下，注意实际存储格式是 base64 编码：</p>
+<h4 id="PassphraseWrappedKEKStruct"><a href="#PassphraseWrappedKEKStruct" class="headerlink" title="PassphraseWrappedKEKStruct"></a>PassphraseWrappedKEKStruct</h4><p>KEK（Key Encryption Key，密钥保护密钥）的构造体：AES包裹的KEK，PBKDF2算法的盐。<br>包含了 2 个 284 位 的数据块，分别用于 recovery password 和 user password。</p>
+<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS3.png" alt="CS3"></p>
+<blockquote>
+<p>注意！MacOS 的每个用户都有其自己关联的 PassphraseWrappedKEKStruct<br>APFS 称之为 VEK（Volume Encryption Key）</p>
+</blockquote>
+<h4 id="KEKWrappedVolumeKeyStruct"><a href="#KEKWrappedVolumeKeyStruct" class="headerlink" title="KEKWrappedVolumeKeyStruct"></a>KEKWrappedVolumeKeyStruct</h4><p>VMK（Volume Master Key，卷宗主密钥）的构造体。<br>数组有多个成员，其中标记为<code>AES-XTS</code>的就是 KEK 包裹的 VMK。<br><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS2.png" alt="CS2"></p>
+<h4 id="KeyWrappedKEK"><a href="#KeyWrappedKEK" class="headerlink" title="KeyWrappedKEK"></a>KeyWrappedKEK</h4><p>如果用户开启了 icloud 远程备份，plist 文件将包含该字段，其数据块结构如下：<br><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS4.png" alt="CS4"></p>
+<blockquote>
+<p>注意！icloud 恢复是另一个基于非对称密钥算法 RSA 封装的 KEK</p>
+</blockquote>
+<h4 id="伪代码实例"><a href="#伪代码实例" class="headerlink" title="伪代码实例"></a>伪代码实例</h4><p>无论基于 recovery password，还是 user password，都需要通过 PBKDF2 算法进行密钥拉伸。</p>
+<blockquote>
+<p>注意！recovery password 是字符串格式，包括数字之间的破折号。</p>
+</blockquote>
+<p><img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/VMK.png" alt="VMK"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">p = get_user_password()</span><br><span class="line">salt = get_salt_from_PassphraseWrappedKEK()</span><br><span class="line">iterations = <span class="number">41000</span></span><br><span class="line">pk = pbkdf2(p, salt, iterations, HMAC-SHA256)</span><br><span class="line">kek_wrapped = get_kek_from_PassphraseWrappedKEK()</span><br><span class="line">kek = aes_unwrap(kek_wrapped, pk)</span><br><span class="line">vmk_wrapped = get_vmk_from_KEKWrappedVolumeKey()</span><br><span class="line">vmk = aes_unwrap(vmk_wrapped, kek)</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Volume-Tweak-Key"><a href="#4-Volume-Tweak-Key" class="headerlink" title="4. Volume Tweak Key"></a>4. Volume Tweak Key</h3><p>用户数据 AES-XTS 加密模式的 tweak key 也是128位，构造方式是：$trunc_{128}(SHA256(VolumeMasterKey || LogicVolumeFamilyIdentifier))$</p>
+<p>上个流程已经找到 VMK，那么如何找到 LV Family UUID 呢？</p>
+<ul>
+<li>在 CoreStorage Header 中，第104字节提供了字节偏移量，就是 Disk Label Metadata 的存储位置</li>
+<li>在 Disk Label 中，第220字节提供了字节偏移量，就是 Encrypted Metadata 的存储位置<br>  即：$offset &#x3D; DiskLabel[DiskLabel[220] +32]$</li>
+<li>Encrypted Metadata 基于 AES-XTS 加密，分组密钥也是 CoreStorage Header 的 AES-XTS Key1，可调整密钥是 CoreStorage Header 的 PV UUID</li>
+<li>解密后的 Encrypted Metadata，第280字节提供了字节偏移量，就是 XML Metadata 的存储位置<br>  <img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS6.png" alt="CS6"></li>
+<li>有3个 XML 文件，包含了许多UUID，其中第1和第3个 XML 文件包含了 Logical Volume Family UUID，就是下图中蓝色字段<br>  <img src="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/CS7.png" alt="CS7"></li>
+</ul>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://fahrplan.events.ccc.de/congress/2006/Fahrplan/attachments/1244-23C3VileFault.pdf">Legacy FileVault 漏洞报告</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.fosketts.net/2011/08/04/mac-osx-lion-corestorage-volume-manager/">MacOS X 的 Corestorage 逻辑卷组管理器 - Stephen Foskett</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/drduh/macOS-Security-and-Privacy-Guide/blob/master/README-cn.md">MacOS 的安全和隐私指南</a></li>
+<li><a target="_blank" rel="noopener" href="https://bombich.com/kb/ccc5/working-apfs-volume-groups">Working with APFS Volume Groups</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/c401d546cebf">APFS 科普贴</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ntfs.com/apfs-structure.htm">APFS Structure</a></li>
+<li><a target="_blank" rel="noopener" href="https://eclecticlight.co/2021/01/14/m1-macs-radically-change-boot-and-recovery/">M1 Macs radically change boot and recovery</a></li>
+<li><a target="_blank" rel="noopener" href="https://sspai.com/post/64301">Mac 迁移指南：换新机后的任务清单</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/libyal/libfvde/blob/main/documentation/FileVault%20Drive%20Encryption%20(FVDE).asciidoc">FileVault Drive Encryption 代码库 - Github</a></li>
+</ul>
+<h3 id="文档下载"><a href="#文档下载" class="headerlink" title="文档下载"></a>文档下载</h3><ul>
+<li><a href="FileVault2%E5%8A%A0%E5%AF%86%E5%88%86%E5%8C%BA%E7%A6%BB%E7%BA%BF%E8%A7%A3%E5%AF%86%E6%8A%80%E6%9C%AF%E5%8F%8A%E5%85%B6%E5%8F%96%E8%AF%81%E5%BA%94%E7%94%A8_%E8%93%9D%E6%9C%9D%E7%A5%A5.pdf">FileVault2加密分区离线解密技术及其取证应用 - 蓝朝祥</a></li>
+<li><a href="slides_fv2_ifip_2013.pdf">Security Analysis and Decryption of FileVault 2 - Omar Choudary</a></li>
+<li><a href="2012-374.pdf">Infiltrate the Vault: Security Analysis and Decryption of Lion Full Disk Encryption - Omar Choudary</a></li>
+<li><a href="Apple-File-System-Reference.pdf">APFS技术白皮书</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/" rel="prev" title="GCM（Galois&#x2F;Counter Mode）认证加密模式">
+                  <i class="fa fa-angle-left"></i> GCM（Galois/Counter Mode）认证加密模式
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/01/10/iPhone4-%E6%95%B0%E6%8D%AE%E7%A0%B4%E8%A7%A3%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" rel="next" title="iPhone4 数据破解的技术分析">
+                  iPhone4 数据破解的技术分析 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

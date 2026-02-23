@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="基础环境  * Raspberry Lite OS： 基于ARM V7，32位操作系统  * dnsmasq： 自建域名服务器 + DHCP服务器， 192.168.0.8  * hostapd： 提供AP服务器，SSID&#x3D;xxx-PI， 192.168.11.x&#x2F;24  * clash： 作为v2ray节点的客户端，自带Dashboard  主路由器： 192.168.0.1  从路由器： -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于树莓派4B构建支持透明代理的辅助路由器">
+<meta property="og:url" content="https://nokiam9.github.io/2020/07/21/%E5%9F%BA%E4%BA%8E%E6%A0%91%E8%8E%93%E6%B4%BE4B%E6%9E%84%E5%BB%BA%E6%94%AF%E6%8C%81%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E7%9A%84%E8%BE%85%E5%8A%A9%E8%B7%AF%E7%94%B1%E5%99%A8/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="基础环境  * Raspberry Lite OS： 基于ARM V7，32位操作系统  * dnsmasq： 自建域名服务器 + DHCP服务器， 192.168.0.8  * hostapd： 提供AP服务器，SSID&#x3D;xxx-PI， 192.168.11.x&#x2F;24  * clash： 作为v2ray节点的客户端，自带Dashboard  主路由器： 192.168.0.1  从路由器： -">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2020/07/21/%E5%9F%BA%E4%BA%8E%E6%A0%91%E8%8E%93%E6%B4%BE4B%E6%9E%84%E5%BB%BA%E6%94%AF%E6%8C%81%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E7%9A%84%E8%BE%85%E5%8A%A9%E8%B7%AF%E7%94%B1%E5%99%A8/dashboard-1.png">
+<meta property="article:published_time" content="2020-07-20T16:18:58.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.140Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2020/07/21/%E5%9F%BA%E4%BA%8E%E6%A0%91%E8%8E%93%E6%B4%BE4B%E6%9E%84%E5%BB%BA%E6%94%AF%E6%8C%81%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E7%9A%84%E8%BE%85%E5%8A%A9%E8%B7%AF%E7%94%B1%E5%99%A8/dashboard-1.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2020/07/21/%E5%9F%BA%E4%BA%8E%E6%A0%91%E8%8E%93%E6%B4%BE4B%E6%9E%84%E5%BB%BA%E6%94%AF%E6%8C%81%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E7%9A%84%E8%BE%85%E5%8A%A9%E8%B7%AF%E7%94%B1%E5%99%A8/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2020/07/21/%E5%9F%BA%E4%BA%8E%E6%A0%91%E8%8E%93%E6%B4%BE4B%E6%9E%84%E5%BB%BA%E6%94%AF%E6%8C%81%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E7%9A%84%E8%BE%85%E5%8A%A9%E8%B7%AF%E7%94%B1%E5%99%A8/","path":"2020/07/21/基于树莓派4B构建支持透明代理的辅助路由器/","title":"基于树莓派4B构建支持透明代理的辅助路由器"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于树莓派4B构建支持透明代理的辅助路由器 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%8E%AF%E5%A2%83"><span class="nav-text">基础环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4"><span class="nav-text">安装步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%AE%89%E8%A3%85%E6%A0%91%E8%8E%93%E6%B4%BE%E5%B9%B6%E5%90%AF%E5%8A%A8"><span class="nav-text">一、安装树莓派并启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%AE%BE%E7%BD%AE%E6%A0%91%E8%8E%93%E6%B4%BE%E7%9A%84%E8%BF%90%E8%A1%8C%E7%8E%AF%E5%A2%83"><span class="nav-text">二、设置树莓派的运行环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%AE%89%E8%A3%85%E5%B9%B6%E8%AE%BE%E7%BD%AEClash"><span class="nav-text">三、安装并设置Clash</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E9%85%8D%E7%BD%AE%E5%B9%B6%E5%90%AF%E5%8A%A8AP%E7%83%AD%E7%82%B9"><span class="nav-text">四、配置并启动AP热点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%B8%BA%E4%BB%8E%E8%B7%AF%E7%94%B1%E5%99%A8%E8%AE%BE%E7%BD%AE%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86"><span class="nav-text">五、为从路由器设置透明代理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E8%AE%BE%E7%BD%AEClash%E5%BC%80%E6%9C%BA%E8%87%AA%E5%90%AF%E5%8A%A8"><span class="nav-text">六、设置Clash开机自启动</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Clash%E9%80%8F%E6%98%8E%E7%BD%91%E5%85%B3%E7%9A%84%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95"><span class="nav-text">Clash透明网关的使用方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A1%A5%E5%85%85%E9%97%AE%E9%A2%98"><span class="nav-text">补充问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%84%E5%BD%951-Clash%E7%9A%84Home%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84"><span class="nav-text">附录1: Clash的Home目录结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%84%E5%BD%952%EF%BC%9A%E5%85%B3%E4%BA%8Eavahi%E6%9C%8D%E5%8A%A1"><span class="nav-text">附录2：关于avahi服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E7%9B%AE%E5%BD%95"><span class="nav-text">参考目录</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/07/21/%E5%9F%BA%E4%BA%8E%E6%A0%91%E8%8E%93%E6%B4%BE4B%E6%9E%84%E5%BB%BA%E6%94%AF%E6%8C%81%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E7%9A%84%E8%BE%85%E5%8A%A9%E8%B7%AF%E7%94%B1%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于树莓派4B构建支持透明代理的辅助路由器 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于树莓派4B构建支持透明代理的辅助路由器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-07-21 00:18:58" itemprop="dateCreated datePublished" datetime="2020-07-21T00:18:58+08:00">2020-07-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>13 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="基础环境"><a href="#基础环境" class="headerlink" title="基础环境"></a>基础环境</h2><ul>
+<li>Raspberry Lite OS：   基于ARM V7，32位操作系统</li>
+<li>dnsmasq： 自建域名服务器 + DHCP服务器， 192.168.0.8</li>
+<li>hostapd： 提供AP服务器，SSID&#x3D;xxx-PI， 192.168.11.x&#x2F;24</li>
+<li>clash：   作为v2ray节点的客户端，自带Dashboard</li>
+</ul>
+<p>主路由器： 192.168.0.1</p>
+<p>从路由器：<br>    - eth0： 192.168.0.8<br>    - waln0：192.168.11.1<br>    - DHCP Range： 192.168.11.100-150<br>    - DHCP Default Gateway: 192.168.11.1</p>
+<p>Clash：<br>    - 7890: http&#x2F;https代理端口<br>    - 7891: socks5代理端口<br>    - 7892: 流量重定向端口<br>    - 9090: Dashboard端口<br>    - 53:   内建DNS端口（UDP）</p>
+<p>Clash控制面板：<a target="_blank" rel="noopener" href="http://192.168.0.8:9090/ui">http://192.168.0.8:9090/ui</a></p>
+<h2 id="安装步骤"><a href="#安装步骤" class="headerlink" title="安装步骤"></a>安装步骤</h2><h3 id="一、安装树莓派并启动"><a href="#一、安装树莓派并启动" class="headerlink" title="一、安装树莓派并启动"></a>一、安装树莓派并启动</h3><p><strong>Raspbian</strong>是树莓派的官方操作系统，是官基于Debain的深度定制，软件升级策略偏保守，强调稳定第一。<br>桌面版下载链接：<a target="_blank" rel="noopener" href="http://downloads.raspberrypi.org/raspbian_latest">http://downloads.raspberrypi.org/raspbian_latest</a><br>Lite 版（无桌面）下载链接：<a target="_blank" rel="noopener" href="https://downloads.raspberrypi.org/raspbian_lite_latest">https://downloads.raspberrypi.org/raspbian_lite_latest</a></p>
+<p>树莓派4B的BCM2711芯片采用四核Cortex A72架构，28nm工艺，主频1.5GHz，GPU 500MHz，因此是<code>armv7</code>的技术架构，32位操作系统。<br>虽然树莓派4B宣称已支持64位操作系统，但还在测试阶段；也可以采用Ubuntu、Centos等第三方系统，但软件依赖还是比较麻烦，因此本次安装采用的是Raspberry Lite OS，下载镜像文件是：<code>2020-05-27-raspios-buster-lite-armhf.img</code>。</p>
+<p>采用<strong>Etcher</strong>刻录CF卡，将写好的CF卡插入树莓派，连接有线网卡并加电后，就可以正常启动了。</p>
+<blockquote>
+<p>为避免安全问题，Raspberry OS默认关闭了ssh登录。解决方法是：在烧录SD卡成功后，手工mount并在根目录下touch一个空文件，名称是ssh</p>
+</blockquote>
+<p>树莓派首次启动时，默认采用DHCP方式获取IP地址，在接入路由器上找到相应IP地址，通过ssh远程登录。<br>默认帐号：Username: pi Password: raspberry<br>当然，如果连接了显示器和键盘，就不需要处理ssh登录的问题了。</p>
+<h3 id="二、设置树莓派的运行环境"><a href="#二、设置树莓派的运行环境" class="headerlink" title="二、设置树莓派的运行环境"></a>二、设置树莓派的运行环境</h3><ol>
+<li><p>设置网络参数，并重新启动</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 激活无线网卡</span></span><br><span class="line"><span class="built_in">sudo</span> rfkill unblock wlan</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置两张网卡的网络参数</span></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/network/interfaces &gt; /dev/null &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">auto lo</span></span><br><span class="line"><span class="string">iface lo inet loopback</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">auto eth0</span></span><br><span class="line"><span class="string">iface eth0 inet static</span></span><br><span class="line"><span class="string">address 192.168.0.8</span></span><br><span class="line"><span class="string">netmask 255.255.255.0</span></span><br><span class="line"><span class="string">gateway 192.168.0.1</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">allow-hotplug wlan0</span></span><br><span class="line"><span class="string">iface wlan0 inet static</span></span><br><span class="line"><span class="string">address 192.168.11.1</span></span><br><span class="line"><span class="string">netmask 255.255.255.0</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p> 网络参数设置成功后，使用<code>sudo reboot</code>重启树莓派。<br> 以<code>ssh pi@192.168.0.8</code>从新的IP地址登录，并使用<code>ip a</code>检查网络情况，如果获得以下输出就OK了！</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">pi@raspberrypi:~ $ ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    <span class="built_in">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">    valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host</span><br><span class="line">    valid_lft forever preferred_lft forever</span><br><span class="line">2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP group default qlen 1000</span><br><span class="line">    <span class="built_in">link</span>/ether dc:a6:32:ad:ad:78 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.0.8/24 brd 192.168.0.255 scope global eth0</span><br><span class="line">    valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::dea6:32ff:fead:ad78/64 scope <span class="built_in">link</span></span><br><span class="line">    valid_lft forever preferred_lft forever</span><br><span class="line">3: wlan0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc pfifo_fast state DOWN group default qlen 1000</span><br><span class="line">    <span class="built_in">link</span>/ether dc:a6:32:ad:ad:79 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.11.1/24 brd 192.168.11.255 scope global wlan0</span><br><span class="line">    valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置软件源，并安装基础软件</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 关闭默认源</span></span><br><span class="line"><span class="built_in">sudo</span> sed -i <span class="string">&#x27;s/^deb http/#deb http/g&#x27;</span> /etc/apt/sources.list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置Aliyun国内源</span></span><br><span class="line"><span class="built_in">sudo</span> sh -c <span class="string">&#x27;echo &quot;deb https://mirrors.aliyun.com/raspbian/raspbian/ buster main non-free contrib&quot; &gt;&gt; /etc/apt/sources.list&#x27;</span></span><br><span class="line"><span class="built_in">sudo</span> sh -c <span class="string">&#x27;echo &quot;deb-src https://mirrors.aliyun.com/raspbian/raspbian/ buster main non-free contrib&quot; &gt;&gt; /etc/apt/sources.list&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 更新源仓库，并安装基础软件</span></span><br><span class="line"><span class="built_in">sudo</span> apt update</span><br><span class="line"><span class="built_in">sudo</span> apt install net-tools dnsutils ntp hostapd git iptables-persistent netfilter-persistent dnsmasq -y</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li>基础软件安装都在此步骤完成！！！ 因为后续启动Clash内建DNS，将域名解析到伪地址，会影响本机Terminal的外网访问</li>
+</ul>
+</blockquote>
+</li>
+<li><p>关闭不需要的Systemd自启动服务</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 关闭avahi自动网络发现功能，类似Bonjure</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">disable</span> avahi-daemon</span><br><span class="line"><span class="built_in">sudo</span> systemctl stop avahi-daemon</span><br><span class="line"></span><br><span class="line"><span class="comment"># 暂时关闭dnsmasq服务，避免影响Clash安装</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl stop dnsmasq</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li>dsnmasq安装时会自动修改&#x2F;etc&#x2F;resolv.conf，将默认DNS修改为127.0.0.1</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<h3 id="三、安装并设置Clash"><a href="#三、安装并设置Clash" class="headerlink" title="三、安装并设置Clash"></a>三、安装并设置Clash</h3><p>Clash的Github地址是<a target="_blank" rel="noopener" href="https://github.com/Dreamacro/clash">https://github.com/Dreamacro/clash</a>, 技术文档位于<a target="_blank" rel="noopener" href="https://lancellc.gitbook.io/clash/clash-config-file/an-example-configuration-file">https://lancellc.gitbook.io/clash</a></p>
+<p>基于众所周知的原因，建议采用手工下载并通过sftp传入树莓派，主要包括以下文件：</p>
+<table>
+<thead>
+<tr>
+<th>文件名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>clash-linux-armv7-v1.0.0.gz</td>
+<td>clash的可执行文件</td>
+</tr>
+<tr>
+<td>Country.mmdb</td>
+<td>各个国家的IP地址数据文件, clash启动时会自动下载</td>
+</tr>
+<tr>
+<td>yacd-gh-pages.zip</td>
+<td>第三方控制面板插件，比官方的好看一些</td>
+</tr>
+<tr>
+<td>config.yaml</td>
+<td>VPS客户端的配置文件</td>
+</tr>
+</tbody></table>
+<ol>
+<li><p>传入文件默认存放在<code>/home/pi/</code>，解压并手工安装</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 建立clash的home目录</span></span><br><span class="line"><span class="built_in">cd</span> <span class="variable">$HOME</span></span><br><span class="line"><span class="built_in">mkdir</span> .config</span><br><span class="line"><span class="built_in">mkdir</span> .config/clash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置/usr/bin/clash，并添加绑定低位端口的权限</span></span><br><span class="line"><span class="built_in">sudo</span> gunzip clash-linux-armv7-v1.0.0.gz</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mv</span> clash-linux-armv7-v1.0.0 /usr/bin/clash</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> a+x /usr/bin/clash</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">setcap</span> cap_net_bind_service=+ep /usr/bin/clash</span><br><span class="line"><span class="built_in">ls</span> -l /usr/bin/clash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装配置文件</span></span><br><span class="line">unzip yacd-gh-pages.zip</span><br><span class="line"></span><br><span class="line"><span class="built_in">mv</span> yacd-gh-pages /home/pi/.config/clash/yacd-dashboard</span><br><span class="line"><span class="built_in">mv</span> Country.mmdb /home/pi/.config/clash/</span><br><span class="line"><span class="built_in">mv</span> config.yaml /home/pi/.config/clash/</span><br><span class="line"><span class="built_in">ls</span> -l /home/pi/.config/clash/</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>输入<code>sudo clash -d /home/pi/.config/clash</code>，启动clash</p>
+<p> 正常情况下屏幕将显示如下内容，就表示启动成功并打开了相应的侦听端口</p>
+ <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">pi@raspberrypi:~/.config/clash $ sudo clash -d /home/pi/.config/clash</span><br><span class="line">INFO[0000] Start initial compatible provider auto</span><br><span class="line">INFO[0000] Start initial compatible provider Proxy</span><br><span class="line">INFO[0000] HTTP proxy listening at: :7890</span><br><span class="line">INFO[0000] SOCKS proxy listening at: :7891</span><br><span class="line">INFO[0000] DNS server listening at: 0.0.0.0:53</span><br><span class="line">INFO[0000] Redir proxy listening at: :7892</span><br><span class="line">INFO[0000] RESTful API listening at: 0.0.0.0:9090</span><br></pre></td></tr></table></figure>
+
+<p> 也可以自行检查端口占用情况</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">pi@raspberrypi:~ $ <span class="built_in">sudo</span> netstat -tunpl |grep clash</span><br><span class="line">tcp6       0      0 :::7890                 :::*                    LISTEN      3001/clash</span><br><span class="line">tcp6       0      0 :::7891                 :::*                    LISTEN      3001/clash</span><br><span class="line">tcp6       0      0 :::7892                 :::*                    LISTEN      3001/clash</span><br><span class="line">tcp6       0      0 :::9090                 :::*                    LISTEN      3001/clash</span><br><span class="line">udp6       0      0 :::53                   :::*                                3001/clash</span><br><span class="line">udp6       0      0 :::7891                 :::*                                3001/clash</span><br><span class="line">udp6       0      0 :::7892                 :::*                                3001/clash  </span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>vmess等协议对Server和CLient的时钟同步有严格要求，如果没有NTP服务，可能导致无法连通</p>
+</blockquote>
+</li>
+<li><p>输入<code>curl -x http://localhost:7890 google.com</code>, 检查KX上网的效果</p>
+ <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pi@raspberrypi:~ $ curl -x http://localhost:7890 google.com</span><br><span class="line">&lt;HTML&gt;&lt;HEAD&gt;&lt;meta http-equiv=&quot;content-type&quot; content=&quot;text/html;charset=utf-8&quot;&gt;</span><br><span class="line">&lt;TITLE&gt;301 Moved&lt;/TITLE&gt;&lt;/HEAD&gt;&lt;BODY&gt;</span><br><span class="line">&lt;H1&gt;301 Moved&lt;/H1&gt;</span><br><span class="line">The document has moved</span><br><span class="line">&lt;A HREF=&quot;http://www.google.com/&quot;&gt;here&lt;/A&gt;.</span><br><span class="line">&lt;/BODY&gt;&lt;/HTML&gt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>浏览器输入地址<code>http://192.168.0.8:9090/ui</code>，打开控制面板</p>
+</li>
+</ol>
+<img src="/2020/07/21/%E5%9F%BA%E4%BA%8E%E6%A0%91%E8%8E%93%E6%B4%BE4B%E6%9E%84%E5%BB%BA%E6%94%AF%E6%8C%81%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E7%9A%84%E8%BE%85%E5%8A%A9%E8%B7%AF%E7%94%B1%E5%99%A8/dashboard-1.png" class="">
+
+<h3 id="四、配置并启动AP热点"><a href="#四、配置并启动AP热点" class="headerlink" title="四、配置并启动AP热点"></a>四、配置并启动AP热点</h3><ol>
+<li><p>输入<code>sudo vi /etc/dnsmasq.conf</code>， 也可以根据本次环境自行修改网络参数</p>
+<blockquote>
+<p>注意：dnsmasq仅作为DHCP服务器，不启动DNS，因为Clash有自建的DNS</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># DHCP</span><br><span class="line">interface=wlan0</span><br><span class="line">listen-address=192.168.11.1</span><br><span class="line">dhcp-range=192.168.11.100, 192.168.11.150, 12h</span><br><span class="line"></span><br><span class="line"># set default route</span><br><span class="line">dhcp-option=3,192.168.11.1</span><br><span class="line"></span><br><span class="line"># set default nameserver</span><br><span class="line">dhcp-option=6, 192.168.11.1</span><br><span class="line"></span><br><span class="line"># without DNS</span><br><span class="line">port=0</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>输入<code>sudo vi /etc/default/hostapd</code>, 设置hostapd启动配置文件。<br> 将其中包含<code>#DAEMON_CONF=&quot;&quot;</code>的行，修改为</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DAEMON_CONF=&quot;/etc/hostapd/hostapd.conf&quot;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>输入<code>sudo vi /etc/hostapd/hostapd.conf</code>， 根据本地网络环境自行修改配置AP接入参数</p>
+ <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">interface=wlan0</span><br><span class="line">driver=nl80211</span><br><span class="line">hw_mode=g</span><br><span class="line">ssid=&lt; Your SSID &gt;</span><br><span class="line">channel=6</span><br><span class="line">wpa=2</span><br><span class="line">wpa_passphrase=&lt; Your Passeword &gt;</span><br><span class="line">wpa_key_mgmt=WPA-PSK</span><br><span class="line">wpa_pairwise=CCMP</span><br><span class="line">rsn_pairwise=CCMP</span><br><span class="line">auth_algs=3</span><br><span class="line">wmm_enabled=1</span><br><span class="line">max_num_sta=10</span><br><span class="line">logger_stdout=-1</span><br><span class="line">logger_stdout_level=2</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：将<code>&lt; Your SSID &gt;</code> 和 <code>&lt; Your Passeword &gt;</code> 修改为用户定义数据</p>
+</blockquote>
+</li>
+<li><p>通过systemd，启动AP热点</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># hostapd启动解锁</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl unmask hostapd</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启服务</span></span><br><span class="line"><span class="built_in">sudo</span> systemctl restart hostapd</span><br><span class="line"><span class="built_in">sudo</span> systemctl restart dnsmasq</span><br></pre></td></tr></table></figure>
+
+<p> 启动完成后，另外找一台PC设备，寻找SSID并连接登录，此时应该分配一个<code>198.168.11.x</code>的地址。<br> 检查该PC的网络参数，默认路由是<code>192.168.11.1</code>，DNS设置为<code>198.19.0.1</code>，但是并不能上网(DNS是个fake-ip的假地址)，因为下面还有一个关键步骤。</p>
+</li>
+</ol>
+<h3 id="五、为从路由器设置透明代理"><a href="#五、为从路由器设置透明代理" class="headerlink" title="五、为从路由器设置透明代理"></a>五、为从路由器设置透明代理</h3><ol>
+<li><p>为AP热点设置动态NAT转发，只出不进</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 为 wlan0---&gt;eth0 设置动态NAT出口转换</span></span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE  </span><br><span class="line"><span class="built_in">sudo</span> iptables -A FORWARD -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT  </span><br><span class="line"><span class="built_in">sudo</span> iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>为Clash设置全量数据转发</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 新建两条链，clash用于数据访问，clash_dns用于内建DNS</span></span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -N clash</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -N clash_dns</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为内建DNS设置NAT转换，从198.18.0.1---&gt;198.19.x.x，同时支持UDP和TCP，但当前版本实际只使用UDP</span></span><br><span class="line"><span class="comment"># 重要：192.168.0.8是你的Clash出口地址，应根据网络环境自行修改！！！</span></span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A PREROUTING -p tcp --dport 53 -d 198.19.0.0/24 -j clash_dns</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A PREROUTING -p udp --dport 53 -d 198.19.0.0/24 -j clash_dns</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash_dns -p udp --dport 53 -d 198.19.0.0/24 -j DNAT --to-destination 192.168.0.8:53</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash_dns -p tcp --dport 53 -d 198.19.0.0/24 -j DNAT --to-destination 192.168.0.8:53</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为Clash数据访问建立NAT转换</span></span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A PREROUTING -p tcp -j clash</span><br><span class="line"></span><br><span class="line"><span class="comment"># 为本机网段、私有网段、保留网段等提供直通车</span></span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash -d 0.0.0.0/8 -j RETURN</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash -d 10.0.0.0/8 -j RETURN</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash -d 127.0.0.0/8 -j RETURN</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash -d 169.254.0.0/16 -j RETURN</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash -d 172.16.0.0/12 -j RETURN</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash -d 192.168.0.0/16 -j RETURN</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash -d 224.0.0.0/4 -j RETURN</span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash -d 240.0.0.0/4 -j RETURN</span><br><span class="line"></span><br><span class="line"><span class="comment"># 上述条件之外的数据流量，一律转发给7892端口，实现免代理的透明网关</span></span><br><span class="line"><span class="built_in">sudo</span> iptables -t nat -A clash -p tcp -j REDIRECT --to-ports 7892</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置iptables路由表的持久化</p>
+<p> 执行完上面的 iptables 命令之后，就完成了旁路由的路由功能了，但是此时 iptables 并没有永久保存，下次开机上面的配置就会丢失。<br> 为了使得重启之后 iptables 命令仍然存在，我们需要安装<code>iptables-persistent软件</code>来实现(前面步骤二已完成)：<br> 执行以下命令，就即可将最新的 iptables 规则保存下来。</p>
+ <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># sudo apt install iptables-persistent</span></span><br><span class="line"><span class="built_in">sudo</span> sh -c <span class="string">&#x27;iptables-save &gt; /etc/iptables/rules.v4&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>安装的过程中会提示你是否需要保存 iptables 配置，直接选是就行。这时候即使电脑重启了也会应用这些路由规则。</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="六、设置Clash开机自启动"><a href="#六、设置Clash开机自启动" class="headerlink" title="六、设置Clash开机自启动"></a>六、设置Clash开机自启动</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/systemd/system/clash.service &gt; /dev/null &lt;&lt; <span class="string">EOF</span></span><br><span class="line"><span class="string">[Unit]</span></span><br><span class="line"><span class="string">Description=clash service</span></span><br><span class="line"><span class="string">After=network.target</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">[Service]</span></span><br><span class="line"><span class="string">Type=simple</span></span><br><span class="line"><span class="string">User=pi</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string"># Set port permissions capability without root user</span></span><br><span class="line"><span class="string">CapabilityBoundingSet=CAP_NET_BIND_SERVICE</span></span><br><span class="line"><span class="string">AmbientCapabilities=CAP_NET_BIND_SERVICE</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">ExecStart=/usr/bin/clash -d /home/pi/.config/clash</span></span><br><span class="line"><span class="string">Restart=on-failure # or always, on-abort, etc</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">[Install]</span></span><br><span class="line"><span class="string">WantedBy=multi-user.target</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> clash</span><br></pre></td></tr></table></figure>
+
+<p>到此为止，Clash透明网关就算是大功告成了，现在可以重启树莓派，检查科学成果了！！！</p>
+<p>当然，从系统安全的角度，做一些扫尾的工作也很重要，包括：</p>
+<ul>
+<li>编辑树莓派的公匙文件<code>mkdir $HOME/.ssh &amp;&amp; vi $HOME/.ssh/authorized_keys</code>，将各台需要管理PC的 RSA 公匙加入</li>
+<li>在树莓派上，设置文件权限并重启ssh服务</li>
+</ul>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> 600 <span class="variable">$HOME</span>/.ssh/authorized_keys</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">chmod</span> 700 <span class="variable">$HOME</span>/.ssh/</span><br><span class="line"></span><br><span class="line"><span class="built_in">sudo</span> systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在管理PC上，尝试ssh登录，如果免密码成功，就可以关闭口令登录了</li>
+<li>编辑树莓派的<code>sudo vi /etc/ssh/sshd_config</code>，将<code>PasswordAuthentication</code>设为<code>no</code>，以禁止采用口令登录</li>
+</ul>
+<p>这样一来，树莓派就在指定PC上就可以<code>pi</code>用户实现免密码登录，而其它用户、其它PC都无法登录了</p>
+<h2 id="Clash透明网关的使用方法"><a href="#Clash透明网关的使用方法" class="headerlink" title="Clash透明网关的使用方法"></a>Clash透明网关的使用方法</h2><p>首先找到相应SSID，连接AP热点后自动设置默认网关和DNS，浏览器打开直接上网，再也不用 HTTP 或 SOCK5 代理了。<br>如果想要观察Clash运行情况，可以在浏览器打开<a target="_blank" rel="noopener" href="http://192.168.0.8:9090/ui]">http://192.168.0.8:9090/ui</a></p>
+<p>Clash的配置是一件比较复杂的工作，准备下次专门讨论，这里就不啰嗦了。</p>
+<hr>
+<h2 id="补充问题"><a href="#补充问题" class="headerlink" title="补充问题"></a>补充问题</h2><h3 id="附录1-Clash的Home目录结构"><a href="#附录1-Clash的Home目录结构" class="headerlink" title="附录1: Clash的Home目录结构"></a>附录1: Clash的Home目录结构</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">pi@raspberrypi:~ $ tree <span class="variable">$HOME</span>/.config/clash/</span><br><span class="line">/home/pi/.config/clash/</span><br><span class="line">├── config.yaml</span><br><span class="line">├── Country.mmdb</span><br><span class="line">└── uacd-dashboard</span><br><span class="line">    ├── 9.e5ebc45c57147750a8b7.js</span><br><span class="line">    ├── app.2710ac87312332833aa4.js</span><br><span class="line">    ├── app.2710ac87312332833aa4.js.LICENSE.txt</span><br><span class="line">    ├── app.bb773b8bdd4263de9ffd.css</span><br><span class="line">    ├── CNAME</span><br><span class="line">    ├── core-js~app.4e0935a458133ffa9ca3.js</span><br><span class="line">    ├── _headers</span><br><span class="line">    ├── index.html</span><br><span class="line">    ├── open-sans-latin-400.woff2</span><br><span class="line">    ├── open-sans-latin-700.woff2</span><br><span class="line">    ├── proxies.1e31d885e6fe278da534.css</span><br><span class="line">    ├── proxies.beaddeef3e0db08db953.js</span><br><span class="line">    ├── react~app.10618449a8e9b56a1845.js</span><br><span class="line">    ├── react~app.10618449a8e9b56a1845.js.LICENSE.txt</span><br><span class="line">    ├── report.html</span><br><span class="line">    ├── roboto-mono-latin-400.woff2</span><br><span class="line">    ├── rules.3ba17dd53c9d8bd8b221.css</span><br><span class="line">    ├── rules.90faad053acc32c74a88.js</span><br><span class="line">    ├── runtime.30479c2b09f71505cee3.js</span><br><span class="line">    ├── vendors~chartjs.e4543f10556636d64b75.js</span><br><span class="line">    ├── vendors~chartjs.e4543f10556636d64b75.js.LICENSE.txt</span><br><span class="line">    ├── vendors~proxies.34b4cb2526b2e8ed766c.js</span><br><span class="line">    ├── vendors~rules.b2e93c21da80f9dc4a80.js</span><br><span class="line">    ├── yacd-128.png</span><br><span class="line">    ├── yacd-64.png</span><br><span class="line">    └── yacd.ico</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="附录2：关于avahi服务"><a href="#附录2：关于avahi服务" class="headerlink" title="附录2：关于avahi服务"></a>附录2：关于avahi服务</h3><p><code>Zeroconf</code>（Zero configuration networking）零配置网络服务规范，是一种用于自动生成可用IP地址的网络技术，不需要额外的手动配置和专属的配置服务器。</p>
+<p>Zeroconf规范的提出者是Apple公司，目标是让非专业用户也能便捷的连接各种网络设备，例如计算机，打印机等。整个搭建网络的过程都是通过程式自动化实现。如果没有 zeroconf，用户必须手动配置一些服务，例如DHCP、DNS，计算机网络的其他设置等。这些对非技术用户和新用户们来说是很难的事情。</p>
+<p><code>Avahi</code> 是Zeroconf规范的开源实现，常见使用在Linux上。包含了一整套多播DNS(multicastDNS)&#x2F;DNS-SD网络服务的实现。它使用 的发布授权是LGPL。Zeroconf规范的另一个实现是Apple公司的Bonjour程式。<code>Avahi</code>和<code>Bonjour</code>相互兼容(废话，都走同一个 规范标准嘛，就象IE，Firefox，chrome都能跑HTTP1.1一样)。</p>
+<p><code>Avahi</code>允许程序在不需要进行手动网络配置的情况 下，在一个本地网络中发布和获知各种服务和主机。例如，当某用户把他的计算机接入到某个局域网时，如果他的机器运行有Avahi服务，则Avahi程式自 动广播，从而发现网络中可用的打印机、共享文件和可相互聊天的其他用户。这有点象他正在接收局域网中的各种网络广告一样。</p>
+<p>Linux下系统实际启动的进程名，是<code>avahi-daemon</code>。除非你有兼容的设备或使用 zeroconf 协议的服务，否则应该关闭它。</p>
+<h2 id="参考目录"><a href="#参考目录" class="headerlink" title="参考目录"></a>参考目录</h2><p>核心参考文献</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://cherysunzhang.com/2020/05/deploy-clash-as-transparent-proxy-on-raspberry-pi/">在 Raspberry Pi上运行Clash作为透明代理</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.nicesite.win/2017/08/16/soft-router/">在树莓派上搭建软路由</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.serenader.me/shi-yong-pve-yun-xing-clash-pang-lu-you-xu-ni-ji-shi-xian-tou-ming-dai-li">使用PVE运行Clash旁路由虚拟机实现透明代理</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.joxrays.com/raspberry-wifi-router/">树莓派搭建简略WiFi无线路由器</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.serenader.me/shi-yong-pve-yun-xing-clash-pang-lu-you-xu-ni-ji-shi-xian-tou-ming-dai-li">使用 PVE 运行 Clash 旁路由虚拟机实现透明代理</a></li>
+<li><a target="_blank" rel="noopener" href="https://breakertt.moe/2019/08/20/clash_gateway/index.html">Ubuntu18.04 上使用 clash 部署旁路代理网关</a></li>
+</ul>
+<p>关于网络协议</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.zsythink.net/archives/1199">iptables经典教材</a></li>
+<li><a target="_blank" rel="noopener" href="https://lesca.me/archives/iptables-nat-mangle-clear-rules.html">iptables的命令解释</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E4%BF%9D%E7%95%99IP%E5%9C%B0%E5%9D%80">IPv4的保留IP地址定义</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.enkichen.com/2017/05/23/dnsmasq-introduce/">Dnsmasq配置文件详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ibm.com/developerworks/cn/linux/l-wifiencrypthostapd/index.html">Hostapd配置文件详解</a></li>
+</ul>
+<p>关于Clash</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/Dreamacro/clash">Clash的Github官方网站</a></li>
+<li><a target="_blank" rel="noopener" href="https://lancellc.gitbook.io/clash/clash-config-file/dns">Clash的Gitbook官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://tlanyan.me/v2ray-clients-download/">V2ray的主流客户端</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.skk.moe/post/alternate-surge-koolclash-as-gateway/#redir-host-%E7%9A%84%E9%97%AE%E9%A2%98">关于Clash自带DNS服务器的fake-ip模式</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.v2rayssr.com/clashxx.html">Clash的配置文件示例</a></li>
+<li><a target="_blank" rel="noopener" href="https://lancellc.gitbook.io/clash/clash-config-file/an-example-configuration-file">Clash的配置文件示例2</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/07/12/Harbor%E7%9A%84%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" rel="prev" title="Harbor的安装记录">
+                  <i class="fa fa-angle-left"></i> Harbor的安装记录
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" rel="next" title="Proxmox VE虚拟机的Cloud-init安装记录">
+                  Proxmox VE虚拟机的Cloud-init安装记录 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

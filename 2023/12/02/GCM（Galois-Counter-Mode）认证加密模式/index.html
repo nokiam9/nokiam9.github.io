@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、背景 研究分组密码工作模式的核心是机密性保护（Confidentiality），历史上曾经将完整性保护（Integrity，例如在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但在发现兼顾两个设计目标的难度之后，密码学社区已经普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标，并开始研究专门的认证加密模式（AE，Authenticated Encryption）。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GCM（Galois&#x2F;Counter Mode）认证加密模式">
+<meta property="og:url" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、背景 研究分组密码工作模式的核心是机密性保护（Confidentiality），历史上曾经将完整性保护（Integrity，例如在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但在发现兼顾两个设计目标的难度之后，密码学社区已经普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标，并开始研究专门的认证加密模式（AE，Authenticated Encryption）。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/HMAC.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/CMAC.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/GCM.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/ghash.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/gctr.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/arch.png">
+<meta property="article:published_time" content="2023-12-02T09:29:03.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.787Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/HMAC.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/","path":"2023/12/02/GCM（Galois-Counter-Mode）认证加密模式/","title":"GCM（Galois/Counter Mode）认证加密模式"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>GCM（Galois/Counter Mode）认证加密模式 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E8%83%8C%E6%99%AF"><span class="nav-text">一、背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E6%9C%AC%E6%B5%81%E7%A8%8B"><span class="nav-text">二、基本流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%A0%B8%E5%BF%83%E7%AE%97%E6%B3%95"><span class="nav-text">三、核心算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9C%89%E9%99%90%E5%9F%9F%E4%B9%98%E6%B3%95%E8%BF%90%E7%AE%97-Z-X-otimes-Y"><span class="nav-text">1. 有限域乘法运算 $Z&#x3D;X \otimes Y$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%B8%A6%E5%AF%86%E9%92%A5%E7%9A%84%E5%93%88%E5%B8%8C%E5%80%BC%E8%AE%A1%E7%AE%97-Y-GHASH-H-X"><span class="nav-text">2. 带密钥的哈希值计算 $Y&#x3D;GHASH_H(X)$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%AE%A1%E6%95%B0%E5%99%A8%E6%93%8D%E4%BD%9C-Y-GCTR-K-ICB-X"><span class="nav-text">3. 计数器操作 $Y&#x3D;GCTR_K(ICB,X)$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E7%AE%97%E6%B3%95-C-T-GCM-AE-K-IV-P-A"><span class="nav-text">4. 认证加密算法 $(C,T)&#x3D;GCM-AE_K(IV,P,A)$</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%AE%A4%E8%AF%81%E8%A7%A3%E5%AF%86%E7%AE%97%E6%B3%95-P-GCM-AD-K-IV-C-A%EF%BC%8CT"><span class="nav-text">5. 认证解密算法 $P&#x3D;GCM-AD_K(IV,C,A，T)$</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">四、技术分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E5%85%A8%E6%80%A7%E8%A6%81%E6%B1%82"><span class="nav-text">1. 安全性要求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E9%80%9F"><span class="nav-text">2. 硬件加速</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="GCM（Galois&#x2F;Counter Mode）认证加密模式 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          GCM（Galois/Counter Mode）认证加密模式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-12-02 17:29:03" itemprop="dateCreated datePublished" datetime="2023-12-02T17:29:03+08:00">2023-12-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、背景"><a href="#一、背景" class="headerlink" title="一、背景"></a>一、背景</h2><p>研究分组密码工作模式的核心是<strong>机密性保护（Confidentiality）</strong>，历史上曾经将<strong>完整性保护（Integrity</strong>，例如在某些数据被修改后的情况下密码的误差传播特性）也一并纳入设计目标，但在发现兼顾两个设计目标的难度之后，密码学社区已经普遍将完整性保护作为另一个完全不同的，与加密无关的密码学目标，并开始研究专门的认证加密模式（AE，Authenticated Encryption）。</p>
+<p>在密码学中，消息验证码（MAC，Message Authentication Code，也称为标签Tag）是用于验证消息的一小段信息。换句话说，用于确认消息来自指定的发送者（其真实性）并且没有被篡改了。<br>一般情况下，消息认证码由三种算法组成：</p>
+<ul>
+<li>密钥生成算法：从密钥空间中随机均匀地选择一个密钥。</li>
+<li>签名算法：有效地返回给定密钥和消息的标签。</li>
+<li>验证算法：有效地验证给定密钥和标签的消息的真实性。 也就是说，当消息和标签没有被篡改或伪造时，返回被接受，否则返回被拒绝。</li>
+</ul>
+<p>针对消息验证码，NIST 先后提出了 HMAC，CMAC 和 GMAC。<br>2002年，HMAC 通过认证为<a target="_blank" rel="noopener" href="https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.198-1.pdf">NIST FIPS 198-1</a>，基于单向散列函数实现，可以检查消息的完整性，但无法确保来源的可靠性。其中 ipad 是 0x36 的重复值，opad 是 0x5c 的重复值。<br><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/HMAC.png" alt="HMAC"></p>
+<p>2005年，CMAC 标准化为<a target="_blank" rel="noopener" href="https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-38b.pdf">NIST SP800-38B</a>，基于分组密码实现，基于共享密钥派生出两个中间密钥，并进行两次哈希计算得到。<br><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/CMAC.png" alt="CMAC"><br>$L &#x3D; CIPH_k(0^b)；K_1 &#x3D; L \otimes \alpha；K_2 &#x3D; L \otimes \alpha^2；128位的生成元&#x3D;x^7+x^2+x+1$</p>
+<p>2007年，GMAC 标准化为<a href="nistspecialpublication800-38d.pdf">NIST SP800-38D</a>，基于伽罗华域乘法实现，可以看做对称加密算法和消息认证码的结合。</p>
+<h2 id="二、基本流程"><a href="#二、基本流程" class="headerlink" title="二、基本流程"></a>二、基本流程</h2><p>GCM（Galois&#x2F;Counter Mode）是一种基于对称加密算法的认证加密（Authenticated Encryption）模式，用于确保数据的机密性和完整性。GCM 结合了 CTR（Counter）模式用于加密和 GHASH（Galois Hash）用于认证，因此不仅继承了 CTR 模式优秀的并行计算能力，还能额外提供对消息完整性、真实性的验证能力，因此广泛应用于 TLS、IPsec 等安全协议中。</p>
+<p>根据<a href="nistspecialpublication800-38d.pdf">NIST SP800-38D</a>的定义，其认证加密过程分为三个阶段：</p>
+<ol>
+<li><strong>初始化阶段</strong>：<br> 根据给定的密钥（key）和初始向量（IV）生成一个初始计数器 ICB；<br> 计算计数器的初始值J0，当 IV 长度为96位时，J0 &#x3D; IV || 0^31 || 1。</li>
+<li><strong>加密阶段</strong>：<br> 使用 GCTR（Galois Counter）模式对明文进行加密，通过将计数器块（CB）与密钥（key）进行加密，然后将结果与明文异或，生成密文。<br> 计数器每次递增，直至加密整个明文。这里，CB 的初始值是 J0 的递增值（即 J0 + 1）。</li>
+<li><strong>认证阶段</strong>：<br> 首先，使用密钥（key）计算一个值H（称为GHASH_H），用于 GHASH 运算。<br> 接着，将关联数据AD 和密文一起输入到 GHASH 算法中，生成一个认证标签。</li>
+</ol>
+<p><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/GCM.png" alt="GCM"></p>
+<p>解密过程与加密过程类似，首先使用 GHASH 验证密文的认证标签。如果认证通过，再使用 GCTR 模式解密密文，还原成明文。</p>
+<h2 id="三、核心算法"><a href="#三、核心算法" class="headerlink" title="三、核心算法"></a>三、核心算法</h2><h3 id="1-有限域乘法运算-Z-X-otimes-Y"><a href="#1-有限域乘法运算-Z-X-otimes-Y" class="headerlink" title="1. 有限域乘法运算 $Z&#x3D;X \otimes Y$"></a>1. 有限域乘法运算 $Z&#x3D;X \otimes Y$</h3><p>基于有限域$GF(2^{128})$，定义本原多项式&#x3D;$x^{128}+x^7+x^2+1$。<br>处理逻辑：略。</p>
+<h3 id="2-带密钥的哈希值计算-Y-GHASH-H-X"><a href="#2-带密钥的哈希值计算-Y-GHASH-H-X" class="headerlink" title="2. 带密钥的哈希值计算 $Y&#x3D;GHASH_H(X)$"></a>2. 带密钥的哈希值计算 $Y&#x3D;GHASH_H(X)$</h3><p>先决条件：哈希算法的子密钥$H$<br>输入参数：128位比特流$X$<br>输出结果：分组$Y$<br>核心逻辑：</p>
+<p>$Y&#x3D;(X_1 \otimes H^m) \oplus (X_2 \otimes H^{m-1}) \oplus … \oplus (X_{m-1} \otimes H^2) \oplus (X_m \otimes H) $</p>
+<blockquote>
+<p>类似二项式乘法：将输入分组切割，并作为密钥 H 各阶的系数，与 CBC 的链式特征很相似</p>
+</blockquote>
+<p><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/ghash.png" alt="GHASH"></p>
+<h3 id="3-计数器操作-Y-GCTR-K-ICB-X"><a href="#3-计数器操作-Y-GCTR-K-ICB-X" class="headerlink" title="3. 计数器操作 $Y&#x3D;GCTR_K(ICB,X)$"></a>3. 计数器操作 $Y&#x3D;GCTR_K(ICB,X)$</h3><p>先决条件：底层的128位分组密码算法$CIPH$<br>输入参数：128位比特流$X$<br>输出结果：分组$Y$<br>核心逻辑：</p>
+<ol>
+<li>初始计数器块ICB（Initial Counter Block），构造方式为：96位 IV + 31位0 + 1，<br>$J_0 &#x3D; IV \parallel 0^{31} \parallel 1$</li>
+<li>计数器递增<br> $CB_1&#x3D;ICB$<br> $CB_i&#x3D;inc_{32}(CB_{i-1})$</li>
+<li>根据流密钥进行加密或解密<br> $Y_i&#x3D; X_i \oplus CIPH_k(CB_i)$</li>
+</ol>
+<p><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/gctr.png" alt="GCTR"></p>
+<h3 id="4-认证加密算法-C-T-GCM-AE-K-IV-P-A"><a href="#4-认证加密算法-C-T-GCM-AE-K-IV-P-A" class="headerlink" title="4. 认证加密算法 $(C,T)&#x3D;GCM-AE_K(IV,P,A)$"></a>4. 认证加密算法 $(C,T)&#x3D;GCM-AE_K(IV,P,A)$</h3><p>先决条件：底层的128位分组密码算法$CIPH$；密钥$K$；标签长度$t$<br>输入参数：初始化向量$IV$；明文$P$；附加认证数据$A$<br>输出结果：密文$C$；标签$T$<br>核心逻辑：</p>
+<ol>
+<li>调用 GCTR 生成密文C<br> $C &#x3D; GCTR_k(inc_{32}(J_0),P)$</li>
+<li>构造验证数据块S，关键数据是 A 和C，还有一些填充位<br> $u &#x3D; len(C) \ mod\ 128;\ v &#x3D; len(A) \ mod\ 128$<br> $S &#x3D; GHASH_H(A \parallel 0^v \parallel C \parallel 0^u \parallel [len(A)]_{64} \parallel [len(C)]_{64})$</li>
+<li>计算数据块S的哈希值，并存入tag<br> $T &#x3D; MSB_i(GCTR_k(J_0,S))$</li>
+</ol>
+<p><img src="/2023/12/02/GCM%EF%BC%88Galois-Counter-Mode%EF%BC%89%E8%AE%A4%E8%AF%81%E5%8A%A0%E5%AF%86%E6%A8%A1%E5%BC%8F/arch.png" alt="arch"></p>
+<h3 id="5-认证解密算法-P-GCM-AD-K-IV-C-A，T"><a href="#5-认证解密算法-P-GCM-AD-K-IV-C-A，T" class="headerlink" title="5. 认证解密算法 $P&#x3D;GCM-AD_K(IV,C,A，T)$"></a>5. 认证解密算法 $P&#x3D;GCM-AD_K(IV,C,A，T)$</h3><p>先决条件：底层的128位分组密码算法$CIPH$；密钥$K$；标签长度$t$<br>输入参数：初始化向量$IV$；密文$C$；附加认证数据$A$；标签$T$<br>输出结果：明文$P$，或者 FAIL<br>核心逻辑：</p>
+<ol>
+<li>调用 GCTR 生成明文P<br> $P &#x3D; GCTR_k(inc_{32}(J_0),C)$</li>
+<li>构造验证数据块S，关键数据是 A 和C，还有一些填充位<br> $u &#x3D; len(C) \ mod\ 128;\ v &#x3D; len(A) \ mod\ 128$<br> $S &#x3D; GHASH_H(A \parallel 0^v \parallel C \parallel 0^u \parallel [len(A)]_{64} \parallel [len(C)]_{64})$</li>
+<li>计算数据块S的哈希值，并存入$T’$<br> $T’ &#x3D; MSB_i(GCTR_k(J_0,S))$</li>
+<li>如果$T &#x3D; T’$，验证通过返回明文P；否则返回 FAIL</li>
+</ol>
+<h2 id="四、技术分析"><a href="#四、技术分析" class="headerlink" title="四、技术分析"></a>四、技术分析</h2><h3 id="1-安全性要求"><a href="#1-安全性要求" class="headerlink" title="1. 安全性要求"></a>1. 安全性要求</h3><p>GCM 在具体的安全模型中被证明是机密性安全，但需要同时满足三个前提条件：</p>
+<ul>
+<li>$len(P) &lt;&#x3D; 2^{39} - 256$</li>
+<li>$len(A) &lt;&#x3D; 2^{64} -1$</li>
+<li>$1 &lt;&#x3D; len(IV) &lt;&#x3D; 2^{64}-1$</li>
+</ul>
+<p>对于任何给定的密钥和初始化向量组合，GCM 加密数据 P 的长度不得高于大约 64 GB。<br>附加身份验证数据 AAD（Additional Authenticated Data）是不需要加密但需要认证的数据，以明文形式与密文一起传递给接收者，通常包含源IP，源端口，目的IP，IV等信息。<br>IV 通常为 96 位长度。</p>
+<p>身份验证的安全性取决于 MAC 的长度。一般来说，标签长度 t 应该在[128，120，112，104，96]中选择。对于某些应用，t 可能是 64 或 32，但必须限制输入的长度数据和密钥的生命周期。</p>
+<h3 id="2-硬件加速"><a href="#2-硬件加速" class="headerlink" title="2. 硬件加速"></a>2. 硬件加速</h3><p>GCM 要求对每个加密和验证数据块（128 位）在有限域中进行一次分组密码操作和一次 128 位乘法。分组密码操作很容易流水线化或并行化；乘法运算也很容易流水线化，并且可以通过一些适度的努力进行并行化。</p>
+<p>Intel 添加了<code>PCLMULQDQ</code>指令，突出了它对 GCM 的使用。<br>2011 年，SPARC 添加了<code>XMULX</code>和<code>XMULXHI</code>指令，它们也执行 64 × 64 位无进位乘法。<br>2015 年，SPARC 添加了<code>XMPMUL</code>指令，该指令对更大的值执行 XOR 乘法，高达 2048 × 2048 位的输入值产生 4096 位的结果。</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a href="nistspecialpublication800-38d.pdf">NIST SP800-38D</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Galois/Counter_Mode">Galois&#x2F;Counter Mode - WiKi</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/Chahot/article/details/130407149">GCM与CCM的的规格和加解密过程</a></li>
+<li><a target="_blank" rel="noopener" href="https://const.net.cn/tool/aes/aes-gcm/">aes-gcm 在线加密工具</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/openluopworld/aes_gcm/blob/master/gcm.c">GCM 的C语言代码示例</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/11/26/Hexo-%E6%94%AF%E6%8C%81-LaTeX-%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/" rel="prev" title="Hexo 支持 LaTeX 数学公式">
+                  <i class="fa fa-angle-left"></i> Hexo 支持 LaTeX 数学公式
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/01/07/Apple%20FileVault%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" rel="next" title="Apple FileVault的技术分析">
+                  Apple FileVault的技术分析 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、概述 神经网络中的每个神经元节点接受上一层神经元的输出值作为本神经元的输入值，并将输入值传递给下一层，输入层神经元节点会将输入属性直接传递到下一层（隐层或输出层）。在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数（activation function）。    $\sum\limits_{i}{w_{i}x_{i}+b}$ 是线形组合部分，$f()$">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大模型学习笔记之二：激活函数">
+<meta property="og:url" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、概述 神经网络中的每个神经元节点接受上一层神经元的输出值作为本神经元的输入值，并将输入值传递给下一层，输入层神经元节点会将输入属性直接传递到下一层（隐层或输出层）。在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数（activation function）。    $\sum\limits_{i}{w_{i}x_{i}+b}$ 是线形组合部分，$f()$">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/vs.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/Sigmoid.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/tanh.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ReLU.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/LU.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/L-ReLU.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ELU.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/group.gif">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/softmax.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png">
+<meta property="article:published_time" content="2024-08-01T05:27:50.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.165Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/","path":"2024/08/01/大模型学习笔记之二：激活函数/","title":"大模型学习笔记之二：激活函数"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>大模型学习笔记之二：激活函数 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8D%95%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">二、单变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Sigmoid%EF%BC%88S%E5%9E%8B%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">1. Sigmoid（S型函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Tanh%EF%BC%88Hyperbolic-tangent%EF%BC%8C%E5%8F%8C%E6%9B%B2%E6%AD%A3%E5%88%87%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">2. Tanh（Hyperbolic tangent，双曲正切函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-ReLU%EF%BC%88Rectified-Linear-Unit-%E7%BA%BF%E5%BD%A2%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">3. ReLU（Rectified Linear Unit, 线形整流函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Leak-ReLU%EF%BC%88Leakly-Rectified-Linear-Unit%EF%BC%8C%E5%B8%A6%E6%B3%84%E9%9C%B2%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">Leak-ReLU（Leakly Rectified Linear Unit，带泄露线性整流函数）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RReLU%EF%BC%88Random-Rectified-Linear-Unit%EF%BC%8C%E9%9A%8F%E6%9C%BA%E7%BA%BF%E6%80%A7%E6%95%B4%E6%B5%81%E5%8D%95%E5%85%83%EF%BC%89"><span class="nav-text">RReLU（Random Rectified Linear Unit，随机线性整流单元）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-ELU%EF%BC%88Exponential-Linear-Unit%EF%BC%8C%E6%8C%87%E6%95%B0%E7%BA%BF%E6%80%A7%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">4. ELU（Exponential Linear Unit，指数线性函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SELU%EF%BC%88Scaled-Exponential-Linear-Unit%EF%BC%8C%E6%89%A9%E5%B1%95%E6%8C%87%E6%95%B0%E7%BA%BF%E5%BD%A2%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">SELU（Scaled Exponential Linear Unit，扩展指数线形函数）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%85%B6%E4%BB%96"><span class="nav-text">5. 其他</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%A4%9A%E5%8F%98%E9%87%8F%E8%BE%93%E5%85%A5%E7%9A%84%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0"><span class="nav-text">三、多变量输入的激活函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Softmax-%E5%87%BD%E6%95%B0"><span class="nav-text">1. Softmax 函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Maxout-%E5%87%BD%E6%95%B0"><span class="nav-text">2. Maxout 函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-text">四、简要分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Sigmoid-%E5%92%8C-Softmax"><span class="nav-text">1. Sigmoid 和 Softmax</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%B8%A9%E5%BA%A6"><span class="nav-text">2. 模型的温度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%87%BD%E6%95%B0%E9%80%89%E6%8B%A9%E7%9A%84%E5%9F%BA%E6%9C%AC%E7%AD%96%E7%95%A5"><span class="nav-text">3. 函数选择的基本策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="大模型学习笔记之二：激活函数 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大模型学习笔记之二：激活函数
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-08-01 13:27:50" itemprop="dateCreated datePublished" datetime="2024-08-01T13:27:50+08:00">2024-08-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>神经网络中的每个神经元节点接受上一层神经元的输出值作为本神经元的输入值，并将输入值传递给下一层，输入层神经元节点会将输入属性直接传递到下一层（隐层或输出层）。在多层神经网络中，上层节点的输出和下层节点的输入之间具有一个函数关系，这个函数称为激活函数（activation function）。</p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/cell.png" alt="cell"></p>
+<p>$\sum\limits_{i}{w_{i}x_{i}+b}$ 是线形组合部分，$f()$ 部分就是激活函数，核心用途是为神经元加入非线性因素！</p>
+<blockquote>
+<p>从哲学的角度看，线性组合解决的是<strong>描述问题</strong>，激励函数解决的是<strong>判断问题</strong>，就是价值观！</p>
+</blockquote>
+<p>在神经网络中，如果不对上一层结点的输出做非线性转换的话（即：激活函数为$f(x)&#x3D;x$），再深的网络也是线性模型，只能把输入线性组合再输出，不能学习到复杂的映射关系，就是最原始的感知机（perceptron），那么网络的逼近能力就相当有限，因此需要使用激活函数提供非线性转换，这样深层神经网络表达能力就更加强大了，几乎可以逼近任意函数。</p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/vs.png" alt="vs"></p>
+<p>设计一个合格的激活函数，必须满足以下性质：</p>
+<ul>
+<li>非线性：这是激活函数的基本要求，目的就是提供<strong>超越</strong>线形组合的表达能力</li>
+<li>可微性：当优化方法是基于梯度的时候，这个性质是必须的。<blockquote>
+<p>连续性是指函数在某一点的极限值等于该点的函数值；<br>可微性是指函数在某一点附近的变化率可以表示为该点的一个线性变换；<br>可导性是指函数在某一点存在切线，且切线的斜率是确定的。<br>注意！<strong>可微一定可导，可微一定连续，但反之并不一定！</strong></p>
+</blockquote>
+</li>
+<li>单调性：当激活函数是单调的时候，单层网络能够保证是凸函数</li>
+<li>$f(x) \approx x$：当激活函数满足这个性质的时候，如果参数的初始化是 random 的很小的值，那么神经网络的训练将会很高效；如果不满足这个性质，那么就需要很用心的去设置初始值</li>
+<li>有限输出：当激活函数的输出值是有限的时候，基于梯度的优化方法会更加稳定，因为特征的表示受有限权值的影响更显著；当激活函数的输出是无限的时候，模型的训练会更加高效，不过在这种情况下，一般需要更小的 learning rate。</li>
+</ul>
+<p>根据输入变量的数量，激活函数分为单变量输入$f(x)$ 和 多变量输入$f(x_1,..x_n)$。</p>
+<h2 id="二、单变量输入的激活函数"><a href="#二、单变量输入的激活函数" class="headerlink" title="二、单变量输入的激活函数"></a>二、单变量输入的激活函数</h2><h3 id="1-Sigmoid（S型函数）"><a href="#1-Sigmoid（S型函数）" class="headerlink" title="1. Sigmoid（S型函数）"></a>1. Sigmoid（S型函数）</h3><p>Sigmoid 函数把一个实数（输入的连续实值）压缩到 0 到 1 之间，当输入的数字非常大的时候，结果会接近 1（完全被激活），当输入非常大的负数时，则会得到接近 0 （几乎死掉了），很好地解释了神经元受到刺激后是否被激活，并向后传递的场景，因此在早期的神经网络中使用非常普遍！</p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/Sigmoid.png" alt="sigmoid"></p>
+<p>不过，其在近期深度学习的应用中已经很少使用，主要存在以下缺点：</p>
+<ul>
+<li>当神经网络的层数很多时，如果每一层的激活函数都采用 Sigmoid 函数的话，就会产生梯度弥散和梯度爆炸的问题，其中梯度爆炸发生的概率非常小，而<strong>梯度消失</strong>的发生概率比较大。</li>
+<li>计算量大，因为解析式中含有幂函数，对于规模比较大的深度网络，这会较大的增加训练时间</li>
+<li>Sigmoid 函数的输出均值不是 0 ，这是不可取的</li>
+</ul>
+<blockquote>
+<p>zero-centered 问题：如果当前参数（$w_0$, $w_1$）的最佳优化方向是 （$+d_0$, $-d_1$），则根据反向传播计算公式，我们希望 $x_0$ 和 $x_1$ 符号相反，但是如果上一级神经元采用 Sigmoid 函数作为激活函数，其输出值恒为正，那么我们无法进行更快的参数更新，只能走 Z 字形逼近最优解。</p>
+</blockquote>
+<h3 id="2-Tanh（Hyperbolic-tangent，双曲正切函数）"><a href="#2-Tanh（Hyperbolic-tangent，双曲正切函数）" class="headerlink" title="2. Tanh（Hyperbolic tangent，双曲正切函数）"></a>2. Tanh（Hyperbolic tangent，双曲正切函数）</h3><p>在数学中，双曲正切 tanh 是由双曲正弦和双曲余弦这两个基本双曲函数推导而来。<br>$$<br>tanh(x)&#x3D;\dfrac{(e^x-e^{-x})}{(e^x+e^{-x})}<br>$$</p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/tanh.png" alt="tanh"></p>
+<p>与 Sigmoid 相比，tanh 函数有了明显改进，但有些问题依然存在：</p>
+<ul>
+<li>tanh 函数输出位于[-1,1]，解决了 Sigmoid 函数输出的 zero-centered 问题</li>
+<li>收敛速度比 Sigmoid 更快，减少迭代次数，梯度消失问题有所缓解，但仍然存在！</li>
+<li>计算量仍然加大，因为解析式中仍然包含幂函数！</li>
+</ul>
+<h3 id="3-ReLU（Rectified-Linear-Unit-线形整流函数）"><a href="#3-ReLU（Rectified-Linear-Unit-线形整流函数）" class="headerlink" title="3. ReLU（Rectified Linear Unit, 线形整流函数）"></a>3. ReLU（Rectified Linear Unit, 线形整流函数）</h3><p>针对 Sigmoid 函数和 tanh 的缺点，提出了一种<strong>斜坡</strong>函数，就是 ReLU函数。</p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ReLU.png" alt="R"></p>
+<p>ReLU 是目前最受欢迎的激活函数！突出优点是：</p>
+<ul>
+<li>解决了梯度消失（gradient vanishing）问题，仅在正区间部分</li>
+<li>计算速度快，求导方便，只需要判断输入是否大于0</li>
+<li>收敛速度远远大于 Sigmoid函数和 tanh 函数，可以加速网络训练</li>
+</ul>
+<p>也有一些缺点：</p>
+<ul>
+<li>由于负数部分恒为零，有些场景下比较脆弱。即如果变量的更新太快，还没有找到最佳值就进入小于零的分段，就会使得梯度变为零，神经元就直接死掉了（无法更新）</li>
+<li>输出不是 zero-centered</li>
+</ul>
+<p>解决方法是可以采用 Xavier 初始化方法，以及避免将 learning rate 设置太大或使用 adagrad 等自动调节 learning rate 的算法。<br>为了改进 ReLU 的缺点，陆续出现了许多的变种，如下图：<br><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/LU.png" alt="LUs"></p>
+<h4 id="Leak-ReLU（Leakly-Rectified-Linear-Unit，带泄露线性整流函数）"><a href="#Leak-ReLU（Leakly-Rectified-Linear-Unit，带泄露线性整流函数）" class="headerlink" title="Leak-ReLU（Leakly Rectified Linear Unit，带泄露线性整流函数）"></a>Leak-ReLU（Leakly Rectified Linear Unit，带泄露线性整流函数）</h4><p>为了避免 ReLU 存在的梯度消失问题，提出了将 ReLU 的前半段设为 $ax$ 而非 0，即当神经元处于非激活状态时，允许一个非0的梯度存在，a 可由方向传播算法学出来，通常设置为 0.01。也称为 LReLU 。</p>
+<p>$$f(x)&#x3D;max(ax, x)$$</p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/L-ReLU.png" alt="R"></p>
+<p>理论上来说，Leaky ReLU 具备 ReLU的所有优点，外加不会有 Dead ReLU 问题，但是在实际操作当中，并没有完全证明 Leaky ReLU 总是好于 ReLU。</p>
+<h4 id="RReLU（Random-Rectified-Linear-Unit，随机线性整流单元）"><a href="#RReLU（Random-Rectified-Linear-Unit，随机线性整流单元）" class="headerlink" title="RReLU（Random Rectified Linear Unit，随机线性整流单元）"></a>RReLU（Random Rectified Linear Unit，随机线性整流单元）</h4><p>Leaky ReLU的一个变体。在 PReLU中，负值的斜率在<strong>训练</strong>中是随机的，在之后的测试中就变成了固定的了。</p>
+<h3 id="4-ELU（Exponential-Linear-Unit，指数线性函数）"><a href="#4-ELU（Exponential-Linear-Unit，指数线性函数）" class="headerlink" title="4. ELU（Exponential Linear Unit，指数线性函数）"></a>4. ELU（Exponential Linear Unit，指数线性函数）</h3><p>一个 ReLU 的进化版，正数部分是和 ReLU 完全相同的 $x$ ，但负数部分是 $\alpha(e^x-1)$ 。</p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/ELU.png" alt="ELU"></p>
+<p>ELU 试图将激活函数的平均值接近零，从而加速学习的速率。同时它融合了 Sigmoid 和 ReLU，左侧具有软饱和性，右侧无饱和性，则可以通过正值的标识来避免梯度消失的问题。根据一些研究，ELU 分类精确度是高于 ReLUs的。</p>
+<h4 id="SELU（Scaled-Exponential-Linear-Unit，扩展指数线形函数）"><a href="#SELU（Scaled-Exponential-Linear-Unit，扩展指数线形函数）" class="headerlink" title="SELU（Scaled Exponential Linear Unit，扩展指数线形函数）"></a>SELU（Scaled Exponential Linear Unit，扩展指数线形函数）</h4><p>一个 ELU 的变种，把每一个值的前面都乘上一个系数，即：正数部分为 $\lambda x$ ，负数部分为 $\lambda\alpha(e^x-1)$ 。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/bioinf-jku/SNNs">有关数学推导</a>表明，最佳参数为：$\alpha$&#x3D;1.67326324，$\lambda$&#x3D;1.050700987。</p>
+<h3 id="5-其他"><a href="#5-其他" class="headerlink" title="5. 其他"></a>5. 其他</h3><p>除了上述流行的激活函数，还有一些可选项：</p>
+<ul>
+<li>ReLU6：就是普通的 ReLU，但是限制最大输出值为 6，适配移动端设备 float16 的低精度。</li>
+<li>SReLU（Sigmoid Rectified Linear Unit，S型线形整流函数）：有多个复杂变种，此处略。</li>
+<li>正弦函数：$f(x)&#x3D;sin(x)$</li>
+<li>高斯函数：$f(x)&#x3D;e^{-x^2}$</li>
+</ul>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/group.gif" alt="Group"></p>
+<h2 id="三、多变量输入的激活函数"><a href="#三、多变量输入的激活函数" class="headerlink" title="三、多变量输入的激活函数"></a>三、多变量输入的激活函数</h2><h3 id="1-Softmax-函数"><a href="#1-Softmax-函数" class="headerlink" title="1. Softmax 函数"></a>1. Softmax 函数</h3><p>Softmax 是一种激活函数，将一个数值向量<strong>归一化</strong>为一个概率分布向量，且各个概率之和为 1。</p>
+<p>$$ Softmax(z_i)&#x3D;\frac {e^{z_i}} {\sum\limits_{j&#x3D;1}^{n} e^{z_j}} $$</p>
+<p>正常的 max 函数仅输出最大值，但 Softmax 函数确保较小的值具有较小的概率，并且不会直接丢弃。可以认为它是    argmax 函数的概率版本或“soft”版本。<br>Softmax 函数的分母结合了原始输出值的所有因子，这意味着 Softmax 函数获得的各种概率彼此相关。</p>
+<p><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/softmax.png" alt="softmax"></p>
+<p>Softmax 通常作为神经网络的<strong>最后</strong>一层，用于多分类问题的输出，它将多个神经元的输出，映射到（0,1）区间内，可以看成概率来理解，从而来进行多分类，常常和交叉熵损失函数一起结合使用。</p>
+<p>下面是使用Python进行函数计算的示例代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> math</span><br><span class="line">z = [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>, <span class="number">4.0</span>, <span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>]</span><br><span class="line">z_exp = [math.exp(i) <span class="keyword">for</span> i <span class="keyword">in</span> z]  </span><br><span class="line"><span class="built_in">print</span>(z_exp)  <span class="comment"># Result: [2.72, 7.39, 20.09, 54.6, 2.72, 7.39, 20.09] </span></span><br><span class="line">sum_z_exp = <span class="built_in">sum</span>(z_exp)  </span><br><span class="line"><span class="built_in">print</span>(sum_z_exp)  <span class="comment"># Result: 114.98 </span></span><br><span class="line">softmax = [<span class="built_in">round</span>(i / sum_z_exp, <span class="number">3</span>) <span class="keyword">for</span> i <span class="keyword">in</span> z_exp]</span><br><span class="line"><span class="built_in">print</span>(softmax)  <span class="comment"># Result: [0.024, 0.064, 0.175, 0.475, 0.024, 0.064, 0.175]</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Maxout-函数"><a href="#2-Maxout-函数" class="headerlink" title="2. Maxout 函数"></a>2. Maxout 函数</h3><p>Maxout 是 Goodfellow 在 2013 年提出的一个新的激活函数，相比于其它的激活函数，Maxout 本身是需要参数的，参数可以通过网络的反向传播得到学习。</p>
+<p>$$f(x)&#x3D;\max(w_1x^T + b_1, w_2x^T + b_2, …, w_nx^T + b_n)$$</p>
+<p>Maxout 的本质是<strong>分段线性拟合</strong>，理论上可以拟合<strong>任意的凸函数</strong>；同时，由于其应用了 max 函数，又具备非线形的特征，因此比其它激活函数有着更好的性能的应用，换个角度看，如果 w 和 b 都设置为 0 ，就转换为 ReLU 函数。<br><img src="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/maxout.png" alt="maxout"></p>
+<p>Maxout 连接与普通的全连接并无区别，之后每两个单元<strong>连接</strong>到一个单元上，当然，这里不是真的连接，因为该条线上并不涉及参数，那么如何从两个单元得到一个单元的值呢？其实只需要比较两个单元的值即可，大的值就是 MaxOut。</p>
+<p>Maxout 继承了 RELU 的优点而且没有死区，但是需要 2 次线性映射运算，因此计算量也会翻倍。</p>
+<h2 id="四、简要分析"><a href="#四、简要分析" class="headerlink" title="四、简要分析"></a>四、简要分析</h2><h3 id="1-Sigmoid-和-Softmax"><a href="#1-Sigmoid-和-Softmax" class="headerlink" title="1. Sigmoid 和 Softmax"></a>1. Sigmoid 和 Softmax</h3><ul>
+<li>Sigmoid 函数将模型的输出转化为概率形式，即将任意实数映射到（0，1）区间，从而解决了归一化问题</li>
+<li>Softmax 是 Sigmoid 的扩展形式，即 Sigmoid 是 Softmax 在二分类情况下的特例。即：<br>  $$Softmax([z,0]) &#x3D; [\frac {e^z}{e^z+1}, \frac {1}{e^z+1}]$$</li>
+<li>使用 Sigmoid &amp; Softmax &#x3D; 选择了<strong>最大熵原理</strong>，因此模型的中间层可能使用其他激活函数（为了解决梯度消失问题），但最终输出必然使用 Softmax</li>
+</ul>
+<p>请参见<a target="_blank" rel="noopener" href="https://blog.csdn.net/Kevin_Carpricron/article/details/124123134">用最大熵搞懂Softmax</a></p>
+<h3 id="2-模型的温度"><a href="#2-模型的温度" class="headerlink" title="2. 模型的温度"></a>2. 模型的温度</h3><p>对于 Softmax 函数，我们可以使用不同的基底参数，其结果仍然服从归一化概率分布，但数值分布发生了变化。<br>$$ Softmax(z_i)&#x3D;\frac {e^{z_i&#x2F;T}} {\sum\limits_{j&#x3D;1}^{n} e^{z_j&#x2F;T}} $$</p>
+<p>其中，$z_i$ 是模型输出的第 $i$ 个元素，$T$ 称为<strong>温度调整（Temperature Scaling）</strong>参数，默认值为 1。</p>
+<ul>
+<li>温度 $T$ 较低时，Softmax 输出的概率分布更加尖锐，即一个值占主导地位（结果的确定性更高）；</li>
+<li>温度 $T$ 较高时，分布更加平坦，即类别之间的概率差异减小（系统熵增加，随机性更高）。</li>
+<li>在实际应用和计算中，$T$ 不能设置为 0（分母为零没有意义），但可以是一个非常小的数字（ Pytorch 通常设置 $eps&#x3D;1e^{-6}$），此时函数表现行为就是最大值的概率为100%</li>
+</ul>
+<h3 id="3-函数选择的基本策略"><a href="#3-函数选择的基本策略" class="headerlink" title="3. 函数选择的基本策略"></a>3. 函数选择的基本策略</h3><ol>
+<li>首先尝试 ReLU，速度快，但是要注意训练的状态</li>
+<li>如果 ReLU 效果欠佳，尝试 Leaky ReLU 或者 Maxout 等变种</li>
+<li>最好不用 Sigmoid 函数，可以尝试 tanh 函数，但通常其效果比不上 ReLU 和 maxout</li>
+<li>Sigmoid tanh 在 RMM（LSTM  注意力机制等）结构中有所应用，作为门控或者概率值</li>
+<li>在浅层神经网络中，如不超过四层，可选择使用多种激励函数，没有太大的影响</li>
+<li>如果是使用 ReLU，那么一定要小心设置 learning rate，而且要注意，不要让网络出现很多“dead”神经元，如果这个问题不好解决，那么可以试试 Leaky ReLU ,PReLU , 或者 Maxout。</li>
+</ol>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0">激活函数 - Wiki</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/wj-1314/p/12015278.html">深度学习笔记——常用的激活（激励）函数</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1558355">从ReLU到GELU，一文概览神经网络的激活函数</a></li>
+<li><a target="_blank" rel="noopener" href="https://nyakku.moe/posts/2019/07/01/maxout.html">Maxout 的简单理解与实现</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/" rel="prev" title="大模型学习笔记之一：基本知识">
+                  <i class="fa fa-angle-left"></i> 大模型学习笔记之一：基本知识
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/" rel="next" title="大模型学习笔记之三：损失函数">
+                  大模型学习笔记之三：损失函数 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

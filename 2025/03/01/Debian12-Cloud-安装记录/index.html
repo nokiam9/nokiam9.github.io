@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="Debian 的每个版本都有绰号，都来自于电影《玩具总动员》中的角色名。   * Debian 8：Jessie，一个乐于助人，热心而温柔的女牛仔  * Debian 9：Stretch，紫色的大章鱼  * Debian 10：Buster：臭小子，安迪一家养的小狗  * Debian 11：Bullseye，红心，风驰电掣的玩具马  * Debian 12：bookworm，书虫，手持强力手电筒">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Debian12 Cloud 安装记录">
+<meta property="og:url" content="https://nokiam9.github.io/2025/03/01/Debian12-Cloud-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="Debian 的每个版本都有绰号，都来自于电影《玩具总动员》中的角色名。   * Debian 8：Jessie，一个乐于助人，热心而温柔的女牛仔  * Debian 9：Stretch，紫色的大章鱼  * Debian 10：Buster：臭小子，安迪一家养的小狗  * Debian 11：Bullseye，红心，风驰电掣的玩具马  * Debian 12：bookworm，书虫，手持强力手电筒">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-03-01T15:57:04.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.779Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2025/03/01/Debian12-Cloud-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2025/03/01/Debian12-Cloud-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/","path":"2025/03/01/Debian12-Cloud-安装记录/","title":"Debian12 Cloud 安装记录"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Debian12 Cloud 安装记录 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E8%AE%BE%E7%BD%AE%E5%9B%BD%E5%86%85%E9%95%9C%E5%83%8F%E6%BA%90"><span class="nav-text">一、设置国内镜像源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%AE%89%E8%A3%85%E5%B8%B8%E7%94%A8%E8%BD%AF%E4%BB%B6"><span class="nav-text">二、安装常用软件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%97%AD-ipv6"><span class="nav-text">关闭 ipv6</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%AE%89%E8%A3%85-Docker"><span class="nav-text">三、安装 Docker</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%8E%B7%E5%BE%97-docker-%E6%BA%90%E5%85%AC%E9%92%A5"><span class="nav-text">1. 获得 docker 源公钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%89%E8%A3%85-docker-%E6%BA%90"><span class="nav-text">2. 安装 docker 源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AE%89%E8%A3%85docker"><span class="nav-text">3. 安装docker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4a-%E8%AE%BE%E7%BD%AE%E6%9C%AC%E5%9C%B0%E9%95%9C%E5%83%8F%E6%BA%90"><span class="nav-text">4a. 设置本地镜像源</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4b-%E4%B8%BA-docker-%E6%8F%90%E4%BE%9B-ssl-proxy"><span class="nav-text">4b. 为 docker 提供 ssl proxy</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-text">四、简要分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85-generic-%E7%89%88%E6%9C%AC%E5%90%AF%E5%8A%A8%E6%97%B6%EF%BC%8C%E6%8F%90%E7%A4%BA%E9%94%99%E8%AF%AF%E6%8F%90%E7%A4%BA%E6%97%A0%E6%B3%95%E5%8A%A0%E8%BD%BDregulatory-db"><span class="nav-text">1. 安装 generic 版本启动时，提示错误提示无法加载regulatory.db</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%97%B6-linux-%E5%86%85%E6%A0%B8%E5%B4%A9%E6%BA%83"><span class="nav-text">2. 系统启动时 linux 内核崩溃</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%9C%89-PCI-%E5%91%8A%E8%AD%A6"><span class="nav-text">3. 系统启动有 PCI 告警</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-text">官方文档</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2025/03/01/Debian12-Cloud-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Debian12 Cloud 安装记录 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Debian12 Cloud 安装记录
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-03-01 23:57:04" itemprop="dateCreated datePublished" datetime="2025-03-01T23:57:04+08:00">2025-03-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>5 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Debian 的每个版本都有绰号，都来自于电影《玩具总动员》中的角色名。</p>
+<ul>
+<li>Debian 8：Jessie，一个乐于助人，热心而温柔的女牛仔</li>
+<li>Debian 9：Stretch，紫色的大章鱼</li>
+<li>Debian 10：Buster：臭小子，安迪一家养的小狗</li>
+<li>Debian 11：Bullseye，红心，风驰电掣的玩具马</li>
+<li>Debian 12：bookworm，书虫，手持强力手电筒，帮助你阅读</li>
+</ul>
+<p>随着云计算的普及，在传统 ISO 镜像安装方式的基础上，Debian 还提供了 Cloud 版本的官方支持，请参见<a target="_blank" rel="noopener" href="https://cloud.debian.org/images/cloud/">https://cloud.debian.org/images/cloud/</a> ，子版本有以下类型：</p>
+<ul>
+<li>azure: 基于 Microsoft Azure 环境优化</li>
+<li>ec2: 基于 Amazon EC2 环境优化</li>
+<li>generic: 基于 OpenStack 环境，预装 cloud-init，也可以用于裸金属服务器</li>
+<li>genericcloud: 与 generic 相似，系统更精简，但不支持额外硬件设备</li>
+<li>nocloud: 单机版本，不提供 cloud-init，默认无密码的 root 用户</li>
+</ul>
+<p>本次安装使用最新的 Debian 12 generic-cloud 版本，64位x86 架构，2025年2月10日发布。<br>镜像下载地址：<a target="_blank" rel="noopener" href="https://cloud.debian.org/images/cloud/bookworm/20250210-2019/debian-12-genericcloud-amd64-20250210-2019.qcow2">debian-12-genericcloud-amd64-20250210-2019.qcow2</a><br>预装软件信息：<a target="_blank" rel="noopener" href="https://cloud.debian.org/images/cloud/bookworm/20250210-2019/debian-12-genericcloud-amd64-20250210-2019.json">debian-12-genericcloud-amd64-20250210-2019.json</a></p>
+<p>在 PVE console 导入 qcow2 镜像，初始磁盘空间为 3GB。</p>
+<blockquote>
+<p>为了替换无比丑陋的 NoVNC，VM 硬件添加 serial port 以支持 xterm.js</p>
+</blockquote>
+<p>配置 cloud-init，<strong>默认用户 debian 和初始密码</strong>，取消软件自动升级参数等。。。</p>
+<h2 id="一、设置国内镜像源"><a href="#一、设置国内镜像源" class="headerlink" title="一、设置国内镜像源"></a>一、设置国内镜像源</h2><p>系统源配置文件不再是传统的 <code>/etc/apt/sources.list</code>，而是改为 Deb 822 格式。<br>配置文件：<code>/etc/apt/sources.list.d/debian.sources</code></p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">Types:</span> <span class="string">deb</span> <span class="string">deb-src</span></span><br><span class="line"><span class="attr">URIs:</span> <span class="string">https://mirrors.aliyun.com/debian</span>             <span class="comment"># mirror+file:///etc/apt/mirrors/debian.list </span></span><br><span class="line"><span class="attr">Suites:</span> <span class="string">bookworm</span> <span class="string">bookworm-updates</span> <span class="string">bookworm-backports</span></span><br><span class="line"><span class="attr">Components:</span> <span class="string">main</span></span><br><span class="line"><span class="attr">Signed-By:</span> <span class="string">/usr/share/keyrings/debian-archive-keyring.gpg</span></span><br><span class="line"></span><br><span class="line"><span class="attr">Types:</span> <span class="string">deb</span> <span class="string">deb-src</span></span><br><span class="line"><span class="attr">URIs:</span> <span class="string">https://mirrors.aliyun.com/debian-security</span>    <span class="comment"># mirror+file:///etc/apt/mirrors/debian-security.list</span></span><br><span class="line"><span class="attr">Suites:</span> <span class="string">bookworm-security</span></span><br><span class="line"><span class="attr">Components:</span> <span class="string">main</span></span><br><span class="line"><span class="attr">Signed-By:</span> <span class="string">/usr/share/keyrings/debian-archive-keyring.gpg</span></span><br></pre></td></tr></table></figure>
+
+<p>如果需要使用非自由固件，则在编辑配置时需要添加 <code>non-free-firmware</code>。</p>
+<h2 id="二、安装常用软件"><a href="#二、安装常用软件" class="headerlink" title="二、安装常用软件"></a>二、安装常用软件</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">apt update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置时区</span></span><br><span class="line">timedatectl set-timezone Asia/Shanghai</span><br><span class="line"><span class="built_in">date</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装常用软件</span></span><br><span class="line">apt install -y git wget net-tools bind9-dnsutils</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装 qemu 相关软件</span></span><br><span class="line">apt install -y qemu-guest-agent acpid </span><br><span class="line">systemctl start qemu-guest-agent</span><br></pre></td></tr></table></figure>
+
+<h3 id="关闭-ipv6"><a href="#关闭-ipv6" class="headerlink" title="关闭 ipv6"></a>关闭 ipv6</h3><p>编辑 <code>/etc/sysctl.conf</code>，追加以下配置信息：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">net.ipv6.conf.all.disable_ipv6 = 1</span><br><span class="line">net.ipv6.conf.default.disable_ipv6 = 1</span><br><span class="line">net.ipv6.conf.lo.disable_ipv6 = 1</span><br><span class="line">net.ipv6.conf.eth0.disable_ipv6 = 1</span><br></pre></td></tr></table></figure>
+
+<p>执行下面命令，以使配置生效：<br><code>sysctl -p</code></p>
+<p>现在基础安装完成！大约需要 400M 磁盘空间。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Filesystem      Size  Used Avail Use% Mounted on</span><br><span class="line">udev            462M     0  462M   0% /dev</span><br><span class="line">tmpfs            97M  568K   96M   1% /run</span><br><span class="line">/dev/sda1       2.8G  1.2G  1.5G  46% /</span><br><span class="line">tmpfs           481M     0  481M   0% /dev/shm</span><br><span class="line">tmpfs           5.0M     0  5.0M   0% /run/lock</span><br><span class="line">/dev/sda15      124M   12M  113M  10% /boot/efi</span><br><span class="line">tmpfs            97M     0   97M   0% /run/user/1000</span><br><span class="line">tmpfs            97M     0   97M   0% /run/user/0</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、安装-Docker"><a href="#三、安装-Docker" class="headerlink" title="三、安装 Docker"></a>三、安装 Docker</h2><h3 id="1-获得-docker-源公钥"><a href="#1-获得-docker-源公钥" class="headerlink" title="1. 获得 docker 源公钥"></a>1. 获得 docker 源公钥</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">apt-get update</span><br><span class="line">apt-get install ca-certificates curl</span><br><span class="line">install -m 0755 -d /etc/apt/keyrings</span><br><span class="line">curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc</span><br><span class="line"><span class="built_in">chmod</span> a+r /etc/apt/keyrings/docker.asc</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/apt/keyrings/docker.asc</span><br></pre></td></tr></table></figure>
+
+<p>如果 curl 成功的话，此时应该显示 docker 源公钥的信息.</p>
+<h3 id="2-安装-docker-源"><a href="#2-安装-docker-源" class="headerlink" title="2. 安装 docker 源"></a>2. 安装 docker 源</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> \</span><br><span class="line">  <span class="string">&quot;deb [arch=<span class="subst">$(dpkg --print-architecture)</span> signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian \</span></span><br><span class="line"><span class="string">  <span class="subst">$(. /etc/os-release &amp;&amp; echo <span class="string">&quot;<span class="variable">$VERSION_CODENAME</span>&quot;</span>)</span> stable&quot;</span> | \</span><br><span class="line">  <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/apt/sources.list.d/docker.list &gt; /dev/null</span><br><span class="line">apt-get update</span><br></pre></td></tr></table></figure>
+
+<p>此时应该可以看到 docker 源信息。</p>
+<blockquote>
+<p>docker 源的配置文件仍然是传统的单行模式，不是新的 Deb 822 格式。</p>
+</blockquote>
+<h3 id="3-安装docker"><a href="#3-安装docker" class="headerlink" title="3. 安装docker"></a>3. 安装docker</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Install the Docker packages</span></span><br><span class="line">apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</span><br><span class="line">apt-get install docker-compose</span><br><span class="line"></span><br><span class="line">docker info</span><br></pre></td></tr></table></figure>
+
+<p>此时应该看到 docker 启动的配置信息，当前版本是 28.0</p>
+<h3 id="4a-设置本地镜像源"><a href="#4a-设置本地镜像源" class="headerlink" title="4a. 设置本地镜像源"></a>4a. 设置本地镜像源</h3><p>编辑 <code>/etc/docker/daemon.json</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;insecure-registries&quot;:</span> [<span class="string">&quot;harbor.lan&quot;</span>],</span><br><span class="line">    <span class="attr">&quot;registry-mirrors&quot;:</span> [<span class="string">&quot;https://harbor.lan&quot;</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>重启 Docker 让配置生效</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br><span class="line"></span><br><span class="line">docker run harbor.lan/proxy/library/hello-world</span><br></pre></td></tr></table></figure>
+
+<p>如果拉取镜像成功的话，此时应该看到 hello-world 的运行信息</p>
+<h3 id="4b-为-docker-提供-ssl-proxy"><a href="#4b-为-docker-提供-ssl-proxy" class="headerlink" title="4b. 为 docker 提供 ssl proxy"></a>4b. 为 docker 提供 ssl proxy</h3><p>新建 docker systemd 启动服务目录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> -p /etc/systemd/system/docker.service.d</span><br></pre></td></tr></table></figure>
+
+<p>编辑 proxy 配置文件<code>/etc/systemd/system/docker.service.d/http-proxy.conf</code></p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[<span class="string">Service</span>]</span><br><span class="line"><span class="string">Environment=&quot;HTTPS_PROXY=http://192.168.73.5:1082&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>重启 Docker 让配置生效</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line">systemctl restart docker</span><br><span class="line"></span><br><span class="line">docker run hello-world</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、简要分析"><a href="#四、简要分析" class="headerlink" title="四、简要分析"></a>四、简要分析</h2><h3 id="1-安装-generic-版本启动时，提示错误提示无法加载regulatory-db"><a href="#1-安装-generic-版本启动时，提示错误提示无法加载regulatory-db" class="headerlink" title="1. 安装 generic 版本启动时，提示错误提示无法加载regulatory.db"></a>1. 安装 generic 版本启动时，提示错误提示无法加载<code>regulatory.db</code></h3><p>原因分析：linux 内核加载 <code>cfg80211</code> 模块以支持无线网卡，但漏安装了系统软件。<br>解决办法： <code>apt install iw</code></p>
+<p>不过，现在是更加精简的 generic-cloud 版本，没有无线网卡模块也就没有这个错误了。</p>
+<h3 id="2-系统启动时-linux-内核崩溃"><a href="#2-系统启动时-linux-内核崩溃" class="headerlink" title="2. 系统启动时 linux 内核崩溃"></a>2. 系统启动时 linux 内核崩溃</h3><p>这个版本还曾经出现系统崩溃，提示 kernel panic - not syncing: killing interrupt handler!<br>出现场景是 HD 扩容后重启时，但是再次重启就能正常处理！！！</p>
+<h3 id="3-系统启动有-PCI-告警"><a href="#3-系统启动有-PCI-告警" class="headerlink" title="3. 系统启动有 PCI 告警"></a>3. 系统启动有 PCI 告警</h3><p>提示信息：acpi PNP0A03:00: fail to add MMCONFIG information, can’t access extended PCI configuration space under this bridge.<br>目前系统运行无影响，原因待查。</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://tech.he-sb.top/posts/creating-vm-template-for-pve-based-on-cloud-init/">PVE 制作基于 Cloud Init 的虚拟机模板</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.voidking.com/dev-ubuntu-change-software-repo/">Ubuntu&#x2F;Debian更换软件安装源</a></li>
+<li><a target="_blank" rel="noopener" href="https://neucrack.com/p/286">docker 设置代理，以及国内加速镜像设置</a></li>
+<li><a target="_blank" rel="noopener" href="https://forum.proxmox.com/threads/cfg80211-failed-to-load-regulatory-db.137298/">cfg80211：无法加载regulatory.db</a></li>
+<li><a target="_blank" rel="noopener" href="https://cn.linux-terminal.com/?p=4467#google_vignette">为 Proxmox 虚拟机启用 SPICE 支持</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2423782">不同场景下 Docker 的网络代理方法</a></li>
+</ul>
+<h2 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a>官方文档</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://manpages.debian.org/stretch/apt/sources.list.5.en.html">SOURCES.LIST - Debian</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.docker.com/engine/install/debian/">Debian 系统如何安装 Docker - Docker 官方</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/02/16/Alpine-Linux-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" rel="prev" title="Alpine Linux 安装记录">
+                  <i class="fa fa-angle-left"></i> Alpine Linux 安装记录
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/03/02/Gitea-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" rel="next" title="Gitea 安装记录">
+                  Gitea 安装记录 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="先给个总体演进图。    一、基本概念 移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证">
+<meta property="og:type" content="article">
+<meta property="og:title" content="移动通信网的鉴权认证技术">
+<meta property="og:url" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="先给个总体演进图。    一、基本概念 移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/vs.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/GSM-arch.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/GSM.jpeg">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/comp128-struct.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/3G-1.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/network.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/usim.png">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/eap.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/6g.jpg">
+<meta property="article:published_time" content="2023-04-16T09:05:41.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.244Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/vs.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/","path":"2023/04/16/移动通信网的鉴权认证技术/","title":"移动通信网的鉴权认证技术"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>移动通信网的鉴权认证技术 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-text">一、基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81GSM-%E7%9A%84-%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">二、GSM 的 鉴权流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%89%E5%85%83%E7%BB%84%E8%AE%A4%E8%AF%81%E5%90%91%E9%87%8F%EF%BC%88RAND%E3%80%81XRES%E3%80%81Kc%EF%BC%89"><span class="nav-text">1. 三元组认证向量（RAND、XRES、Kc）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-COMP128-1-%E7%AE%97%E6%B3%95%E5%92%8C%E5%85%8B%E9%9A%86%E5%8D%A1%E9%97%AE%E9%A2%98"><span class="nav-text">2. COMP128-1 算法和克隆卡问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8D%95%E5%90%91%E9%89%B4%E6%9D%83%E5%92%8C%E4%BC%AA%E5%9F%BA%E7%AB%99%E9%97%AE%E9%A2%98"><span class="nav-text">3. 单向鉴权和伪基站问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81CDMA-%E7%9A%84%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">三、CDMA 的鉴权流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%813G%EF%BC%88UTMS%EF%BC%89%E7%9A%84%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">四、3G（UTMS）的鉴权流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BA%94%E5%85%83%E7%BB%84%E8%AE%A4%E8%AF%81%E5%90%91%E9%87%8F%EF%BC%88RAND-XRES-CK-IK-AUTN%EF%BC%89"><span class="nav-text">1. 五元组认证向量（RAND, XRES, CK, IK, AUTN）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-MILENAGE-%E7%AE%97%E6%B3%95%E7%B0%87"><span class="nav-text">2. MILENAGE 算法簇</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%814G-%E7%9A%84%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">五、4G 的鉴权流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%815G-%E7%9A%84%E9%89%B4%E6%9D%83%E6%B5%81%E7%A8%8B"><span class="nav-text">六、5G 的鉴权流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81-%E6%80%BB%E7%BB%93"><span class="nav-text">七、 总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9ACOMP128-%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0"><span class="nav-text">附录一：COMP128 算法实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="移动通信网的鉴权认证技术 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          移动通信网的鉴权认证技术
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-04-16 17:05:41" itemprop="dateCreated datePublished" datetime="2023-04-16T17:05:41+08:00">2023-04-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>先给个总体演进图。</p>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/vs.png" alt="VS"></p>
+<h2 id="一、基本概念"><a href="#一、基本概念" class="headerlink" title="一、基本概念"></a>一、基本概念</h2><p>移动通信网通常由三个部分组成，即核心网 (CN，core network)、无线接入网(RAN，radio access network)和用户设备(UE，user equipment)。 其中移动用户设备属于用户个人，由用户直接控制，接入网与核心网属于运营商，由运营商直接控制。如果用户希望使用运营商服务和网络资源，需要用户和运营商共同协商，这就涉及鉴权认证，判明和确认通信双方真实身份。</p>
+<p>移动通信网的鉴权认证过程采用的是古老的“Challenge - Response”（挑战 - 响应）的机制，即认证方向被认证方发送一个“挑战”（一般是一个随机数），被认证方基于双方共有密钥，以及挑战中所包含的信息计算一个“响应”。显然，只有拥有密钥的参与方才能正确计算出这个响应。</p>
+<blockquote>
+<p>一般情况下，认证可基于被认证方拥有一个独特的、不可复制的构件；或者双方都知道的一个秘密；又或者被认证方的某种唯一特征。<br>除第一代模拟通信外，从2G开始的移动通信网络的认证综合了前两种方式：一个共同的秘密（密钥）和被认证方一个独特的构件（SIM&#x2F;USIM卡）。</p>
+</blockquote>
+<p>移动通信网的鉴权认证是移动网络与终端用户之间相互识别的过程，核心是解决两个问题：</p>
+<ol>
+<li><p><strong>你是谁?</strong><br> 基于国际移动用户识别号 IMSI（International Mobile Subscriber Identification）。<br> IMSI 定义为 15 位的十进制数，其结构为：MCC + MNC + MSIN。<br> 全球运营商统一编码，是唯一且固定的身份标识，SIM&#x2F;USIM 卡中存储了该数据。</p>
+</li>
+<li><p><strong>你是不是你?</strong><br> 基于永久性的根密钥 Ki，长度是 16 个字节，也就是 128 比特位。<br> 认证就是基于 Ki 共同秘密，配合一些其他的参数，基于一定的认证算法和协议过程而展开。<br> Ki 仅在运营商的 AUC（Authentication Center）和用户的 SIM&#x2F;USIM 卡中存储，基于根密钥的计算都在内部进行，绝对不允许对外暴露。<br> 后续需要使用的其它密钥（例如通信密钥 Kc），都是基于 Ki 通过不可逆的算法衍生出来的。</p>
+</li>
+</ol>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/GSM-arch.jpg" alt="GSM"></p>
+<p>AUC 和 SIM&#x2F;USIM 是移动通信网安全的基石之一。AUC在运营商网络之内，在物理上、管理机制上、安全防护手段上都有严格的要求，卡则散落在用户手里，是不可控的环境。通常卡都采用抵制篡改（tamper-resist）的硬件设计，即要求不能从卡内读出卡内的信息，从而防止信息的泄露。</p>
+<h2 id="二、GSM-的-鉴权流程"><a href="#二、GSM-的-鉴权流程" class="headerlink" title="二、GSM 的 鉴权流程"></a>二、GSM 的 鉴权流程</h2><h3 id="1-三元组认证向量（RAND、XRES、Kc）"><a href="#1-三元组认证向量（RAND、XRES、Kc）" class="headerlink" title="1. 三元组认证向量（RAND、XRES、Kc）"></a>1. 三元组认证向量（RAND、XRES、Kc）</h3><p>GSM 系统的鉴权流程在 GSM09.02 MAP 中定义，核心是三元组认证向量（RAND、XRES、Kc）。</p>
+<ul>
+<li>RAND：移动网络AUC提供的随机数</li>
+<li>XRES&#x2F;SRES：AUC侧计算的期望响应值（eXperted RESponse），卡侧计算的鉴权响应值（Signed RESponse），检测 XRES &#x3D;&#x3D; SRES</li>
+<li>Kc：通信使用的一次性会话密钥，用于 A5 算法的加密输入</li>
+</ul>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/GSM.jpeg" alt="GSM"></p>
+<p>在这个6步的过程里面同时实现了认证和会话密钥协商，称为AKA（Authentication and Key Agreement，会话与密钥协商）协议。</p>
+<h3 id="2-COMP128-1-算法和克隆卡问题"><a href="#2-COMP128-1-算法和克隆卡问题" class="headerlink" title="2. COMP128-1 算法和克隆卡问题"></a>2. COMP128-1 算法和克隆卡问题</h3><p>AKA 协议定义了 A3 和 A8 算法，其中 A3 算法以 Ki 和 RAND 作为输入参数，负责生成 SRES（32bits），A8 算法同样以 Ki 和 RAND 作为输入参数，负责生成后续用于通信加密的会话密钥 Kc（64bits）。由于这两个算法的输入参数完全相同，绝大多数运营商都直接采用 COMP128-1算法。</p>
+<p>COMP128-1 算法于1987年设计，1991年投入使用，其设计较为简单，其实现仅需20行代码，在最初设计与使用时，所有参与方签订协议对方法进行保密。</p>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/comp128-struct.jpg" alt="COMP128"></p>
+<blockquote>
+<p>R 为轮函数，P 为置换，F 为置换与抽取。由于R、P、F均为高强度非线性运算，整体呈现哈希的雪崩特性。</p>
+</blockquote>
+<p>1998年，COMP128-1 算法被泄露，随即在1999年即被破解。究其原因，由于COMP128-1 算法中输入的信息（128bits）大于输出的信息（96bits,即SRES+Kc），因此必然会出现不同的输入产生相同的输出，也就是“碰撞”，而且由于字节压缩得很厉害，很容易找到“碰撞”。</p>
+<p>2000年，出现了对应的SIM卡破解软件，攻击者输入大量连续的数据就能轻易获得碰撞，以此来推算出密钥Ki。一旦计算出Ki，SIM卡就可被复制。因此，对SIM卡的破解并不是从智能卡中读取了机密信息，而是利用算法的脆弱性实施了计算破解。</p>
+<h3 id="3-单向鉴权和伪基站问题"><a href="#3-单向鉴权和伪基站问题" class="headerlink" title="3. 单向鉴权和伪基站问题"></a>3. 单向鉴权和伪基站问题</h3><p>GSM 认证机制最大的缺陷是“单向认证”，就是说只有网络认证用户的真实性，而用户不认证网络。</p>
+<p>2009年，OpenBTS软件发布，攻击者购置主机和笔记本电脑，再加上一个射频装置，通过<strong>中间人攻击</strong>方式构造“伪基站”，其基本流程是：</p>
+<ul>
+<li>伪基站设备发射高强度的非法信号，用户终端自动连接到信号强度最高的基站并发送注册请求，这便暴露了自己的 IMSI</li>
+<li>伪基站设备侦听设备，冒充目标终端向运营商真实网络侧发起注册请求</li>
+<li>伪基站设备把网络下发的 RAND 转给受害者移动终端，并把终端返回的 SRES 转给网络，这就完成了鉴权认证流程</li>
+</ul>
+<p>理论上说，如果伪基站接入了运营商网络，可以解析信令数据并通过 A5 算法解密话音数据，从而实现主叫通话的窃听功能（此时无法做被叫，因为终端未在公众通信网络注册），但由于这些功能实现较为复杂，实际上典型的犯罪应用是短信欺诈，即伪装成任意号码（例如95588、95533、10086等银行或通信运营商的客服号码）下发垃圾短信，或者伪造短信验证码。</p>
+<h2 id="三、CDMA-的鉴权流程"><a href="#三、CDMA-的鉴权流程" class="headerlink" title="三、CDMA 的鉴权流程"></a>三、CDMA 的鉴权流程</h2><p>CDMA 系统的鉴权流程在 IS-41 MAP 中被详细定义。<br>CDMA 系统中用于移动台鉴权的密码分为两级，第一级为移动台的密钥 A_Key，第二级为共享加密数据(SSD，shared secret data)。</p>
+<ul>
+<li>密钥 A_Key是高级密码，长度为 64 bit，由运营商分配，它和 IMSI 一同被写入移动终端永久性存储器中。<br>  同时，运营商核心网存储该用户的 IMSI 和对应的 A_Key。该密钥是永久性的，不在网络和空中信道上传播。</li>
+<li>SSD 是低级密码，长为 128 bit(分为 SSD_A 为 64 bit 和 SSD_B 为 64 bit)，它由A_Key 运算产生，存在于移动台、鉴权中心和拜访者位置寄存器。<br>  在鉴权过程中，核心网使用RAND 和 SSD_A 计算出期望的响应 AUTHx，倘若移动终端计算的 AUTHx(用 RAND 和 SSD_A计算所得)和核心网计算的 AUTHx 相同，则鉴权成功，攻击者因没有正确有效的 SSD 值，无法计算得到核心网所期望的 AUTHx 值导致鉴权 失败]。</li>
+</ul>
+<h2 id="四、3G（UTMS）的鉴权流程"><a href="#四、3G（UTMS）的鉴权流程" class="headerlink" title="四、3G（UTMS）的鉴权流程"></a>四、3G（UTMS）的鉴权流程</h2><p>2000年，ITU 制定 3G 空口传输标准制式的时候，针对2G智能卡及网络的破解攻击已经存在。因此，在 3G 网络认证标准制定时，采用了两项关键技术：一是建立“用户+网络”的<strong>双向认证机制</strong>，二是将智能卡升级为USIM卡（Universal Subscriber Identity Module，全球用户识别卡），并选用更加安全的认证算法。</p>
+<blockquote>
+<p>CMCC是个特例！因为政府只给了 TD-SCDMA 牌照，巨大的市场压力下提出“不换号、不换卡”的业务策略，直到 4G 时代才将 SIM 卡换成 USIM 卡。</p>
+</blockquote>
+<h3 id="1-五元组认证向量（RAND-XRES-CK-IK-AUTN）"><a href="#1-五元组认证向量（RAND-XRES-CK-IK-AUTN）" class="headerlink" title="1. 五元组认证向量（RAND, XRES, CK, IK, AUTN）"></a>1. 五元组认证向量（RAND, XRES, CK, IK, AUTN）</h3><p>3G 标准的鉴权流程与 GSM 基本相同，关键是用户认证向量发生变化。</p>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/3G-1.jpg" alt="1"></p>
+<ol>
+<li>在第三步中，网络侧发送<code>(RAND，AUTN)</code>。不仅有用于挑战的随机数 RAND，还增加了 AUTN（Authentication Token）参数，使得 USIM 可以鉴别网络的真伪，防止接入伪基站<ul>
+<li>GSM 中的长期密钥Ki，3G 标准改名为 K，GSM AKA 也改为 UMTS AKA</li>
+<li>AUTN 通过终端与归属网络之间的共享密钥K，以及一些其他输入参数计算得出</li>
+</ul>
+</li>
+<li>在第四步中，如果 AUTN 验证通过，USIM 基于长期密钥 K 计算形成<code>(XRES，CK，IK)</code>。<ul>
+<li>XRES：挑战的响应值，第五步将此上报给网络侧，实现网络对用户的认证，</li>
+<li>CK：机密性保护密钥，与GSM的 Kc 对应</li>
+<li>IK：完整性保护密钥，3G 标准新增</li>
+</ul>
+</li>
+</ol>
+<h3 id="2-MILENAGE-算法簇"><a href="#2-MILENAGE-算法簇" class="headerlink" title="2. MILENAGE 算法簇"></a>2. MILENAGE 算法簇</h3><p>3GPP 使用代号为$f1$ - $f5$ 的5个算法来产生认证向量，但允许运营商自行决定采用何种具体算法，因为这些算法应用于 USIM 和 AUC 之间，不涉及到运营商之间的互操作。<br>3GPP 推荐使用基于 AES 的 MILENAGE 算法簇，加密分组和密钥长度都是128比特，</p>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/network.png" alt="N"></p>
+<ul>
+<li>SQN：48bit序列号，通过序列号确保每个认证向量不会被重放；</li>
+<li>AK：48bit用于隐藏序列号的临时密钥，基于K和RAND生成；</li>
+<li>MAC：64bit，用于构成AUTN的主要变量，由于包含了K的计算，可用于作为网络认证；</li>
+<li>AMF：Authentication Management Field，共16bit，未标准化。在4G的时候，最高位被用于区分AMF所在的认证向量是4G的认证向量还是3G的认证向量，因为4G和3G可能会共用HSS&#x2F;AuC。</li>
+</ul>
+<p><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/usim.png" alt="N"></p>
+<ul>
+<li>$f1(SQN, AFM, K) \Rightarrow MAC$</li>
+<li>$f2(K，RAND) \Rightarrow XRES$</li>
+<li>$f3(K, RAND) \Rightarrow CK$</li>
+<li>$f4(K, RAND) \Rightarrow IK$</li>
+<li>$f5(K, RAND) \Rightarrow AK$</li>
+<li>$AUTN &#x3D; SQN \oplus AK || MAC || AMF$</li>
+</ul>
+<p>理论上来说，在3G认证过程实施之后就不会再出现伪基站了，但也有一些例外情况，如为了方便2G存量用户的使用，3G网络在推荐使用USIM卡接入的基础上、同时也允许SIM卡直接认证后接入；因此，对于使用SIM卡接入网络的用户还是容易受到2G伪基站的攻击。<br>另外，3G认证协议标准化不久，就发现易受到重定向攻击 (redirection attack) ，2017年的黑帽大会上有针对4G网络攻击案例被披露.</p>
+<h2 id="五、4G-的鉴权流程"><a href="#五、4G-的鉴权流程" class="headerlink" title="五、4G 的鉴权流程"></a>五、4G 的鉴权流程</h2><p>4G 基本沿用了3G认证的协议流程和认证算法，只在卡的兼容性和后续密钥的衍生方面有少量的修改，称为 EPS-AKA，主要改进包括：</p>
+<ol>
+<li>LTE 仅允许 USIM 接入，不允许 SIM 接入，意味着双向认证和信令的完整性保护是必选的。<br>但在少量特殊的情况下，例如终端被叫因为不支持 VoLTE 而被切换到 2G，或者 4G 过载向 2G 进行切换时，可能仍然存在伪基站的问题，2017 年的黑帽大会上就曝出了一个“呼叫劫持”漏洞。</li>
+<li>为了支持 WLAN 的接入方式，提供了扩展的 EAP-AKA 和 EAP-AKA’ 认证。<br>EAP-AKA 是将 AKA 认证过程使用 EAP 协议进行封装，其核心参数仍然是AKA认证向量，参与认证的网元有UE、AC、AAA Server、HSS。<br><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/eap.jpg" alt="1"></li>
+</ol>
+<h2 id="六、5G-的鉴权流程"><a href="#六、5G-的鉴权流程" class="headerlink" title="六、5G 的鉴权流程"></a>六、5G 的鉴权流程</h2><p>5G 继承了 AKA 作为网络接入的认证方式，重点考虑认证体系的扩展，主要改进包括：</p>
+<ol>
+<li>增强了归属网络对认证的控制。<br>5G-AKA 对认证向量进行一次单向变换，拜访地运营商仅能获取漫游用户经过变换之后的认证向量，并将漫游用户反馈的认证结果发送给归属地。<br><img src="/2023/04/16/%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E7%9A%84%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E6%8A%80%E6%9C%AF/6g.jpg" alt="6"></li>
+<li>统一的认证框架更好支持 WLAN 等非蜂窝通信网络。<br> 一方面，5G 无线网接入可以采用 EAP-AKA’ 认证方式，EAP-AKA’认证方式提升到了和 5G-AKA 并列的位置；另一方面，EAP-AKA’ 认证和 5G-AKA 认证在网络架构上使用了同样的网元，意味着5G的认证网元在标准上必须同时支持这两种认证方式。</li>
+</ol>
+<h2 id="七、-总结"><a href="#七、-总结" class="headerlink" title="七、 总结"></a>七、 总结</h2><p>通信网络的认证协议，基于“挑战-响应”的AKA协议是一条贯穿始终的线索。但从2G到5G，AKA也一直在演进以适应形势的变化。所谓形势，主要是新的威胁的出现，或一些预期的安全风险逐渐变成现实。毕竟，算力在不断强大，而网络越来越复杂。AKA的演进，在AKA的前缀上表现出来：在2G的时候，AKA就叫AKA；在3G的时候，应对伪基站风险，增加了双向认证，解决了用户对网络的信任问题，3G的AKA被称为UMTS AKA；在4G的时候，Authentication部分没有变化，但Key Agreement发生了变化，针对无线网络、核心网络，衍生出不同的密钥，解决了无线网和核心网的互信问题，4G的AKA被称为EPS AKA；5G的AKA增强了归属网络的控制，解决归属网络和拜访网络的互信问题，并被称为5G AKA。</p>
+<p>相对来说，算法变动倒是相对小些，在2G被证明不安全的COMP128在3G之后就被可以以AES为核心的MILENAGE替代，目前这个部分仍然被认为是安全的。</p>
+<p>在AKA这条主脉络之外，5G作为一个“野心勃勃”的网络，在认证上也体现出与以往几代不同之处，如EAP。在4G的时候可以作为WLAN接入的认证方式，但并非特别重要。在5G中，EAP还承载了为外部数据网络提供认证服务、为垂直行业应用提供认证服务的职能，充分体现了5G希望超越“人与手机”的单一形态，从设计上就契合物联网、工业互联网等形态的需求。</p>
+<hr>
+<h2 id="附录一：COMP128-算法实现"><a href="#附录一：COMP128-算法实现" class="headerlink" title="附录一：COMP128 算法实现"></a>附录一：COMP128 算法实现</h2><p>COMP128 - Details</p>
+<ol>
+<li>x[16-31] &#x3D; RAND</li>
+<li>for 0&lt;i&lt;8<br>  x[0-15] &#x3D; Ki<br>  call Compression (5 rounds)<br>  call FormBitsFromBytes<br>  if i&lt;7 call Permute</li>
+</ol>
+<p>Compress 16-byte result to 12-bytes, store in simoutput[] and return.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">comp128v1</span><span class="params">(<span class="type">const</span> <span class="type">uint8_t</span> *ki, <span class="type">const</span> <span class="type">uint8_t</span> *rand, <span class="type">uint8_t</span> *sres, <span class="type">uint8_t</span> *kc)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="type">uint8_t</span> x[<span class="number">32</span>], bits[<span class="number">128</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* x[16-31] = RAND */</span></span><br><span class="line">    <span class="built_in">memcpy</span>(&amp;x[<span class="number">16</span>], rand, <span class="number">16</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Round 1-7 */</span></span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;<span class="number">7</span>; i++) &#123;</span><br><span class="line">        <span class="comment">/* x[0-15] = Ki */</span></span><br><span class="line">        <span class="built_in">memcpy</span>(x, ki, <span class="number">16</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Compression */</span></span><br><span class="line">        _comp128_compression(x);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* FormBitFromBytes */</span></span><br><span class="line">        _comp128_bitsfrombytes(x, bits);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Permutation */</span></span><br><span class="line">        _comp128_permutation(x, bits);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Round 8 (final) */</span></span><br><span class="line">    <span class="comment">/* x[0-15] = Ki */</span></span><br><span class="line">    <span class="built_in">memcpy</span>(x, ki, <span class="number">16</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Compression */</span></span><br><span class="line">    _comp128_compression(x);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Output stage */</span></span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;<span class="number">8</span>; i+=<span class="number">2</span>)</span><br><span class="line">        sres[i&gt;&gt;<span class="number">1</span>] = x[i]&lt;&lt;<span class="number">4</span> | x[i+<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;<span class="number">12</span>; i+=<span class="number">2</span>)</span><br><span class="line">        kc[i&gt;&gt;<span class="number">1</span>] = (x[i + <span class="number">18</span>] &lt;&lt; <span class="number">6</span>) |</span><br><span class="line">                   (x[i + <span class="number">19</span>] &lt;&lt; <span class="number">2</span>) |</span><br><span class="line">                   (x[i + <span class="number">20</span>] &gt;&gt; <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line">    kc[<span class="number">6</span>] = (x[<span class="number">30</span>]&lt;&lt;<span class="number">6</span>) | (x[<span class="number">31</span>]&lt;&lt;<span class="number">2</span>);</span><br><span class="line">    kc[<span class="number">7</span>] = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> _comp128_compression(<span class="type">uint8_t</span> *x)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> n;</span><br><span class="line">    <span class="keyword">for</span> (n=<span class="number">0</span>; n&lt;<span class="number">5</span>; n++)</span><br><span class="line">        _comp128_compression_round(x, n, _comp128_table[n]);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> _comp128_bitsfrombytes(<span class="type">uint8_t</span> *x, <span class="type">uint8_t</span> *bits)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="built_in">memset</span>(bits, <span class="number">0x00</span>, <span class="number">128</span>);</span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;<span class="number">128</span>; i++)</span><br><span class="line">        <span class="keyword">if</span> (x[i&gt;&gt;<span class="number">2</span>] &amp; (<span class="number">1</span>&lt;&lt;(<span class="number">3</span>-(i&amp;<span class="number">3</span>))))</span><br><span class="line">            bits[i] = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> _comp128_permutation(<span class="type">uint8_t</span> *x, <span class="type">uint8_t</span> *bits)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="built_in">memset</span>(&amp;x[<span class="number">16</span>], <span class="number">0x00</span>, <span class="number">16</span>);</span><br><span class="line">    <span class="keyword">for</span> (i=<span class="number">0</span>; i&lt;<span class="number">128</span>; i++)</span><br><span class="line">        x[(i&gt;&gt;<span class="number">3</span>)+<span class="number">16</span>] |= bits[(i*<span class="number">17</span>) &amp; <span class="number">127</span>] &lt;&lt; (<span class="number">7</span>-(i&amp;<span class="number">7</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.secrss.com/articles/36564">移动通信网中的密码算法演进 (三)：认证篇</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.secrss.com/articles/36562">移动通信网中的密码算法演进 (一)：机密性保护</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.secrss.com/articles/36563">移动通信网中的密码算法演进 (二)：完整性保护</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/osmocom/libosmocore/blob/master/src/gsm/comp128.c">COMP128算法源码 - Github</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/528866024">GSM SIM卡算法COMP128生日攻击原理 - 知乎</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_31985307/article/details/115265685">3GPP USIM milenage 算法代码</a></li>
+</ul>
+<h3 id="文档下载"><a href="#文档下载" class="headerlink" title="文档下载"></a>文档下载</h3><ul>
+<li><a href="5G%E7%BD%91%E7%BB%9C%E7%9A%84%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB---%E9%BD%90%E9%B9%8F%E6%99%8F.pdf">5G网络的认证体系—齐鹏晏</a></li>
+<li><a href="%E7%A7%BB%E5%8A%A8%E9%80%9A%E4%BF%A1%E7%BD%91%E9%89%B4%E6%9D%83%E8%AE%A4%E8%AF%81%E7%BB%BC%E8%BF%B0_%E8%83%A1%E9%91%AB%E9%91%AB.pdf">移动通信网鉴权认证综述 - 胡鑫鑫</a></li>
+<li><a href="chinois.pdf">COMP128算法分析中关键问题研究 - 汪涛</a></li>
+<li><a href="comp128-a-birthday-surprise-rev.pdf">COMP128: A Birthday Surprise - Stuart Wray</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/01/02/%E5%85%B3%E4%BA%8E%E5%AF%86%E7%A0%81%E5%AD%A6%E7%9A%84%E5%87%A0%E4%B8%AA%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5/" rel="prev" title="关于密码学的几个基本概念">
+                  <i class="fa fa-angle-left"></i> 关于密码学的几个基本概念
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/08/17/BCLinux-oe21-10-%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" rel="next" title="BCLinux oe21.10 安装记录">
+                  BCLinux oe21.10 安装记录 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

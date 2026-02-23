@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="概述 Cloud-init的原理，就是给VM增加一个CDROM设备，配合操作系统安装的cloud-init软件包，以便在启动时自动读取网络设置参数。  这个Cloud-init设备的路径一般为&#x2F;dev&#x2F;sr0, 大小约为4M，其中包含三个文件，这就是元数据了。  1 2 3 4 5   [root@localhost ~]# tree &#x2F;mnt &#x2F;mnt ├── meta-data ├── net">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Proxmox VE虚拟机的Cloud-init安装记录">
+<meta property="og:url" content="https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="概述 Cloud-init的原理，就是给VM增加一个CDROM设备，配合操作系统安装的cloud-init软件包，以便在启动时自动读取网络设置参数。  这个Cloud-init设备的路径一般为&#x2F;dev&#x2F;sr0, 大小约为4M，其中包含三个文件，这就是元数据了。  1 2 3 4 5   [root@localhost ~]# tree &#x2F;mnt &#x2F;mnt ├── meta-data ├── net">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/hardware.png">
+<meta property="og:image" content="https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/cloud-init.png">
+<meta property="og:image" content="https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/disk-partition.png">
+<meta property="og:image" content="https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/clone.png">
+<meta property="article:published_time" content="2020-08-02T02:31:45.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.884Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/hardware.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/","path":"2020/08/02/Proxmox-VE虚拟机的Cloud-init安装记录/","title":"Proxmox VE虚拟机的Cloud-init安装记录"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Proxmox VE虚拟机的Cloud-init安装记录 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4"><span class="nav-text">安装步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85Centos-7-8%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F"><span class="nav-text">1. 安装Centos 7.8操作系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%85%B3%E9%97%ADselinux%E5%92%8Cfirewalld%E4%BB%A5%E5%8F%8A%E7%A2%8D%E4%BA%8B%E7%9A%84NetworkManager"><span class="nav-text">2. 关闭selinux和firewalld以及碍事的NetworkManager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AE%89%E8%A3%85%E5%BF%85%E8%A6%81%E7%9A%84%E8%99%9A%E6%8B%9F%E5%8C%96%E8%BD%AF%E4%BB%B6%E5%92%8C%E5%B7%A5%E5%85%B7%E8%BD%AF%E4%BB%B6"><span class="nav-text">3. 安装必要的虚拟化软件和工具软件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E8%AE%BE%E7%BD%AEcloud-init"><span class="nav-text">4. 设置cloud-init</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%85%B3%E6%9C%BA%EF%BC%8C%E5%B9%B6%E5%9C%A8PVE%E6%8E%A7%E5%88%B6%E5%8F%B0%E4%B8%8A%E5%B0%86%E5%85%B6%E8%BD%AC%E6%8D%A2%E4%B8%BA%E6%A8%A1%E7%89%88templete%EF%BC%8C%E6%AF%8D%E9%B8%A1%E5%B0%B1%E6%AD%A4%E5%AE%8C%E6%88%90"><span class="nav-text">5. 虚拟机关机，并在PVE控制台上将其转换为模版templete，母鸡就此完成</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Cloud-init%E6%A8%A1%E7%89%88%E5%85%8B%E9%9A%86%E6%96%B0%E7%9A%84%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-text">使用Cloud-init模版克隆新的虚拟机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Proxmox VE虚拟机的Cloud-init安装记录 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Proxmox VE虚拟机的Cloud-init安装记录
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-08-02 10:31:45" itemprop="dateCreated datePublished" datetime="2020-08-02T10:31:45+08:00">2020-08-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>4 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>Cloud-init的原理，就是给VM增加一个CDROM设备，配合操作系统安装的cloud-init软件包，以便在启动时自动读取网络设置参数。</p>
+<img src="/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/hardware.png" class="">
+
+<p>这个Cloud-init设备的路径一般为<code>/dev/sr0</code>, 大小约为4M，其中包含三个文件，这就是元数据了。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# tree /mnt</span><br><span class="line">/mnt</span><br><span class="line">├── meta-data</span><br><span class="line">├── network-config</span><br><span class="line">└── user-data</span><br></pre></td></tr></table></figure>
+
+<p>下图就标注了Cloud-init所有可以配置的参数信息。</p>
+<img src="/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/cloud-init.png" class="">
+
+<h2 id="安装步骤"><a href="#安装步骤" class="headerlink" title="安装步骤"></a>安装步骤</h2><h3 id="1-安装Centos-7-8操作系统"><a href="#1-安装Centos-7-8操作系统" class="headerlink" title="1. 安装Centos 7.8操作系统"></a>1. 安装Centos 7.8操作系统</h3><p>首先创建一个虚拟机并加载Centos系统安装ISO文件，基本配置建议为：1vCPU，1024M内存，4G硬盘，网卡无所谓。注意暂时先不启动！！<br>然后，在PVE控制台上为该虚拟机增加一个Cloud init设备，稍等初始化完成，开始启动VM进行操作系统安装。<br>在安装Centos时，注意手工建立磁盘分区，只留一个启动分区，EFI-Boot和Swap分区都不要了，参见下图。</p>
+<img src="/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/disk-partition.png" class="">
+
+<p>系统安装完成后，检查是否可以正常启动。</p>
+<blockquote>
+<p>新系统装完后，必须将网卡配置文件内的onboot打开，清除uuid！！！<br>创建Ubuntu的VM，Cloud-Init设备必须使用<code>virtio-scsi-pci</code>类型的驱动程序</p>
+</blockquote>
+<h3 id="2-关闭selinux和firewalld以及碍事的NetworkManager"><a href="#2-关闭selinux和firewalld以及碍事的NetworkManager" class="headerlink" title="2. 关闭selinux和firewalld以及碍事的NetworkManager"></a>2. 关闭selinux和firewalld以及碍事的NetworkManager</h3><blockquote>
+<p>selinux的真实配置文件路径是<code>/etc/selinux/config</code>,而<code>/etc/sysconfig/selinux</code>实际是它的软链接文件。<br>检查selinux状态可以使用<code>sestatus</code>命令。</p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 关闭Selinux</span></span><br><span class="line">sed -i <span class="string">&#x27;s/SELINUX=enforcing/SELINUX=disabled/g&#x27;</span> /etc/selinux/config</span><br><span class="line">setenforce 0</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭Firewalld</span></span><br><span class="line">systemctl <span class="built_in">disable</span> --now firewalld</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭NetworManager</span></span><br><span class="line">systemctl <span class="built_in">disable</span> --now NetworkManager</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置Linunx内核，允许IP转发</span></span><br><span class="line">modprobe br_netfilter</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;net.ipv4.ip_forward = 1&quot;</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;net.bridge.bridge-nf-call-ip6tables = 1&quot;</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;net.bridge.bridge-nf-call-iptables = 1&quot;</span> &gt;&gt; /etc/sysctl.conf</span><br><span class="line">sysctl -p</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置启动时自动加载br_netfilter模块</span></span><br><span class="line"><span class="built_in">cat</span> &gt; /etc/rc.sysinit &lt;&lt;- <span class="string">EOF</span></span><br><span class="line"><span class="string">#!/bin/bash</span></span><br><span class="line"><span class="string">for file in /etc/sysconfig/modules/*.modules ; do</span></span><br><span class="line"><span class="string">[ -x $file ] &amp;&amp; $file</span></span><br><span class="line"><span class="string">done</span></span><br><span class="line"><span class="string">EOF</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;modprobe br_netfilter&#x27;</span> &gt; /etc/sysconfig/modules/br_netfilter.modules</span><br><span class="line"><span class="built_in">chmod</span> 755 /etc/sysconfig/modules/br_netfilter.modules</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>netfilter是Linux内核的包过滤框架，它提供了一系列的钩子（Hook）供其他模块控制包的流动，配置Linux内核防火墙的命令行工具iptables就是基于netfilter机制的。<br>注意：服务器重启后<code>sysctl</code>命令报错，原因大概是br_netfilter模块未被自动加载，考虑通过配置<code>/etc/rc.sysinit</code>来解决！</p>
+</blockquote>
+<h3 id="3-安装必要的虚拟化软件和工具软件"><a href="#3-安装必要的虚拟化软件和工具软件" class="headerlink" title="3. 安装必要的虚拟化软件和工具软件"></a>3. 安装必要的虚拟化软件和工具软件</h3><p>为了让虚拟化层可以重启和关闭虚拟机，必须安装acpid服务；<br>为了使根分区正确调整大小安装cloud-utils-growpart，cloud-init支持下发前设置信息写入。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">yum install -y acpid cloud-init cloud-utils-growpart</span><br><span class="line">yum install -y git wget yum-utils net-tools bind-utils</span><br><span class="line">systemctl <span class="built_in">enable</span> acpid</span><br><span class="line"></span><br><span class="line"><span class="comment"># 禁用zeroconf(零配置网络服务规范)，该协议目的是在系统无法连接DHCP服务的时候，尝试获取类似169.254.0.0的保留IP</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;NOZEROCONF=yes&quot;</span> &gt;&gt; /etc/sysconfig/network</span><br><span class="line"></span><br><span class="line"><span class="comment"># 防止ssh连接使用dns导致访问过慢</span></span><br><span class="line">sed -ri <span class="string">&#x27;/UseDNS/&#123;s@#@@;s@\s+.+@ no@&#125;&#x27;</span> /etc/ssh/sshd_config</span><br><span class="line">systemctl restart sshd</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-设置cloud-init"><a href="#4-设置cloud-init" class="headerlink" title="4. 设置cloud-init"></a>4. 设置cloud-init</h3><p>设置允许root登录，允许输入口令，禁止第一次启动后yum更新软件</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sed -ri <span class="string">&#x27;/disable_root/&#123;s#\S$#0#&#125;&#x27;</span> /etc/cloud/cloud.cfg</span><br><span class="line">sed -ri <span class="string">&#x27;/ssh_pwauth/&#123;s#\S$#1#&#125;&#x27;</span> /etc/cloud/cloud.cfg</span><br><span class="line">sed -ri <span class="string">&#x27;/package-update/s@^@#@&#x27;</span> /etc/cloud/cloud.cfg</span><br></pre></td></tr></table></figure>
+
+<p>默认cloud-init会创建一个系统类型的centos用户，手工编辑配置文件取消掉。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#  default_user:</span><br><span class="line">#    name: centos</span><br><span class="line">#    lock_passwd: true</span><br><span class="line">#    gecos: Cloud User</span><br><span class="line">#    groups: [wheel, adm, systemd-journal]</span><br><span class="line">#    sudo: [&quot;ALL=(ALL) NOPASSWD:ALL&quot;]</span><br><span class="line">#    shell: /bin/bash</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-虚拟机关机，并在PVE控制台上将其转换为模版templete，母鸡就此完成"><a href="#5-虚拟机关机，并在PVE控制台上将其转换为模版templete，母鸡就此完成" class="headerlink" title="5. 虚拟机关机，并在PVE控制台上将其转换为模版templete，母鸡就此完成"></a>5. 虚拟机关机，并在PVE控制台上将其转换为模版templete，母鸡就此完成</h3><h2 id="使用Cloud-init模版克隆新的虚拟机"><a href="#使用Cloud-init模版克隆新的虚拟机" class="headerlink" title="使用Cloud-init模版克隆新的虚拟机"></a>使用Cloud-init模版克隆新的虚拟机</h2><p>在PVE控制台选中模版，右键选择<code>Clone</code>，在弹出对话框中设置就可以了。<br>注意，一般选择<code>Full Clone</code>，相比<code>Link Clone</code>更安全，但是要多花一点硬盘空间就是了。</p>
+<img src="/2020/08/02/Proxmox-VE%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%9A%84Cloud-init%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/clone.png" class="">
+
+<p>创建小鸡需要花一点时间写盘，此时VM被锁定，等锁定解除后就可以设置Cloud-init的信息，并启动小鸡了。</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><p><a target="_blank" rel="noopener" href="https://kinkinlu.com/2019/04/18/proxmox%E4%B8%ADcloud-init%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95/">proxmox中cloud-init使用方法</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://xixiliguo.github.io/post/cloud-init-1/">Cloud-init的基本原理</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://qizhanming.com/blog/2018/08/08/how-to-install-nfs-on-centos-7">CentOS 7 下 yum 安装和配置 NFS</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://pve.proxmox.com/wiki/Cloud-Init_Support">PVE CLoud-Init的官方文档</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://feisky.gitbooks.io/sdn/content/linux/iptables.html">Linux网络配置的白皮书</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://www.icode9.com/content-4-718596.html">一种自动加载br_netfilter模块的方法</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/07/21/%E5%9F%BA%E4%BA%8E%E6%A0%91%E8%8E%93%E6%B4%BE4B%E6%9E%84%E5%BB%BA%E6%94%AF%E6%8C%81%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E7%9A%84%E8%BE%85%E5%8A%A9%E8%B7%AF%E7%94%B1%E5%99%A8/" rel="prev" title="基于树莓派4B构建支持透明代理的辅助路由器">
+                  <i class="fa fa-angle-left"></i> 基于树莓派4B构建支持透明代理的辅助路由器
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/08/16/Kubetnetes%E9%9B%86%E7%BE%A4%E9%85%8D%E7%BD%AENFS-StorageClass%E7%9A%84%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95/" rel="next" title="Kubetnetes集群配置NFS StorageClass的操作记录">
+                  Kubetnetes集群配置NFS StorageClass的操作记录 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

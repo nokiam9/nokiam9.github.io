@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一般认为，神经网络的三个核心要素是：   1. 模型结构（Architecture）：这是指神经网络的拓扑结构，包括层数、每层的神经元数量、神经元之间的连接方式等。例如，一个简单的多层感知机（MLP）包含输入层、一个或多个隐藏层以及输出层。  2. 学习策略（Learning Strategy）：涉及如何选择训练神经网络的方法，包括损失函数的选择、优化算法等。损失函数定义了模型预测与实际结果之间的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大模型学习笔记之一：基本知识">
+<meta property="og:url" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一般认为，神经网络的三个核心要素是：   1. 模型结构（Architecture）：这是指神经网络的拓扑结构，包括层数、每层的神经元数量、神经元之间的连接方式等。例如，一个简单的多层感知机（MLP）包含输入层、一个或多个隐藏层以及输出层。  2. 学习策略（Learning Strategy）：涉及如何选择训练神经网络的方法，包括损失函数的选择、优化算法等。损失函数定义了模型预测与实际结果之间的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/tensor.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/Scalar-product.gif">
+<meta property="og:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/Cross-product.jpeg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/Cross-product.gif">
+<meta property="og:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/product-vs.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/cp1.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/cp2.png">
+<meta property="article:published_time" content="2024-07-30T05:25:25.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.156Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/tensor.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/","path":"2024/07/30/大模型学习笔记之一：基本知识/","title":"大模型学习笔记之一：基本知识"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>大模型学习笔记之一：基本知识 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%BC%A0%E9%87%8F%EF%BC%88tensor%EF%BC%89"><span class="nav-text">一、张量（tensor）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E6%80%A7%E8%B4%A8"><span class="nav-text">数学性质</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%A0%E9%87%8F%E7%9A%84%E8%8C%83%E6%95%B0-norm"><span class="nav-text">张量的范数 - norm</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%A0%E9%87%8F%E7%9A%84%E5%86%85%E7%A7%AF-inner-product"><span class="nav-text">张量的内积 - inner product</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E8%BF%90%E7%AE%97"><span class="nav-text">数学运算</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%BF%90%E7%AE%97"><span class="nav-text">基本运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0%E8%BF%90%E7%AE%97"><span class="nav-text">线性代数运算</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9E%E6%8E%A5%E3%80%81%E5%88%86%E7%89%87%E3%80%81%E5%8F%98%E5%BD%A2"><span class="nav-text">连接、分片、变形</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%86%85%E7%A7%AF%E5%92%8C%E5%A4%96%E7%A7%AF%EF%BC%88inner-product-external-product%EF%BC%89"><span class="nav-text">二、内积和外积（inner product &amp; external product）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E7%A7%AF%EF%BC%88inner-product%EF%BC%89"><span class="nav-text">内积（inner product）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E7%A7%AF%EF%BC%88external-product%EF%BC%89"><span class="nav-text">外积（external product）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-text">应用示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%8D%B7%E7%A7%AF%EF%BC%88convolution%EF%BC%89"><span class="nav-text">三、卷积（convolution）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E5%AD%A6%E5%AE%9A%E4%B9%89"><span class="nav-text">数学定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B"><span class="nav-text">应用实例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-text">附录：名词解释</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MOE%EF%BC%88Mixture-of-Experts%EF%BC%8C%E4%B8%93%E5%AE%B6%E6%B7%B7%E5%90%88%EF%BC%89%E6%A8%A1%E5%9E%8B"><span class="nav-text">MOE（Mixture of Experts，专家混合）模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%87%E6%8B%9F%E5%90%88-%E6%B3%9B%E5%8C%96"><span class="nav-text">过拟合 &amp; 泛化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A2%AF%E5%BA%A6%E6%B6%88%E5%A4%B1%E3%80%81%E6%A2%AF%E5%BA%A6%E7%88%86%E7%82%B8"><span class="nav-text">梯度消失、梯度爆炸</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dropout%E3%80%81masked"><span class="nav-text">dropout、masked</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B6%85%E5%8F%82%E6%95%B0"><span class="nav-text">超参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SVM%EF%BC%88Support-Vector-Machine%EF%BC%8C%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA%EF%BC%89"><span class="nav-text">SVM（Support Vector Machine，支持向量机）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Perceptron%EF%BC%88%E6%84%9F%E7%9F%A5%E6%9C%BA%EF%BC%89"><span class="nav-text">Perceptron（感知机）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kernel-Function%EF%BC%88%E6%A0%B8%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">Kernel Function（核函数）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E8%A7%A3%E8%AF%BB"><span class="nav-text">技术解读</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="大模型学习笔记之一：基本知识 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大模型学习笔记之一：基本知识
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-07-30 13:25:25" itemprop="dateCreated datePublished" datetime="2024-07-30T13:25:25+08:00">2024-07-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>一般认为，神经网络的三个核心要素是：</p>
+<ol>
+<li>模型结构（Architecture）：这是指神经网络的拓扑结构，包括层数、每层的神经元数量、神经元之间的连接方式等。例如，一个简单的多层感知机（MLP）包含输入层、一个或多个隐藏层以及输出层。</li>
+<li>学习策略（Learning Strategy）：涉及如何选择训练神经网络的方法，包括损失函数的选择、优化算法等。损失函数定义了模型预测与实际结果之间的差异如何计算，而优化算法则用于调整网络的权重以最小化损失函数。</li>
+<li>激活函数（Activation Function）：决定了神经网络如何处理和传递信息。它们通常用于在网络的每个神经元中引入非线性，使得网络能够学习和模拟复杂的函数映射。</li>
+</ol>
+<h2 id="一、张量（tensor）"><a href="#一、张量（tensor）" class="headerlink" title="一、张量（tensor）"></a>一、张量（tensor）</h2><p>张量（Tensor）是一个具有统一数据类型的多维数组，本质就是一组有序的数字。</p>
+<p>张量的阶数（order）也称为维数（dimensions）、模态（modes）或方式（ways）。一个 N 阶张量是 N 个向量空间元素的张量积，每个向量空间都有自己的坐标系。实际上，引入 tensor 的目的就是把向量、矩阵推向更高的维度.</p>
+<p>零阶张量是一个标量（scalar），一阶张量是一个矢量（vector，也称向量），二阶张量是一个矩阵（matrix），三阶或更高阶的张量叫做高阶张量（tensor）。</p>
+<p><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/tensor.png" alt="tensor"></p>
+<p>在 PyTorch 中，<code>torch.Tensor</code>是存储和变换数据的主要工具。如果你之前用过 NumPy，你会发现 Tensor 和 NumPy 的多维数组非常类似。然而，Tensor 提供 GPU 计算和自动求梯度等更多功能，这些使 Tensor 数据类型更加适合深度学习。</p>
+<h3 id="数学性质"><a href="#数学性质" class="headerlink" title="数学性质"></a>数学性质</h3><h4 id="张量的范数-norm"><a href="#张量的范数-norm" class="headerlink" title="张量的范数 - norm"></a>张量的范数 - norm</h4><p>张量的范数是其所有元素平方和的平方根，即:</p>
+<p>这类似于矩阵 的 F范数(Frobenius norm).</p>
+<h4 id="张量的内积-inner-product"><a href="#张量的内积-inner-product" class="headerlink" title="张量的内积 - inner product"></a>张量的内积 - inner product</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> tensorflow <span class="keyword">as</span> tf</span><br><span class="line"></span><br><span class="line"><span class="comment"># There can be an arbitrary number of axes (sometimes called &quot;dimensions&quot;)</span></span><br><span class="line">rank_3_tensor = tf.constant([</span><br><span class="line">  [[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>],</span><br><span class="line">   [<span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>]],</span><br><span class="line">  [[<span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>],</span><br><span class="line">   [<span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>, <span class="number">18</span>, <span class="number">19</span>]],</span><br><span class="line">  [[<span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>],</span><br><span class="line">   [<span class="number">25</span>, <span class="number">26</span>, <span class="number">27</span>, <span class="number">28</span>, <span class="number">29</span>]],])</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(rank_3_tensor)</span><br></pre></td></tr></table></figure>
+
+<p>输出结果如下：</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">tf.Tensor(</span><br><span class="line">[[[ 0  1  2  3  4]</span><br><span class="line">  [ 5  6  7  8  9]]</span><br><span class="line"></span><br><span class="line"> [[10 11 12 13 14]</span><br><span class="line">  [15 16 17 18 19]]</span><br><span class="line"></span><br><span class="line"> [[20 21 22 23 24]</span><br><span class="line">  [25 26 27 28 29]]], shape=(3, 2, 5), dtype=int32)</span><br></pre></td></tr></table></figure>
+
+<h3 id="数学运算"><a href="#数学运算" class="headerlink" title="数学运算"></a>数学运算</h3><h4 id="基本运算"><a href="#基本运算" class="headerlink" title="基本运算"></a>基本运算</h4><ul>
+<li>torch.add()：加法</li>
+<li>torch.mul()：乘法</li>
+<li>torch.div()：除法</li>
+<li>torch.abs()：tensor内每个元素取绝对值</li>
+<li>torch.round()：tensor内每个元素取整数部分</li>
+<li>torch.frac()：tensor内每个元素取小数部分</li>
+<li>torch.log()：tensor内每个元素取对数</li>
+<li>torch.pow()：tensor内每个元素取幂函数</li>
+<li>torch.exp()：tensor内每个元素取指数</li>
+<li>torch.sigmoid()：tensor内每个元素取sigmoid函数值</li>
+<li>torch.mean()：tensor所有元素的均值</li>
+<li>torch.norm()：tensor所有元素的范数值</li>
+<li>torch.prod()：tensor所有元素积</li>
+<li>torch.sum()：tensor所有元素和</li>
+<li>torch.max()：tensor所有元素最大值</li>
+<li>torch.min()：tensor所有元素最小值</li>
+</ul>
+<p>注意：例如add()这类函数一般都是会返回一直tensor值的，但是add_()这类加了下划线的方法是在tensor的原空间处理的，会覆盖之前的值</p>
+<p>同样也可以是用以下方式直接处理</p>
+<p>加 tensor1 + tensor2；<br>减 tensor1 - tensor2；<br>乘 tensor1 * tensor2；<br>除 tensor1 &#x2F; tensor2；<br>内积 tensor1 @ tensor2；<br>幂运算 tensor1 ** n</p>
+<h4 id="线性代数运算"><a href="#线性代数运算" class="headerlink" title="线性代数运算"></a>线性代数运算</h4><ul>
+<li>torch.dot()：向量内积运算</li>
+<li>torch.mv()：矩阵与向量的乘法</li>
+<li>torch.mm()：矩阵乘法，仅适用二维矩阵；高维的矩阵乘法，使用 torch.matnul()</li>
+<li>torch.eig()：方阵的特征值和特征向量</li>
+<li>torch.inverse()：方阵的逆</li>
+<li>torch.ger()：两个向量的张量积</li>
+</ul>
+<h4 id="连接、分片、变形"><a href="#连接、分片、变形" class="headerlink" title="连接、分片、变形"></a>连接、分片、变形</h4><ul>
+<li>torch.cat()：多个tensor的拼接</li>
+<li>torch.reshape()\torch.view()：返回一个张量，其数据和元素数量与输入相同，但具有指定的形状</li>
+<li>torch.transpose()\torch.t()：指定tensor的两个维度进行转置，torch.t()方法只适用与二维tensor</li>
+<li>torch.squeeze()&#x2F;unsqueeze()：tensor对于张量中大小为1的维度的压缩与扩张</li>
+<li>torch.permute()：返回维度排列后的原始张量输入的视图。</li>
+</ul>
+<h2 id="二、内积和外积（inner-product-external-product）"><a href="#二、内积和外积（inner-product-external-product）" class="headerlink" title="二、内积和外积（inner product &amp; external product）"></a>二、内积和外积（inner product &amp; external product）</h2><p>由于历史原因，数学学科和物理学科关于 inner product 和 outer product 两个词汇有着五花八门的翻译。<br>在数学学科，通常翻译成内积和外积，是两个名词的直译。点乘和叉乘是根据运算符号得来的俗称。<br>在物理学科，一般翻译成标积和矢积，表示运算的结果为标量和矢量，高中数学则称之为数量积和向量积。</p>
+<h3 id="内积（inner-product）"><a href="#内积（inner-product）" class="headerlink" title="内积（inner product）"></a>内积（inner product）</h3><p>也称为<strong>点积</strong>（dot product）或<strong>数量积</strong>（scalar product），运算结果是一个<strong>标量</strong>。<br>数学定义为：已知两个向量 $a$, $b$，它们的夹角为 $\theta$，那么：<br>$$ a \cdot b &#x3D; |a||b|\cos \theta$$</p>
+<p>内积的代数定义，对于任意维数的向量都适用：<br>$$\vec{a} \cdot \vec{b} &#x3D; \sum_{i&#x3D;1}^{n}a_ib_i&#x3D;a_1b_1+a_2b_2+…+a_nb_n$$</p>
+<p>内积的几何意义：内积 $a \cdot b$ 等于 $a$ 的模与 $b$ 在 $a$ 方向上的投影的乘积。<br><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/Scalar-product.gif" alt="inner"></p>
+<p>在欧几里得几何中，两个向量的笛卡尔坐标的点积被广泛使用。它通常被称为欧几里得空间的内积（或很少称为投影积），是内积的一种特殊情况，尽管它不是可以在欧几里得空间上定义的唯一内积。</p>
+<p>内积满足以下性质：</p>
+<ul>
+<li>满足交换律：$a \cdot b &#x3D; b \cdot a$</li>
+<li>满足加法的分配律：$a \cdot (b+c) &#x3D; a \cdot b + a \cdot c$</li>
+<li><strong>不满足结合律</strong>：$(a \cdot b) \cdot c$ 和 $a \cdot (b \cdot c)$ 均无意义，因为无法定义一个标量和一个向量的运算</li>
+<li>两个非零向量 $a$ 和 $b$是正交的，当且仅当 $a \cdot b &#x3D; 0$</li>
+</ul>
+<h3 id="外积（external-product）"><a href="#外积（external-product）" class="headerlink" title="外积（external product）"></a>外积（external product）</h3><p>是<strong>三维向量特有</strong>的运算，也称为<strong>叉积</strong>（cross product）或<strong>向量积</strong>（vector product），运算结果是一个<strong>向量</strong>。<br>数学定义为：已知两个向量 $a$, $b$，它们的夹角为 $ \theta $，那么：<br>$$<br>a \times b  :&#x3D; |a||b| \sin \theta，此时 a \times b 与 a，b 都垂直，且 a，b，a \times b 符合右手法则<br>$$</p>
+<p>内积的代数定义，使用拉普拉斯展开：<br>$$<br>\begin{align*}<br>\textbf{u} \times \textbf{v} &amp;&#x3D;<br>  \begin{vmatrix}<br>    \textbf{i} &amp; \textbf{j} &amp; \textbf{k} \\<br>    u_1 &amp; u_2 &amp; u_3 \\<br>    v_1 &amp; v_2 &amp; v_3 \\<br>  \end{vmatrix}<br>&#x3D;  \begin{vmatrix} u_2 &amp; u_3 \\ v_2 &amp; v_3 \end{vmatrix} \textbf{i} - \begin{vmatrix} u_1 &amp; u_3 \\ v_1 &amp; v_3 \end{vmatrix} \textbf{j} + \begin{vmatrix} u_1 &amp; u_2 \\ v_1 &amp; v_2 \end{vmatrix} \textbf{k} \\<br>&amp;&#x3D; (u_2v_3-u_3v_2) \textbf{i} - (u_1v_3-u_3v_1)\textbf{j} + (u_1v_2 - u_2v_1)\textbf{k}<br>\end{align*}<br>$$</p>
+<p>外积的几何意义是：$a \times b$ 的长度是以 $a,b$ 为邻边的平行四边形的面积，$a \times b$ 的方向是垂直于$a$，$b$ 的法向量。<br><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/Cross-product.jpeg" alt="outer"></p>
+<p>外积满足以下性质：</p>
+<ul>
+<li>$ \textbf{a} \times \textbf{a} &#x3D; \textbf{0} $</li>
+<li>$ \textbf{a} \times \textbf{0} &#x3D; \textbf{0} $</li>
+<li>对于两个非零向量 $ \textbf{a} \times \textbf{b} &#x3D; \textbf{0} $，当且仅当 $ \textbf{a} $ 平行于 $ \textbf{b} $</li>
+<li>满足<strong>反交换律</strong>：$ ( \textbf{a} + \textbf{b}) \times \textbf{c} &#x3D; \textbf{a} \times \textbf{c} + \textbf{a} \times \textbf{c} $，$ \textbf{a} \times (\textbf{b} + \textbf{c}) &#x3D; \textbf{a} \times \textbf{c} + \textbf{b} \times \textbf{c} $</li>
+</ul>
+<p><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/Cross-product.gif" alt="outer"></p>
+<h3 id="应用示例"><a href="#应用示例" class="headerlink" title="应用示例"></a>应用示例</h3><p><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/product-vs.png" alt="Vs"></p>
+<p>向量内积在机器学习和深度学习领域具有广泛的应用，例如自然语言处理中判断两个单词的相似度，计算机图形学中判断两个矢量的方向性等：</p>
+<ul>
+<li>如果点积 &gt; 0，则它们的方向基本一致（同义词），数值越大表明<strong>相关性</strong>越强</li>
+<li>如果点积 &#x3D; 0，则他们的方向正交，即在空间上互相垂直，也即是<strong>不相关</strong></li>
+<li>如果点积 &lt; 0，则它们的方向基本相反（反义词），数值越大表明<strong>负相关性</strong>越强</li>
+</ul>
+<p>向量外积在计算机图形学中有广泛的应用，包括计算两个向量之间的夹角、计算两个平面的正交关系、计算三角形和多边形的面积、计算几何形状的表面积和体积、计算光线与物体表面的交叉关系，以及计算物体的旋转和转动等。</p>
+<h2 id="三、卷积（convolution）"><a href="#三、卷积（convolution）" class="headerlink" title="三、卷积（convolution）"></a>三、卷积（convolution）</h2><p>在泛函分析中，卷积（convolution），也称叠积、褶积或旋积，是透过两个函数 $f$ 和 $g$ 生成第三个函数的一种数学算子，表征函数 $f$ 与经过翻转和平移的 $g$ 的乘积函数所围成的曲边梯形的面积。</p>
+<p>卷积其实就是为冲击函数诞生的。“冲击函数”是狄拉克为了解决一些瞬间作用的物理现象而提出的符号，例如在 t 时间内对一物体作用 F 的力，对它进行积分（求面积）就代表了力 F 在时间 t 上的累积效果，也就是<strong>冲量</strong>。<br>换句话说，如果将参加卷积的一个函数看作区间的指示函数，卷积也可以被看作是“移动平均”的推广，在“信号与系统”中得到广泛应用。</p>
+<h3 id="数学定义"><a href="#数学定义" class="headerlink" title="数学定义"></a>数学定义</h3><p>设：$ f(t) $ 和 $ g(t) $ 是在实数 $ R $ 上的两个可积函数，则定义：<br>$$<br>f(t) * g(t) :&#x3D; \int_{-\infty}^{\infty} f(\tau)g(t-\tau)d(\tau)<br>$$</p>
+<p>若为离散情况，就是级数形式了：<br>$$<br>f(n) * g(n) :&#x3D; \sum_{-\infty}^{\infty} f[k]g[n-k]<br>$$</p>
+<p>满足如下性质：</p>
+<ul>
+<li>交换律：$ f * g &#x3D; g * f $</li>
+<li>结合律：$ f * ( g * h) &#x3D; (f * g) * h $</li>
+<li>分配律：$ f * (g + h) &#x3D; f * g + f * h $</li>
+<li>微分有关：$ (f*g)’ &#x3D; f’ *g &#x3D; f *g’ $</li>
+</ul>
+<p><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/cp1.png" alt="cp1"><br><img src="/2024/07/30/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86/cp2.png" alt="cp2"></p>
+<h3 id="应用实例"><a href="#应用实例" class="headerlink" title="应用实例"></a>应用实例</h3><ul>
+<li>代数中，整数乘法和多项式乘法都是卷积。</li>
+<li>统计学中，加权的滑动平均是一种卷积。</li>
+<li>概率论中，两个统计独立变量X与Y的和的概率密度函数是X与Y的概率密度函数的卷积。</li>
+<li>声学中，回声可以用源声与一个反映各种反射效应的函数的卷积表示。</li>
+<li>物理学中，任何一个线性系统（符合叠加原理）都存在卷积。</li>
+</ul>
+<p>在工程技术中的应用更加重要：</p>
+<ul>
+<li>卷积神经网络，应用了多重级联的卷积核心，它被用于机器视觉和人工智能，尽管在多数情况下实际上用的是互相关而非卷积</li>
+<li>传统计算机图像处理中，用作图像模糊、锐化、边缘检测</li>
+<li>信号处理中，任一个线性系统的输出都可以通过将输入信号与系统函数（系统的冲激响应）做卷积获得</li>
+</ul>
+<hr>
+<h2 id="附录：名词解释"><a href="#附录：名词解释" class="headerlink" title="附录：名词解释"></a>附录：名词解释</h2><h3 id="MOE（Mixture-of-Experts，专家混合）模型"><a href="#MOE（Mixture-of-Experts，专家混合）模型" class="headerlink" title="MOE（Mixture of Experts，专家混合）模型"></a>MOE（Mixture of Experts，专家混合）模型</h3><p>MOE 是一种深度学习架构，它将多个专家（experts）网络组合在一起，并通过一个门控（gating）网络来决定每个输入样本应该由哪个专家网络来处理。每个专家网络通常是一个小型的神经网络，它们专注于学习数据的不同部分或特征。</p>
+<h3 id="过拟合-泛化"><a href="#过拟合-泛化" class="headerlink" title="过拟合 &amp; 泛化"></a>过拟合 &amp; 泛化</h3><h3 id="梯度消失、梯度爆炸"><a href="#梯度消失、梯度爆炸" class="headerlink" title="梯度消失、梯度爆炸"></a>梯度消失、梯度爆炸</h3><h3 id="dropout、masked"><a href="#dropout、masked" class="headerlink" title="dropout、masked"></a>dropout、masked</h3><h3 id="超参数"><a href="#超参数" class="headerlink" title="超参数"></a>超参数</h3><p>学习率（learning rate，例如 10%）也是超参数，可以动态吗？</p>
+<h3 id="SVM（Support-Vector-Machine，支持向量机）"><a href="#SVM（Support-Vector-Machine，支持向量机）" class="headerlink" title="SVM（Support Vector Machine，支持向量机）"></a>SVM（Support Vector Machine，支持向量机）</h3><p>SVM 是一种监督学习算法，主要用于分类和回归分析。它在解决小样本、非线性、高维数据的问题上表现出色，因此在机器学习领域得到了广泛的应用。</p>
+<h3 id="Perceptron（感知机）"><a href="#Perceptron（感知机）" class="headerlink" title="Perceptron（感知机）"></a>Perceptron（感知机）</h3><p>Perceptron 是最早的人工神经网络模型之一，由 Frank Rosenblatt 在 1957 年提出。它是一种简单的线性二分类模型，用于处理和分类数据。</p>
+<p>感知机由输入层、权重、偏置项和激活函数组成。输入层接收多个输入特征，每个特征都有一个对应的权重。输入特征和权重的点积加上偏置项构成了感知机的净输入。</p>
+<p>感知机可以看作是现代神经网络的一个特例，其中每个神经元只进行线性计算。现代神经网络通过堆叠多个感知机层（隐藏层）和引入非线性激活函数，能够解决更复杂的问题。</p>
+<h3 id="Kernel-Function（核函数）"><a href="#Kernel-Function（核函数）" class="headerlink" title="Kernel Function（核函数）"></a>Kernel Function（核函数）</h3><p>核函数（Kernel Function）是机器学习中的一种数学工具，主要目的是将数据映射到一个更高维的空间，以便在这个新空间中应用线性模型来解决原始空间中的非线性问题。</p>
+<p>常见的核函数有：线性核、多项式核、径向基函数核（Radial Basis Function Kernel，RBF，就是高斯核），Sigmod 核等。</p>
+<p>核函数是 SVM 处理非线性问题的关键技术，它允许 SVM 在高维特征空间中进行有效的线性分割，同时避免了直接在高维空间中进行计算的高成本。通过精心选择核函数和调整其参数，SVM 能够应用于各种复杂的数据集和问题。</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="http://staff.ustc.edu.cn/~zhuang/cgi/lectures/cg5.pdf">计算机图形学之几何变换</a></li>
+</ul>
+<h3 id="技术解读"><a href="#技术解读" class="headerlink" title="技术解读"></a>技术解读</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/AIMZZY/article/details/106528350">张量的概念及基本运算</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/young978/p/15678816.html">PyTorch - Tensor的相关概念及操作</a></li>
+<li><a target="_blank" rel="noopener" href="https://datawhalechina.github.io/thorough-pytorch/%E7%AC%AC%E4%BA%8C%E7%AB%A0/2.1%20%E5%BC%A0%E9%87%8F.html">深入浅出Pytorch - 张量</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/314b6cfce1c3">PyTorch学习笔记(二)：Tensor操作</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.51cto.com/u_11299290/3312822">PyTorch基础 - 张量Tensor线性运算（点乘、叉乘）</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/Dust_Evc/article/details/127502272">点积、叉积、内积、外积</a></li>
+<li><a target="_blank" rel="noopener" href="https://juejin.cn/post/7315122130287280138">向量外积在图像纠错中的应用</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/346918533">格拉斯曼: 扩展的学问与线之代数</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2179484">卷积公式</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zdaiot.com/MachineLearning/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/%E5%8D%B7%E7%A7%AF%E7%9A%84%E6%9C%AC%E8%B4%A8%E5%8F%8A%E7%89%A9%E7%90%86%E6%84%8F%E4%B9%89%EF%BC%88%E5%85%A8%E9%9D%A2%E7%90%86%E8%A7%A3%E5%8D%B7%E7%A7%AF%EF%BC%89/">卷积的本质及物理意义</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/196786958?utm_oi=1191492330161606656">什么是卷积？</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.sciencenet.cn/blog-548663-744441.html">卷积与自由能</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2127881">很详细的讲解什么以及为什么是卷积</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/07/16/%E4%BF%A1%E6%81%AF%E8%AE%BA%E5%9F%BA%E7%A1%80-%E4%BF%A1%E6%81%AF%E7%86%B5/" rel="prev" title="信息论基础 - 信息熵">
+                  <i class="fa fa-angle-left"></i> 信息论基础 - 信息熵
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/" rel="next" title="大模型学习笔记之二：激活函数">
+                  大模型学习笔记之二：激活函数 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

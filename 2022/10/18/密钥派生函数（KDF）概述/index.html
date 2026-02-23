@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、什么是 KDF KDF（Key Derivation Function）的最初用途是密钥派生，即从秘密密码或密码短语生成密钥。  1、密钥拉伸（Key Stretching） 在系统要求用户设置密码时，我们习惯用4-6位的数字组合，或者字母、数字和特殊符号的某种组合，这种密码强度肯定无法抵御暴力破解、字典攻击、彩虹表攻击等技术手段，密钥派生函数由此应运而生。  KDF 最基础的用途是将密码和其">
+<meta property="og:type" content="article">
+<meta property="og:title" content="密钥派生函数（KDF）概述">
+<meta property="og:url" content="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、什么是 KDF KDF（Key Derivation Function）的最初用途是密钥派生，即从秘密密码或密码短语生成密钥。  1、密钥拉伸（Key Stretching） 在系统要求用户设置密码时，我们习惯用4-6位的数字组合，或者字母、数字和特殊符号的某种组合，这种密码强度肯定无法抵御暴力破解、字典攻击、彩虹表攻击等技术手段，密钥派生函数由此应运而生。  KDF 最基础的用途是将密码和其">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/key-derivation-function.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/KDF.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/PBKDF2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/argon2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/dropbox.png">
+<meta property="article:published_time" content="2022-10-18T03:45:34.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.200Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/key-derivation-function.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/","path":"2022/10/18/密钥派生函数（KDF）概述/","title":"密钥派生函数（KDF）概述"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>密钥派生函数（KDF）概述 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E4%BB%80%E4%B9%88%E6%98%AF-KDF"><span class="nav-text">一、什么是 KDF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E5%AF%86%E9%92%A5%E6%8B%89%E4%BC%B8%EF%BC%88Key-Stretching%EF%BC%89"><span class="nav-text">1、密钥拉伸（Key Stretching）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%AF%86%E9%92%A5%E5%88%86%E7%A6%BB%EF%BC%88Key-Separation%EF%BC%89"><span class="nav-text">2、密钥分离（Key Separation）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E5%AF%86%E9%92%A5%E5%BC%BA%E5%8C%96%EF%BC%88Key-Strengthening%EF%BC%89"><span class="nav-text">3、密钥强化（Key Strengthening）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81KDF-Vs-Hash"><span class="nav-text">二、KDF Vs Hash</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%B8%BB%E6%B5%81%E7%AE%97%E6%B3%95"><span class="nav-text">三、主流算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-crypt"><span class="nav-text">1. crypt</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-PBKDF2%EF%BC%88Password-Based-Key-Derivation-Function%EF%BC%89"><span class="nav-text">2. PBKDF2（Password-Based Key Derivation Function）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Bcrypt%EF%BC%88Blowfish-crypt%EF%BC%89"><span class="nav-text">3. Bcrypt（Blowfish crypt）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Scrypt"><span class="nav-text">4. Scrypt</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Argon2%EF%BC%88%E6%B0%A9-18%E5%8F%B7%E5%85%83%E7%B4%A0%EF%BC%89"><span class="nav-text">5. Argon2（氩-18号元素）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%85%B8%E5%9E%8B%E6%A1%88%E4%BE%8B%EF%BC%9ADropbox-%E7%9A%84%E4%B8%89%E5%B1%82%E5%8A%A0%E5%AF%86%E7%AD%96%E7%95%A5"><span class="nav-text">四、典型案例：Dropbox 的三层加密策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="密钥派生函数（KDF）概述 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          密钥派生函数（KDF）概述
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-10-18 11:45:34" itemprop="dateCreated datePublished" datetime="2022-10-18T11:45:34+08:00">2022-10-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、什么是-KDF"><a href="#一、什么是-KDF" class="headerlink" title="一、什么是 KDF"></a>一、什么是 KDF</h2><p>KDF（Key Derivation Function）的最初用途是密钥派生，即从秘密密码或密码短语生成密钥。</p>
+<h3 id="1、密钥拉伸（Key-Stretching）"><a href="#1、密钥拉伸（Key-Stretching）" class="headerlink" title="1、密钥拉伸（Key Stretching）"></a>1、密钥拉伸（Key Stretching）</h3><p>在系统要求用户设置密码时，我们习惯用4-6位的数字组合，或者字母、数字和特殊符号的某种组合，这种密码强度肯定无法抵御暴力破解、字典攻击、彩虹表攻击等技术手段，密钥派生函数由此应运而生。</p>
+<p>KDF 最基础的用途是将密码和其他弱密钥材料来源转换为强密钥，文绉绉地说，就是采用具有低熵（安全性或随机性）的密钥，并将其扩展为更安全的更长密钥。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">derivedKey = <span class="title function_">keyDerivationFunction</span>(originalKey, salt, difficulty)</span><br></pre></td></tr></table></figure>
+
+<p>密钥派生函数接受一个密码（或其他弱密钥材料）作为输入，通过一个特殊函数运行它，然后输出安全密钥材料，关键点是增加了一个随机数作为加密因子，这个随机数被称为<strong>盐（Salt）</strong>，针对预计算攻击或rainbow表的随机数据，而<code>difficulty</code> 是难度系数的标记，例如迭代计算的次数。</p>
+<p><img src="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/key-derivation-function.png" alt="KDF"></p>
+<p>以Apple数据保护技术为例，就是将4-6位的用户锁屏密码<code>Passcode</code>转化为256位的密文<code>Passcode Key</code>。</p>
+<h3 id="2、密钥分离（Key-Separation）"><a href="#2、密钥分离（Key-Separation）" class="headerlink" title="2、密钥分离（Key Separation）"></a>2、密钥分离（Key Separation）</h3><p>KDF允许从单一的密钥材料（主密钥）生成多个不同用途的子密钥，方法是通过使用不同的 salt 随机数，这也被称为密钥多样化（Key Diversification）。</p>
+<p>这种方式可以防止获得派生密钥的攻击者学习关于输入秘密值或任何其他派生密钥的有用信息，子密钥可以控制业务的某个部分，但只有主密钥具有完全控制权。例如，Apple 的 Secure Enclave 就以 UID 为根，派生出用于保护 Class Key 的<code>Key 0x835</code>和 用于保护 EMF Key 的<code>Key 0x89B</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Key</span> <span class="number">0x835</span> = <span class="title function_">KDF</span>(<span class="variable constant_">UID</span>, <span class="title function_">bytes</span>(<span class="string">&quot;01010101010101010101010101010101&quot;</span>))</span><br><span class="line"><span class="title class_">Key</span> <span class="number">0x836</span> = <span class="title function_">KDF</span>(<span class="variable constant_">UID</span>, <span class="title function_">bytes</span>(<span class="string">&quot;00E5A0E6526FAE66C5C1C6D4F16D6180&quot;</span>))</span><br><span class="line"><span class="title class_">Key</span> <span class="number">0x838</span> = <span class="title function_">KDF</span>(<span class="variable constant_">UID</span>, <span class="title function_">bytes</span>(<span class="string">&quot;8C8318A27D7F030717D2B8FC5514F8E1&quot;</span>))</span><br><span class="line"><span class="title class_">Key</span> <span class="number">0x89B</span> = <span class="title function_">KDF</span>(<span class="variable constant_">UID</span>, <span class="title function_">bytes</span>(<span class="string">&quot;183e99676bb03c546fa468f51c0cbd49&quot;</span>))</span><br></pre></td></tr></table></figure>
+
+<h3 id="3、密钥强化（Key-Strengthening）"><a href="#3、密钥强化（Key-Strengthening）" class="headerlink" title="3、密钥强化（Key Strengthening）"></a>3、密钥强化（Key Strengthening）</h3><p>密钥强化同样使用随机盐扩展密钥，但随后<strong>删除该盐</strong>，这使得生成的密钥更强壮，但也意味着后续无法直接验证，<strong>即使合法用户也必须进行暴力破解验证</strong>。<br>但是，由于合法用户掌握了passcode等部分信息，暴力破解难度远远低于非法用户，但仍然需要消耗大量算力，因此实际应用中并不多见。</p>
+<h2 id="二、KDF-Vs-Hash"><a href="#二、KDF-Vs-Hash" class="headerlink" title="二、KDF Vs Hash"></a>二、KDF Vs Hash</h2><p>理论上，KDF 可以采用 3DES 或 AES 等对称算法，好处是可以通过密钥恢复原文，但密钥保管是个大麻烦，一旦泄露所有密码就全部暴露，因此在实际应用中主要采用哈希算法。</p>
+<p>一个理想的加密哈希函数，应当具有如下属性：</p>
+<ul>
+<li>快速：计算速度要足够快</li>
+<li>确定性：对同样的输入，应该总是产生同样的输出</li>
+<li>难以分析：对输入的任何微小改动，都应该使输出完全发生变化</li>
+<li>不可逆：从其哈希值逆向演算出输入值应该是不可行的。这意味着暴力破解是唯一方法</li>
+<li>无碰撞：找到具有相同哈希值的两条不同消息应该非常困难（或几乎不可能）</li>
+</ul>
+<p>这些特点非常适合密钥派生的业务场景，可以确保即使密码文件本身被泄露也能保护密码，同时又能方便地验证用户密码，代价是要同时保存每个用户的密文和随机数。</p>
+<p><img src="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/KDF.png" alt="KDF Vs Hash"><br>可以证明，所有基于哈希的 KDF 都是安全的哈希函数，但并非所有哈希函数都是基于哈希的 KDF。<br>尽管高吞吐量是通用哈希函数的理想属性，但在密码安全应用程序中则相反，防御暴力破解是主要关注点，因此 KDF 要求的是<strong>故意缓慢的哈希算法</strong>。</p>
+<p>KDF 计算速度的”慢”是相对而言的，对于普通用户而言，KDF 通常只需要在登录时被执行一次，因此慢这么一点点完全可以接受，而且用户也完全有足够的资源执行这个 KDF 函数。 但是如果一个黑客想要通过 Hash 碰撞来猜测出用户的密码，那它就必须执行海量的 KDF 计算，这个时候 KDF 的威力就显现出来了 —— 黑客将需要提供海量的 CPU&#x2F;GPU 计算资源、海量的内存资源才能完成目标，而这显然得不偿失，这样 KDF 就确保了用户密码的安全性。</p>
+<p>提升 Hash 算法的碰撞难度，主要从以下三个方向入手：</p>
+<ul>
+<li>时间复杂度：对应 CPU&#x2F;GPU 计算资源</li>
+<li>空间复杂度：对应 Memory 内存资源</li>
+<li>并行维度：使用无法分解的算法，锁定只允许单线程运算</li>
+</ul>
+<h2 id="三、主流算法"><a href="#三、主流算法" class="headerlink" title="三、主流算法"></a>三、主流算法</h2><h3 id="1-crypt"><a href="#1-crypt" class="headerlink" title="1. crypt"></a>1. crypt</h3><p>第一个基于密码的密钥派生函数被称为“ crypt ”（或在其手册页之后的“crypt(3)” ），由 Robert Morris 在 1978 年发明。<br>crypt 算法将加密一个常数（零），使用用户密码的前 8 个字符作为密钥，通过执行修改后的DES加密算法的 25 次迭代（其中使用从实时计算机时钟读取的 12 位数字来干扰计算），生成的 64 位数字被编码为 11 个可打印字符，然后存储在Unix密码文件中。<br>虽然这在当时是一个巨大的进步，但自 PDP-11 以来处理器速度的提高使得针对 crypt 的暴力攻击成为可能，并且 12 位盐的加密强度不足。此外，crypt 函数的设计还将用户密码限制为 8 个字符，这就限制了密钥空间。</p>
+<h3 id="2-PBKDF2（Password-Based-Key-Derivation-Function）"><a href="#2-PBKDF2（Password-Based-Key-Derivation-Function）" class="headerlink" title="2. PBKDF2（Password-Based Key Derivation Function）"></a>2. PBKDF2（Password-Based Key Derivation Function）</h3><p>基本原理是通过一个伪随机函数（例如 HMAC 函数），把明文和一个随机盐作为输入参数，然后重复进行运算，并最终产生密钥。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable constant_">DK</span> = <span class="title class_">PBKDF2</span>(<span class="variable constant_">PRF</span>, password, salt, c, dk_len)</span><br></pre></td></tr></table></figure>
+
+<p>其中，PRF 表示使用何种哈希算法（通常是 SHA1 或者 SHA256），password 是人类可读密码，salt 是随机生成的盐（一般不能少于8字节），c 是迭代次数（至少1000次），dk_len 是最终生成的 key 的长度，也就是加密算法的块大小。<br><img src="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/PBKDF2.png" alt="PBKDF2"></p>
+<p>该算法的优点是标准化，技术实现容易，而且导出密钥的长度本质上是没有限制的，但是其最大有效搜索空间受限于基本伪随机函数的结构。<br>典型应用是 Wi-Fi 的 WPA2 密码保护协议就是采用这个算法，即：<br><code>DK = PBKDF2(HMAC−SHA1, passphrase, ssid, 4096, 256)</code></p>
+<blockquote>
+<p>最近几年比特币挖矿的发展，让大家看到专有硬件、GPU 在对付大规模哈希时的威力。像 PBKDF2 这样简单使用 SHA256，看起来已经不太保险了</p>
+</blockquote>
+<h3 id="3-Bcrypt（Blowfish-crypt）"><a href="#3-Bcrypt（Blowfish-crypt）" class="headerlink" title="3. Bcrypt（Blowfish crypt）"></a>3. Bcrypt（Blowfish crypt）</h3><p>Blowfish（河豚）是一个对称密钥加密的分组密码算法，由布鲁斯·施奈尔于 1993 年设计用于替代陈旧的 DES 算法，强调完全开源，无须授权即可使用。<br>1999年，Niels Provos 和 David Mazières 改进了 Blowfish 算法，通过增加每次迭代的计算开销，达到提升破解难度的目标，并成为 OpenBSD 和许多Linux 发行版（如SUSE Linux）的默认密码哈希算法。</p>
+<p>Bcrypt的工作原理，就是对字符串<code>OrpheanBeholderScryDoubt</code>进行64次 blowfish 加密得到的结果，而用户密码就是该字符串的加密因子之一。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">Function bcrypt</span><br><span class="line">   Input:</span><br><span class="line">      cost:     Number (<span class="number">4.</span><span class="number">.31</span>)                      log2(Iterations). e.g. <span class="number">12</span> ==&gt; <span class="number">212</span> = <span class="number">4</span>,096 iterations</span><br><span class="line">      salt:     array of <span class="title function_">Bytes</span> <span class="params">(<span class="number">16</span> bytes)</span>           random salt</span><br><span class="line">      password: array of <span class="title function_">Bytes</span> <span class="params">(<span class="number">1.</span><span class="number">.72</span> bytes)</span>        UTF-<span class="number">8</span> encoded password</span><br><span class="line">   Output: </span><br><span class="line">      hash:     array of <span class="title function_">Bytes</span> <span class="params">(<span class="number">24</span> bytes)</span></span><br><span class="line"></span><br><span class="line">   <span class="comment">// 初始化方法，用于生成 K 数组和 S-box 空间，此步骤非常耗时</span></span><br><span class="line">   <span class="comment">//P: array of 18 subkeys (UInt32[18])</span></span><br><span class="line">   <span class="comment">//S: Four substitution boxes (S-boxes), S0...S3. Each S-box is 1,024 bytes (UInt32[256])</span></span><br><span class="line">   P, S &lt;- EksBlowfishSetup(cost, salt, password)   </span><br><span class="line"></span><br><span class="line">   <span class="comment">// 基于 24 位初始向量，使用 Blowfish 算法的 ECB 模式，进行 64 轮的迭代加密</span></span><br><span class="line">   ctext &lt;- <span class="string">&quot;OrpheanBeholderScryDoubt&quot;</span>  <span class="comment">//24 bytes ==&gt; three 64-bit blocks</span></span><br><span class="line">   repeat (<span class="number">64</span>)</span><br><span class="line">      ctext &lt;-  EncryptECB(P, S, ctext) <span class="comment">//encrypt using standard Blowfish in ECB mode</span></span><br><span class="line"></span><br><span class="line">   <span class="comment">//24-byte ctext is resulting password hash</span></span><br><span class="line">   <span class="keyword">return</span> Concatenate(cost, salt, ctext)</span><br></pre></td></tr></table></figure>
+
+<p>BCrypt算法将 salt 随机并混入最终加密后的密码，形成一个 60 位的 bcrypt hash 密文，因此验证时无需单独提供之前的 salt。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$</span><span class="language-bash">2a$10<span class="variable">$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy</span></span></span><br><span class="line">\__/\/ \____________________/\_____________________________/</span><br><span class="line"> Alg Cost      Salt                        Hash</span><br></pre></td></tr></table></figure>
+
+<p>该表示中 <code>$</code> 是各个字段的分隔符，包括：</p>
+<ul>
+<li>2a：  表示的hash算法的唯一标志。这里表示的是bcrypt算法。</li>
+<li>10：  表示的是代价因子，这里是2的10次方，也就是1024轮。</li>
+<li>N9qo8uLOickgx2ZMRZoMye ：             是16个字节的 salt 经过 base64 编码得到的 22 长度的字符</li>
+<li>IjZAgcfl7p92ldGxad68LJZdL17lhWy：     是24个字节的 hash，经过 bash64 的编码得到的 31 长度的字符</li>
+</ul>
+<blockquote>
+<p>Blowfish算法由于分组长度太小已被认为不安全，替代方案是使用 Twofish 密码，有128、192、256位三种密钥长度可供选择，块大小为128位</p>
+</blockquote>
+<h3 id="4-Scrypt"><a href="#4-Scrypt" class="headerlink" title="4. Scrypt"></a>4. Scrypt</h3><p>比特币最最被人诟病的就是它使用的POW算法，谁的算力高，谁就可以挖矿。传统的基于 CPU 计算的算法逐渐被一些特制的 ASIC &#x2F; FPGA 处理器打败，这些专用处理器不做别的，就是破解你的密码或者进行哈希运算，为此科学家们发明了很多其他的算法，比如需要占用大量内存的算法，因为内存不像CPU可以疯狂提速，所以限制了很多暴力破解的场景。</p>
+<p>Scrypt 是一种密码衍生算法，它是由 Colin Percival 创建的，特点是根据初始化的主密码来生成系列的衍生密码，2016年已列入 RFC 7914 标准。<br>Scrypt 内部用的还是 PBKDF2 （Salsa20算法），但会长时间地维护一组非常大的伪随机数序列，用于后续的 key 生成过程中，其算法表达式为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable constant_">DK</span> = <span class="title class_">Scrypt</span>(salt, dk_len, n, r, p)</span><br></pre></td></tr></table></figure>
+
+<p>其中的 salt 是一段随机的盐，dk_len 是输出的哈希值的长度。n 是 CPU&#x2F;Memory 开销值，越高的开销值，计算就越困难。r 表示块大小，p 表示并行度。<br>在高敏感的场景，推荐使用参数为 <code>n = 2 ** 20, r = 8</code>，此时需要消耗 1 GB内存。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">Function scrypt</span><br><span class="line">   Inputs: This algorithm includes the following parameters:</span><br><span class="line">      Passphrase:                Bytes    string of characters to be hashed</span><br><span class="line">      Salt:                      Bytes    string of random characters that modifies the hash to protect against Rainbow table attacks</span><br><span class="line">      <span class="title function_">CostFactor</span> <span class="params">(N)</span>:            Integer  CPU/memory cost parameter – Must be a power of <span class="number">2</span> (e.g. <span class="number">1024</span>)</span><br><span class="line">      BlockSizeFactor (r):       Integer  blocksize parameter, which fine-tunes sequential memory read size and performance. (<span class="number">8</span> is commonly used)</span><br><span class="line">      ParallelizationFactor (p): Integer  Parallelization parameter. (<span class="number">1</span> .. <span class="number">232</span>-<span class="number">1</span> * hLen/MFlen)</span><br><span class="line">      DesiredKeyLen (dkLen):     Integer  Desired key length in <span class="title function_">bytes</span> <span class="params">(Intended output length in octets of the derived key; a positive integer satisfying dkLen ≤ (<span class="number">232</span>− <span class="number">1</span>)</span> * hLen.)</span><br><span class="line">      hLen:                      Integer  The length in octets of the hash <span class="title function_">function</span> <span class="params">(<span class="number">32</span> <span class="keyword">for</span> SHA256)</span>.</span><br><span class="line">      MFlen:                     Integer  The length in octets of the output of the mixing <span class="title function_">function</span> <span class="params">(SMix below)</span>. Defined as r * <span class="number">128</span> in RFC7914.</span><br><span class="line">   Output:</span><br><span class="line">      DerivedKey:                Bytes    array of bytes, DesiredKeyLen <span class="type">long</span></span><br><span class="line"></span><br><span class="line">   Step <span class="number">1.</span> Generate expensive salt</span><br><span class="line">   blockSize ← <span class="number">128</span>*BlockSizeFactor  <span class="comment">// Length (in bytes) of the SMix mixing function output (e.g. 128*8 = 1024 bytes)</span></span><br><span class="line"></span><br><span class="line">   Use PBKDF2 to generate initial <span class="number">128</span>*BlockSizeFactor*p bytes of <span class="title function_">data</span> <span class="params">(e.g. <span class="number">128</span>*<span class="number">8</span>*<span class="number">3</span> = <span class="number">3072</span> bytes)</span></span><br><span class="line">   Treat the result as an array of p elements, each entry being blocksize <span class="title function_">bytes</span> <span class="params">(e.g. <span class="number">3</span> elements, each <span class="number">1024</span> bytes)</span></span><br><span class="line">   [B0...Bp−<span class="number">1</span>] ← PBKDF2HMAC-SHA256(Passphrase, Salt, <span class="number">1</span>, blockSize*ParallelizationFactor)</span><br><span class="line"></span><br><span class="line">   Mix each block in B Costfactor times using ROMix <span class="title function_">function</span> <span class="params">(each block can be mixed in parallel)</span></span><br><span class="line">   <span class="keyword">for</span> i ← <span class="number">0</span> to p-<span class="number">1</span> <span class="keyword">do</span></span><br><span class="line">      Bi ← ROMix(Bi, CostFactor)</span><br><span class="line"></span><br><span class="line">   All the elements of B is our <span class="keyword">new</span> <span class="string">&quot;expensive&quot;</span> salt</span><br><span class="line">   expensiveSalt ← B0∥B1∥B2∥ ... ∥Bp-<span class="number">1</span>  <span class="comment">// where ∥ is concatenation</span></span><br><span class="line"> </span><br><span class="line">   Step <span class="number">2.</span> Use PBKDF2 to generate the desired number of bytes, but using the expensive salt we just generated</span><br><span class="line">   <span class="keyword">return</span> PBKDF2HMAC-SHA256(Passphrase, expensiveSalt, <span class="number">1</span>, DesiredKeyLen);</span><br><span class="line"></span><br><span class="line">Function <span class="title function_">ROMix</span><span class="params">(Block, Iterations)</span></span><br><span class="line"></span><br><span class="line">Create Iterations copies of X</span><br><span class="line">X ← Block</span><br><span class="line"><span class="keyword">for</span> i ← <span class="number">0</span> to Iterations−<span class="number">1</span> <span class="keyword">do</span></span><br><span class="line">   Vi ← X</span><br><span class="line">   X ← BlockMix(X)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i ← <span class="number">0</span> to Iterations−<span class="number">1</span> <span class="keyword">do</span></span><br><span class="line">   j ← Integerify(X) mod Iterations </span><br><span class="line">   X ← BlockMix(X xor Vj)</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> X</span><br><span class="line"></span><br><span class="line">Function <span class="title function_">BlockMix</span><span class="params">(B)</span>:</span><br><span class="line"></span><br><span class="line">   The block B is r <span class="number">128</span>-<span class="type">byte</span> <span class="title function_">chunks</span> <span class="params">(which is equivalent of 2r <span class="number">64</span>-<span class="type">byte</span> chunks)</span></span><br><span class="line">   r ← Length(B) / <span class="number">128</span>;</span><br><span class="line"></span><br><span class="line">   Treat B as an array of 2r <span class="number">64</span>-<span class="type">byte</span> chunks</span><br><span class="line">   [B0...B2r-<span class="number">1</span>] ← B</span><br><span class="line"></span><br><span class="line">   X ← B2r−<span class="number">1</span></span><br><span class="line">   <span class="keyword">for</span> i ← <span class="number">0</span> to 2r−<span class="number">1</span> <span class="keyword">do</span></span><br><span class="line">      X ← Salsa20/<span class="number">8</span>(X xor Bi)  <span class="comment">// Salsa20/8 hashes from 64-bytes to 64-bytes</span></span><br><span class="line">      Yi ← X</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> ← Y0∥Y2∥...∥Y2r−<span class="number">2</span> ∥ Y1∥Y3∥...∥Y2r−<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>Scrypt被用在很多新的POW的虚拟货币中，用以表示他们挖矿程序的公平性，比如Tenebrix、 Litecoin 和 Dogecoin等。据说以太坊的 PoW 共识算法也是利用 Scrypt 实现的，但事实上以太坊自己实现了一套哈希算法，叫做 Ethash 。</p>
+<blockquote>
+<p>Scrypt 是一种资源消耗型的算法，但可以灵活地设定使用的内存大小</p>
+</blockquote>
+<h3 id="5-Argon2（氩-18号元素）"><a href="#5-Argon2（氩-18号元素）" class="headerlink" title="5. Argon2（氩-18号元素）"></a>5. Argon2（氩-18号元素）</h3><p>2013 年，NIST（美国国家标准与技术研究院）举办了密码散列竞赛，宣布将选择一种新的标准算法，2015 年 Argon2 被宣布为最终获胜者，其他四种算法获得了特别认可：Catena、Lyra2、Makwa 和 yescrypt。</p>
+<p>Argon2 的设计目标是实现最高的内存填充率和多个计算单元的有效使用，同时仍然提供对（GPU）权衡攻击的防御。<br>Argon2 基于 AES 实现，现代的 x64 和 ARM 处理器已经在指令集扩展中实现了它，从而大大缩小了普通系统和攻击者系统之间的性能差距。</p>
+<p>Argon2 具有三个变体：Argon2i、Argon2d 和 Argon2id。</p>
+<ul>
+<li>Argon2d：速度最快，并且使用依赖于数据的内存访问，是对抗侧信道攻击的最安全选择，适用于加密货币等场景</li>
+<li>Argon2i：使用与数据无关的内存访问，速度最慢，内存消耗高，是抵抗 GPU 破解攻击的最安全选择，适用于密钥派生等场景</li>
+<li>Argon2id：是 Argon2i 和 Argon2d 的混合体，使用了数据依赖和数据无关的内存访问的组合</li>
+</ul>
+<p>下图是最简单的，非并行的Argon2的算法流程。<br><img src="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/argon2.png" alt="Argon2"><br>以下是使用方法的示例：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Inputs</span>:</span><br><span class="line">   <span class="title function_">password</span> (P):       <span class="title class_">Bytes</span> (<span class="number">0.</span><span class="number">.232</span>-<span class="number">1</span>)    需要加密的原始信息P</span><br><span class="line">   <span class="title function_">salt</span> (S):           <span class="title class_">Bytes</span> (<span class="number">8.</span><span class="number">.232</span>-<span class="number">1</span>)    <span class="title class_">Salt</span>盐，建议<span class="number">16</span>个字节</span><br><span class="line">   <span class="title function_">parallelism</span> (p):    <span class="title class_">Number</span> (<span class="number">1.</span><span class="number">.224</span>-<span class="number">1</span>)   并行程度p，表示同时可以有多少独立的计算链同时运行</span><br><span class="line">   <span class="title function_">tagLength</span> (T):      <span class="title class_">Number</span> (<span class="number">4.</span><span class="number">.232</span>-<span class="number">1</span>)   指定返回的<span class="title class_">Tag</span>密文长度</span><br><span class="line">   <span class="title function_">memorySizeKB</span> (m):   <span class="title class_">Number</span> (8p.<span class="number">.232</span>-<span class="number">1</span>)  内存大小, 单位是<span class="variable constant_">MB</span></span><br><span class="line">   <span class="title function_">iterations</span> (t):     <span class="title class_">Number</span> (<span class="number">1.</span><span class="number">.232</span>-<span class="number">1</span>)   迭代器的个数t，用于提升运行速度</span><br><span class="line">   <span class="title function_">version</span> (v):        <span class="title class_">Number</span> (<span class="number">0x13</span>)       版本号v，一个字节，取值<span class="number">0x13</span></span><br><span class="line">   <span class="title function_">key</span> (K):            <span class="title class_">Bytes</span> (<span class="number">0.</span><span class="number">.232</span>-<span class="number">1</span>)    可选的，安全值<span class="title function_">key</span> (<span class="title class_">Errata</span>: <span class="variable constant_">PDF</span> says <span class="number">0.</span><span class="number">.32</span> bytes, <span class="variable constant_">RFC</span> says <span class="number">0.</span><span class="number">.232</span> bytes)</span><br><span class="line">   <span class="title function_">associatedData</span> (X): <span class="title class_">Bytes</span> (<span class="number">0.</span><span class="number">.232</span>-<span class="number">1</span>)    可选的，附件数据</span><br><span class="line">   <span class="title function_">hashType</span> (y):       <span class="title class_">Number</span> (<span class="number">0</span>=<span class="title class_">Argon2</span>d, <span class="number">1</span>=<span class="title class_">Argon2</span>i, <span class="number">2</span>=<span class="title class_">Argon2</span>id)  <span class="title class_">Argon2</span>的类型</span><br><span class="line"><span class="title class_">Output</span>:</span><br><span class="line">   <span class="attr">tag</span>:                <span class="title class_">Bytes</span> (tagLength)   运算结算密文, 长度是tagLength</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、典型案例：Dropbox-的三层加密策略"><a href="#四、典型案例：Dropbox-的三层加密策略" class="headerlink" title="四、典型案例：Dropbox 的三层加密策略"></a>四、典型案例：Dropbox 的三层加密策略</h2><p>Dropbox 公司曾公开分享过自己对用户账号的密码加密的策略，使用了三层加密，从里到外就像洋葱一样层层叠加。<br><img src="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/dropbox.png" alt="Dropbox"></p>
+<ol>
+<li>首先，对明文密码使用 SHA512 散列算法，得到固定长度的 512 字节散列值。<br>某些 Bcrypt 实现可能默认散列值长度为 72 字节，从而降低了密码的熵值；而有的则允许变长密码，容易受到 DoS 攻击。</li>
+<li>然后，针对散列值进行 Bcrypt 再次散列，每个密码都有不同的“盐”，并且是分开存储的<br>Bcrypt 速度比较慢，这样就很难通过硬件加速来加快破解速度。<br>Bcrypt 散列使用了成本因子 10（每个因子相当于每一步计算需要耗费 100 毫秒的时间），这样就更是加大了暴力破解的难度。</li>
+<li>最后，散列值会再次经过 AES256 算法的加密，这次加密会使用到对称秘钥，也就是所谓的“胡椒粉”（pepper）。<br>pepper 与账号数据库分开存储，但所有账号的pepper都是统一的</li>
+</ol>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.ujcms.com/knowledge/509.html">密码加密存储技术详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.tomczhen.com/2016/10/10/hashing-security/">加盐密码哈希：如何正确使用</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/HORHEART/article/details/119968850">PBKDF2算法原理</a></li>
+<li><a target="_blank" rel="noopener" href="https://crackstation.net/hashing-security.htm">Salted Password Hashing - Doing it Right</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ujcms.com/knowledge/509.html">密码加密存储技术详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1888720">密码学系列之:加密货币中的scrypt算法</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.tarsnap.com/scrypt/scrypt.pdf">Colin Percival 关于 Scrypt 的原始论文</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.rfc-editor.org/rfc/rfc7914">Scrypt - RFC 7914 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/P-H-C/phc-winner-argon2/blob/master/argon2-specs.pdf">Argon2 的技术白皮书 - 英文</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/p-h-c/phc-winner-argon2">Argon2 的参考 C 实现 - Github</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.11meigui.com/2020/rainbow-table.html">什么是彩虹表 Rainbow Table</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.comparitech.com/blog/information-security/key-derivation-function-kdf/">KDF是怎么工作的？- 英文加速</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/10/05/%E9%9A%8F%E6%9C%BA%E6%95%B0%E7%94%9F%E6%88%90%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/" rel="prev" title="随机数生成技术概述">
+                  <i class="fa fa-angle-left"></i> 随机数生成技术概述
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/" rel="next" title="基于椭圆曲线的ECC非对称密码系统">
+                  基于椭圆曲线的ECC非对称密码系统 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

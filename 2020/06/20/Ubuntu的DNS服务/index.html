@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="DNS概述 DNS（Domain Name Server，域名服务器）是进行域名(domain name)和与之相对应的IP地址 (IP address)转换的服务器。DNS中保存了一张域名(domain name)和与之相对应的IP地址 (IP address)的表，以解析消息的域名。  DNS服务是一件很复杂的事情，有很多不同来源的设置途径相互影响，主要包括：   * 全局配置文件: &#x2F;etc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu的DNS服务">
+<meta property="og:url" content="https://nokiam9.github.io/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="DNS概述 DNS（Domain Name Server，域名服务器）是进行域名(domain name)和与之相对应的IP地址 (IP address)转换的服务器。DNS中保存了一张域名(domain name)和与之相对应的IP地址 (IP address)的表，以解析消息的域名。  DNS服务是一件很复杂的事情，有很多不同来源的设置途径相互影响，主要包括：   * 全局配置文件: &#x2F;etc">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/dns.jpg">
+<meta property="article:published_time" content="2020-06-20T14:41:00.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.901Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/dns.jpg">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/","path":"2020/06/20/Ubuntu的DNS服务/","title":"Ubuntu的DNS服务"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Ubuntu的DNS服务 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS%E6%A6%82%E8%BF%B0"><span class="nav-text">DNS概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS%E7%9A%84%E8%A7%A3%E6%9E%90%E9%A1%BA%E5%BA%8F"><span class="nav-text">DNS的解析顺序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE-etc-resolv-conf"><span class="nav-text">如何配置&#x2F;etc&#x2F;resolv.conf</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ubuntu-DNS%E8%AE%BE%E7%BD%AE%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-text">Ubuntu DNS设置的注意事项</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Ubuntu的DNS服务 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ubuntu的DNS服务
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-20 22:41:00" itemprop="dateCreated datePublished" datetime="2020-06-20T22:41:00+08:00">2020-06-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="DNS概述"><a href="#DNS概述" class="headerlink" title="DNS概述"></a>DNS概述</h2><p>DNS（Domain Name Server，域名服务器）是进行域名(domain name)和与之相对应的IP地址 (IP address)转换的服务器。DNS中保存了一张域名(domain name)和与之相对应的IP地址 (IP address)的表，以解析消息的域名。</p>
+<p>DNS服务是一件很复杂的事情，有很多不同来源的设置途径相互影响，主要包括：</p>
+<ul>
+<li>全局配置文件: <code>/etc/systemd/resolved.conf</code></li>
+<li>单个连接的静态配置文件：通过<code>/etc/netplan/*.yaml</code>对单个网卡配置nameserver，还有<code>/etc/systemd/network/*.network</code>???</li>
+<li>单个连接的动态配置 :从DHCP默认网关或其他系统服务得到的DNS设置</li>
+</ul>
+<p>请看官方文档的解释：</p>
+<p>systemd-resolved 为本地应用程序提供了网络名字解析服务。 它不但提供了传统的 DNS&#x2F;DNSSEC 解析与本地缓存功能，还提供了 LLMNR 与 MulticastDNS 的解析(resolver)与应答(responder)的功能。 本地应用程序可以通过三种方式提交网络名字解析请求：</p>
+<p>第一种，通过D-Bus总线上的本地全功能API systemd-resolved (详见 API Documentation)。 这是首选方法，因为它是异步的并且功能最全。 此种方式可以正确返回 DNSSEC 的有效状态，以及支持 link-local 网络所必需的地址的网口范围(interface scope)。</p>
+<p>第二种，通过 glibc 的 getaddrinfo(3), gethostbyname(3) 等相关API(RFC3493)。 这些API受到了广泛的支持(包括非Linux平台)。此种方法不能检查 DNSSEC 的有效状态，并且是同步的。 此种方法由 glibc Name Service Switch (nss(5)) 支持。 必须使用 glibc NSS 模块 nss-resolve(8) 才能让 glibc NSS 使用 systemd-resolved 提供的名字解析功能。</p>
+<p>第三种，通过 systemd-resolved 在本地回环网口 127.0.0.53 上提供的本地DNS服务器。 应用程序可以直接向 127.0.0.53 发送DNS请求，从而直接使用 systemd-resolved 提供的解析服务。 除非确实无法使用前面的 glibc NSS 或 D-Bus API 两种方法， 否则应该尽量避免使用此种方式， 因为无法将各种网络解析功能(例如 link-local 地址或 LLMNR Unicode 域名)全部映射到 单播DNS协议中。</p>
+<h2 id="DNS的解析顺序"><a href="#DNS的解析顺序" class="headerlink" title="DNS的解析顺序"></a>DNS的解析顺序</h2><img src="/2020/06/20/Ubuntu%E7%9A%84DNS%E6%9C%8D%E5%8A%A1/dns.jpg" class="">
+
+<ol>
+<li><p>操作系统会先检查自己<code>本地hosts</code>文件是否有这个网址映射关系，如果有，就先调用这个IP地址映射，完成域名解析。</p>
+</li>
+<li><p>如果hosts里没有这个域名的映射，则查找本地DNS解析器缓存，是否有这个网址映射关系，如果有，直接返回，完成域名解析。</p>
+</li>
+<li><p>如果hosts与本地DNS解析器缓存都没有相应的网址映射关系，首先会找TCP&#x2F;ip参数中设置的<code>首选DNS服务器</code>，在此我们叫它本地DNS服务器，此服务器收到查询时，如果要查询的域名，包含在本地配置区域资源中，则返回解析结果给客户机，完成域名解析，此解析具有权威性。</p>
+</li>
+<li><p>如果要查询的域名，不由本地DNS服务器区域解析，但该服务器已缓存了此网址映射关系，则调用这个IP地址映射，完成域名解析，此解析不具有权威性。</p>
+</li>
+<li><p>如果本地DNS服务器本地区域文件与缓存解析都失效，则根据本地DNS服务器的设置（是否设置转发器）进行查询.</p>
+<ul>
+<li><p>如果未用转发模式，本地DNS就把请求发至<code>13台根DNS</code>，根DNS服务器收到请求后会判断这个域名(.com)是谁来授权管理，并会返回一个负责该顶级域名服务器的一个IP。本地DNS服务器收到IP信息后，将会联系负责.com域的这台服务器。这台负责.com域的服务器收到请求后，如果自己无法解析，它就会找一个管理.com域的下一级DNS服务器地址(qq.com)给本地DNS服务器。当本地DNS服务器收到这个地址后，就会找qq.com域服务器，重复上面的动作，进行查询，直至找到<a target="_blank" rel="noopener" href="http://www.qq.com主机./">www.qq.com主机。</a></p>
+</li>
+<li><p>如果用的是转发模式，此DNS服务器就会把请求转发至<code>上一级DNS服务器</code>，由上一级服务器进行解析，上一级服务器如果不能解析，或找根DNS或把转请求转至上上级，以此循环。不管是本地DNS服务器用是是转发，还是根提示，最后都是把结果返回给本地DNS服务器，由此DNS服务器再返回给客户机。</p>
+</li>
+</ul>
+</li>
+</ol>
+<p>从客户端到本地DNS服务器是属于递归查询，而DNS服务器之间就是的交互查询就是迭代查询。</p>
+<h2 id="如何配置-etc-resolv-conf"><a href="#如何配置-etc-resolv-conf" class="headerlink" title="如何配置&#x2F;etc&#x2F;resolv.conf"></a>如何配置&#x2F;etc&#x2F;resolv.conf</h2><p>在DNS设置中，最重要的配置文件就是<code>/etc/resolv.conf</code>，其中的关键字主要有四个，每行以一个关键字开头，后接一个或多个由空格隔开的参数，分别是：</p>
+<ul>
+<li><code>nameserver</code>  ：表示解析域名时使用该地址指定的主机为域名服务器。其中域名服务器是按照文件中出现的顺序来查询的,且只有当第一个nameserver没有反应时才查询下面的nameserver。</li>
+<li><code>domain</code>      ：声明主机的域名。很多程序用到它，如邮件系统；当为没有域名的主机进行DNS查询时，也要用到。如果没有域名，主机名将被使用，删除所有在第一个点( .)前面的内容。</li>
+<li><code>search</code>      ：它的多个参数指明域名查询顺序。当要查询没有域名的主机，主机将在由search声明的域中分别查找。<br>domain和search不能共存；如果同时存在，后面出现的将会被使用。</li>
+<li><code>sortlist</code>    ：允许将得到域名结果进行特定的排序。它的参数为网络&#x2F;掩码对，允许任意的排列顺序。</li>
+</ul>
+<p>下面我们给出一个&#x2F;etc&#x2F;resolv.conf的示例：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">domain  51osos.com</span><br><span class="line">search  www.51osos.com  51osos.com</span><br><span class="line">nameserver 202.102.192.68</span><br><span class="line">nameserver 202.102.192.69</span><br></pre></td></tr></table></figure>
+
+<h2 id="Ubuntu-DNS设置的注意事项"><a href="#Ubuntu-DNS设置的注意事项" class="headerlink" title="Ubuntu DNS设置的注意事项"></a>Ubuntu DNS设置的注意事项</h2><p>在无网络条件下安装ubuntu，系统将自启动并运行<code>systemd-resolved</code>服务，在<code>127.0.0.53:53</code>保持侦听并提供DNS解析服务。<br>注意：Ubuntu将<code>/etc/resolv.conf</code>设置为软连接，并指向<code>/run/systemd/resolve/stub-resolv.conf</code>，其配置信息为：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">root@nuc5i3:/etc# ls -l resolv.conf</span><br><span class="line">lrwxrwxrwx 1 root root 39 Feb  3 18:22 resolv.conf -&gt; ../run/systemd/resolve/stub-resolv.conf</span><br><span class="line"></span><br><span class="line">root@nuc5i3:/etc# cat resolv.conf</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">This file is managed by man:systemd-resolved(8). Do not edit.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># This is a dynamic resolv.conf file for connecting local clients to the</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">internal DNS stub resolver of systemd-resolved. This file lists all</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">configured search domains.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># Run &quot;systemd-resolve --status&quot; to see details about the uplink DNS servers</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">currently <span class="keyword">in</span> use.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># Third party programs must not access this file directly, but only through the</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">symlink at /etc/resolv.conf. To manage man:resolv.conf(5) <span class="keyword">in</span> a different way,</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">replace this symlink by a static file or a different symlink.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># See man:systemd-resolved.service(8) for details about the supported modes of</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">operation <span class="keyword">for</span> /etc/resolv.conf.</span></span><br><span class="line"></span><br><span class="line">nameserver 127.0.0.53</span><br><span class="line">options edns0</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p>参考文档：<br><a target="_blank" rel="noopener" href="http://www.jinbuguo.com/systemd/systemd-resolved.service.html">systemd-resolved.service 中文手册</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/590a8dfdf9a9">搭建Kubernetes集群时DNS无法解析问题的处理过程</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/c1ccc5db1762">ubuntu的DNS配置和管理</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/marklove/p/9196045.html">Ubuntu 18.04设置dns</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/06/20/%E7%A1%AC%E7%9B%98%E5%88%86%E5%8C%BA%E8%A1%A8%E4%B9%8BMBR%E5%92%8CGPT/" rel="prev" title="硬盘分区表之MBR和GPT">
+                  <i class="fa fa-angle-left"></i> 硬盘分区表之MBR和GPT
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/06/25/Kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" rel="next" title="Kubernetes集群的安装记录">
+                  Kubernetes集群的安装记录 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

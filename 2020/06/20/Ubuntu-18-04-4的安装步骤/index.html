@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="这几天折腾NUC主机，在安装Ubuntu 18.04.4 LTS（长期支持的稳定版本）的过程中遇到不少坑，立此存照吧。  Step 0：安装前的准备工作 已安装内存和硬盘的NUC主机之外，还需要：   * 独立显示器：感谢LP赞助的DELL S2319SP          * USB键盘 + USB鼠标：开机BIOS设置硬件启动顺序时键盘操作不方便          * 有线网络接口：备用先不接">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu 18.04.4的安装步骤">
+<meta property="og:url" content="https://nokiam9.github.io/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="这几天折腾NUC主机，在安装Ubuntu 18.04.4 LTS（长期支持的稳定版本）的过程中遇到不少坑，立此存照吧。  Step 0：安装前的准备工作 已安装内存和硬盘的NUC主机之外，还需要：   * 独立显示器：感谢LP赞助的DELL S2319SP          * USB键盘 + USB鼠标：开机BIOS设置硬件启动顺序时键盘操作不方便          * 有线网络接口：备用先不接">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/intel-bios.png">
+<meta property="article:published_time" content="2020-06-20T08:10:49.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.901Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/intel-bios.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/","path":"2020/06/20/Ubuntu-18-04-4的安装步骤/","title":"Ubuntu 18.04.4的安装步骤"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Ubuntu 18.04.4的安装步骤 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-0%EF%BC%9A%E5%AE%89%E8%A3%85%E5%89%8D%E7%9A%84%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-text">Step 0：安装前的准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-1-%E5%AE%89%E8%A3%85Ubuntu-Server"><span class="nav-text">Step 1: 安装Ubuntu Server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#step-2-%E6%BF%80%E6%B4%BBroot%E7%94%A8%E6%88%B7"><span class="nav-text">step 2: 激活root用户</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-3-%E8%AE%BE%E7%BD%AE%E6%9C%89%E7%BA%BF%E7%BD%91%E7%BB%9C%E6%8E%A5%E5%85%A5"><span class="nav-text">Step 3: 设置有线网络接入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-4-%E8%AE%BE%E7%BD%AEDNS%E6%9C%8D%E5%8A%A1"><span class="nav-text">Step 4: 设置DNS服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Step-5-%E8%AE%BE%E7%BD%AEWifi%E7%BD%91%E7%BB%9C%E6%8E%A5%E5%85%A5%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="nav-text">Step 5: 设置Wifi网络接入（可选）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A-%E5%A6%82%E4%BD%95%E6%9F%A5%E7%9C%8B%E7%BD%91%E5%8D%A1%E7%9A%84%E9%80%BB%E8%BE%91%E8%AE%BE%E5%A4%87%E5%90%8D"><span class="nav-text">附录： 如何查看网卡的逻辑设备名</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Ubuntu 18.04.4的安装步骤 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ubuntu 18.04.4的安装步骤
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-06-20 16:10:49" itemprop="dateCreated datePublished" datetime="2020-06-20T16:10:49+08:00">2020-06-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>6 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>这几天折腾NUC主机，在安装Ubuntu 18.04.4 LTS（长期支持的稳定版本）的过程中遇到不少坑，立此存照吧。</p>
+<h2 id="Step-0：安装前的准备工作"><a href="#Step-0：安装前的准备工作" class="headerlink" title="Step 0：安装前的准备工作"></a>Step 0：安装前的准备工作</h2><p>已安装内存和硬盘的NUC主机之外，还需要：</p>
+<ul>
+<li><p>独立显示器：感谢LP赞助的DELL S2319SP</p>
+</li>
+<li><p>USB键盘 + USB鼠标：开机BIOS设置硬件启动顺序时键盘操作不方便</p>
+</li>
+<li><p>有线网络接口：备用先不接</p>
+</li>
+<li><p>Ubuntu启动U盘：制作方法参见<a href="%E5%A6%82%E4%BD%95%E5%88%B6%E4%BD%9CUbuntu%E7%9A%84USB%E5%90%AF%E5%8A%A8%E7%9B%98.md">如何制作Ubuntu的USB启动盘</a>，Server版本912M，Desktop版本2.13G</p>
+</li>
+</ul>
+<h2 id="Step-1-安装Ubuntu-Server"><a href="#Step-1-安装Ubuntu-Server" class="headerlink" title="Step 1: 安装Ubuntu Server"></a>Step 1: 安装Ubuntu Server</h2><ol>
+<li><p>插入Ubuntu安装U盘，开机启动后进入安装界面，各种参数选默认</p>
+</li>
+<li><p>完成安装后拔出U盘，重新启动并登录进入新安装的Ubuntu Server<br>开机启动过程中，可能需要在BIOS设置启动顺序（USB—STAT—LAN），进入方法是加电过程中持续按F2<br>强烈建议安装Openssh Server，以后可以拔掉键盘和鼠标，直接远程登录管理主机<br>安装过程中需要设置一个默认用户，root尚未激活<br>由于安装过程中未接网线，完成后所有网络接口都不可用</p>
+ <img src="/2020/06/20/Ubuntu-18-04-4%E7%9A%84%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4/intel-bios.png" class=""></li>
+</ol>
+<h2 id="step-2-激活root用户"><a href="#step-2-激活root用户" class="headerlink" title="step 2: 激活root用户"></a>step 2: 激活root用户</h2><ol>
+<li><p>以默认用户身份设置root口令，并切换到root</p>
+ <figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">sj@nuc5i3:~$ <span class="title">sudo</span> <span class="title">passwd</span> <span class="title">root</span></span></span><br><span class="line"><span class="function">[<span class="title">sudo</span>] <span class="title">password</span> <span class="title">for</span> <span class="title">sj</span>:</span></span><br><span class="line"><span class="function"><span class="title">Enter</span> <span class="title">new</span> <span class="title">UNIX</span> <span class="title">password</span>:</span></span><br><span class="line"><span class="function"><span class="title">Retype</span> <span class="title">new</span> <span class="title">UNIX</span> <span class="title">password</span>:</span></span><br><span class="line"><span class="function"><span class="title">passwd</span>: <span class="title">password</span> <span class="title">updated</span> <span class="title">successfully</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">sj</span>@<span class="title">nuc5i3</span>:~$ <span class="title">su</span> -</span></span><br><span class="line"><span class="function"><span class="title">Password</span>:</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">root</span>@<span class="title">nuc5i3</span>:~#</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>如果需要允许root用户远程登录，修改配置文件<code>/etc/ssh/sshd_config</code>，将<code>PermitRootLogin</code>改为<code>yes</code></p>
+ <figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">#PermitRootLogin prohibit-password</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="Step-3-设置有线网络接入"><a href="#Step-3-设置有线网络接入" class="headerlink" title="Step 3: 设置有线网络接入"></a>Step 3: 设置有线网络接入</h2><ol>
+<li><p>插入有线网络，没啥动静？ 别着急，还没配置网络参数呢！</p>
+</li>
+<li><p>编辑网卡配置文件<code>/etc/netplan/50-cloud-init.yaml</code>，至少需要设置IP地址和默认网关</p>
+ <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># This file is generated from information provided by the datasource.  Changes</span></span><br><span class="line"><span class="comment"># to it will not persist across an instance reboot.  To disable cloud-init&#x27;s</span></span><br><span class="line"><span class="comment"># network configuration capabilities, write a file</span></span><br><span class="line"><span class="comment"># /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:</span></span><br><span class="line"><span class="comment"># network: &#123;config: disabled&#125;</span></span><br><span class="line"><span class="attr">network:</span></span><br><span class="line">    <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">ethernets:</span></span><br><span class="line">        <span class="attr">enp0s25:</span></span><br><span class="line">            <span class="attr">dhcp4:</span> <span class="literal">no</span></span><br><span class="line">            <span class="attr">addresses:</span> [<span class="number">192.168</span><span class="number">.0</span><span class="number">.130</span><span class="string">/24</span>]</span><br><span class="line">            <span class="attr">gateway4:</span> <span class="number">192.168</span><span class="number">.0</span><span class="number">.1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用<code>netpaln generate</code>刷新网络配置，<code>netplan apply</code>启动有线网卡<br>最后用<code>ifconfig</code>检查网络状态，确认有线网卡<code>enp0s25</code>启动成功</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">root@nuc5i3:/etc/netplan# netplan generate</span><br><span class="line">root@nuc5i3:/etc/netplan# netplan apply</span><br><span class="line"></span><br><span class="line">root@nuc5i3:/etc/netplan# ifconfig</span><br><span class="line">enp0s25: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 192.168.0.130  netmask 255.255.255.0  broadcast 192.168.0.255</span><br><span class="line">        inet6 fe80::baae:edff:fe73:87fb  prefixlen 64  scopeid 0x20&lt;link&gt;</span><br><span class="line">        ether b8:ae:ed:73:87:fb  txqueuelen 1000  (Ethernet)</span><br><span class="line">        RX packets 23068  bytes 14045959 (14.0 MB)</span><br><span class="line">        RX errors 0  dropped 23  overruns 0  frame 0</span><br><span class="line">        TX packets 12173  bytes 1273580 (1.2 MB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line">        device interrupt 20  memory 0xf7100000-f7120000  </span><br><span class="line"></span><br><span class="line">lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536</span><br><span class="line">        inet 127.0.0.1  netmask 255.0.0.0</span><br><span class="line">        inet6 ::1  prefixlen 128  scopeid 0x10&lt;host&gt;</span><br><span class="line">        loop  txqueuelen 1000  (Local Loopback)</span><br><span class="line">        RX packets 144  bytes 13680 (13.6 KB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 144  bytes 13680 (13.6 KB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="Step-4-设置DNS服务"><a href="#Step-4-设置DNS服务" class="headerlink" title="Step 4: 设置DNS服务"></a>Step 4: 设置DNS服务</h2><ol>
+<li><p>在基本安装完成后，默认DNS指向的是<code>127.0.0.53:53</code>，无法解析公网域名！！！<br>解决办法：停止并禁用系统默认的DNS服务<code>systemd-resolved</code>，并删除<code>/etc/resolv.conf</code>软连接</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">root@nuc5i3:~# ping t.cn</span><br><span class="line">ping: t.cn: Temporary failure in name resolution</span><br><span class="line"></span><br><span class="line">root@nuc5i3:~# netstat -tunpl</span><br><span class="line">Active Internet connections (only servers)</span><br><span class="line">Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name</span><br><span class="line">tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      1001/systemd-resolv</span><br><span class="line">tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      2012/sshd</span><br><span class="line">tcp6       0      0 :::22                   :::*                    LISTEN      2012/sshd</span><br><span class="line">udp        0      0 127.0.0.53:53           0.0.0.0:*                           1001/systemd-resolv</span><br><span class="line"></span><br><span class="line">root@nuc5i3:~# systemctl stop systemd-resolved</span><br><span class="line">root@nuc5i3:~# systemctl disable systemd-resolved</span><br><span class="line">root@nuc5i3:~# systemctl status systemd-resolved</span><br><span class="line">● systemd-resolved.service - Network Name Resolution</span><br><span class="line">Loaded: loaded (/lib/systemd/system/systemd-resolved.service; disabled; vendor preset: enabled)</span><br><span class="line">Active: inactive (dead)</span><br><span class="line">    Docs: man:systemd-resolved.service(8)</span><br><span class="line">        https://www.freedesktop.org/wiki/Software/systemd/resolved</span><br><span class="line">        https://www.freedesktop.org/wiki/Software/systemd/writing-network-configuration-managers</span><br><span class="line">        https://www.freedesktop.org/wiki/Software/systemd/writing-resolver-clients</span><br><span class="line"></span><br><span class="line">root@nuc5i3:/# ls -l /etc/resolv.conf</span><br><span class="line">lrwxrwxrwx 1 root root 39 Feb  3 18:22 /etc/resolv.conf -&gt; ../run/systemd/resolve/stub-resolv.conf</span><br><span class="line"></span><br><span class="line">root@nuc5i3:/# rm /etc/resolv.conf</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重新创建文件<code>/etc/resolv.conf</code>，并写入自定义的nameserver</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@nuc5i3:~# cat /etc/resolv.conf</span><br><span class="line">nameserver 192.168.0.1</span><br><span class="line">nameserver 8.8.8.8</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>简单用<code>dig</code>测试一下，DNS现在正常工作了。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">root@nuc5i3:~# dig t.cn</span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.11.3-1ubuntu1.11-Ubuntu &lt;&lt;&gt;&gt; t.cn</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 22813</span><br><span class="line">;; flags: qr rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1</span><br><span class="line"></span><br><span class="line">;; OPT PSEUDOSECTION:</span><br><span class="line">; EDNS: version: 0, flags:; udp: 512</span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;t.cn.    IN  A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">t.cn.    59  IN  A  116.211.169.137</span><br><span class="line"></span><br><span class="line">;; Query time: 197 msec</span><br><span class="line">;; SERVER: 8.8.8.8#53(8.8.8.8)</span><br><span class="line">;; WHEN: Sat Jun 20 13:05:06 UTC 2020</span><br><span class="line">;; MSG SIZE  rcvd: 49</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="Step-5-设置Wifi网络接入（可选）"><a href="#Step-5-设置Wifi网络接入（可选）" class="headerlink" title="Step 5: 设置Wifi网络接入（可选）"></a>Step 5: 设置Wifi网络接入（可选）</h2><ol>
+<li><p>在确认已连接公网、且<strong>DNS正常工作</strong>的前提下，在线安装<code>network-manager</code>（其中包括了无线网卡驱动程序等必需的软件包）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">apt update</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">apt install network-manager</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：如果有线网卡没有配置nameserver，而且缺少上一步强行设置nameserver的情况下，由于不能正确解析公网域名，apt无法工作！！！</p>
+</blockquote>
+</li>
+<li><p>再次编辑<code>/etc/netplan/50-cloud-init.yaml</code>，至少需要配置<code>Access-points</code>的SSID和接入密码等。<br>注意：必须显示定义渲染方式为<code>NetworkManager</code>，这也是上一步需要apt安装的原因。</p>
+ <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># This file is generated from information provided by the datasource.  Changes</span></span><br><span class="line"><span class="comment"># to it will not persist across an instance reboot.  To disable cloud-init&#x27;s</span></span><br><span class="line"><span class="comment"># network configuration capabilities, write a file</span></span><br><span class="line"><span class="comment"># /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:</span></span><br><span class="line"><span class="comment"># network: &#123;config: disabled&#125;</span></span><br><span class="line"><span class="attr">network:</span></span><br><span class="line">    <span class="attr">version:</span> <span class="number">2</span></span><br><span class="line">    <span class="attr">renderer:</span> <span class="string">NetworkManager</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">ethernets:</span></span><br><span class="line">        <span class="attr">enp0s25:</span></span><br><span class="line">            <span class="attr">dhcp4:</span> <span class="literal">no</span></span><br><span class="line">            <span class="attr">addresses:</span> [<span class="number">192.168</span><span class="number">.0</span><span class="number">.130</span><span class="string">/24</span>]</span><br><span class="line">            <span class="attr">gateway4:</span> <span class="number">192.168</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">wifis:</span></span><br><span class="line">        <span class="attr">wlp2s0:</span></span><br><span class="line">            <span class="attr">access-points:</span></span><br><span class="line">                <span class="attr">&quot;NETGEAR59&quot;:</span></span><br><span class="line">                    <span class="attr">password:</span> <span class="string">&quot;xxxxxxxx&quot;</span></span><br><span class="line">            <span class="attr">dhcp4:</span> <span class="literal">no</span></span><br><span class="line">            <span class="attr">addresses:</span> [<span class="number">192.168</span><span class="number">.0</span><span class="number">.131</span><span class="string">/24</span>]</span><br><span class="line">            <span class="attr">gateway4:</span> <span class="number">192.168</span><span class="number">.0</span><span class="number">.1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>再次<code>netplan generate</code>检查并刷新网络配置，<code>netplan apply</code>启动无线网卡。<br>检查网络状态，<code>ifconfig</code>确认无线网卡<code>wlp2s0</code>启动成功<br>注意：<code>netplan</code>有中间配置文件的刷新机制，generate + apply是一个良好的操作习惯。</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">root@nuc5i3:/etc/netplan# netplan generate</span><br><span class="line">root@nuc5i3:/etc/netplan# netplan apply</span><br><span class="line">root@nuc5i3:/etc# ifconfig</span><br><span class="line">......</span><br><span class="line">wlp2s0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 192.168.0.131  netmask 255.255.255.0  broadcast 192.168.0.255</span><br><span class="line">        inet6 fe80::3613:e8ff:fe25:20d8  prefixlen 64  scopeid 0x20&lt;link&gt;</span><br><span class="line">        ether 34:13:e8:25:20:d8  txqueuelen 1000  (Ethernet)</span><br><span class="line">        RX packets 501  bytes 94281 (94.2 KB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 44  bytes 4436 (4.4 KB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<h2 id="附录：-如何查看网卡的逻辑设备名"><a href="#附录：-如何查看网卡的逻辑设备名" class="headerlink" title="附录： 如何查看网卡的逻辑设备名"></a>附录： 如何查看网卡的逻辑设备名</h2><p>不同型号的硬件设备，由于其驱动程序的差异，在Ubuntu安装完成后会有不同的设备名。</p>
+<p>使用<code>lshw</code>命令，可以查询全部硬件设备信息，并找到其逻辑设备名。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">lshw</span></span><br><span class="line">nuc5i3</span><br><span class="line">    description: Desktop Computer</span><br><span class="line">    width: 64 bits</span><br><span class="line">    capabilities: smbios-2.8 dmi-2.8 smp vsyscall32</span><br><span class="line">    configuration: boot=normal chassis=desktop uuid=00EC2C62-7872-E311-B04F-B8AEED7387FB</span><br><span class="line">......</span><br><span class="line">        *-network</span><br><span class="line">             description: Ethernet interface</span><br><span class="line">             product: Ethernet Connection (3) I218-V</span><br><span class="line">             vendor: Intel Corporation</span><br><span class="line">             physical id: 19</span><br><span class="line">             bus info: pci@0000:00:19.0</span><br><span class="line">             logical name: enp0s25</span><br><span class="line">             version: 03</span><br><span class="line">             serial: b8:ae:ed:73:87:fb</span><br><span class="line">             size: 100Mbit/s</span><br><span class="line">             capacity: 1Gbit/s</span><br><span class="line">             width: 32 bits</span><br><span class="line">             clock: 33MHz</span><br><span class="line">......</span><br><span class="line">        *-network</span><br><span class="line">            description: Wireless interface</span><br><span class="line">            product: Wireless 7265</span><br><span class="line">            vendor: Intel Corporation</span><br><span class="line">            physical id: 0</span><br><span class="line">            bus info: pci@0000:02:00.0</span><br><span class="line">            logical name: wlp2s0</span><br><span class="line">            version: 59</span><br><span class="line">            serial: 34:13:e8:25:20:d8</span><br><span class="line">            width: 64 bits</span><br><span class="line">            clock: 33MHz</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>还有一个办法，就是命令<code>ip a</code>查看网卡的简要信息。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">root@nuc5i3:~# ip a</span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 ::1/128 scope host</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">2: enp0s25: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc fq_codel state UP group default qlen 1000</span><br><span class="line">    link/ether b8:ae:ed:73:87:fb brd ff:ff:ff:ff:ff:ff</span><br><span class="line">    inet 192.168.0.130/24 brd 192.168.0.255 scope global enp0s25</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">    inet6 fe80::baae:edff:fe73:87fb/64 scope link</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">3: wlp2s0: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop state DOWN group default qlen 1000</span><br><span class="line">    link/ether 34:13:e8:25:20:d8 brd ff:ff:ff:ff:ff:ff</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/06/13/%E5%9F%BA%E4%BA%8Essh%E5%8A%A0%E5%AF%86%E9%9A%A7%E9%81%93%E7%9A%84%E4%B8%89%E7%A7%8D%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91%E6%A8%A1%E5%BC%8F/" rel="prev" title="基于ssh加密隧道的三种端口转发模式">
+                  <i class="fa fa-angle-left"></i> 基于ssh加密隧道的三种端口转发模式
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/06/20/%E7%A1%AC%E7%9B%98%E5%88%86%E5%8C%BA%E8%A1%A8%E4%B9%8BMBR%E5%92%8CGPT/" rel="next" title="硬盘分区表之MBR和GPT">
+                  硬盘分区表之MBR和GPT <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

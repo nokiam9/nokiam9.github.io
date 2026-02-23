@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、PVE存储的性质类型（Storage Properties） PVE需要管理的存储资源，分为以下6种，分别用于不同类型的数据持久化。  标识符类型特性说明iso安装盘ISO images，包括Centos、Ubuntu等操作系统的安装镜像文件，也可以是Win7安装盘vztmpl模版文件Container templates，LXC的模版文件，仅支持Linunx类型rootdir根系统Allow">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Proxmox-VE的存储管理小结">
+<meta property="og:url" content="https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、PVE存储的性质类型（Storage Properties） PVE需要管理的存储资源，分为以下6种，分别用于不同类型的数据持久化。  标识符类型特性说明iso安装盘ISO images，包括Centos、Ubuntu等操作系统的安装镜像文件，也可以是Win7安装盘vztmpl模版文件Container templates，LXC的模版文件，仅支持Linunx类型rootdir根系统Allow">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/proxmox-storage-types.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/shot2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/shot4.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/shot4.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/lvm2.png">
+<meta property="article:published_time" content="2021-01-17T15:47:09.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.880Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/proxmox-storage-types.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/","path":"2021/01/17/Proxmox-VE的存储管理小结/","title":"Proxmox-VE的存储管理小结"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Proxmox-VE的存储管理小结 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81PVE%E5%AD%98%E5%82%A8%E7%9A%84%E6%80%A7%E8%B4%A8%E7%B1%BB%E5%9E%8B%EF%BC%88Storage-Properties%EF%BC%89"><span class="nav-text">一、PVE存储的性质类型（Storage Properties）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81PVE%E5%AD%98%E5%82%A8%E7%9A%84%E8%AE%BE%E5%A4%87%E7%B1%BB%E5%9E%8B%EF%BC%88Storage-Types%EF%BC%89"><span class="nav-text">二、PVE存储的设备类型（Storage Types）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%9B%AE%E5%BD%95%EF%BC%88Directory%EF%BC%89"><span class="nav-text">1. 目录（Directory）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%80%BB%E8%BE%91%E5%8D%B7%EF%BC%88LVM%EF%BC%89"><span class="nav-text">2.逻辑卷（LVM）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%96%84%E6%A8%A1%E5%BC%8F%E7%9A%84%E9%80%BB%E8%BE%91%E5%8D%B7%EF%BC%88LVM-thin%EF%BC%89"><span class="nav-text">3. 薄模式的逻辑卷（LVM-thin）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%EF%BC%88NFS%EF%BC%89"><span class="nav-text">4. 网络文件系统（NFS）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Windows%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%EF%BC%88CIFS%EF%BC%89"><span class="nav-text">5. Windows文件共享（CIFS）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81PVE%E9%BB%98%E8%AE%A4%E5%AE%89%E8%A3%85%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="nav-text">三、PVE默认安装的实例分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%BB%93%E8%AE%BA"><span class="nav-text">四、结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%951%EF%BC%9A%E5%AE%89%E8%A3%85LVM2"><span class="nav-text">附录1：安装LVM2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Proxmox-VE的存储管理小结 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Proxmox-VE的存储管理小结
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-17 23:47:09" itemprop="dateCreated datePublished" datetime="2021-01-17T23:47:09+08:00">2021-01-17</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.8k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、PVE存储的性质类型（Storage-Properties）"><a href="#一、PVE存储的性质类型（Storage-Properties）" class="headerlink" title="一、PVE存储的性质类型（Storage Properties）"></a>一、PVE存储的性质类型（Storage Properties）</h2><p>PVE需要管理的存储资源，分为以下6种，分别用于不同类型的数据持久化。</p>
+<table>
+<thead>
+<tr>
+<th align="center">标识符</th>
+<th align="left">类型</th>
+<th align="left">特性说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">iso</td>
+<td align="left">安装盘</td>
+<td align="left">ISO images，包括Centos、Ubuntu等操作系统的安装镜像文件，也可以是Win7安装盘</td>
+</tr>
+<tr>
+<td align="center">vztmpl</td>
+<td align="left">模版文件</td>
+<td align="left">Container templates，LXC的模版文件，仅支持Linunx类型</td>
+</tr>
+<tr>
+<td align="center">rootdir</td>
+<td align="left">根系统</td>
+<td align="left">Allow to store container data.用于VM或LXC的系统盘</td>
+</tr>
+<tr>
+<td align="center">images</td>
+<td align="left">虚拟磁盘</td>
+<td align="left">KVM-Qemu VM images，一般用于数据盘，VM或LXC均可挂载，文件格式或者LV块设备均可以</td>
+</tr>
+<tr>
+<td align="center">backup</td>
+<td align="left">备份文件</td>
+<td align="left">Backup files (vzdump).VM或LXC均可以使用，通常是文件格式</td>
+</tr>
+<tr>
+<td align="center">snippets</td>
+<td align="left">快照文件</td>
+<td align="left">Snippet files, for example guest hook scripts，VM或LXC快照文件</td>
+</tr>
+</tbody></table>
+<h2 id="二、PVE存储的设备类型（Storage-Types）"><a href="#二、PVE存储的设备类型（Storage-Types）" class="headerlink" title="二、PVE存储的设备类型（Storage Types）"></a>二、PVE存储的设备类型（Storage Types）</h2><p>与通常的UNIX系统一样，Proxmox VE支持基于POSIX的文件系统存储和基于RAW裸设备的块存储设备。<br>裸设备一般建在LV上，没有filesystem，因此无法支持iso、vztmpl、backup，但可以支持rootdir、image。</p>
+<p>各种存储方式的特性见下表。</p>
+<img src="/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/proxmox-storage-types.png" class="">
+
+<blockquote>
+<p>1: 绝大部分文件系统本身不支持快照功能。如果要创建虚拟机快照，只能利用 qcow2 文件格式自带的快照功能。<br>2: 如果后端存储是FC光纤存储设备，或是iSCSI存储设备，LVM方式可以提供共享资源。</p>
+</blockquote>
+<p>下面介绍几个最重要的存储类型：</p>
+<h3 id="1-目录（Directory）"><a href="#1-目录（Directory）" class="headerlink" title="1. 目录（Directory）"></a>1. 目录（Directory）</h3><p>Proxmox VE 可以使用本地目录或挂载在本地文件系统的共享存储作为存储服务。<br>目录是文件系统级的存储服务，你可以保存任何类型的数据，包括虚拟机镜像，容器，模板， ISO 镜像或虚拟机备份文件。<br>PVE初始安装生成的<code>local</code>存储就是<code>Directory</code>属性，其路径是<code>/var/lib/vz</code>。</p>
+<img src="/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/shot2.png" class="">
+
+<p>可以看到，其中<code>dump</code>目录存储的就是备份文件，<code>template</code>目录存储的就是VM模版和LXC模版。</p>
+<h3 id="2-逻辑卷（LVM）"><a href="#2-逻辑卷（LVM）" class="headerlink" title="2.逻辑卷（LVM）"></a>2.逻辑卷（LVM）</h3><p>LVM 是典型的块存储解决方案，但 LVM 后端存储本身不支持快照和链接克隆功能。更不幸的是，在创建普通 LVM 快照期间，整个卷组的写操作都会受到影响而变得非常低效。</p>
+<blockquote>
+<p>LVM最大的好处是你可以在共享存储上建立 LVM 后端存储服务。例如可以在 iSCSI LUN 上建立 LVM。LVM 后端存储自带 Proxmox VE 集群锁以有效防止并发访问冲突。</p>
+</blockquote>
+<p>LVM的创建包含了以下步骤： Device -&gt; Partition -&gt; Phycial Volume -&gt; Volume Group -&gt; Login Volume，具体步骤参见附录1。</p>
+<img src="/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/shot4.png" class="">
+
+<h3 id="3-薄模式的逻辑卷（LVM-thin）"><a href="#3-薄模式的逻辑卷（LVM-thin）" class="headerlink" title="3. 薄模式的逻辑卷（LVM-thin）"></a>3. 薄模式的逻辑卷（LVM-thin）</h3><p>LVM 是在逻辑卷创建时就按设置的卷容量大小预先分配所需空间。LVM-thin 存储池是在向 卷内写入数据时按实际写入数据量大小分配所需空间。LVM-thin 所用的存储空间分配方式允许创建容量远大于物理存储空间的存储卷，因此也称为“薄模式”。</p>
+<blockquote>
+<p>注意：LVM-thin 存储池不能被多个节点同时共享使用，只能用于节点本地存储.</p>
+</blockquote>
+<p>创建和管理 LVM-thin 存储池的命令和 LVM 命令完全一致(参见 man lvmthin)。假定你已 经有一个 LVM 卷组 pve，如下命令可以创建一个名为 data 的新 LVM-thin 存储池(容量 100G):</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lvcreate -L 100G -n data pve</span><br><span class="line">lvconvert --type thin-pool pve/data</span><br></pre></td></tr></table></figure>
+
+<p>也可以在PVE的GUI界面进行操作。</p>
+<img src="/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/shot4.png" class="">
+
+<h3 id="4-网络文件系统（NFS）"><a href="#4-网络文件系统（NFS）" class="headerlink" title="4. 网络文件系统（NFS）"></a>4. 网络文件系统（NFS）</h3><p>基于 NFS 的后端存储服务实际上建立在目录后端存储之上，其属性和目录后端存储非常相似。其中子目录布局和文件命名规范完全一致。<br>NFS 后端存储的优势在于，你可以通过配置 NFS 服务器参数，实现 NFS 存储服务自动挂载，而无需编辑修改&#x2F;etc&#x2F;fstab 文件。</p>
+<p>NFS 存储服务能够自动检测 NFS 服务器的在线状态，并自动连接 NFS 服务器输出的共享存储服务。</p>
+<h3 id="5-Windows文件共享（CIFS）"><a href="#5-Windows文件共享（CIFS）" class="headerlink" title="5. Windows文件共享（CIFS）"></a>5. Windows文件共享（CIFS）</h3><p>CIFS（Common Internet File System）就是 SMB 的改进版本。Windows的文件共享其实就是使用了 SMB或者说 CIFS。<br>基于 CIFS 的后端存储可用于扩展基于目录的存储，这样就无需再手工配置 CIFS 挂载。该类 型存储可直接通过 Proxmox VE API 或 WebUI 添加。服务器心跳检测或共享输出选项等后端 存储参数配置也将自动完成配置。</p>
+<h2 id="三、PVE默认安装的实例分析"><a href="#三、PVE默认安装的实例分析" class="headerlink" title="三、PVE默认安装的实例分析"></a>三、PVE默认安装的实例分析</h2><p>在默认安装完成后，PVE将后端存储的配置文件存放在<code>/etc/pve/storage.cfg</code>中。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">root@pve01:~# cat /etc/pve/storage.cfg</span><br><span class="line">dir: local</span><br><span class="line">    path /var/lib/vz</span><br><span class="line">    content vztmpl,iso,backup</span><br><span class="line"></span><br><span class="line">lvmthin: local-lvm</span><br><span class="line">    thinpool data</span><br><span class="line">    vgname pve</span><br><span class="line">    content images,rootdir</span><br><span class="line"></span><br><span class="line">nfs: nfs130</span><br><span class="line">    export /data/nfs</span><br><span class="line">    path /mnt/pve/nfs130</span><br><span class="line">    server 192.168.0.130</span><br><span class="line">    content images</span><br></pre></td></tr></table></figure>
+
+<p>PVE默认存储配置至少包含了2个资源池（Storage Pools）：</p>
+<ul>
+<li>local<br>基于目录模式，用于iso、vztmpl、backup、snippets等文件存储。<br>物理资源位于<code>/dev/sda3</code>磁盘分区，逻辑卷是<code>pve-root</code><br>mount挂载点是<code>/var/lib/vz</code>。</li>
+<li>local-lvm<br>基于薄模式的逻辑卷，用于存储容器的系统盘rootdir，和数据盘image。<br>物理资源位于<code>/dev/sda3</code>磁盘分区，逻辑卷分为两个部分：管理元数据的<code>pve-data_tmeta</code>，和管理实际数据的<code>pve-data_tdeta</code></li>
+</ul>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">root@pve01:~# lsblk</span><br><span class="line">NAME                            MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT</span><br><span class="line">sda                               8:0    0 111.8G  0 disk </span><br><span class="line">├─sda1                            8:1    0  1007K  0 part </span><br><span class="line">├─sda2                            8:2    0   512M  0 part /boot/efi</span><br><span class="line">└─sda3                            8:3    0 111.3G  0 part </span><br><span class="line">  ├─pve-swap                    253:0    0     8G  0 lvm  [SWAP]</span><br><span class="line">  ├─pve-root                    253:1    0  27.8G  0 lvm  /</span><br><span class="line">  ├─pve-data_tmeta              253:2    0     1G  0 lvm  </span><br><span class="line">  │ └─pve-data-tpool            253:4    0  59.7G  0 lvm  </span><br><span class="line">  │   ├─pve-data                253:5    0  59.7G  0 lvm  </span><br><span class="line">  │   ├─pve-vm--198--cloudinit  253:7    0     4M  0 lvm  </span><br><span class="line">  │   ├─pve-vm--198--disk--0    253:8    0     4G  0 lvm  </span><br><span class="line">  │   ├─pve-vm--199--disk--0    253:9    0     4G  0 lvm  </span><br><span class="line">  │   ├─pve-vm--199--cloudinit  253:10   0     4M  0 lvm  </span><br><span class="line">  │   ├─pve-vm--121--cloudinit  253:11   0     4M  0 lvm  </span><br><span class="line">  │   └─pve-base--121--disk--0  253:26   0     4G  1 lvm  </span><br><span class="line">  └─pve-data_tdata              253:3    0  59.7G  0 lvm  </span><br><span class="line">    └─pve-data-tpool            253:4    0  59.7G  0 lvm  </span><br><span class="line">      ├─pve-data                253:5    0  59.7G  0 lvm  </span><br><span class="line">      ├─pve-vm--198--cloudinit  253:7    0     4M  0 lvm  </span><br><span class="line">      ├─pve-vm--198--disk--0    253:8    0     4G  0 lvm  </span><br><span class="line">      ├─pve-vm--199--disk--0    253:9    0     4G  0 lvm  </span><br><span class="line">      ├─pve-vm--199--cloudinit  253:10   0     4M  0 lvm  </span><br><span class="line">      ├─pve-vm--121--cloudinit  253:11   0     4M  0 lvm  </span><br><span class="line">      ├─pve-vm--199--state--dns 253:17   0   1.5G  0 lvm  </span><br><span class="line">      └─pve-base--121--disk--0  253:26   0     4G  1 lvm  </span><br><span class="line">nvme0n1                         259:0    0   477G  0 disk </span><br><span class="line">├─data02-data02_tmeta           253:23   0   4.8G  0 lvm  </span><br><span class="line">│ └─data02-data02               253:28   0 467.3G  0 lvm  </span><br><span class="line">└─data02-data02_tdata           253:27   0 467.3G  0 lvm  </span><br><span class="line">  └─data02-data02               253:28   0 467.3G  0 lvm  </span><br><span class="line"></span><br><span class="line">root@pve01:/var/lib/vz# tree /var/lib/vz</span><br><span class="line">/var/lib/vz</span><br><span class="line">├── dump</span><br><span class="line">│   ├── vzdump-qemu-120-2021_01_18-00_17_53.log</span><br><span class="line">│   └── vzdump-qemu-120-2021_01_18-00_17_53.vma.zst</span><br><span class="line">├── images</span><br><span class="line">└── template</span><br><span class="line">    ├── cache</span><br><span class="line">    │   ├── alpine-3.11-default_20200425_amd64.tar.xz</span><br><span class="line">    │   ├── centos-7-default_20190926_amd64.tar.xz</span><br><span class="line">    │   └── ubuntu-18.04-standard_18.04.1-1_amd64.tar.gz</span><br><span class="line">    ├── iso</span><br><span class="line">    │   ├── CentOS-7-x86_64-DVD-2003.iso</span><br><span class="line">    │   ├── CentOS-7-x86_64-Minimal-2003.iso</span><br><span class="line">    │   └── ubuntu-18.04.4-live-server-amd64.iso</span><br><span class="line">    └── qemu</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、结论"><a href="#四、结论" class="headerlink" title="四、结论"></a>四、结论</h2><ul>
+<li>PVE安装后，将默认提供基于dir的<code>local</code>资源池，和基于LVM-thin的<code>local-lvm</code>资源池。</li>
+<li>对于容器管理的场景，LVM-thin是最佳方案。<br>优点一是基于宿主机的本地磁盘，可靠性高，性能好，二是动态的容量管理，“用多少是多少”；<br>缺点是不支持PVE多节点的共享。</li>
+<li>对于备份和快照管理的场景，NFS是最佳方案。<br>优点是部署配置简单，可以支持多容器的共享存储；<br>缺点是依赖网络和外部服务器，可靠性较低，性能也受限。<br>特别指出，如果已经有WDCLOUD之类的网络存储，直接用CIFS更方便，无需单独部署NFS服务器。</li>
+<li>LVM方案的功能和LVM-thin基本类似，但配置更复杂、资源利用率低，不建议使用。<br>其唯一的价值在于，如果后端存储是iSCSI或FC类型的高端的集中式存储设备，可以支持多容器之间的共享。</li>
+<li>GlusterFS 和Ceph都是典型的分布式存储系统，都提供文件存储、块存储功能（在应用层面还提供对象存储功能）</li>
+<li>ZFS的性能非常好，提供copy-on-write，快照、存储空间池等高级功能，但其设计思想仍然是传统的基于磁盘管理的文件系统<br>ZFS的重要价值在于，可以通过适度的CPU和内存负载以及简单的管理来取代成本高昂的硬件RAID卡</li>
+</ul>
+<hr>
+<h2 id="附录1：安装LVM2"><a href="#附录1：安装LVM2" class="headerlink" title="附录1：安装LVM2"></a>附录1：安装LVM2</h2><p>Centos基本安装包并不包含LVM管理功能，需用<code>yum install lvm2</code>自行安装。</p>
+<ul>
+<li>PV（Physical Volume）- 物理卷<br>  物理卷在逻辑卷管理中处于最底层，它可以是实际物理硬盘上的分区，也可以是整个物理硬盘，也可以是raid设备。</li>
+<li>VG（Volumne Group）- 卷组<br>  卷组建立在物理卷之上，一个卷组中至少要包括一个物理卷，在卷组建立之后可动态添加物理卷到卷组中。一个逻辑卷管理系统工程中可以只有一个卷组，也可以拥有多个卷组。</li>
+<li>LV（Logical Volume）- 逻辑卷<br>  逻辑卷建立在卷组之上，卷组中的未分配空间可以用于建立新的逻辑卷，逻辑卷建立后可以动态地扩展和缩小空间。系统中的多个逻辑卷可以属于同一个卷组，也可以属于不同的多个卷组。</li>
+</ul>
+<img src="/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/lvm2.png" class="">
+
+<p>在安装lvm2后，就可以使用以下命令了。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">root@pve01:~# pvs</span><br><span class="line">  PV           VG           Fmt  Attr PSize    PFree  </span><br><span class="line">  /dev/nvme0n1 date-nvme0n1 lvm2 a--  &lt;476.94g 124.00m</span><br><span class="line">  /dev/sda3    pve          lvm2 a--  &lt;111.29g  13.87g</span><br><span class="line">root@pve01:~# vgs</span><br><span class="line">  VG           #PV #LV #SN Attr   VSize    VFree  </span><br><span class="line">  date-nvme0n1   1   1   0 wz--n- &lt;476.94g 124.00m</span><br><span class="line">  pve            1  24   0 wz--n- &lt;111.29g  13.87g</span><br><span class="line">root@pve01:~# lvs</span><br><span class="line">  LV                     VG           Attr       LSize    Pool Origin          Data%  Meta%  Move Log Cpy%Sync Convert</span><br><span class="line">  date-nvme0n1           date-nvme0n1 twi-aotz-- &lt;467.28g                      0.00   0.37                            </span><br><span class="line">  base-120-disk-0        pve          Vri-a-tz-k    4.00g data                 38.28                                  </span><br><span class="line">  base-121-disk-0        pve          Vri-a-tz-k    4.00g data                 38.53                                  </span><br><span class="line">  base-122-disk-0        pve          Vri-a-tz-k    8.00g data                 54.14                                  </span><br><span class="line">  data                   pve          twi-aotz--   59.66g                      42.54  2.87                            </span><br><span class="line">  root                   pve          -wi-ao----   27.75g                                                             </span><br><span class="line">  snap_vm-199-disk-0_dns pve          Vri---tz-k    4.00g data vm-199-disk-0                                          </span><br><span class="line">  swap                   pve          -wi-ao----    8.00g                                                             </span><br><span class="line">  vm-100-cloudinit       pve          Vwi-a-tz--    4.00m data                 9.38                                   </span><br><span class="line">  vm-100-disk-0          pve          Vwi-a-tz--   12.00g data                 59.46                                  </span><br><span class="line">  vm-120-cloudinit       pve          Vwi-a-tz--    4.00m data                 9.38                                   </span><br><span class="line">  vm-121-cloudinit       pve          Vwi-a-tz--    4.00m data                 9.38                                   </span><br><span class="line">  vm-122-cloudinit       pve          Vwi-a-tz--    4.00m data                 9.38                                   </span><br><span class="line">  vm-160-disk-0          pve          Vwi-aotz--    8.00g data                 7.74                                   </span><br><span class="line">  vm-198-cloudinit       pve          Vwi-aotz--    4.00m data                 9.38                                   </span><br><span class="line">  vm-198-disk-0          pve          Vwi-aotz--    4.00g data                 38.55                                  </span><br><span class="line">  vm-199-cloudinit       pve          Vwi-aotz--    4.00m data                 9.38                                   </span><br><span class="line">  vm-199-disk-0          pve          Vwi-aotz--    4.00g data                 38.56                                  </span><br><span class="line">  vm-199-state-dns       pve          Vwi-a-tz--   &lt;1.49g data                 33.03                                  </span><br><span class="line">  vm-200-cloudinit       pve          Vwi-aotz--    4.00m data                 9.38                                   </span><br><span class="line">  vm-200-disk-0          pve          Vwi-aotz--    4.00g data                 38.58                                  </span><br><span class="line">  vm-222-cloudinit       pve          Vwi-a-tz--    4.00m data                 9.38                                   </span><br><span class="line">  vm-222-disk-0          pve          Vwi-a-tz--    4.00g data                 54.27                                  </span><br><span class="line">  vm-223-cloudinit       pve          Vwi-aotz--    4.00m data                 9.38                                   </span><br><span class="line">  vm-223-disk-0          pve          Vwi-aotz--    8.00g data base-122-disk-0 85.10 </span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://blog.51cto.com/6222666/2161799">Proxmox VE 安装的系列教程</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/145862221">Proxmox虚拟系统PVE的磁盘分区及文件系统分析总结</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/u011069498/article/details/96303220">CentOS7 LVM与RAID简单使用</a></li>
+<li><a target="_blank" rel="noopener" href="http://einverne.github.io/post/2020/03/proxmox-install-and-setup.html">Proxmox 安装和设置</a></li>
+<li><a target="_blank" rel="noopener" href="https://post.smzdm.com/p/768830/">ProXmoX VE 安装及基础配置</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/30/NFC%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/" rel="prev" title="NFC核心技术概览">
+                  <i class="fa fa-angle-left"></i> NFC核心技术概览
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/01/31/Docker-Mirror-%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9C%8D%E5%8A%A1%E8%A7%A3%E6%9E%90/" rel="next" title="Docker Mirror 容器镜像服务解析">
+                  Docker Mirror 容器镜像服务解析 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

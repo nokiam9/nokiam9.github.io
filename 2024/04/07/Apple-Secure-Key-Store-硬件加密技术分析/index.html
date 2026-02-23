@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="根据iOS 16 安全评估报告的表述（P16-P20），Apple 设备提供的加密服务分为三个层级：   * User Space：SL1，软件级。驻留在用户空间内的动态可加载库，为 App 提供加密功能  * Kernel Space：SL1，软件级。操作系统内核加载的扩展模块，仅为内核提供加密功能  * Secure Key Store：SL2，硬件级。一个单芯片独立硬件加密模块，为静态数据和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apple Secure Key Store 硬件加密技术分析">
+<meta property="og:url" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="根据iOS 16 安全评估报告的表述（P16-P20），Apple 设备提供的加密服务分为三个层级：   * User Space：SL1，软件级。驻留在用户空间内的动态可加载库，为 App 提供加密功能  * Kernel Space：SL1，软件级。操作系统内核加载的扩展模块，仅为内核提供加密功能  * Secure Key Store：SL2，硬件级。一个单芯片独立硬件加密模块，为静态数据和">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/SKS-arch.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/soc.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/sepos.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/KDF.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/PBKDF2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch3.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/TOC-key.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/ES.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/ES2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/ES3.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/keybag2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/boot.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/first-unlock.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/lock.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/touch-id-unlock.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/file.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/FDE1.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/FDE2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/filevault2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/filevault1.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/SKP.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/mac-boot.png">
+<meta property="article:published_time" content="2024-04-07T13:08:41.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.681Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/SKS-arch.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/","path":"2024/04/07/Apple-Secure-Key-Store-硬件加密技术分析/","title":"Apple Secure Key Store 硬件加密技术分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Apple Secure Key Store 硬件加密技术分析 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Secure-Key-Store-%E6%80%BB%E4%BD%93%E6%9E%B6%E6%9E%84"><span class="nav-text">一、Secure Key Store 总体架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%A1%AC%E4%BB%B6%E7%8E%AF%E5%A2%83"><span class="nav-text">1. 硬件环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%BA%94%E7%94%A8%E6%9E%B6%E6%9E%84"><span class="nav-text">2. 应用架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81-Secure-Key-Store-%E5%AF%86%E7%A0%81%E7%AE%97%E6%B3%95"><span class="nav-text">二、 Secure Key Store 密码算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%8C%E5%85%A8%E7%AC%A6%E5%90%88-FIPS-140-2-%E6%A0%87%E5%87%86%E7%9A%84%E7%AE%97%E6%B3%95"><span class="nav-text">1. 完全符合 FIPS 140-2 标准的算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%B8%8D%E5%AE%8C%E5%85%A8%E7%AC%A6%E5%90%88-FIPS-140-2-%E6%A0%87%E5%87%86%EF%BC%8C%E4%BD%86%E8%A2%AB%E5%85%81%E8%AE%B8%E4%BD%BF%E7%94%A8%E7%9A%84%E7%AE%97%E6%B3%95"><span class="nav-text">2. 不完全符合 FIPS 140-2 标准，但被允许使用的算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%9C%AA%E8%8E%B7%E5%BE%97-FIPS-140-2-%E6%89%B9%E5%87%86%E7%9A%84%E7%AE%97%E6%B3%95"><span class="nav-text">3. 未获得 FIPS 140-2 批准的算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-PBKDF2-%E7%AE%97%E6%B3%95"><span class="nav-text">4. PBKDF2 算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81Secure-Key-Store-%E5%AF%86%E9%92%A5%E5%B1%82%E7%BA%A7"><span class="nav-text">三、Secure Key Store 密钥层级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%85%B3%E9%94%AE%E5%AE%89%E5%85%A8%E5%8F%82%E6%95%B0"><span class="nav-text">1. 关键安全参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Effaceable-Storage"><span class="nav-text">2. Effaceable Storage</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AF%86%E9%92%A5%E5%8C%85"><span class="nav-text">3. 密钥包</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Secure-Key-Store-%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91"><span class="nav-text">四、Secure Key Store 业务逻辑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8"><span class="nav-text">1. 系统启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%A6%96%E6%AC%A1%E8%A7%A3%E9%94%81"><span class="nav-text">2. 首次解锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%B3%BB%E7%BB%9F%E9%94%81%E5%AE%9A"><span class="nav-text">3. 系统锁定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81"><span class="nav-text">4. 指纹解锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%AF%BB%E5%8F%96%E6%96%87%E4%BB%B6"><span class="nav-text">5. 读取文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81-Secure-Key-Store-%E6%9C%8D%E5%8A%A1%E6%8E%A5%E5%8F%A3"><span class="nav-text">五、 Secure Key Store 服务接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%8C%E5%85%A8%E7%AC%A6%E5%90%88-FIPS-140-2-%E7%9A%84%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1"><span class="nav-text">1. 完全符合 FIPS 140-2 的系统服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E4%B8%8D%E7%AC%A6%E5%90%88-FIPS-140-2-%E7%9A%84%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1"><span class="nav-text">2. 不符合 FIPS 140-2 的系统服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81MacOS-FileVault-%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90"><span class="nav-text">六、MacOS FileVault 的技术分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E5%87%A0%E4%B8%AA%E9%97%AE%E9%A2%98%E7%9A%84%E8%AE%A8%E8%AE%BA"><span class="nav-text">七、几个问题的讨论</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E5%85%A8%E5%AD%98%E5%82%A8%E7%BB%84%E4%BB%B6%E7%9A%84%E6%95%B0%E6%8D%AE%E4%BF%9D%E5%AD%98%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F"><span class="nav-text">1. 安全存储组件的数据保存在哪里？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%89%E5%85%A8%E5%AD%98%E5%82%A8%E7%BB%84%E4%BB%B6%E7%AE%A1%E7%90%86%E4%BA%86%E5%93%AA%E4%BA%9B%E6%A0%B8%E5%BF%83%E6%95%B0%E6%8D%AE%EF%BC%9F"><span class="nav-text">2. 安全存储组件管理了哪些核心数据？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E7%BB%91%E5%AE%9A%E5%AF%86%E9%92%A5%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6%EF%BC%9F"><span class="nav-text">3. 操作系统绑定密钥的工作机制？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Key-0x89B-%E5%92%8C-Key-0x835-%E5%AD%98%E5%82%A8%E6%96%B9%E5%BC%8F%E7%9A%84%E5%8B%98%E8%AF%AF"><span class="nav-text">4.  Key 0x89B 和 Key 0x835 存储方式的勘误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%85%B3%E4%BA%8E%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99%E6%B5%81%E7%A8%8B%E7%9A%84%E5%8B%98%E8%AF%AF"><span class="nav-text">5. 关于文件读写流程的勘误</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9ACocoa-%E6%A1%86%E6%9E%B6"><span class="nav-text">附录：Cocoa 框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">官方文档下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A0%94%E7%A9%B6%E6%8A%A5%E5%91%8A%E4%B8%8B%E8%BD%BD"><span class="nav-text">研究报告下载</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Apple Secure Key Store 硬件加密技术分析 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Apple Secure Key Store 硬件加密技术分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-04-07 21:08:41" itemprop="dateCreated datePublished" datetime="2024-04-07T21:08:41+08:00">2024-04-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>8.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>31 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>根据<a href="Apple_iOS_16_iPhone_Security_Target_v1.1.pdf">iOS 16 安全评估报告</a>的表述（P16-P20），Apple 设备提供的加密服务分为三个层级：</p>
+<ul>
+<li>User Space：SL1，软件级。驻留在用户空间内的动态可加载库，为 App 提供加密功能</li>
+<li>Kernel Space：SL1，软件级。操作系统内核加载的扩展模块，仅为内核提供加密功能</li>
+<li>Secure Key Store：SL2，硬件级。一个单芯片独立硬件加密模块，为静态数据和数据传输提供保护，包含固件和硬件加密算法实现</li>
+</ul>
+<p>Secure Key Store（安全密钥存储，SKS，也称 Secure Key Service）是 Apple Secure Enclave 的加密模块，也是其硬件加密技术的核心组件。</p>
+<ul>
+<li>根据 Apple 官网提供的<a target="_blank" rel="noopener" href="https://support.apple.com/zh-cn/guide/certifications/welcome/web">第三方平台认证信息</a>，其硬件、操作系统、应用软件、互联网服务和 Apple Pay 广泛采用 FIPS 140-2 加密标准（FIPS 140-3 认证已提交但尚未通过），当前<a target="_blank" rel="noopener" href="https://csrc.nist.gov/CSRC/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp3811.pdf">硬件加密模块 v10.0</a> 获得 CMVP 颁发的<a target="_blank" rel="noopener" href="https://csrc.nist.gov/Projects/cryptographic-module-validation-program/Certificate/3811">3811 证书</a>。</li>
+<li>Apple 积极参与通用标准 (CC) 评估，当前<a target="_blank" rel="noopener" href="https://www.niap-ccevs.org/Product/index.cfm">认证产品清单</a>包括：macOS 13 Ventura（含<a target="_blank" rel="noopener" href="https://www.niap-ccevs.org/MMO/Product/st_vid11348-st.pdf">FileVault</a>）、iOS 15 &amp; <a target="_blank" rel="noopener" href="https://www.niap-ccevs.org/MMO/Product/st_vid11349-st.pdf">iOS 16</a>；iPadOS 15 &amp; iPadOS 16，由 <a target="_blank" rel="noopener" href="https://www.atsec.com/">ATSEC 公司</a>出具 TOE（Target of Evaluation）评估报告。</li>
+<li>2016年美国举办的 Black hat 会议上，Apple 公司的 Ivan Krstic 介绍了数据保护技术，也是难得的<a href="(Behind_the_Scenes_with_iOS_Security.pdf)">官方资料</a>。</li>
+</ul>
+<p>本文就是依据上述公开信息的研究分析。</p>
+<h2 id="一、Secure-Key-Store-总体架构"><a href="#一、Secure-Key-Store-总体架构" class="headerlink" title="一、Secure Key Store 总体架构"></a>一、Secure Key Store 总体架构</h2><h3 id="1-硬件环境"><a href="#1-硬件环境" class="headerlink" title="1. 硬件环境"></a>1. 硬件环境</h3><p>根据<a href="Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf">Apple SKS 加密模块</a>的表述，其逻辑边界包含以下组件：</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/SKS-arch.png" alt="SKS"></p>
+<ul>
+<li>SEP（Secure Encalve Processor）：区别于 REE 环境的应用处理器 AP，位于 TEE 环境的安全隔区拥有独立的应用处理器<br>  SEP 运行的操作系统称为 sepOS（基于 L4 微内核的 Apple 定制版本）<br>  TOE OS 和 sepOS 之间采用物理隔离方式，仅能通过 Mailbox 完成数据交互</li>
+<li>SKS（Secure Key Store，安全密钥存储）：负责生成并管理 CSP（Critical Security Parameter，关键安全参数），为静态数据加密所需密钥提供关键的加密材料<br>  按照 FIPS 140-2 的要求提供 POST（Power-On Self Test，启动自检）功能，以确保模块的完整性和加密功能的正确性</li>
+<li>HW AES：基于硬件实现的 AES 加密算法，Apple 安全隔区支持对抗时序攻击、静态功耗分析（SPA）和动态功耗分析 (DPA)。</li>
+<li>UID：在 SoC 生产环节，使用基于 AES 算法的 DRBG 生成 UID，然后蚀刻到硅片上的 OTP-ROM（One Time Programmable Read-Only Memory，一次性编程的只读内存，即熔丝），它只能通过 AES 引擎处理加密和解密操作，即使 SEP 的 Apps 也无法读取</li>
+<li>HW DRBG：基于硬件实现的伪随机数发生器（确定性随机数发生器），内置专用的 AES 引擎实现 CTR_DRBG 算法</li>
+</ul>
+<blockquote>
+<p>早期的 A8 处理器的硬件版本是 1.0，A9 及后续处理器升级为 2.0，差异在于是否提供 PAA (Processor Algorithm Accelerator，处理器算法加速，基于 ARM NEON 指令集实现)。</p>
+</blockquote>
+<p>对比 Apple 平台安全技术白皮书提供的信息，HW AES &#x3D; Secure Enclave AES Engine，此外还有 PKA（public key acceleration，公钥加速器）。</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/soc.png" alt="SoC"></p>
+<h3 id="2-应用架构"><a href="#2-应用架构" class="headerlink" title="2. 应用架构"></a>2. 应用架构</h3><p>根据<a href="us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf">Demystifying the Secure Enclave Processor</a>的 P61 的描述，Secure Key Store 作为 SEPOS 的一个功能模块，其暴露在 SL1 级（内核 XNU）的 Endpoint 就是一个内核扩展<code>AppleKeyStore.kext</code>。此外，SEPOS 还包含了其他类型的 APP，包括：</p>
+<ul>
+<li>ART Manager：反重放攻击服务</li>
+<li>Secure Biometric Engine：生物识别引擎，简称 SBIO，用于 Touce ID 和 Face ID 等</li>
+<li>Secure Credential Manager：凭据管理，用于网络连接和配件的安全管理</li>
+<li>SSE：未知。似乎用于硬件识别？</li>
+</ul>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/sepos.png" alt="SEPOS"></p>
+<h2 id="二、-Secure-Key-Store-密码算法"><a href="#二、-Secure-Key-Store-密码算法" class="headerlink" title="二、 Secure Key Store 密码算法"></a>二、 Secure Key Store 密码算法</h2><p><a href="Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf">Apple SKS 加密模块</a>有完整的的表述。</p>
+<h3 id="1-完全符合-FIPS-140-2-标准的算法"><a href="#1-完全符合-FIPS-140-2-标准的算法" class="headerlink" title="1. 完全符合 FIPS 140-2 标准的算法"></a>1. 完全符合 FIPS 140-2 标准的算法</h3><ul>
+<li>对称加密&#x2F;解密算法：基于<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/fips/197/final">FIPS 197</a>的 AES 算法，工作模式包括：<ul>
+<li><a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/38/a/final">SP 800-38 A</a> ：工作模式 ECB CBC CFB OFB CTR</li>
+<li><a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/38/c/upd1/final">SP 800-38 C</a> ：加密认证模式 CCM</li>
+<li><a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/38/d/final">SP 800-38 D</a> ：工作模式 GMAC</li>
+<li><a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/38/e/final">SP 800-38 E</a> ：磁盘加密模式 AES-XTS</li>
+<li><a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/38/f/final">SP 800-38 F</a> ：密钥包裹传输 AES-KW</li>
+</ul>
+</li>
+<li>数字签名（非对称加密&#x2F;解密）算法：基于<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/fips/186-4/final">FIPS 186-4</a>，<ul>
+<li>ECDSA 椭圆曲线采用 P-2224, P-256, P-384, P-521，加密算法符合 ANSI X9.62 标准</li>
+<li>签名生成和校验算法采用 SHA</li>
+</ul>
+</li>
+<li>消息摘要算法：基于<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/fips/180-4/upd1/final">FIPS 180-4</a> 的 SHA 算法</li>
+<li>消息验证算法：基于<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/fips/198-1/final">FIPS 198</a>的 HMAC 算法</li>
+<li>DRBG：基于<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/90/a/r1/final">SP 800-90A</a> 的确定性随机数生成算法</li>
+<li>密钥交换算法：基于<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/56/a/r3/final">SP 800-56A</a> 的一次性 DH 算法</li>
+</ul>
+<blockquote>
+<p>ANSI（American National Standards Institute，美国国家标准协会）是一个非盈利组织，也是 IEEE 和 ISO 标准化组织的成员，还记得 ANSI C 吗？<br><a target="_blank" rel="noopener" href="https://x9.org/">ANSI X9</a> 系列标准主要用于金融服务业，是信息和数据安全的重要参考。</p>
+</blockquote>
+<h3 id="2-不完全符合-FIPS-140-2-标准，但被允许使用的算法"><a href="#2-不完全符合-FIPS-140-2-标准，但被允许使用的算法" class="headerlink" title="2. 不完全符合 FIPS 140-2 标准，但被允许使用的算法"></a>2. 不完全符合 FIPS 140-2 标准，但被允许使用的算法</h3><ul>
+<li>密钥扩展算法：基于<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/132/final">SP 800-132</a>的 PBKDF 算法，Apple 基于 HMAC 和 SHA-256（早期为 SHA-1）的定制化 PBKDF2 算法，注意不支持自检功能！</li>
+<li>TRNG：Apple 定制的，基于物理过程的真随机数生成器</li>
+</ul>
+<h3 id="3-未获得-FIPS-140-2-批准的算法"><a href="#3-未获得-FIPS-140-2-批准的算法" class="headerlink" title="3. 未获得 FIPS 140-2 批准的算法"></a>3. 未获得 FIPS 140-2 批准的算法</h3><p>对于此类算法，Apple 规定<strong>不得与上述算法共享加密因子</strong>。</p>
+<ul>
+<li>基于 RSA 的密钥包裹协议：验证配件、VPN 连接和 iMessage 等场景中使用。填充方案采用 OAEP（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Optimal_asymmetric_encryption_padding">Optimal Asymmetric Encryption Padding</a>，最佳非对称加密填充）</li>
+<li>ECDH 密钥交换协议：使用了未被批准的 Curve25519 曲线，而且使用了密钥模块外部的加密因子。用于文件保护 B 类密钥管理、iCloud 云备份密钥管理、HomeKit 配件通信等场景。</li>
+<li>Ed25519 签名方案：使用了未被批准的 Curve25519 曲线。</li>
+<li><a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc5869">RFC 5869 HKDF</a>：使用了未被批准的、基于 HMAC 的密钥扩展算法。HomeKit 配件连接和 iMessage 等场景中使用。</li>
+<li><a href="(https://csrc.nist.gov/CSRC/media/Events/Key-Management-Workshop-2000/documents/x963_overview.pdf)">ANSI X9.63</a> KDF：用于金融服务行业密钥协议和密钥传输，同样采用 Curve25519</li>
+<li>AES-GCM：IV 的生成方式不符合 FIPS 140-2</li>
+</ul>
+<blockquote>
+<p>事实上，Curve25519 已成为 P-256 的替代品。2024 年，NIST 宣布弃用 FIPS 186-4 并发布<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/fips/186-5/final">FIPS 186-5</a>，Curve25519 和 Curve448 被正式纳入规范，ANSI X9.62 也被 ANSI X9.142 替代</p>
+</blockquote>
+<h3 id="4-PBKDF2-算法"><a href="#4-PBKDF2-算法" class="headerlink" title="4. PBKDF2 算法"></a>4. PBKDF2 算法</h3><p>用户的锁屏密码 Passcode 的长度有限，不能直接作为密钥使用，必须经过密钥扩展（Password-Based Key Derivation）生成标准的 Passcode Key，参考<a target="_blank" rel="noopener" href="https://csrc.nist.gov/pubs/sp/800/132/final">SP 800-132</a>第 5.4 节的 2b 模式。</p>
+<p>基于<a href="Behind_the_Scenes_with_iOS_Security.pdf">Behind the Scenes with iOS Security - Ivan Krstić</a>的描述，其处理步骤包括：</p>
+<ul>
+<li>初始阶段：Userspace 侧完成。使用 HMAC-SHA-256 作为伪随机函数<br>  输入：基于TRNG 生成的 128 位随机 salt、未经任何预处理的 passcode、<strong>迭代计数 1</strong><br>  输出：256 位的中间密钥 MK</li>
+<li>迭代阶段：SEP 侧完成。以 UID 为加密密钥，使用 AES-CBC-256 硬件重复迭代加密 MK，最终形成 Master Key<br>  迭代次数需要根据硬件环境校准，确保计算时间为 100-150 毫秒，迭代次数至少为 50000 次</li>
+</ul>
+<blockquote>
+<p>大量重复运算使得暴力破解的成本很高，而添加盐值可以有效防御彩虹表攻击。</p>
+</blockquote>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/KDF.png" alt="KDF"></p>
+<p>需要注意的是，不同版本硬件的算法和配置都可能发生变化：</p>
+<ul>
+<li>iOS 4 迭代算法与标准规范有差异，增加了将 256位 MK 扩展为 4096 位的环节</li>
+<li>iOS 4.3 升级了 Keybag 版本，v2 算法的 counter 更复杂</li>
+<li>Filevault 软件加密方式的迭代次数为 41000，但加密因子不包含 UID！</li>
+</ul>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/PBKDF2.png" alt="PBKDF2"></p>
+<h2 id="三、Secure-Key-Store-密钥层级"><a href="#三、Secure-Key-Store-密钥层级" class="headerlink" title="三、Secure Key Store 密钥层级"></a>三、Secure Key Store 密钥层级</h2><p>根据之前的 iOS4 破解技术分析，Apple 数据保护密钥的持久化存储有 4 种方式：</p>
+<ul>
+<li>SEP 内部：每个设备唯一且不可修改的UID，基于固定参数衍生的Key 0x89B 和 Key 0x835</li>
+<li>可擦除区域（effaceable storage）：EMF Key，Dkey 和 Bag1<br>  包裹状态密文保存在 NAND 的 Block 1，不提供额外的机密性保护，而是便于快速&#x2F;远程清除</li>
+<li>用户密钥包（User Keybag）：各类文件保护 Class key 和钥匙串 Class key<br>  包裹状态密文保存在一个普通的数据文件（plist格式），存储于<code>/var/keybags/systembag.kb</code></li>
+<li>per-file key 以包裹状态的密文存储在文件系统元数据中，keychain 的 item 以包裹状态保存在一个 sqlite 数据库，存储目录位于<code>/Users/&lt;UserName&gt;/Library/Keychains/</code></li>
+</ul>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch3.jpg" alt="arch"></p>
+<blockquote>
+<p>注意，系统密钥包<strong>不存储 Class D key</strong>！因为 NSFileProtectionNone 实际是一个单密钥系统，即：<code>per-file key = Class D key = AES_Unwrap(key 0x835，Dkey)</code></p>
+</blockquote>
+<h3 id="1-关键安全参数"><a href="#1-关键安全参数" class="headerlink" title="1. 关键安全参数"></a>1. 关键安全参数</h3><p><a href="Apple_iOS_16_iPhone_Security_Target_v1.1.pdf">iOS 16 安全评估报告</a>的 P119 - P121，介绍了密钥管理的基本概念并提供了 CSP（Critical Security Parameter，关键安全参数）的列表信息，P125 提供了密钥层次结构图，与 iOS4 的描述基本一致，</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/TOC-key.png" alt="TOC"></p>
+<p><a href="Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf">Apple SKS 加密模块</a>的 P20，也提供了关键安全参数 CSP 的生命周期列表：</p>
+<ul>
+<li><code>Root Encryption Key (REK)</code> &#x3D; Passcode Key，其描述为：<br>  Generation：Derived from passcode using PBKDF2 and entanglement with UID<br>  Entry and Output：Generated inside the module and is never output。</li>
+<li><code>Moudle-managed keybags key</code> <strong>不是 Bag1</strong>(因为其是明文存储方式)，而是指密钥包中存储的各种 Class key<br>  Generation: Symmetric key generation services of the module<br>  Entered encrypted using AES-256 KW, Output encrypted using AES-256 KW<br>  Non-volatile store: cryptographically zeroized when overwriting the KEK<br>  Volatile store: zeroized when freeing the secure memory</li>
+<li><code>File system object DEK</code> &#x3D; EMF</li>
+<li><code>Escrow Keybag and the class D key encryption key</code> &#x3D; Key 0x835</li>
+<li>CSP 列表没有提供 Key 0x89B 的信息</li>
+</ul>
+<blockquote>
+<p>Q1： CSP 列表的 <code>REK wrapping key</code> 应该就是 SKS 和 SBIO 之间的 random secret。<br>描述为：Entered&#x2F;Output in plaintext by calling application within physical the boundary。<br>random secret 在 SKS 和 SBIO 之间明文传输，但都处于 SEP 范围内，行为方式符合其描述</p>
+</blockquote>
+<h3 id="2-Effaceable-Storage"><a href="#2-Effaceable-Storage" class="headerlink" title="2. Effaceable Storage"></a>2. Effaceable Storage</h3><p>根据<a href="iPhone_Data_Protection_in_Depth.pdf">iPhone Data Protection in Depth</a>的介绍，从 iPhone 3GS 开始，iPhone 内置的闪存芯片都最前面的 16 个 block 和最后的 15 个 block 保留给 Apple，并将 Block 1 作为 Effaceable Storage（可擦除区域），用于储存加密密钥的专用区域，可被直接寻址和安全擦除。</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/ES.png" alt="effaceable storage"></p>
+<p>Github 上有一个取证软件包可以读取早期的 iOS 系统数据，请参见<a target="_blank" rel="noopener" href="https://github.com/nabla-c0d3/iphone-dataprotection">https://github.com/nabla-c0d3/iphone-dataprotection</a>。</p>
+<p>浅蓝色是 length ，红色是 tag 标记，注意 HFS 是大端字节顺序，字符串要反着读。<br>第一个标记：0x42414731 &#x3D; BAG1，长度 0x0034 &#x3D; 52 个字节<br>第二个标记：0xC46B6579 &#x3D; key，长度 0x0028 &#x3D; 40 个字节<br>第三个标记：0xC54D4621 &#x3D; EMF!，长度 0x0024 &#x3D; 36 个字节<br>第四个标记：0x444F4E45 &#x3D; DONE，长度 0x0000，这就是结束了！</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/ES2.png" alt="effaceable storage"></p>
+<p>尽管当攻击者实际占有设备时，可擦除存储器无法提供保护（事实上 OS 可以直接读取该区域），但其中存储的密钥作为密钥层级的一部分，可以实现快速擦除和前向安全性。</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/ES3.png" alt="effaceable storage"></p>
+<h3 id="3-密钥包"><a href="#3-密钥包" class="headerlink" title="3. 密钥包"></a>3. 密钥包</h3><p>文件和钥匙串数据保护类的密钥均在密钥包中收集和管理。<strong>Secure Key Store</strong>负责管理系统密钥包，并且可以查询设备的锁定状态，只有当系统密钥包中的所有类密钥都可以访问并且已成功解开包装时，设备才会解锁。</p>
+<p>User keybag 是设备常规操作中使用的封装类密钥的储存位置（与 passcode 相关），设备密钥包用来储存用于涉及设备特定操作数据的封装类密钥（仅与 UID 相关），两者合称为系统密钥包。<br>配置为单用户使用 (默认配置) 的 iOS 和 iPadOS 设备中，设备密钥包和用户密钥包是同一个。</p>
+<p>此外，还有用于备份、托管和 iCloud 云备份的几种的密钥包，item 包含了一些其他密钥，但数据结构完全相同。请参考<a target="_blank" rel="noopener" href="https://github.com/russtone/systembag.kb">https://github.com/russtone/systembag.kb</a>。<br><a href="Behind_the_Scenes_with_iOS_Security.pdf">Behind the Scenes with iOS Security - Ivan Krstić</a>的 P27，也给出了一个示例。</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/keybag2.png" alt="keybag"></p>
+<p>密钥包的头部字段包括：</p>
+<ul>
+<li>VERS：版本号，iOS 12 之后都置为 4</li>
+<li>TYPE：该密钥包的类型，[0-system，1-backup，2-escrow，3-iCloud Backup]</li>
+<li>UUID：该密钥包的 UUID</li>
+<li>HMCK：如果密钥包已签名，保存 HMAC 校验值</li>
+<li>WRAP：包裹方式，[1:仅 UID 派生, 2:仅 passcode 派生, 3:两者都有]</li>
+<li>SALT：PBKDF2 算法使用的盐</li>
+<li>ITER：PBKDF2 算法的迭代次数</li>
+</ul>
+<blockquote>
+<p>不同版本可能出现 GRCE、GRNT、TKMT、SART 等字段，信息含义未知</p>
+</blockquote>
+<p>对于每个密钥包的条目（文件保护类密钥 &amp; 钥匙串类密钥），其字段包括：</p>
+<ul>
+<li>CLAS：class，密钥的级别<br>  文件保护类型为[1,2,3]：4-空缺，就是Dkey；5-保留未启用；<br>  钥匙串保护类型为[6,7,8,9,10,11]：对应钥匙串的 3 个级别和相应的 device only</li>
+<li>WRAP：wraping type，包裹方式。与 Header 定义一致</li>
+<li>KTPY：key type。例如 Curve25519</li>
+<li>WPKY：wrapped key。如果是非对称密钥，此处存储的是 Private key</li>
+<li>PBKY：public key（可选）。Class B 的 Pulic key，包裹状态</li>
+<li>UUID：该密钥的 UUID</li>
+</ul>
+<p>关于密钥包的解封流程，<a href="Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf">Apple SKS 加密模块</a>的 P23 指出：</p>
+<ul>
+<li>所有在钥匙包中、由加密模块管理的密钥，由 Device OS 负责存储在 non-volatile memory 中。</li>
+<li>密钥包基于 256 位的 AES-KW 包裹算法，然后输出到 Device OS 完成持久化存储（permanent storage）。</li>
+<li>设备加电启动后，加密模块从 Device OS 导入包裹状态的密钥包并完成解封。</li>
+</ul>
+<p>P14 描述了基于密码的身份验证工作模式：</p>
+<ul>
+<li>当用户从模块请求加密服务时，它必须提供密码和对用户密钥包的引用，该密钥包在 SKS 内的 SP800-38F AES 密钥包装 (AES-KW) 下加密存储。该模块使用 PBKDF 从操作者提供的密码中派生 AES 密钥。</li>
+<li>然后，模块的 SP800-38F AES 密钥解包功能（即 AES-KW-AD）使用派生的 AES 密钥来解密参考用户密钥包并验证解密密钥的真实性。<br>  由于 AES-KW 是一种身份验证密码，因此解密操作只有在没有身份验证错误的情况下才会成功。这意味着用户提供了正确的密码来导出用于 AES 密钥解包的正确 AES 密钥。<br>  任何其他密码都将派生出不同的 AES 密钥，这将导致解密的用户密钥错误，导致身份验证检查失败。</li>
+<li>如果可以成功解开用户密钥包，则用户将通过模块的身份验证，然后将使用解开的用户密钥继续执行所请求的加密服务。<br>  解包用户密钥包失败也是用户身份验证失败，操作员将被拒绝访问模块。</li>
+</ul>
+<h2 id="四、Secure-Key-Store-业务逻辑"><a href="#四、Secure-Key-Store-业务逻辑" class="headerlink" title="四、Secure Key Store 业务逻辑"></a>四、Secure Key Store 业务逻辑</h2><p><a href="Apple_iOS_16_iPhone_Security_Target_v1.1.pdf">iOS 16 安全评估报告</a>的 P125-P127，介绍了SEP启动、第一次解锁、文件处理等核心业务场景的处理逻辑，结合<a href="Behind_the_Scenes_with_iOS_Security.pdf">Behind the Scenes with iOS Security - Ivan Krstić</a>的 P31-P34 的流程图，做个简要分析。</p>
+<h3 id="1-系统启动"><a href="#1-系统启动" class="headerlink" title="1. 系统启动"></a>1. 系统启动</h3><p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/boot.jpg" alt="File"></p>
+<ul>
+<li>SEP 使用 NDRBG 生成一个<code>临时封装密钥</code>，并通过专用线路传送给 NVM 控制器的 AES 引擎</li>
+<li>XNU（操作系统内核）的 AppleKeyStore 从 Effaceable storage 加载包裹状态的 EMF key 和 Dkey</li>
+<li>SEP 持有<code>Key 0x835</code>解封<code>Dkey</code>，将 Class D key 加入 Keyring</li>
+<li>SEP 使用<code>临时封装密钥</code>重新包裹 Class D key，<strong>用于后续该类型文件的统一解密密钥</strong></li>
+<li>XNU 加载系统分区表和文件系统元数据，发送给 SEP</li>
+<li>SEP 持有<code>Key 0x89B</code>解封<code>EMF key</code>，持有<code>media key</code>解密文件系统元数据，并返回给 XNU</li>
+</ul>
+<p>现在 Userspace 就可以正确处理 Class D 类型的文件了，然后是处理密钥包：</p>
+<ul>
+<li>用户空间启动<code>keybagd</code>系统进程，读取无保护的数据文件<code>/var/keybags/systembag.kb</code></li>
+<li><code>keybagd</code>从 Effaceable storage 加载 keybag prot key（即：Bag1，明文），并完成文件级解封</li>
+<li><code>keybagd</code>将解封后的密钥包发送给 SEP，SKS 将 Class B 的 Public key 加入 Keyring</li>
+</ul>
+<p>此时，SKS 就可以<strong>新建 Class B 类型文件</strong>（但不能读取已有文件，因为没有 Private key）；此外，SKS 安全内存中还有仍处于包裹状态的 Class A key、Class B 的 Private key 和 Class C key，需要等待第一次解锁！</p>
+<h3 id="2-首次解锁"><a href="#2-首次解锁" class="headerlink" title="2. 首次解锁"></a>2. 首次解锁</h3><p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/first-unlock.jpg" alt="File"></p>
+<ul>
+<li>用户空间的 SpringBoard（用户解锁界面）获得 passcode，通过 XNU 的 AppleKeyStore 发送给 SEP</li>
+<li>SEP 的 Secure Key Store 基于 PBKDF2 算法生成 master key（即 Passcode key 或 REK）</li>
+<li>基于 master key XOR Dkey 解封密钥包，如果校验成功则将 Boot 阶段未完成的 3 个类密钥加入 Keyring</li>
+</ul>
+<p>此时 SKS 就可以正确处理所有类型的文件了，然后是处理 Touch ID：</p>
+<ul>
+<li>SEP 的 SKS 随机生成一个 random secret</li>
+<li>SKS 使用 random secret 包裹 master key，并保存在 SEP 内部</li>
+<li>SKS 将 random secret 发送 SBIO</li>
+<li>SKS 从内存中销毁 master key</li>
+</ul>
+<p>这样以来，后续在没有输入 passcode 的情况下，可以使用 Touch ID 来恢复类密钥。</p>
+<h3 id="3-系统锁定"><a href="#3-系统锁定" class="headerlink" title="3. 系统锁定"></a>3. 系统锁定</h3><p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/lock.jpg" alt="File"></p>
+<p>如果用户界面触发了系统锁定事件，SKS 将从 Keyring 中删除 Class A key 和 Class B 的 private key。<br>注意！此时 Class C key 仍然可用，因为已经成功完成一次解锁。</p>
+<h3 id="4-指纹解锁"><a href="#4-指纹解锁" class="headerlink" title="4. 指纹解锁"></a>4. 指纹解锁</h3><p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/touch-id-unlock.jpg" alt="File"></p>
+<ul>
+<li>用户按压 Home 键时，启动指纹传感器</li>
+<li>指纹传感器匹配已存储模版，如果检测成功，SEP 的 SBIO 将 random secret 发送给 SKS</li>
+<li>SKS 根据 random secret 解封获得 master key，并将 Class A key 和 Class B 的 private key 添加到 Keyring</li>
+</ul>
+<p>现在，SKS 又可以准确处理所有文件了。</p>
+<h3 id="5-读取文件"><a href="#5-读取文件" class="headerlink" title="5. 读取文件"></a>5. 读取文件</h3><p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/file.jpg" alt="File"></p>
+<p>上图是一个简要描述，<a href="Apple_iOS_16_iPhone_Security_Target_v1.1.pdf">iOS 16 安全评估报告</a>的 P126 提供了更详细的步骤，但似乎存在一些偏差，后续有勘误分析！</p>
+<ul>
+<li>XNU 首先提取文件元数据（使用 EMF 密钥加密），并将其发送到 SEP</li>
+<li>SEP 持有 EMF 密钥，据此解密文件元数据，并将其发送回 XNU</li>
+<li>XNU 判断文件保护类型，并将文件密钥（用类密钥包裹）和<strong>类密钥标记</strong>发送到 SEP</li>
+<li>SEP 解开文件密钥，使用临时密钥重新包裹，并将其返回 XNU</li>
+<li>XNU 将文件访问请求（读&#x2F;写）与重新包裹的文件密钥一起发送到存储控制器。</li>
+<li>存储控制器使用其内部的 AES 硬件解密文件密钥，然后在从闪存传输数据或向闪存传输数据期间解密（读取操作时）或加密（写入操作时）数据</li>
+</ul>
+<h2 id="五、-Secure-Key-Store-服务接口"><a href="#五、-Secure-Key-Store-服务接口" class="headerlink" title="五、 Secure Key Store 服务接口"></a>五、 Secure Key Store 服务接口</h2><p><a href="Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf">Apple SKS 加密模块</a>的 P15-P17，提供了 SKS 系统服务清单。</p>
+<h3 id="1-完全符合-FIPS-140-2-的系统服务"><a href="#1-完全符合-FIPS-140-2-的系统服务" class="headerlink" title="1. 完全符合 FIPS 140-2 的系统服务"></a>1. 完全符合 FIPS 140-2 的系统服务</h3><ol>
+<li>文件系统服务（Class D File System Services）：无保护类型文件的系统（读&#x2F;写）服务<br> Key wrapping: UID，AES Key used to wrap Class D Key（key 0x835），Class D Key<br> File system keys：DEK（EMF 或 VEK）<br> Storage controller key：KEK（ DMA临时密钥 ）</li>
+<li>用户密钥包服务（User Keybag Services）：从 Device OS 导入包裹状态的用户密钥包<br> Keybag wrapping：AES Key shared with NVM Storage Controller<br> Keybag content：KEK</li>
+<li>设备密钥包服务（Device Keybag Services）：<br> Keybag wrapping: UID,AES Keys as part of module-managed keybags<br> Keybag content: KEK<br> Keychain keys: DEK<br> Sign&#x2F;verify key: ECDSA Private Key</li>
+<li>备份密钥包服务（Backup Keybag Services）：<br> Keybag wrapping：AES Key used to wrap Backup Keybag，PBKDF password for Backup Keybag，PBKDF Salt for Backup Keybag<br> Keybag content: KEK<br> Backup keys: DEK</li>
+<li>托管密钥包服务（Escrow Keybag Services）：<br> Keybag wrapping：AES Key used to wrap Escrow Keybag<br> Keybag content：KEK from User Keybag，DEK</li>
+<li>iCloud密钥包服务（iCloud Keybag Services）：<br> Keybag wrapping：REK derived from UID<br> Keybag content：DEK</li>
+<li>创建REK（Create REK）：<br> 加密因子：UID，PBKDF Password，PBKDF Salt for REK，DRBG internal state，Entropy input string，REK，KEK as AES key used to wrap REK</li>
+<li>更新REK（Update REK）：<br> 加密因子：UID，Old&#x2F;new PBKDF Password，PBKDF Salt for REK，DRBG internal state，Entropy input string，Old&#x2F;new REK derived from PBKDF Password</li>
+<li>生成密钥对（Generate Ref-Keys）：<br> 加密因子：EC Key Pair，Password，PBKDF Salt for EC Private Key Encryption Key</li>
+<li>生成共享密钥（Generate Shared Secret using EC keys generated by the module）：<br>加密因子：EC Key Pair，Password，PBKDF Salt for EC Private Key Encryption Key</li>
+<li>出厂重置（Erase all content）：清除 UID 之外的所有密钥和关键因子</li>
+<li>重启自检（Reboot that implies Self-test）：</li>
+<li>显示状态（Show Status）：</li>
+</ol>
+<h3 id="2-不符合-FIPS-140-2-的系统服务"><a href="#2-不符合-FIPS-140-2-的系统服务" class="headerlink" title="2. 不符合 FIPS 140-2 的系统服务"></a>2. 不符合 FIPS 140-2 的系统服务</h3><ol>
+<li>Generate Shared Secret using EC keys generated outside of the module</li>
+<li>Ed 25519 Digital signature generation</li>
+<li>Hash based KDF based on ANSI X9.63</li>
+<li>EC Diffie-Hellman Key Agreement using curve 25519</li>
+<li>RFC 5869 based HKDF</li>
+<li>AES-GCM Encryption and Decryption X</li>
+</ol>
+<h2 id="六、MacOS-FileVault-的技术分析"><a href="#六、MacOS-FileVault-的技术分析" class="headerlink" title="六、MacOS FileVault 的技术分析"></a>六、MacOS FileVault 的技术分析</h2><p>与 iPhone OS 相比，MacOS 的加密技术方案 FileVault 有着明显差异，一是仅支持单密钥的 FDE 加密方案，而非数据保护技术的 FBE 加密方案；二是 Macbook 长期使用 Intel CPU，硬件加密只能采用 T2 安全芯片的外挂方案。</p>
+<p>NIAP 根据 CC 安全标准定义了 FDE 的保护配置文件，请参见<a target="_blank" rel="noopener" href="https://www.niap-ccevs.org/Profile/PP.cfm">https://www.niap-ccevs.org/Profile/PP.cfm</a>，其核心功能组件分别为 AA（Authorization Acquisition，授权获取）和 EE（Encryption Engine，加密引擎），可以由不同的供应商提供组合能力。<br><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/FDE1.png" alt="FDE"></p>
+<p>一般来说，AA 和 EE 的运行环境可能会根据其运行平台的启动阶段而有所不同，初始化方面以及可能的授权可以在 Pre-Boot 中执行，同时配置、加密、解密和管理功能可能在 OS 中执行。</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/FDE2.png" alt="FDE"></p>
+<p>AA 组件有三种类型的加密因子，分别是设备厂商提供的硬件密钥，用户提供的 passcode，和 TRNG 随机生成的 salt，共同构成了机密性保护。<br>根据 <a href="Apple_MacOS_13_Ventura_FileVault_Security_Target.pdf">TOE 评估报告 - MacOS 13：FileVault</a>，P9 指出了 Apple 自研 CPU 负责实现 AA 和 EE 的全部功能，而 Intel CPU 只负责 AA 的 Password Acquisition 功能的实例化，其他核心功能仍然由 T2 安全芯片提供，具体对比见下图。</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/filevault2.png" alt="Intel"><br><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/filevault1.png" alt="M1"></p>
+<h2 id="七、几个问题的讨论"><a href="#七、几个问题的讨论" class="headerlink" title="七、几个问题的讨论"></a>七、几个问题的讨论</h2><h3 id="1-安全存储组件的数据保存在哪里？"><a href="#1-安全存储组件的数据保存在哪里？" class="headerlink" title="1. 安全存储组件的数据保存在哪里？"></a>1. 安全存储组件的数据保存在哪里？</h3><p>根据<a target="_blank" rel="noopener" href="https://help.apple.com/pdf/security/zh_CN/apple-platform-security-guide-cn.pdf">Apple平台安全保护-2022</a>的表述：</p>
+<ul>
+<li>虽然安全隔区不含储存设备，但它拥有一套将信息安全储存在所连接储存设备上的机制，<strong>该储存设备与应用程序处理器和操作系统使用的 NAND 闪存互相独立</strong>。</li>
+<li>安全隔区配备了<strong>专用的安全非易失性存储器设备</strong>。安全非易失性存储器通过专用的 I2C 总线与安全隔区连接，因此它仅可被安全隔区访问。所有用户数据加密密钥植根于储存在安全隔区非易失性存储器中的熵内。</li>
+<li>在未配备安全储存组件的架构上，<strong>EEPROM（电可擦除可编程只读存储器）被用于为安全隔区提供安全储存服务</strong>。跟安全储存组件类似，EEPROM 连接到安全隔区并仅可从安全隔区访问，但其不包含专用的硬件安全性功能，不能确保对熵的独有访问权限（除了其物理连接特性），也不具备计数器加密箱功能。</li>
+</ul>
+<p>总结一下，安全存储组件（Secure Storage Component）的（持久化）存储设备是一个专用芯片（早期是 EEPROM，但<strong>绝对不是 NAND 的 Effaceable Storage</strong>），通过专用 I2C 总线与安全隔区连接，即 Secure Encalve 标注的<strong>安全非易失性存储器（Secure nonvolatile storage）</strong>！</p>
+<h3 id="2-安全存储组件管理了哪些核心数据？"><a href="#2-安全存储组件管理了哪些核心数据？" class="headerlink" title="2. 安全存储组件管理了哪些核心数据？"></a>2. 安全存储组件管理了哪些核心数据？</h3><p>根据<a target="_blank" rel="noopener" href="https://help.apple.com/pdf/security/zh_CN/apple-platform-security-guide-cn.pdf">Apple平台安全保护-2022</a>的表述：</p>
+<ul>
+<li>搭载 A12、 S4 及后续型号 SoC 的设备并用了安全隔区与<strong>安全储存组件来储存熵</strong>。安全储存组件本身设计为使用不可更改的 ROM 代码、硬件随机数生成器、<strong>每个设备唯一的加密密钥</strong>、加密引擎和物理篡改检测。安全隔区和安全储存组件使用加密且认证的协议通信以提供对熵的独有访问权限。</li>
+<li>2020 年秋季或之后首次发布的设备（为抵御重放攻击）配备了第二代安全储存组件。第二代安全储存组件增加了计数器加密箱（和 xART 机制）。<strong>每个计数器加密箱储存一个 128 位盐、一个 128 位密码验证器、一个 8 位计数器，以及一个 8 位最大尝试值</strong>。对计数器加密箱的访问通过加密且认证的协议来实现。</li>
+<li>计数器加密箱中含有所需用于解锁受密码保护用户数据的熵。若要访问用户数据，<strong>配对的安全隔区必须从用户的密码和安全隔区的 UID 中派生出正确的密码熵值</strong>。从除配对安全隔区之外其他来源发送的解锁尝试均无法获知用户的密码。如果密码的尝试次数超过限制（例如，在 iPhone 上为 10 次），安全储存组件就会完全抹掉受密码保护的数据。</li>
+<li>为了创建计数器加密箱，安全隔区会向安全储存组件发送密码熵值和最大尝试次数值。安全储存组件会使用其随机数生成器生成盐值。之后<strong>通过提供的密码熵、安全储存组件的唯一加密密钥和盐值派生出密码验证器值和加密箱熵值</strong>。安全储存组件使用计数 0、提供的最大尝试次数值、派生的密码验证器值和盐值来初始化计数器加密箱。之后<strong>安全储存组件将生成的加密箱熵值返回到安全隔区</strong>。</li>
+<li>对于搭载 A9 或后续型号 SoC 的设备，该 .plist 文件（密钥包）包含一个密钥，表示密钥包储存在受<strong>反重放随机数（由安全隔区控制）</strong>保护的有锁储存库中。</li>
+</ul>
+<p>做个初步的分析。</p>
+<ol>
+<li>密码熵值和加密箱熵值在安全隔区和安全存储之间传递，这是一个标准的双向鉴权流程。<br> 密码熵值可以肯定就是 Passcode Key，加密箱熵值估计是系统密钥包的 SART 字段，即安全白皮书介绍的 A9 设备的新增密钥。<br> 早期版本的 HMCK 字段保存签名信息，但目标是密钥包内容的完整性，而非反重放攻击。</li>
+<li>核心密钥全部由 Secure Key Store 管理，安全储存组件仅负责存储一些关键的安全参数，包括：反重放随机数（区别于系统密钥包中、用于 REK 的 Salt）、密码验证器、计数器和最大尝试值等，这些数据不以任何形式输出，为 xART 机制提供额外的机密性。</li>
+<li>安全储存组件的唯一加密密钥（即 xART key）的构造方式不清楚，猜测是一个 UID 的固定衍生密钥（如果是原生密钥，就需要额外考虑持久化存储方式）。</li>
+</ol>
+<h3 id="3-操作系统绑定密钥的工作机制？"><a href="#3-操作系统绑定密钥的工作机制？" class="headerlink" title="3. 操作系统绑定密钥的工作机制？"></a>3. 操作系统绑定密钥的工作机制？</h3><p>SKP（Sealed Key Protection，密封密钥保护，也称操作系统绑定密钥），是使用系统软件的测量值和仅在硬件中可用的密钥来保护（或密封）加密密钥的一种技术。搭载 Apple 芯片的 Mac 上，对 KEK 的保护通过整合有关系统安全性策略的信息进一步得到了加强。</p>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/SKP.png" alt="SKP"></p>
+<ul>
+<li>Apple 设备支持一项称为密封密钥保护 (SKP) 的技术，其旨在确保加密材料在这些情况下不可用：脱离设备时，或者对操作系统版本或安全性设置存在未经用户正确授权的操纵时。<strong>此功能不是由安全隔区提供，而是由位于更底层的硬件寄存器支持</strong>，目的是针对解密用户数据所需的密钥提供独立于安全隔区的额外保护层</li>
+<li>由用户密码与长期 SKP 密钥和硬件密钥 1（安全隔区的 UID）配合使用而生成的密钥称为密码派生密钥。<strong>此密钥用于保护用户密钥包（在所有支持的平台上）和 KEK（仅限在 macOS 中）</strong>，然后启用生物识别解锁或使用其他设备（如Apple Watch）自动解锁</li>
+<li>在搭载 Apple 芯片的 Mac 中，LLB（Low Level Bootloader，底层引导载入程序）会验证设备是否存在有效的 LocalPolicy，且 LocalPolicy 策略随机数值是否与<strong>安全储存组件中所储存的值匹配</strong></li>
+<li>系统还会使用一个独立于 lpnh 和 rpnh 的随机数，以便设备被“查找”置于停用状态时，现有操作系统可被停用（通过将其 <strong>LPN 和 RPN 从安全储存组件中移除</strong>）的同时仍保持系统 recoveryOS 可启动</li>
+</ul>
+<p><img src="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/mac-boot.png" alt="搭载 Apple 芯片的 Mac 开机时的启动过程步骤"></p>
+<p>初步探讨一下：</p>
+<ol>
+<li>Hardward key 1 &#x3D; UID，Hardward key 2 &#x3D; Key 0x835</li>
+<li>LPN（Local Policy Number，本地策略随机数）和 RPN（Remote Policy Number，远程策略随机数）是用于 LLB 校验的策略随机数值，也在安全存储组件中保存。</li>
+<li>passcode key 仍然由 passcode 和 UID 通过 PBKDF2 算法生成，但是增加了 LPN 和 RPN 的校验环节以支持 SKP 功能。</li>
+<li>操作系统绑定的目的是阻止用户安装未经 Apple 授权的操作系统，从根本上杜绝了 iOS 越狱功能。对于个人使用的 iPhone，其只能通过 Apple Store 安装官方认证的 APP，但是对于生产力工具 Macbook 来说，必须支持用户手工安装应用程序，因此设定了不同的安全等级来支持。</li>
+</ol>
+<h3 id="4-Key-0x89B-和-Key-0x835-存储方式的勘误"><a href="#4-Key-0x89B-和-Key-0x835-存储方式的勘误" class="headerlink" title="4.  Key 0x89B 和 Key 0x835 存储方式的勘误"></a>4.  <code>Key 0x89B</code> 和 <code>Key 0x835</code> 存储方式的勘误</h3><p><a href="Apple_iOS_16_iPhone_Security_Target_v1.1.pdf">iOS 16 安全评估报告</a>的 P117 说明：<br>The UID is used to derive two other keys, called “Key 0x89B” and “Key 0x835”. These two keys are derived during <strong>the first boot</strong> by encrypting defined constants with the UID.</p>
+<p>P121 的密钥列表中，关于这两个 UID 衍生密钥的存储方式描述是：<br>SEP. Block 0 of the flash memory. (Effaceable storage.)</p>
+<p>P125 进一步描述：<br>The UID (a.k.a. UID key) is not accessible by any software. The “Key 0x89B” and “Key 0x835” keys are both derived by encrypting <strong>defined values (identical for all devices)</strong> with the UID key. All three keys are stored in the SEP. All other keys shown in the figure are stored in wrapped form in persistent storage and unwrapped when needed.</p>
+<p>笔者认为，这两个 UID 衍生密钥应该是安全隔区<strong>每次</strong>启动时，基于固定值计算得出并保存在内存中，无需持久化存储。</p>
+<ul>
+<li>Key 0x835 &#x3D; AES_KW(UID, 0x’01010101010101010101010101010101’)：Dkey 包裹密钥</li>
+<li>Key 0x89B &#x3D; AES_KW(UID, 0x’183e99676bb03c546fa468f51c0cbd49’)：EMF 包裹密钥</li>
+<li>Key 0x836 &#x3D; AES_KW(UID, 0x‘00E5A0E6526FAE66C5C1C6D4F16D6180’)</li>
+<li>Key 0x837 &#x3D; AES_KW(GID, 0x’345A2D6C5050D058780DA431F0710E15’)：Apple 固件的 img3 文件解密</li>
+<li>Key 0x838 &#x3D; AES_KW(UID, 0x’8C8318A27D7F030717D2B8FC5514F8E1‘)</li>
+</ul>
+<p>当然也有一种可能性，就是设备第一次启动时生成，并保存在安全存储组件的 Flash 中，这就留待后续验证吧。</p>
+<h3 id="5-关于文件读写流程的勘误"><a href="#5-关于文件读写流程的勘误" class="headerlink" title="5. 关于文件读写流程的勘误"></a>5. 关于文件读写流程的勘误</h3><p><a href="Apple_iOS_16_iPhone_Security_Target_v1.1.pdf">iOS 16 安全评估报告</a>的 P126 提供了详细的文件读写流程，但似乎存在一些偏差，其描述为：</p>
+<blockquote>
+<p>XNU 判断文件保护类型，并将类密钥（用 Dkey 包装，或 Dkey XOR Passcode Key 包装）和文件密钥（用类密钥包装）发送到 SEP</p>
+</blockquote>
+<p>笔者的分析认为，内部的 SKS keyring 保存已解封的类密钥，尚未解封类密钥也保存在 SKS memory ，因此 XNU 无需发送 wrapped class key，仅提供 class key type 即可，请参见安全白皮书的描述：</p>
+<blockquote>
+<p>当打开一个文件时，系统会使用文件系统密钥解密文件的元数据，以显露出<strong>封装的文件独有密钥</strong>和表示它受哪个<strong>类保护的记号</strong>。文件独有或范围独有密钥使用类密钥解封，然后提供给硬件 AES 引擎，该引擎会在从闪存中读取文件时对文件进行解密。所有封装文件密钥的处理发生在安全隔区中；文件密钥绝不会直接透露给应用程序处理器。启动时，安全隔区与 AES 引擎协商得到一个临时密钥。当安全隔区解开文件密钥时， 它们又通过该临时密钥再次封装，然后发送回应用程序处理器。</p>
+</blockquote>
+<p>此外，iOS 4 破解技术中介绍 WARP 类型‘3’ 是两轮解封，硬件加密简化为：<code>Dkey XOR PDK</code>？</p>
+<hr>
+<h2 id="附录：Cocoa-框架"><a href="#附录：Cocoa-框架" class="headerlink" title="附录：Cocoa 框架"></a>附录：Cocoa 框架</h2><p>Cocoa 是苹果公司为 macOS 所创建的原生面向对象的应用程序接口，是 Mac OS X 上五大 AP 之一（其它四个是Carbon、POSIX、X11 和 Java）。</p>
+<p>Cocoa 应用程序一般在苹果公司的开发工具 Xcode（前身为 Project Builder ）和 Interface Builder 上用Objective-C 写成。</p>
+<p>Cocoa包含三个主要的 Objective-C 对象库，称为“框架”。框架的功能类似于动态库，即可以在运行时动态的加载应用程序的地址空间，但框架作为一个捆绑而非独立文件，其中除了可执行代码外，也包含了资源，头文件和文档。</p>
+<ul>
+<li>Foundation：面向对象的通用函数库。提供了字符串，数值的管理，容器及其枚举，分布式计算，事件循环，以及一些其它的与图形用户界面没有直接关系的功能，其中用于类和常数的函数有<code>NS</code>前缀（因为源自于NeXTSTEP）。<br>  它可以在 MacOS 和 iOS 中使用。</li>
+<li>AppKit（Application Kit，应用程序工具包）：包含了程序与图形用户界面交互所需的代码。基于 Foundation 创建的，也使用<code>NS</code>前缀（因为其直接派生自 NeXTSTEP）。<br>  它只能在 MacOS 中使用。</li>
+<li>UIKit（User Interface Kit，用户界面工具包）：用于 iOS 的图形用户界面工具包。与AppKit不同，它使用<code>UI</code>的前缀。</li>
+</ul>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://blog.elcomsoft.com/2023/03/perfect-acquisition-part-1-introduction/">iOS 取证技术 - elcomsoft blog</a></li>
+<li><a target="_blank" rel="noopener" href="https://medium.com/hackernoon/demystifying-apples-touch-id-4883d5121b77">揭开 Apple Touch ID 的神秘面纱</a></li>
+<li><a target="_blank" rel="noopener" href="https://fisco-bcos-documentation.readthedocs.io/zh-cn/v2.8.0/docs/articles/3_features/36_cryptographic/elliptic_curve.html">一场椭圆曲线的寻根问祖之旅</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Elliptic-curve_cryptography">椭圆曲线密码学 - Wiki</a></li>
+<li><a target="_blank" rel="noopener" href="https://csrc.nist.gov/CSRC/media/Events/Key-Management-Workshop-2000/documents/x963_overview.pdf">ANSI X9.63 Overview</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.antpedia.com/standard/sp/65347.html">密钥管理的国际标准汇总</a></li>
+<li><a target="_blank" rel="noopener" href="https://askanydifference.com/zh-CN/difference-between-eeprom-and-flash-with-table/">EEPROM 与 Flash 的区别与比较</a></li>
+</ul>
+<h3 id="官方文档下载"><a href="#官方文档下载" class="headerlink" title="官方文档下载"></a>官方文档下载</h3><ul>
+<li><a href="apple-platform-security-guide-cn-2022.pdf">Apple 平台安全保护 - 2022年中文版</a></li>
+<li><a href="Apple_Secure_Key_Store_Cryptographic_Module_with_Notes.pdf">Apple SKS 加密模块（FIPS 140-2 非专用设备安全策略）- v10注释版</a></li>
+<li><a href="Apple_MacOS_13_Ventura_FileVault_Security_Target.pdf">TOE 评估报告 - MacOS 13：FileVault</a></li>
+<li><a href="Apple_iOS_16_iPhone_Security_Target_v1.1.pdf">TOE 评估报告 - iOS 16</a></li>
+<li><a href="Apple_T2_Security_Chip_Overview_2018.pdf">Apple T2 安全芯片概览</a></li>
+<li><a href="Behind_the_Scenes_with_iOS_Security.pdf">Behind the Scenes with iOS Security - Ivan Krstić</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=BLGFriOKz6U">Behind the Scenes with iOS Security 演讲视频</a></li>
+</ul>
+<h3 id="研究报告下载"><a href="#研究报告下载" class="headerlink" title="研究报告下载"></a>研究报告下载</h3><ul>
+<li><a href="iPhone_Data_Protection_in_Depth.pdf">iPhone Data Protection in Depth - Sogti</a></li>
+<li><a href="2016-BSidesROC-iOSCrypto.pdf">iOS Encryption - NCC Group</a></li>
+<li><a href="Platform_Security.pdf">iOS Platform Security</a></li>
+<li><a href="Data_Security_on_Mobile_Devices.pdf">Data Security on Mobile Devices</a></li>
+<li><a href="us-16-Mandt-Demystifying-The-Secure-Enclave-Processor.pdf">Demystifying the Secure Enclave Processor</a></li>
+<li><a href="iOS_Encryption_Systems.pdf">iOS Encryption Systems - 奥地利格拉茨技术大学</a></li>
+<li><a href="0721C6_Andrey.Belenko_Evolution.of.iOS.Data.Protection.pdf">iOS 5的数据保护技术分析</a></li>
+<li><a href="OWASP_BeNeLux_Day_2011_-_A._Belenko_-_Overcoming_iOS_Data_Protection.pdf">iPhone 数据保护技术 - ELComSoft</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/03/10/FIPS-140-%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/" rel="prev" title="FIPS 140 认证体系">
+                  <i class="fa fa-angle-left"></i> FIPS 140 认证体系
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" rel="next" title="Android 文件级加密技术分析">
+                  Android 文件级加密技术分析 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

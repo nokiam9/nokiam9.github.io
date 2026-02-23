@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="国密算法的概述 国密即国家密码局认定的国产密码算法。主要有SM1，SM2，SM3，SM4。密钥长度和分组长度均为128位。  2011年，国家密码管理局发布了《关于做好公钥密码算法升级工作的通知》，要求“自2011年3月1日起，在建和拟建公钥密码基础设施电子认证系统和密钥管理系统应使用国密算法。自2011年7月1日起，投入运行并使用公钥密码的信息系统，应使用SM2算法。”  国密SM1 SM1为对">
+<meta property="og:type" content="article">
+<meta property="og:title" content="国密标准的简介">
+<meta property="og:url" content="https://nokiam9.github.io/2019/08/29/%E5%9B%BD%E5%AF%86%E6%A0%87%E5%87%86%E7%9A%84%E7%AE%80%E4%BB%8B/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="国密算法的概述 国密即国家密码局认定的国产密码算法。主要有SM1，SM2，SM3，SM4。密钥长度和分组长度均为128位。  2011年，国家密码管理局发布了《关于做好公钥密码算法升级工作的通知》，要求“自2011年3月1日起，在建和拟建公钥密码基础设施电子认证系统和密钥管理系统应使用国密算法。自2011年7月1日起，投入运行并使用公钥密码的信息系统，应使用SM2算法。”  国密SM1 SM1为对">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-08-29T02:21:00.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.132Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2019/08/29/%E5%9B%BD%E5%AF%86%E6%A0%87%E5%87%86%E7%9A%84%E7%AE%80%E4%BB%8B/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2019/08/29/%E5%9B%BD%E5%AF%86%E6%A0%87%E5%87%86%E7%9A%84%E7%AE%80%E4%BB%8B/","path":"2019/08/29/国密标准的简介/","title":"国密标准的简介"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>国密标准的简介 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BD%E5%AF%86%E7%AE%97%E6%B3%95%E7%9A%84%E6%A6%82%E8%BF%B0"><span class="nav-text">国密算法的概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BD%E5%AF%86SM1"><span class="nav-text">国密SM1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BD%E5%AF%86SM2"><span class="nav-text">国密SM2</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BD%E5%AF%86SM3"><span class="nav-text">国密SM3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BD%E5%AF%86SM4"><span class="nav-text">国密SM4</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%951-%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E9%92%A5%E7%9A%84%E5%8A%A0%E5%AF%86%E7%B3%BB%E7%BB%9F"><span class="nav-text">附录1: 非对称密钥的加密系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RSA"><span class="nav-text">RSA</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ECC"><span class="nav-text">ECC</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DSA"><span class="nav-text">DSA</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%952-%E5%AF%B9%E7%A7%B0%E5%AF%86%E9%92%A5%E7%9A%84%E5%8A%A0%E5%AF%86%E7%B3%BB%E7%BB%9F"><span class="nav-text">附录2: 对称密钥的加密系统</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DES"><span class="nav-text">DES</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3DES"><span class="nav-text">3DES</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AES"><span class="nav-text">AES</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%953-%E6%95%B0%E5%AD%97%E6%91%98%E8%A6%81"><span class="nav-text">附录3: 数字摘要</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MD5"><span class="nav-text">MD5</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SHA"><span class="nav-text">SHA</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2019/08/29/%E5%9B%BD%E5%AF%86%E6%A0%87%E5%87%86%E7%9A%84%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="国密标准的简介 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          国密标准的简介
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-08-29 10:21:00" itemprop="dateCreated datePublished" datetime="2019-08-29T10:21:00+08:00">2019-08-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>3.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>12 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="国密算法的概述"><a href="#国密算法的概述" class="headerlink" title="国密算法的概述"></a>国密算法的概述</h2><p>国密即国家密码局认定的国产密码算法。主要有SM1，SM2，SM3，SM4。密钥长度和分组长度均为128位。</p>
+<p>2011年，国家密码管理局发布了《关于做好公钥密码算法升级工作的通知》，要求“自2011年3月1日起，在建和拟建公钥密码基础设施电子认证系统和密钥管理系统应使用国密算法。自2011年7月1日起，投入运行并使用公钥密码的信息系统，应使用SM2算法。”</p>
+<h2 id="国密SM1"><a href="#国密SM1" class="headerlink" title="国密SM1"></a>国密SM1</h2><p>SM1为对称加密。其加密强度与AES相当。该算法不公开，调用该算法时，需要通过加密芯片的接口进行调用。</p>
+<h2 id="国密SM2"><a href="#国密SM2" class="headerlink" title="国密SM2"></a>国密SM2</h2><p>SM2为基于ECC的非对称加密。该算法已公开。由于该算法基于ECC-256位，与RSA-2048相比，签名速度与秘钥生成速度更快，且安全强度更高。</p>
+<p>SM2椭圆曲线公钥密码算法是我国自主设计的公钥密码算法，包括SM2-1椭圆曲线数字签名算法，SM2-2椭圆曲线密钥交换协议，SM2-3椭圆曲线公钥加密算法，分别用于实现数字签名密钥协商和数据加密等功能。SM2算法与RSA算法不同的是，SM2算法是基于椭圆曲线上点群离散对数难题，相对于RSA算法，256位的SM2密码强度已经比2048位的RSA密码强度要高。</p>
+<h2 id="国密SM3"><a href="#国密SM3" class="headerlink" title="国密SM3"></a>国密SM3</h2><p>SM3是消息摘要。可以用MD5作为对比理解。该算法已公开。校验结果为256位。</p>
+<p>SM3密码杂凑算法是中国国家密码管理局于2010年公布的中国商用密码杂凑算法标准（其实也是哈希算法，或者单向散列算法），适用于商用密码应用中的数字签名和验证消息认证码的生成与验证以及随机数的生成，可满足多种密码应用的安全需求。</p>
+<p>该算法由王小云等人设计，消息分组为512位，经过填充和迭代压缩，生成256位的杂凑值。</p>
+<p>SM3算法的压缩函数与SHA-256的压缩函数具有相似结构，但其中关键的迭代压缩方法更有优势。</p>
+<p>为了保证杂凑算法的安全性，其产生的杂凑值的长度不应太短。MD5输出128比特杂凑值，SHA-1算法的输出长度为160比特，SM3算法的输出长度为256比特，因此SM3算法的安全性要高于MD5算法和SHA-1算法。</p>
+<h2 id="国密SM4"><a href="#国密SM4" class="headerlink" title="国密SM4"></a>国密SM4</h2><p>SM4为对称加密。来源于无线局域网标准的分组数据算法，密钥长度和分组长度均为128位。</p>
+<p>SM4分组密码算法是我国自主设计的分组对称密码算法，用于实现数据的加密&#x2F;解密运算，以保证数据和信息的机密性。要保证一个对称密码算法的安全性的基本条件是其具备足够的密钥长度，SM4算法与AES算法具有相同的密钥长度分组长度128比特，因此在安全性上高于3DES算法。</p>
+<hr>
+<h2 id="附录1-非对称密钥的加密系统"><a href="#附录1-非对称密钥的加密系统" class="headerlink" title="附录1: 非对称密钥的加密系统"></a>附录1: 非对称密钥的加密系统</h2><p>根据密钥类型不同将现代密码技术分为两类：对称加密算法和非对称加密算法。<br>非对称密钥加密系统采用的加密钥匙（公钥）和解密钥匙（私钥）是不同的。<br>常见的非对称加密算法如下：</p>
+<h3 id="RSA"><a href="#RSA" class="headerlink" title="RSA"></a>RSA</h3><p>由 RSA 公司发明，安全性依赖于大数分解，是一个支持变长密钥的公共密钥算法，需要加密的文件块的长度也是可变的；</p>
+<h3 id="ECC"><a href="#ECC" class="headerlink" title="ECC"></a>ECC</h3><p>ECC（Elliptic Curves Cryptography）：椭圆曲线密码编码学。</p>
+<h3 id="DSA"><a href="#DSA" class="headerlink" title="DSA"></a>DSA</h3><p>DSA（Digital Signature Algorithm）：数字签名算法，是一种标准的 DSS（数字签名标准）。</p>
+<ul>
+<li>DSA和RSA的基本原理都是大数分解，其安全性略高于与RSA，区别在于RSA的两个素数公开，这样，当使用别人的p和q时，即使不知道私钥，你也能确认它们是否是随机产生的，还是作了手脚，RSA算法却作不到。</li>
+<li>DSA只是一种算法，和RSA不同之处在于它不能用作加密和解密，也不能进行密钥交换，只用于签名,它比RSA要快很多.</li>
+</ul>
+<hr>
+<h2 id="附录2-对称密钥的加密系统"><a href="#附录2-对称密钥的加密系统" class="headerlink" title="附录2: 对称密钥的加密系统"></a>附录2: 对称密钥的加密系统</h2><h3 id="DES"><a href="#DES" class="headerlink" title="DES"></a>DES</h3><p>1977年1月，美国政府采纳IBM公司设计的方案作为非机密数据的正式数据加密标准（DES Data Encryption Standard) 。</p>
+<p>目前在国内，随着三金工程尤其是金卡工程的启动，DES算法在POS、ATM、磁卡及智能卡（IC卡）、加油站、高速公路收费站等领域被广泛应用，以此来实现关键数据的保密，如信用卡持卡人的PIN的加密传输，IC卡与POS间的双向认证、金融交易数据包的MAC校验等，均用到DES算法。</p>
+<p>DES算法的入口参数有三个：Key、Data、Mode</p>
+<ul>
+<li>Key为8个字节共64位，是DES算法的工作密钥；</li>
+<li>Data也为8个字节64位，是要被加密或被解密的数据；</li>
+<li>Mode为DES的工作方式，有两种：加密或解密。</li>
+</ul>
+<p>DES算法是这样工作的：</p>
+<ul>
+<li>如Mode为加密，则用Key 去把数据Data进行加密， 生成Data的密码形式（64位）作为DES的输出结果；</li>
+<li>如Mode为解密，则用Key去把密码形式的数据Data解密，还原为Data的明码形式（64位）作为DES的输出结果。</li>
+<li>在通信网络的两端，双方约定一致的Key，在通信的源点用Key对核心数据进行DES加密，然后以密码形式在公共通信网（如电话网）中传输到通信网络的终点，数据到达目的地后，用同样的Key对密码数据进行解密，便再现了明码形式的核心数据。这样，便保证了核心数据（如PIN、MAC等）在公共通信网中传输的安全性和可靠性。</li>
+</ul>
+<p>通过定期在通信网络的源端和目的端同时改用新的Key，便能更进一步提高数据的保密性，这正是现在金融交易网络的流行做法。</p>
+<h3 id="3DES"><a href="#3DES" class="headerlink" title="3DES"></a>3DES</h3><p>3DES是DES加密算法的一种模式，它使用3条64位的密钥对数据进行三次加密。数据加密标准（DES）是美国的一种由来已久的加密标准，它使用对称密钥加密法。</p>
+<p>3DES（即Triple DES）是DES向AES过渡的加密算法（1999年，NIST将3-DES指定为过渡的加密标准），是DES的一个更安全的变形。它以DES为基本模块，通过组合分组方法设计出分组加密算法。</p>
+<p>设Ek()和Dk()代表DES算法的加密和解密过程，K代表DES算法使用的密钥，P代表明文，C代表密表，这样，</p>
+<ul>
+<li><p>3DES加密过程为：C&#x3D;Ek3(Dk2(Ek1(P)))</p>
+</li>
+<li><p>3DES解密过程为：P&#x3D;Dk1((EK2(Dk3(C)))</p>
+</li>
+<li><p>K1、K2、K3决定了算法的安全性，若三个密钥互不相同，本质上就相当于用一个长为168位的密钥进行加密。多年来，它在对付强力攻击时是比较安全的。若数据对安全性要求不那么高，K1可以等于K3。在这种情况下，密钥的有效长度为112位。</p>
+</li>
+</ul>
+<h3 id="AES"><a href="#AES" class="headerlink" title="AES"></a>AES</h3><p>AES(Advanced Encryption Standard)：高级加密标准，是下一代的加密算法标准，速度快，安全级别高。</p>
+<p>用AES加密2000年10月，NIST（美国国家标准和技术协会）宣布通过从15种候选算法中选出的一项新的密匙加密标准。Rijndael被选中成为将来的 AES。Rijndael是在1999年下半年，由研究员Joan Daemen 和 Vincent Rijmen 创建的。AES正日益成为加密各种形式的电子数据的实际标准。</p>
+<p>美国标准与技术研究院（NIST）于2002年5月26日制定了新的高级加密标准（AES）规范。</p>
+<p>AES算法基于排列和置换运算。排列是对数据重新进行安排，置换是将一个数据单元替换为另一个。</p>
+<p>AES使用几种不同的方法来执行排列和置换运算。AES是一个迭代的、对称密钥分组的密码，它可以使用128、192和256位密钥，并且用128位（16字节）分组加密和解密数据。</p>
+<p>与公共密钥加密使用密钥对不同，对称密钥密码使用相同的密钥加密和解密数据。通过分组密码返回的加密数据的位数与输入数据相同。迭代加密使用一个循环结构，在该循环中重复置换和替换输入数据。</p>
+<h2 id="附录3-数字摘要"><a href="#附录3-数字摘要" class="headerlink" title="附录3: 数字摘要"></a>附录3: 数字摘要</h2><h3 id="MD5"><a href="#MD5" class="headerlink" title="MD5"></a>MD5</h3><p>MD5（Message-Digest Algorithm 5，信息摘要算法第5版）是计算机广泛使用的散列算法（也称“哈希算法”或“杂凑算法”）之一，采用带密钥的运算时，可同时用于消息完整性检测和消息源身份认证。它是由MD2、MD3和MD4版本一路发展而来，是Ronald Rivest 于1991年设计发布的，用于取代MD4。</p>
+<ul>
+<li>MD算法的基本工作机制：</li>
+</ul>
+<p>先在发送端将一个随机长度的消息，经过一系列的各种逻辑运算，以打乱原始消息的次序，生成一个128位的消息摘要（也称哈希值），并随着原始消息一起发送。</p>
+<p>原始消息，连同摘要消息一起到了接收端后，再采用相同的方法对所接收到的原始消息进行“压缩”，看生成的消息摘要是否与随着原始消息一起发送过来的消息摘要一致，一致则认为所接收的消息是完整的，在传输途中没有被非法篡改。</p>
+<ul>
+<li><p>对于带密钥的MD5消息摘要，不是直接基于原始消息进行计算的，还要与机密的预共享密钥（采用预共享密钥认证方法时），或者本端的公钥（采用数字证书认证方法时）结合起来计算的，而预共享密钥和本端公钥只有发送者和接收者才知道的，所以能保证摘要计算的机密性，产生独一无二的“数字指纹”，起到了消息源身份认证的目的。</p>
+</li>
+<li><p>MD5摘要运算是不可逆的（即具有单向性，也称之为“单向密钥”），不可通过摘要消息还原出原始的消息。当然，其实所有身份认证算法都是这样的，仅用于认证，不需要在接收端进行数据还原。也正因为如此，MD5算法通常不认为是一种加密算法，不具有解密能力。</p>
+</li>
+<li><p>MD5算法的主要应用于各种三层VPN通信的数据完整性验证和消息源身份认证外，也经常用于数字签名。</p>
+</li>
+</ul>
+<p>如我们常常在某些软件下载站点的某软件信息中看到其MD5值，它的作用就是用于在我们下载该软件后对下载回来的文件用专门的软件（如Windows MD5 Check等）做一次MD5校验，以确保我们获得的文件与该站点提供的文件为同一文件。利用MD5算法来进行文件校验的方案被大量应用到软件下载站、论坛数据库、系统文件安全等方面。</p>
+<p>另外，MD5还广泛用于操作系统的登陆验证上，如UNIX、各类BSD系统登录密码、数字签名等诸多方。如在UNIX系统中用户的密码是以MD5（或其他类似的算法）经Hash运算后存储在文件系统中。当用户登录的时候，系统把用户输入的密码进行MD5 Hash运算，然后再去和保存在文件系统中的MD5值进行比较，进而确定输入的密码是否正确。通过这样的步骤，系统在并不知道用户密码的明码的情况下就可以确定用户登录系统的合法性。避免用户的密码被具有系统管理员权限的用户知道。</p>
+<h3 id="SHA"><a href="#SHA" class="headerlink" title="SHA"></a>SHA</h3><p>SHA（Secure Hash Algorithm，安全哈希算法）主要适用于数字签名，也是一种不可逆的MAC算法，但比MD5算法更加安全。</p>
+<ul>
+<li><p>目前它有三种主要的版本，即SHA-0、SHA-1、SHA-2和SHA-3。<br>其中SHA-2和SHA-3版本中又有多种不同子分类，如在SHA-2中又根据它们最终所生成的摘要消息长度的不同又包括SHA-224、SHA-256、SHA-384和SHA-512等几种。</p>
+</li>
+<li><p>SHA算法的认证原理与前面介绍的MD5算法认证原理完全一致。</p>
+</li>
+<li><p>各种版本SHA算法的区别在于，进行散列运算时所涉及的一些参数特性不完全相同</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2019/07/05/SDN%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%80/" rel="prev" title="SDN学习笔记之一">
+                  <i class="fa fa-angle-left"></i> SDN学习笔记之一
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/10/26/Centos%E5%AE%BF%E4%B8%BB%E6%9C%BA%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85docker%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC/" rel="next" title="Centos宿主机如何安装docker最新版本">
+                  Centos宿主机如何安装docker最新版本 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

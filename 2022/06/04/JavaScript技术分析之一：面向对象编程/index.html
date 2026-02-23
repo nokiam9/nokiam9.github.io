@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、面向对象编程（Object-oriented programming） 对于面向对象的 OOP 编程语言，最基本的概念就是是：类、实例、对象。   * Class - 类是对象的类型模板    类是抽象的，而不是其所描述的对象集合中的任何特定的个体。    类定义了某一对象集合所具有的共同特征，包含了存储数据的结构（Attribute属性）和操纵数据的行为（Method方法）  * Insta">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript技术分析之一：面向对象编程">
+<meta property="og:url" content="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、面向对象编程（Object-oriented programming） 对于面向对象的 OOP 编程语言，最基本的概念就是是：类、实例、对象。   * Class - 类是对象的类型模板    类是抽象的，而不是其所描述的对象集合中的任何特定的个体。    类定义了某一对象集合所具有的共同特征，包含了存储数据的结构（Attribute属性）和操纵数据的行为（Method方法）  * Insta">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/class5.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/prototype.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/instance.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/extends-es5.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/extends-es6.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/Object-Function3.jpg">
+<meta property="article:published_time" content="2022-06-04T08:44:07.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.859Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/class5.jpg">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/","path":"2022/06/04/JavaScript技术分析之一：面向对象编程/","title":"JavaScript技术分析之一：面向对象编程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>JavaScript技术分析之一：面向对象编程 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%EF%BC%88Object-oriented-programming%EF%BC%89"><span class="nav-text">一、面向对象编程（Object-oriented programming）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E7%B1%BB%E7%9A%84OOP%E8%AF%AD%E8%A8%80"><span class="nav-text">基于类的OOP语言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%8E%9F%E5%9E%8B%E7%9A%84OOP%E8%AF%AD%E8%A8%80"><span class="nav-text">基于原型的OOP语言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90"><span class="nav-text">对比分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%8E%9F%E5%9E%8B%E9%93%BE%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-text">二、原型链的实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9A%90%E5%BC%8F%E5%8E%9F%E5%9E%8B%EF%BC%9A-proto"><span class="nav-text">隐式原型：__proto__</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%BE%E5%BC%8F%E5%8E%9F%E5%9E%8B%EF%BC%9A-prototype"><span class="nav-text">显式原型：[[prototype]]</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%9A%E8%BF%87new%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1"><span class="nav-text">通过new创建对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9E%8B%E9%93%BE%E7%9A%84%E7%A4%BA%E4%BE%8B"><span class="nav-text">原型链的示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%8E%9F%E5%9E%8B%E7%BB%A7%E6%89%BF%EF%BC%88ES5%EF%BC%89"><span class="nav-text">三、原型继承（ES5）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%9C%A8%E5%89%8D%EF%BC%8C%E7%BB%A7%E6%89%BF%E5%9C%A8%E5%90%8E"><span class="nav-text">实例在前，继承在后</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9E%8B%E9%93%BE%E7%BB%A7%E6%89%BF%E6%96%B9%E6%A1%88"><span class="nav-text">原型链继承方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0%E7%BB%A7%E6%89%BF%E6%96%B9%E6%A1%88"><span class="nav-text">构造函数继承方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E7%BE%8E%E7%BB%84%E5%90%88%E6%96%B9%E6%A1%88"><span class="nav-text">完美组合方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%9E%8B%E7%BB%A7%E6%89%BF%E7%9A%84%E7%A4%BA%E4%BE%8B"><span class="nav-text">原型继承的示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Class%E7%BB%A7%E6%89%BF%EF%BC%88ES6%EF%BC%89"><span class="nav-text">四、Class继承（ES6）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF%E5%9C%A8%E5%89%8D%EF%BC%8C%E5%AE%9E%E4%BE%8B%E5%9C%A8%E5%90%8E"><span class="nav-text">继承在前，实例在后</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%A4%E6%9D%A1%E7%BB%A7%E6%89%BF%E9%93%BE"><span class="nav-text">两条继承链</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Class%E7%BB%A7%E6%89%BF%E7%9A%84%E7%A4%BA%E4%BE%8B"><span class="nav-text">Class继承的示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9AObject%E5%92%8CFunction%EF%BC%8C%E5%85%88%E6%9C%89%E9%B8%A1%E8%BF%98%E6%98%AF%E5%85%88%E6%9C%89%E8%9B%8B%EF%BC%9F"><span class="nav-text">附录一：Object和Function，先有鸡还是先有蛋？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%87%E7%89%A9%E5%A7%8B%E7%A5%96-Object"><span class="nav-text">万物始祖 - Object</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E7%AD%89%E5%85%AC%E6%B0%91-Function"><span class="nav-text">一等公民 - Function</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9A%E5%88%A4%E6%96%AD%E5%8E%9F%E5%9E%8B%E5%92%8C%E5%AE%9E%E4%BE%8B%E4%B9%8B%E9%97%B4%E5%85%B3%E7%B3%BB%E7%9A%84Object%E5%86%85%E7%BD%AE%E6%96%B9%E6%B3%95"><span class="nav-text">附录二：判断原型和实例之间关系的Object内置方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%89%EF%BC%9AObject-create-%E6%96%B9%E6%B3%95"><span class="nav-text">附录三：Object.create()方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="JavaScript技术分析之一：面向对象编程 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JavaScript技术分析之一：面向对象编程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-06-04 16:44:07" itemprop="dateCreated datePublished" datetime="2022-06-04T16:44:07+08:00">2022-06-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>16 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、面向对象编程（Object-oriented-programming）"><a href="#一、面向对象编程（Object-oriented-programming）" class="headerlink" title="一、面向对象编程（Object-oriented programming）"></a>一、面向对象编程（Object-oriented programming）</h2><p>对于面向对象的 OOP 编程语言，最基本的概念就是是：类、实例、对象。</p>
+<ul>
+<li>Class - 类是对象的类型模板<br>  类是抽象的，而不是其所描述的对象集合中的任何特定的个体。<br>  类定义了某一对象集合所具有的共同特征，包含了存储数据的结构（Attribute属性）和操纵数据的行为（Method方法）</li>
+<li>Instance - 实例是根据类创建的对象<br>  对象就是实例，是一个类的实例化。例如， Victoria 是 Employee 类的一个实例，表示一个特定的雇员个体。<br>  实例具有和其父类完全一致的属性，不多也不少。</li>
+</ul>
+<h3 id="基于类的OOP语言"><a href="#基于类的OOP语言" class="headerlink" title="基于类的OOP语言"></a>基于类的OOP语言</h3><p>大多数的OOP编程语言采用基于类（class-based）的模式，也称为经典模式，包括Java、Python、C++等，例如Java的开发过程完全基于Class，每个jar包就是一个完整的类定义，其核心理念是：</p>
+<ul>
+<li>强调类和实例是两种完全不同的实体，通过类来描述实例对象应该具有哪些状态和行为</li>
+<li>类是一个模板，对象是一个实例，必须首先定义类，然后才能根据模板完成相应对象的创建工作</li>
+<li>类与类之间形成了继承、组合等关系</li>
+</ul>
+<h3 id="基于原型的OOP语言"><a href="#基于原型的OOP语言" class="headerlink" title="基于原型的OOP语言"></a>基于原型的OOP语言</h3><p>然而，少数语言坚持采用基于原型（prototype-based）的模式，主要是JavaScript、Lua、Perl等，不区分类和实例的概念，而是通过原型（prototype）来实现面向对象编程。其强调程序员应关注一系列对象实例的行为，并将这些对象划分为使用方式相似的原型对象，而不是努力去将实体抽象为难以理解的Class。</p>
+<ul>
+<li>强调原型对象(prototypical object)，即不是根据“模板”，而是通过“复制”一个已经存在的对象（原型）来创建另一个新对象</li>
+<li>任何对象都可以作为另一个对象的原型，从而允许后者共享前者的属性，但只允许单继承</li>
+<li>强调动态属性和方法，任何对象都可以指定其自身的属性，既可以是创建时也可以在运行时修改</li>
+</ul>
+<h3 id="对比分析"><a href="#对比分析" class="headerlink" title="对比分析"></a>对比分析</h3><table>
+<thead>
+<tr>
+<th>基于类的（Java）</th>
+<th>基于原型的（JavaScript）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>类和实例是不同的实体,通过类定义来定义类，通过构造器方法来实例化类</td>
+<td>所有对象都是实例，无需单独的类定义，通过构造器函数来定义和创建一组对象</td>
+</tr>
+<tr>
+<td>通过类定义来定义现存类的子类，从而构建对象的层级结构</td>
+<td>指定一个对象作为原型，并且与构造函数一起构建对象的层级结构</td>
+</tr>
+<tr>
+<td>支持多重继承，遵循<strong>类链</strong>继承属性</td>
+<td>仅支持单继承，遵循<strong>原型链</strong>继承属性</td>
+</tr>
+<tr>
+<td>类定义指定类的所有实例的所有属性，不允许运行时动态添加属性</td>
+<td>构造器函数或原型指定实例的初始属性集，允许动态地向单个对象或者整个对象集中添加或移除属性</td>
+</tr>
+<tr>
+<td>通过<code>new</code>操作符创建单个对象</td>
+<td>相同</td>
+</tr>
+</tbody></table>
+<h2 id="二、原型链的实现原理"><a href="#二、原型链的实现原理" class="headerlink" title="二、原型链的实现原理"></a>二、原型链的实现原理</h2><p>早期的JavaScript支持<code>Object</code>对象，但根本没有类的概念，也不支持<code>Class</code>关键字，实现类定义的唯一途径就是通过函数来<strong>模拟</strong>实现。<br>以ECMAScript 5为例，定义一个类就等同于定义一个构造函数，实现继承关系就是把一个对象(函数)的原型指向另一个对象(函数)，依次延展从而构成一条原型链。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义Person类的构造函数</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">Person</span>(<span class="params">name</span>) &#123;</span><br><span class="line">  <span class="comment">// 实例属性</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">name</span> = name</span><br><span class="line">  <span class="comment">// 实例方法</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">sayName</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">name</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> person1 = <span class="keyword">new</span> <span class="title class_">Person</span>(<span class="string">&#x27;xyf1&#x27;</span>)</span><br><span class="line"><span class="keyword">var</span> person2 = <span class="keyword">new</span> <span class="title class_">Person</span>(<span class="string">&#x27;xyf2&#x27;</span>)</span><br><span class="line"><span class="comment">//true</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(person1.<span class="property">constructor</span> === <span class="title class_">Person</span>)</span><br></pre></td></tr></table></figure>
+
+<p>实现原型链继承的关键是<code>__proto__</code>（隐式原型）和 <code>[[prototype]]</code>（显示原型）,JavaScript正是通过两者的合作实现了原型链，以及对象的继承。</p>
+<blockquote>
+<p>Every JavaScript object has a second JavaScript object (or null ,but this is rare) associated with it.<br>This second object is known as a prototype, and the first object inherits properties from the prototype.</p>
+</blockquote>
+<h3 id="隐式原型：-proto"><a href="#隐式原型：-proto" class="headerlink" title="隐式原型：__proto__"></a>隐式原型：<code>__proto__</code></h3><ul>
+<li>每个对象都有的一个属性，指向当前对象的原型对象</li>
+<li>当访问一个对象的属性时，如果对象内部不存在该属性，那么就通过<code>__proto__</code>去原型对象中寻找该属性，并一直循环下去，这就是<strong>原型链</strong>的概念</li>
+</ul>
+<h3 id="显式原型：-prototype"><a href="#显式原型：-prototype" class="headerlink" title="显式原型：[[prototype]]"></a>显式原型：<code>[[prototype]]</code></h3><ul>
+<li>函数作为一类特殊对象，在创建时将自动添加<code>[[prototype]]</code>属性</li>
+<li><code>[[prototype]]</code>指向一个拥有<code>constructor</code>属性的对象（指回该原型的构造函数），如果该函数作为构造函数被调用时（即通过new关键字调用），将自动创建该构造函数的实例</li>
+<li><code>[[prototype]]</code>同样拥有<code>__proto__</code>属性，指向上一层的对象原型，用于添加可继承的方法和属性</li>
+</ul>
+<p>实际上，JavaScript规定：任意函数对象都必须拥有内置属性<code>[[Prototype]]</code>，并据此实现原型链，这也是其被称为<strong>显式原型</strong>的原因。</p>
+<p>但是，该规范要求并没有定义<strong>如何实现</strong>以及<strong>如何访问</strong>这个内置属性，而是由各个浏览器自行负责技术实现，大多数浏览器的解决方案都是设置<code>__proto__</code>属性用于访问<code>[[Prototype]]</code>属性，但这并不是统一标准，这也是其被称为<strong>隐式原型</strong>的原因。</p>
+<p>后来，EMCAScript对此进行了进一步规范：</p>
+<ul>
+<li>ES5 定义了<code>Object.getPrototypeOf</code>方法，可以获得一个对象的<code>[[Prototype]]</code>属性</li>
+<li>ES6 定义了<code>Object.setPrototypeOf</code>方法，可以直接修改一个对象的<code>[[Prototype]]</code>属性</li>
+</ul>
+<h3 id="通过new创建对象"><a href="#通过new创建对象" class="headerlink" title="通过new创建对象"></a>通过<code>new</code>创建对象</h3><p>EMCAScript 5提供了<code>new</code>关键字，用于创建对象实例，其主要步骤参见myNew的伪代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">myNew</span>(<span class="params">Fn, ...param</span>) &#123;</span><br><span class="line">    <span class="comment">// 1. 创建一个空对象&#123;&#125;</span></span><br><span class="line">    <span class="keyword">var</span> obj = <span class="keyword">new</span> <span class="title class_">Object</span>();</span><br><span class="line">    <span class="comment">// 2. 设置新对象的原型链指向obj</span></span><br><span class="line">    obj.<span class="property">__proto__</span> = <span class="title class_">Fn</span>.<span class="property"><span class="keyword">prototype</span></span>;</span><br><span class="line">    <span class="comment">// 3. 将新对象作为`this`指向obj，并调用其构造函数</span></span><br><span class="line">    <span class="comment">// 注意call()调用，并支持构造函数的传参</span></span><br><span class="line">    <span class="keyword">var</span> result = <span class="title class_">Fn</span>.<span class="title function_">call</span>(obj, ...param);</span><br><span class="line">    <span class="comment">// 4. 将新对象作为返回值</span></span><br><span class="line">    <span class="comment">// 注意：需要判断Func的返回值类型：如果是值类型，返回obj；如果是引用类型，就返回这个引用类型的对象    </span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">typeof</span> result === <span class="string">&#x27;object&#x27;</span>          </span><br><span class="line">        || <span class="keyword">typeof</span> result === <span class="string">&#x27;function&#x27;</span> ? result : obj</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上步骤完成后，新对象实例就与其原型<code>Person</code>再无联系，这个时候即使其原型<code>Person</code>后续增加了成员属性，都不再影响已经实例化的新对象了。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">person1.<span class="property">__proto__</span> === <span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span>                  <span class="comment">// true</span></span><br><span class="line">person1.<span class="property">__proto__</span>.<span class="property">__proto__</span> === <span class="title class_">Object</span>.<span class="property"><span class="keyword">prototype</span></span>        <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line">person1.<span class="property">constructor</span> === <span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">constructor</span>    <span class="comment">// true</span></span><br><span class="line">person1.<span class="property">constructor</span> === <span class="title class_">Person</span>.<span class="property">__proto__</span>.<span class="property">constructor</span>    <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="原型链的示例"><a href="#原型链的示例" class="headerlink" title="原型链的示例"></a>原型链的示例</h3><p>以person1为例，我们来看看原型链是如何实现的：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">person1 ---&gt; Person.Prototype ---&gt; Object.Prototype ---&gt; null</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/class5.jpg" alt="原型链的全貌"></p>
+<p><img src="/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/prototype.png" alt="prototype示例"></p>
+<ul>
+<li><code>name</code>：person1拥有的实例属性</li>
+<li><code>sayName</code>：person1拥有的实例方法</li>
+<li><code>[[Prototype]]</code>：是person1的原型链，指向实例的原型对象<code>Person.Prototype</code></li>
+</ul>
+<p>进一步，我们来分析原型对象<code>Person.Prototype</code>的内容：</p>
+<ul>
+<li><code>constructor</code>：就是一个指针，指回该原型的构造函数<code>Person.constructor</code></li>
+<li><code>[[Prototype]]</code>：还是一个原型链，指向该原型的上一层原型<code>Object.[[Prototype]]</code></li>
+</ul>
+<p>换一个角度，我们来看看person1实例的表现形式。奇怪的是，我们可以看到<code>name</code>属性和<code>sayName</code>方法，但是<code>[[Prototype]]</code>在哪里呢？</p>
+<p><img src="/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/instance.png" alt="实例的属性"></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Object</span>.<span class="title function_">getPrototypeOf</span>(person1) === <span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span>     <span class="comment">// true</span></span><br><span class="line">preson1.<span class="property"><span class="keyword">prototype</span></span>                                       <span class="comment">// undefined</span></span><br><span class="line">person1.<span class="property">__proto__</span> === <span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span>                  <span class="comment">// true</span></span><br><span class="line">person1.<span class="property">__proto__</span>.<span class="property">__proto__</span> === <span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span>        <span class="comment">// false</span></span><br><span class="line">person1.<span class="property">__proto__</span>.<span class="property">__proto__</span> === <span class="title class_">Object</span>.<span class="property"><span class="keyword">prototype</span></span>        <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="三、原型继承（ES5）"><a href="#三、原型继承（ES5）" class="headerlink" title="三、原型继承（ES5）"></a>三、原型继承（ES5）</h2><p>基于类的面向对象编程中，类继承(Inherit)是非常重要的特征，其本质是子类对父类定义的扩展。</p>
+<h3 id="实例在前，继承在后"><a href="#实例在前，继承在后" class="headerlink" title="实例在前，继承在后"></a>实例在前，继承在后</h3><p>由于ES5不支持<code>Class</code>关键字，这就意味着根本不存在类定义，那如何实现类定义的扩展呢？还是老办法，通过函数来<strong>模拟</strong>。<br>解决方案：先创造一个独立的子类的实例对象，然后再将父类的方法添加到这个对象上面，即：<strong>实例在前，继承在后</strong>。</p>
+<p>具体来说，原型继承有两个核心问题要解决：一是如何将父类的实例属性传递给子类，也就是构造函数继承问题；二是如何将父类原型的方法传递给子类？也就是原型链继承问题。</p>
+<h3 id="原型链继承方案"><a href="#原型链继承方案" class="headerlink" title="原型链继承方案"></a>原型链继承方案</h3><p>核心思想：子类的原型指向父类的一个实例</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Child</span>.<span class="property"><span class="keyword">prototype</span></span> = <span class="keyword">new</span> <span class="title class_">Parent</span>();</span><br></pre></td></tr></table></figure>
+
+<p>优点：由于方法定义在父类的原型上，可以直接复用父类构造函数中的方法<br>缺点：创建子类实例的时候，不能传参数；由于子类实例共享了父类构造函数的引用属性，不同子类实例的引用属性可能互相污染</p>
+<h3 id="构造函数继承方案"><a href="#构造函数继承方案" class="headerlink" title="构造函数继承方案"></a>构造函数继承方案</h3><p>核心思想：借用父类的构造函数来增强子类实例，等于是复制父类的实例属性给子类</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">Child</span>(<span class="params">name</span>) &#123;</span><br><span class="line">    <span class="title class_">Parent</span>.<span class="title function_">call</span>(<span class="variable language_">this</span>,name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>优点：创建子类实例，可以向父类构造函数传参数；不同子类实例之间独立，引用属性不存在污染<br>缺点：子类实例无法继承父类原型的方法</p>
+<h3 id="完美组合方案"><a href="#完美组合方案" class="headerlink" title="完美组合方案"></a>完美组合方案</h3><p>由于两种基本方法都存在缺陷，随后提出了组合继承、寄生继承等不同优化方案，最后整合为本完美组合的方案，这也是ES5的推荐方案。</p>
+<p><img src="/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/extends-es5.png" alt="原型继承"></p>
+<ul>
+<li>采用组合继承方案，将发生两次父类构造函数的调用，一是子类构造函数的<code>Parent.call(this,name,like)</code>，二是创建父类实例<code>Child.prototype = new Parent()</code>，虽然内容一致不会报错，但是冗余代码影响执行效率，也不优美！</li>
+<li>采用优化的组合继承方案，通过<code>Child.prototype = Parent.prototype</code>替换<code>Child.prototype = new Parent()</code>，虽然不再产生二次构造函数调用，但是子类的原型被强制指向父类的原型，造成实质上子类原型和父类原型是同一个，必须手工进行修正</li>
+<li>完美组合方案进行了进一步优化，解决方案是通过<code>Object.create()</code>方法通过一个桥接的空函数，实现父类原型和子类原型的分离，具体参见附录三</li>
+</ul>
+<h3 id="原型继承的示例"><a href="#原型继承的示例" class="headerlink" title="原型继承的示例"></a>原型继承的示例</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">Parent</span>(<span class="params">name</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">name</span> = name; <span class="comment">// 实例基本属性 (该属性，强调私有，不共享)</span></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">arr</span> = [<span class="number">1</span>]; <span class="comment">// (该属性，强调私有)</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title class_">Parent</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">say</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123; <span class="comment">// --- 将需要复用、共享的方法定义在父类原型上 </span></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;hello&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">Child</span>(<span class="params">name,like</span>) &#123;</span><br><span class="line">    <span class="comment">// 核心！通过构造函数继承父类实例的属性和方法</span></span><br><span class="line">    <span class="title class_">Parent</span>.<span class="title function_">call</span>(<span class="variable language_">this</span>,name,like) </span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">like</span> = like;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 核心！通过原型链继承父类原型的属性和方法，并通过构造中间对象隔离子类原型和父类原型</span></span><br><span class="line"><span class="title class_">Child</span>.<span class="property"><span class="keyword">prototype</span></span> = <span class="title class_">Object</span>.<span class="title function_">create</span>(<span class="title class_">Parent</span>.<span class="property"><span class="keyword">prototype</span></span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 关键！修复构造函数指向的代码</span></span><br><span class="line"><span class="title class_">Child</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">constructor</span> = <span class="title class_">Child</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> boy1 = <span class="keyword">new</span> <span class="title class_">Child</span>(<span class="string">&#x27;小红&#x27;</span>,<span class="string">&#x27;apple&#x27;</span>)</span><br><span class="line"><span class="keyword">let</span> boy2 = <span class="keyword">new</span> <span class="title class_">Child</span>(<span class="string">&#x27;小明&#x27;</span>,<span class="string">&#x27;orange&#x27;</span>)</span><br><span class="line"><span class="keyword">let</span> p1 = <span class="keyword">new</span> <span class="title class_">Parent</span>(<span class="string">&#x27;小爸爸&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、Class继承（ES6）"><a href="#四、Class继承（ES6）" class="headerlink" title="四、Class继承（ES6）"></a>四、Class继承（ES6）</h2><h3 id="继承在前，实例在后"><a href="#继承在前，实例在后" class="headerlink" title="继承在前，实例在后"></a>继承在前，实例在后</h3><p>尽管ES5可以基本准确地实现类继承，但是需要编写大量代码，而且难以理解，为此ES6正式引入了<code>Class</code>关键字，并通过<code>extends</code>关键字实现继承。<br>由于ES6可以支持类定义，其继承机制就调整为：先将父类的属性和方法，加到一个空的对象上面，然后再将该对象作为子类的实例，即：<strong>继承在前，实例在后</strong>。</p>
+<ul>
+<li>一个类必须有<code>constructor()</code>方法，如果没有显式定义，一个空的<code>constructor()</code>方法会被默认添加</li>
+<li>子类必须在<code>constructor()</code>方法中调用<code>super()</code>，否则新建实例会报错就会报错</li>
+<li>通过<code>new</code>命令生成对象实例时，自动调用其构造方法</li>
+<li>类的所有方法都定义在类的原型上，在类的内部定义方法不用加<code>function</code>关键字</li>
+</ul>
+<blockquote>
+<p>子类的构造函数通过继承父类的this对象，并对其进行加工，因此如果不调用<code>super()</code>方法，子类就得不到this对象</p>
+</blockquote>
+<h3 id="两条继承链"><a href="#两条继承链" class="headerlink" title="两条继承链"></a>两条继承链</h3><p>Class 作为构造函数的语法糖，类定义同时拥有<code>prototype</code>属性和<code>__proto__</code>属性，并由此构造了两条继承链，分别用于属性继承和方法继承。<br><code>extends</code>关键字不仅可以用来继承类，还可以用来继承原生的构造函数。因此可以在原生数据结构的基础上，定义自己的数据结构</p>
+<ul>
+<li>子类的__proto__属性：表示构造函数的继承，总是指向父类</li>
+<li>子类prototype属性的__proto__属性：表示方法的继承，总是指向父类的prototype属性</li>
+</ul>
+<p>需要注意的是，ES6的<code>Class</code>关键字并未修改底层设计，实际就是一个语法糖，所有功能ES5都可以实现，只是更加清晰和方便了！</p>
+<p><img src="/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/extends-es6.png" alt="Class继承"></p>
+<h3 id="Class继承的示例"><a href="#Class继承的示例" class="headerlink" title="Class继承的示例"></a>Class继承的示例</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Parent</span> &#123;</span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params">name</span>) &#123;</span><br><span class="line">       <span class="variable language_">this</span>.<span class="property">name</span> = name;</span><br><span class="line">       <span class="variable language_">this</span>.<span class="property">arr</span> = [<span class="number">1</span>];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_">say</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;hello&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Child</span> <span class="keyword">extends</span> <span class="title class_ inherited__">Parent</span> &#123;</span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params">name, like</span>) &#123;</span><br><span class="line">        <span class="variable language_">super</span>(name);</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">like</span> = like;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> boy1 = <span class="keyword">new</span> <span class="title class_">Child</span>(<span class="string">&#x27;小红&#x27;</span>,<span class="string">&#x27;apple&#x27;</span>)</span><br><span class="line"><span class="keyword">let</span> boy2 = <span class="keyword">new</span> <span class="title class_">Child</span>(<span class="string">&#x27;小明&#x27;</span>,<span class="string">&#x27;orange&#x27;</span>)</span><br><span class="line"><span class="keyword">let</span> p1 = <span class="keyword">new</span> <span class="title class_">Parent</span>(<span class="string">&#x27;小爸爸&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>可以通过以下测试检查Class继承的准确性。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">boy1.<span class="property">__proto__</span> === <span class="title class_">Child</span>.<span class="property"><span class="keyword">prototype</span></span>                  <span class="comment">// true  </span></span><br><span class="line"></span><br><span class="line"><span class="title class_">Child</span>.<span class="property">__proto__</span> === <span class="title class_">Parent</span>                          <span class="comment">// true</span></span><br><span class="line"><span class="title class_">Child</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">__proto__</span> === <span class="title class_">Parent</span>.<span class="property"><span class="keyword">prototype</span></span>      <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">Object</span>.<span class="title function_">getPrototypeOf</span>(boy1) === <span class="title class_">Child</span>.<span class="property"><span class="keyword">prototype</span></span>     <span class="comment">// true</span></span><br><span class="line"><span class="title class_">Object</span>.<span class="title function_">getPrototypeOf</span>(<span class="title class_">Child</span>) === <span class="title class_">Parent</span>             <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="附录一：Object和Function，先有鸡还是先有蛋？"><a href="#附录一：Object和Function，先有鸡还是先有蛋？" class="headerlink" title="附录一：Object和Function，先有鸡还是先有蛋？"></a>附录一：Object和Function，先有鸡还是先有蛋？</h2><p>JavaScript语言的数据类型由基本类型和对象类型两类组成。</p>
+<ol>
+<li><p>基本类型：直接表示在语言底层的不可变数据，也称为值类型，包括：</p>
+<ul>
+<li>String：字符串类型</li>
+<li>Number：数字类型</li>
+<li>Boolean：布尔类型</li>
+<li>Null：空类型</li>
+<li>Undefined：未定义类型</li>
+<li>BigInt：大整数类型</li>
+<li>Symbol：符号类型，表示独一无二的值，ES6引入</li>
+</ul>
+</li>
+<li><p>对象类型：一种无序的集合数据类型，由若干键值对(Key : Value)组成，用于描述现实世界某个对象的一组属性。</p>
+<ul>
+<li>Object：对象类型，这是最基本的对象类型</li>
+<li>Function：函数类型，由Object构造而来，最重要的一等公民</li>
+<li>数组（Array）、正则（RegExp）、日期（Date）等都是Object衍生的对象类型</li>
+</ul>
+</li>
+</ol>
+<h3 id="万物始祖-Object"><a href="#万物始祖-Object" class="headerlink" title="万物始祖 - Object"></a>万物始祖 - Object</h3><p>在JavaScript的世界里，万物皆对象！<br><code>Object.[[Prototype]]</code>就是万物的始祖，继承于虚无。<br>Object是对象的始祖，但也是一个函数。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Object</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">__proto__</span> === <span class="literal">null</span>             <span class="comment">// true</span></span><br><span class="line"><span class="title class_">Object</span>.<span class="property">__proto__</span> === <span class="title class_">Function</span>.<span class="property"><span class="keyword">prototype</span></span>         <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="一等公民-Function"><a href="#一等公民-Function" class="headerlink" title="一等公民 - Function"></a>一等公民 - Function</h3><p>在JavaScript的世界里，函数是一等公民！<br><code>Function.[[Prototype]]</code>是函数的原型，也是对象，同样源自于<code>Object.[[Prototype]]</code><br><code>Object.[[Prototype]]</code>的具体实现<code>Object.__proto__</code>，指向函数的原型<code>Function.[[Prottype]]</code><br><code>Function.[[Prototype]]</code> 是个特殊的函数对象，它忽略参数总是返回 undefined，且没有 <code>[[Construct]]</code>内部方法<br>通过<code>Function.prototype.bind</code>方法构造出来的函数是个例外，它没有<code>[[Prototype]]</code>属性</p>
+<p><img src="/2022/06/04/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%B8%80%EF%BC%9A%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B/Object-Function3.jpg" alt="Object和Function的关系"></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Function</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">__proto__</span> === <span class="title class_">Object</span>.<span class="property"><span class="keyword">prototype</span></span>       <span class="comment">// true</span></span><br><span class="line"><span class="title class_">Object</span>.<span class="property"><span class="keyword">prototype</span></span> === <span class="title class_">Function</span>.<span class="property"><span class="keyword">prototype</span></span>                 <span class="comment">// false</span></span><br><span class="line"><span class="title class_">Object</span>.<span class="property">__proto__</span> === <span class="title class_">Function</span>.<span class="property"><span class="keyword">prototype</span></span>                 <span class="comment">// true</span></span><br><span class="line"><span class="title class_">Object</span>.<span class="property">__proto__</span> === <span class="title class_">Function</span>.<span class="property">__proto__</span>                 <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+
+<p>最后总结一下：</p>
+<ul>
+<li><code>Object.prototype</code>是原型链的顶端，<code>Function.prototype</code>继承<code>Object.prototype</code>而产生</li>
+<li><code>Function</code>、<code>Object</code>以及其它构造函数，都是继承<code>Function.prototype</code>而产生</li>
+</ul>
+<h2 id="附录二：判断原型和实例之间关系的Object内置方法"><a href="#附录二：判断原型和实例之间关系的Object内置方法" class="headerlink" title="附录二：判断原型和实例之间关系的Object内置方法"></a>附录二：判断原型和实例之间关系的Object内置方法</h2><p><code>Object.[[prototype]]</code>内置了几个方法，用于判断原型和实例的关系，也可以验证以上实现原理。</p>
+<ul>
+<li><p><code>instanceof</code>：这个操作符用于判断对象和原型之间的关系</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">person1 <span class="keyword">instanceof</span> <span class="title class_">Person</span>               <span class="comment">// true</span></span><br><span class="line">person1.<span class="property">__proto__</span> === <span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span>  <span class="comment">// true，两种方式等价</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>isPrototypeOf</code>：如果<code>[[prototype]]</code>指向调用此方法的对象，那么这个方法就会返回true</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="title function_">isPrototypeOf</span>(person1) <span class="comment">// true</span></span><br><span class="line">person1.<span class="property">__proto__</span> === <span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span>  <span class="comment">// true，两种方式等价</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Object.getPrototypeOf</code>：这个方法返回<code>[[Prototype]]</code>的值,可以获取到一个对象的原型</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Object</span>.<span class="title function_">getPrototypeOf</span>(person1) === <span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span> <span class="comment">// true</span></span><br><span class="line">person1.<span class="property">__proto__</span> === <span class="title class_">Person</span>.<span class="property"><span class="keyword">prototype</span></span>  <span class="comment">// true，两种方式等价</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="附录三：Object-create-方法"><a href="#附录三：Object-create-方法" class="headerlink" title="附录三：Object.create()方法"></a>附录三：Object.create()方法</h2><p>2006年，为了完美解决类继承的问题，javascript之父道格拉斯提出，借助一个空函数作为中间对象来实现正确的原型链，示例代码为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">object</span>(<span class="params">o</span>) &#123;</span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">F</span>(<span class="params"></span>) &#123; &#125;;   <span class="comment">// 定义一个空函数</span></span><br><span class="line">    F.<span class="property"><span class="keyword">prototype</span></span> = o;    <span class="comment">// 指定空函数的原型为父类</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title function_">F</span>();     <span class="comment">// 创建并返回该空函数的实例，作为类继承的中间对象</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>EMCAScript 5实现了道爷的奇思妙想，并将上述代码封装为Object.create()方法。</p>
+<p><code>Object.create(proto[, propertiesObject])</code></p>
+<ul>
+<li>proto：必填参数，指定新对象的原型对象。注意，如果是null，那新对象就是一个彻底的空对象，没有继承Object.prototype上的任何属性和方法，如hasOwnProperty()、toString()等</li>
+<li>propertiesObject：可选参数，指定要添加到新对象上的可枚举的属性（即其自定义的属性和方法，可用hasOwnProperty()获取的，而不是原型对象上的）的描述符及相应的属性名称</li>
+</ul>
+<hr>
+<h3 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Details_of_the_Object_Model">JavaScript对象模型设计 - Mozilla官方</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Inheritance_and_the_prototype_chain">继承与原型链 - Mozilla官方</a></li>
+<li><a target="_blank" rel="noopener" href="https://wangjintian.com/2021/04/18/ES6%E7%AF%87-class%E5%9F%BA%E6%9C%AC%E8%AF%AD%E6%B3%95/">ES6篇 - class 基本语法</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.liaoxuefeng.com/wiki/1022910821149312/1023021997355072">原型继承和Class继承 - 廖雪峰</a></li>
+<li><a target="_blank" rel="noopener" href="https://xieyufei.com/2020/04/10/Js-Class-Inherit.html">一文读懂JS中类、原型和继承</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/prehistorical/article/details/53671415">基于类 vs 基于原型</a></li>
+<li><a target="_blank" rel="noopener" href="https://oychao.github.io/2016/11/28/javascript/21_oop/">JavaScript基于原型的面向对象编程</a></li>
+<li><a target="_blank" rel="noopener" href="https://chenzhuo1024.github.io/tech/js/js-oo.html">JavaScript对象模型与原型体系</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/34183746/answer/58155878">js中__proto__和prototype的区别和关系？</a></li>
+<li><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000022776150">JS中的构造函数、原型、原型链</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/creeperyang/blog/issues/9">从__proto__和prototype来深入理解JS对象和原型链</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.yixuebiancheng.com/article/74630.html">JS function 是函数也是对象, 浅谈原型链</a></li>
+<li><a target="_blank" rel="noopener" href="https://segmentfault.com/a/1190000015216289">js继承的5种方法</a></li>
+<li><a target="_blank" rel="noopener" href="https://xieyufei.com/2020/04/10/Js-Class-Inherit.html">一文读懂JS中类、原型和继承</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/1aa2755171fe">ES5&#x2F;ES6 的继承除了写法以外还有什么区别</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/59e6dca643ad">JS继承 -&gt; ES6的class和decorator</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/6726623123a7">ES5&#x2F;ES6 的继承除了写法以外还有什么区别?</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/05/05/JavaScript-%E5%BC%80%E5%8F%91%E7%BB%8F%E9%AA%8C%E7%82%B9%E6%BB%B4/" rel="prev" title="JavaScript 开发经验点滴">
+                  <i class="fa fa-angle-left"></i> JavaScript 开发经验点滴
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/06/05/JavaScript%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90%E4%B9%8B%E4%BA%8C%EF%BC%9Athis%E6%8C%87%E5%90%91%E5%93%AA%E9%87%8C/" rel="next" title="JavaScript技术分析之二：this指向哪里">
+                  JavaScript技术分析之二：this指向哪里 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

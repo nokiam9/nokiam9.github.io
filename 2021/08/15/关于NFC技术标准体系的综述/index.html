@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="概述 NFC（Near Field Communication，近场通信），也叫做近距离无线通信技术，用于在两个非常接近的设备之间执行数据传输。   * 2002年，NFC技术由Philips和Sony两家公司联合推出。  * 2004年，Nokia、Philips、Sony等公司共同组建了非盈利性组织NFC Forum ，负责制定NFC相关的技术标准，致力于促进 NFC 技术在消费类电子产品、移">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于NFC技术标准体系的综述">
+<meta property="og:url" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="概述 NFC（Near Field Communication，近场通信），也叫做近距离无线通信技术，用于在两个非常接近的设备之间执行数据传输。   * 2002年，NFC技术由Philips和Sony两家公司联合推出。  * 2004年，Nokia、Philips、Sony等公司共同组建了非盈利性组织NFC Forum ，负责制定NFC相关的技术标准，致力于促进 NFC 技术在消费类电子产品、移">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/protocol-1.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/nfc-map.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/protocol-2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/nfc-mode.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/rw-mode.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/ce-mode.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/rf.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/nedf.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/nfc-protocol-3.bmp">
+<meta property="og:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/protocol-3.png">
+<meta property="article:published_time" content="2021-08-15T10:05:45.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.021Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/protocol-1.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/","path":"2021/08/15/关于NFC技术标准体系的综述/","title":"关于NFC技术标准体系的综述"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>关于NFC技术标准体系的综述 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NFC%E7%9A%84%E6%BC%94%E8%BF%9B%E5%8E%86%E5%8F%B2"><span class="nav-text">NFC的演进历史</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-IEC-7816"><span class="nav-text">ISO&#x2F;IEC 7816</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#S2C%E6%8E%A5%E5%8F%A3-ISO-IEC-28361"><span class="nav-text">S2C接口 &#x3D;  ISO&#x2F;IEC 28361</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SWP%E5%8D%8F%E8%AE%AE-ETSI-TS-102613"><span class="nav-text">SWP协议 &#x3D; ETSI TS-102613</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NFC%E7%9A%84%E8%BF%90%E8%A1%8C%E6%A8%A1%E5%BC%8F"><span class="nav-text">NFC的运行模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%8D%A1%E5%99%A8%E6%A8%A1%E5%BC%8F%EF%BC%88Reader-Write-Mode%EF%BC%89"><span class="nav-text">读卡器模式（Reader&#x2F;Write Mode）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%A1%E6%A8%A1%E6%8B%9F%E6%A8%A1%E5%BC%8F%EF%BC%88Card-Emulation-Mode%EF%BC%89"><span class="nav-text">卡模拟模式（Card Emulation Mode）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%82%B9%E5%AF%B9%E7%82%B9%E6%A8%A1%E5%BC%8F%EF%BC%88Peer-to-Peer-Mode%EF%BC%89"><span class="nav-text">点对点模式（Peer-to-Peer Mode）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NFC%E7%9A%84%E6%95%B0%E6%8D%AE%E4%BC%A0%E8%BE%93%E5%8D%8F%E8%AE%AE"><span class="nav-text">NFC的数据传输协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NFC-A-ISO-IEC-14443-3-Type-A"><span class="nav-text">NFC-A &#x3D; ISO&#x2F;IEC 14443-3 Type A</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NFC-B-ISO-IEC-14443-4-Type-B"><span class="nav-text">NFC-B &#x3D; ISO&#x2F;IEC 14443-4 Type B</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NFC-F-FeliCa-JIS-X6319-4"><span class="nav-text">NFC-F &#x3D; FeliCa &#x3D; JIS X6319-4</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NFC-V-ISO-IEC-15693-2"><span class="nav-text">NFC-V &#x3D; ISO&#x2F;IEC 15693-2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NFC%E7%9A%84%E6%A0%87%E7%AD%BE%E7%B1%BB%E5%9E%8B"><span class="nav-text">NFC的标签类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NFC%E7%9A%84%E6%95%B0%E6%8D%AE%E4%BA%A4%E6%8D%A2%E6%A0%BC%E5%BC%8F"><span class="nav-text">NFC的数据交换格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NFC%E6%A0%87%E5%87%86%E7%9A%84%E6%9C%80%E6%96%B0%E8%BF%9B%E5%B1%95"><span class="nav-text">NFC标准的最新进展</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NFCIP-1-ISO-IEC-18092-ECMA-340"><span class="nav-text">NFCIP-1 &#x3D; ISO&#x2F;IEC 18092 &#x3D; ECMA 340</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NFCIP-2-ISO-IEC-21481-ECMA-352"><span class="nav-text">NFCIP-2 &#x3D; ISO&#x2F;IEC 21481 &#x3D; ECMA 352</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8E%E7%BB%AD%E6%BC%94%E8%BF%9B"><span class="nav-text">后续演进</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9ANFC%E7%9A%84%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E6%B8%85%E5%8D%95"><span class="nav-text">附录一：NFC的核心技术标准清单</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9ANFC%E4%B8%BB%E6%B5%81%E8%8A%AF%E7%89%87%E5%9E%8B%E5%8F%B7"><span class="nav-text">附录二：NFC主流芯片型号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-14443-Type-A"><span class="nav-text">ISO 14443 Type A</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-14443-Type-B"><span class="nav-text">ISO 14443 Type B</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ISO-15693"><span class="nav-text">ISO 15693</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD"><span class="nav-text">资料下载</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="关于NFC技术标准体系的综述 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          关于NFC技术标准体系的综述
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-08-15 18:05:45" itemprop="dateCreated datePublished" datetime="2021-08-15T18:05:45+08:00">2021-08-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>22 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>NFC（<code>Near Field Communication</code>，近场通信），也叫做近距离无线通信技术，用于在两个非常接近的设备之间执行数据传输。</p>
+<ul>
+<li>2002年，NFC技术由<code>Philips</code>和<code>Sony</code>两家公司联合推出。</li>
+<li>2004年，<code>Nokia</code>、<code>Philips</code>、<code>Sony</code>等公司共同组建了非盈利性组织<code>NFC Forum</code> ，负责制定NFC相关的技术标准，致力于促进 NFC 技术在消费类电子产品、移动设备和 PC 中的应用，并通过NFC认证测试来保证各厂家的NFC产品符合NFC规范以实现互联互通。</li>
+<li>2006年，恩智浦半导体公司(<code>NXP</code> Semiconductors)从<code>Philips</code>剥离，总部位于荷兰埃因霍温，在全球20多个国家拥有37000名员工（欧洲37%、亚洲37%、大中华区21%、美洲5%），2007年公布的销售额达63亿美元。</li>
+</ul>
+<p>NFC的核心技术优势在于：</p>
+<ul>
+<li><strong>无源硬件</strong>：采用感应耦合技术，NFC标签可以从其他NFC设备产生的电磁场获得能量，经济实惠且完全无源，特别适合IoE（物联网）应用场景</li>
+<li><strong>公开频段</strong>：电磁场频率为 13.56 MHz，该频率是射频频谱高频部分中无需执照的波段，有效距离为4cm左右，目前所支持的数据传输速率有106Kbps、212Kbps和424Kbps三种</li>
+<li><strong>一触即发</strong>：用户无需事先启动APP（特定场景可能要求安全验证），基于硬件支持即可触发NFC，交互时间只有几分之一秒</li>
+<li><strong>终端集成</strong>：NFC软件协议栈完全集成到Android（v.4.0以上）、iOS（v.11）中，有助于在多个应用程序中使用NFC，而无需安装任何特定软件或应用</li>
+</ul>
+<p>需要注意的是，NFC技术演进路线中，多个标准化组织为争夺主导权，互相竞争也互相融合。</p>
+<ul>
+<li><code>NFC Forum</code>是最重要的标准化组织，影响力最大；</li>
+<li><code>ISO/IEC</code>也是重要的标准化组织，但侧重从RF（Radio Frequency，无线频率）和数据交换格式等底层定义，较少涉及业务和应用层面；</li>
+<li>此外，还存在<code>ETSI</code>,<code>ECMA</code>,<code>GB</code>,<code>JIS</code>等区域性的国家标准。</li>
+</ul>
+<p>下图是简化的协议栈结构，本文将以NFC-Froum为主线，对相关技术标准进行阐述。</p>
+<img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/protocol-1.png" class="">
+
+<h2 id="NFC的演进历史"><a href="#NFC的演进历史" class="headerlink" title="NFC的演进历史"></a>NFC的演进历史</h2><p>NFC是多种技术路线并行发展的综合体，得益于条形码、磁条卡和智能终端三种技术的共同推动。</p>
+<img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/nfc-map.png" class="">
+
+<ol>
+<li><p>最左边一条为发源于条形码（Barcodes）的无线射频识别技术，即RFID技术路线，最终出现了NFC中的两个重要组件<code>NFC Tag</code>（标签）和<code>NFC Reader</code>(读卡器)。</p>
+</li>
+<li><p>最右边一条为磁条卡（Magnetic Strip Cards）技术路线，该路线后来向智能卡（Smart Card）、非接触式智能卡的方向发展。</p>
+<p> 粗略来看Smart Card和RFID Tag类似，例如二者都只存储一些数据，而且自身都没有电源组件，但Smart Card在安全性上的要求远比RFID Tag严格。另外，Smart Card上还能运行一些小的嵌入式系统（如Java Card OS）或者应用程序（Applets）以完成更为复杂的工作。</p>
+<p> Smart Card是NFC技术演进的核心来源，主要包含三个分支：</p>
+<ul>
+<li><p>Proximity Coupling Smart Card（近场耦合智能卡）：对应规范为<code>ISO/IEC 14443</code>，有效距离在10cm之内，是消费市场上最普及的技术标准。NFC Form为此定义了<code>NFC-A</code>，<code>NFC-B</code>和非ISO标准的<code>NFC-F</code>，区别主要在于调制编码方式的不同。</p>
+</li>
+<li><p>Vicinity Coupling Smart Card（疏耦合智能卡）：对应规范为<code>ISO/IEC 15693</code>，有效距离高达1m，NFC Form为此定义了<code>NFC-V</code>。</p>
+<blockquote>
+<p>该技术标准由于读取距离远，使用场景的温度要求远高于消费级产品（通常是-40度到+85度），同时设计简单使得读取器的生产成本低，在物流运输、企业门禁卡等场景中得到广泛应用</p>
+</blockquote>
+</li>
+<li><p>Close Coupling Smart Card：对应的规范是<code>ISO 10536</code>，该标准主要发展于1992到1995年间，由于这种卡的成本高，优点少，因此从未在市场上销售。</p>
+</li>
+</ul>
+</li>
+<li><p>中间一条技术路线为移动终端，它演化出了携带NFC功能的终端设备。随着移动终端越来越智能，NFC和这些设备也融合得更加紧密，使得NFC的应用场景得到了较大的拓展。</p>
+</li>
+</ol>
+<p>从协议栈的角度，下图是 NFC 各类标签所涉及的技术标准。</p>
+<img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/protocol-2.png" class="">
+
+<p>此外，还有几个与NFC密切相关的技术标准：</p>
+<h3 id="ISO-IEC-7816"><a href="#ISO-IEC-7816" class="headerlink" title="ISO/IEC 7816"></a><code>ISO/IEC 7816</code></h3><p>一套成熟的接触式智能卡标准，用于读写接触式智能卡，例如PSAM、SAM、手机的SIM卡等皆符合该协议标准，其采用半双工串行通信接口，由VCC, RESET, CLK, IO, VPP（保留接口，不使用）组成。</p>
+<p>其中有一部分定义了与应用相关的规范，NFC Forum也参照该标准实现了类似功能。其全部内容包括：</p>
+<ul>
+<li>ISO7816-1：接触式卡智能卡的物理特性</li>
+<li>ISO7816-2：接触式卡智能卡触点的尺寸与位置</li>
+<li>ISO7816-3：接触式卡智能卡的电信号和传输协议</li>
+<li>ISO7816-4：接触式卡智能卡与外界交互的介面</li>
+<li>ISO7816-5：接触式卡智能卡应用的命名方式与注册系统</li>
+<li>ISO7816-6：接触式卡智能卡与外界交互的资料物件</li>
+<li>ISO7816-7：接触式卡智能卡的结构化查询语句</li>
+<li>ISO7816-8：接触式卡智能卡与安全有关的指令</li>
+<li>ISO7816-9：接触式卡智能卡附加指令与安全参数</li>
+</ul>
+<h3 id="S2C接口-ISO-IEC-28361"><a href="#S2C接口-ISO-IEC-28361" class="headerlink" title="S2C接口 &#x3D;  ISO/IEC 28361"></a><code>S2C接口</code> &#x3D;  <code>ISO/IEC 28361</code></h3><p>由飞利浦公司最早提出，用于在手机上实现 NFC 功能，定义了NFC芯片和智能卡芯片的接口方式，并成为ISO 和 ECMA的共同标准。<br>此后，由于遭到主流运营商的反对，最终飞利浦公司放弃了该技术标准，转而与GEMALTO公司合作支持<code>SWP协议</code>。</p>
+<h3 id="SWP协议-ETSI-TS-102613"><a href="#SWP协议-ETSI-TS-102613" class="headerlink" title="SWP协议 &#x3D; ETSI TS-102613"></a><code>SWP协议</code> &#x3D; <code>ETSI TS-102613</code></h3><p>由GEMALTO公司提出，法国公司 Inside开发了支持 SWP 的产品雏形。<br>单线连接协议(Single Wire Protocol)，定义了CLF模块和USIM卡内的SE芯片传输信息的物理连接形式和底层信号传输方式。由于商业利益的考虑，最终SWP的架构获得运营商（GSMA）的一致支持，已经成为事实上的行业标准。</p>
+<p>该标准已经获得<code>ETSI TS-102613</code>，但尚未成为ISO标准。</p>
+<blockquote>
+<p>SWP 也好、S2C 也好，和 NFC 规范是没有直接联系的，更没有冲突。NFC 规范定义的是 NFC 设备与外界的通讯规范，S2C&#x2F;SWP 定义的是 NFC 内部实现的不同方式，是 NFC 芯片和智能卡芯片芯片之间的接口方式和通讯协议。NFC（ISO 18902）和SWP， NFC 论坛和 ETSI 也是没有直接联系，更没有直接冲突，这些是组成完整的 NFC 系统和产业环境必不可少的几个部分。</p>
+</blockquote>
+<h2 id="NFC的运行模式"><a href="#NFC的运行模式" class="headerlink" title="NFC的运行模式"></a>NFC的运行模式</h2><p>从用户角度（即图中的Applications层之上）来看，NFC有三种运行模式（operation mode），分别是</p>
+<ul>
+<li><code>Reader/Write</code>：简称R&#x2F;W，和NFC Tag&#x2F;NFC Reader相关</li>
+<li><code>Card Emulation</code>：简称CE，它能把携带NFC功能的设备模拟成Smart Card，这样就能实现诸如手机支付、门禁卡之类的功能</li>
+<li><code>Peer-to-Peer</code>：简称P2P，它支持两个NFC设备交互</li>
+</ul>
+<img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/nfc-mode.png" class="">
+
+<h3 id="读卡器模式（Reader-Write-Mode）"><a href="#读卡器模式（Reader-Write-Mode）" class="headerlink" title="读卡器模式（Reader&#x2F;Write Mode）"></a>读卡器模式（Reader&#x2F;Write Mode）</h3><p>在读写器模式中，NFC读卡器询问标签以执行交互。NFC Forum定义了5种类型的标签，涵盖了广泛的应用。读卡器可以是专用的NFC读写器，也可以是移动设备。NFC读写器能够感测多个标签的存在。</p>
+<p>数据在NFC Tag的芯片中，可以简单理解成<strong>刷标签</strong>，本质上就是通过支持NFC的手机或其它电子设备从带有NFC芯片的标签、贴纸、名片等媒介中读写信息，随后它可能根据读取来自部件的信息执行操作。例如，靠近 NFC 标签的 NFC 手机会检索到一个 URL，并链接到相应的网站，NFC手机可以在无需打字的情况下发送 SMS （短消息服务）文本、获得优惠券、启动配对动作、获得电子名片（Vcard）等。</p>
+<img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/rw-mode.jpg" class="">
+
+<p>对于读卡器模式，NFC Forum定义了4种标准类型的 NFC 标签（Type 5还不是正式标准），这四种类型NFC Tag的区别在于存储空间大小，数据传输率以及底层使用的协议上，后面有具体的技术细节。</p>
+<p>此外，NFC Forum定义了两个通用的数据结构用于在NFC Device之间（包括R&#x2F;W模式中的NFC Reader和NFC Tag）传递数据。这两个通用数据结构分别是NFC Data Exchange Format（简写为NDEF）以及NFC Record。</p>
+<blockquote>
+<p>对于“刷标签”场景，NFC 手机工作在主动模式，而NFC标签是不需要外部供电的，依靠NFC手机发送的电磁场获得能量，<strong>此时数据传输是不安全的</strong>。</p>
+</blockquote>
+<h3 id="卡模拟模式（Card-Emulation-Mode）"><a href="#卡模拟模式（Card-Emulation-Mode）" class="headerlink" title="卡模拟模式（Card Emulation Mode）"></a>卡模拟模式（Card Emulation Mode）</h3><p>数据在支持NFC的手机中，可以简单理解成<strong>刷手机</strong>。本质上就是将支持NFC的手机或其它电子设备当成借记卡、公交卡、门禁卡等IC卡使用。</p>
+<p>基本原理是将相应IC卡中的信息凭证封装成数据包存储在支持NFC的外设中，在使用时还需要一个NFC射频器（例如Pos终端、闸机等），将手机靠近NFC射频器，手机就会接收到NFC射频器发过来的信号，在通过一系列复杂的验证后，将IC卡的相应信息传入NFC射频器，最后这些IC卡数据会传入NFC射频器连接的电脑，并进行相应的处理（如电子转帐、开门等操作），这让它可以用于已有的非接触式智能卡基础设施，实现访问控制、非接触式支付、固件更换或数据传输等操作。</p>
+<p>通常存在于移动设备中的NFC控制器模拟ISO &#x2F; IEC 14443或FeliCa标准定义的非接触式卡的行为，用于诸如支付、交通等非接触式基础设施中。<br>在此模式下，NFC控制器仅处理低级别通信，而NFC安全应用程序位于SIM卡、嵌入式安全元件（eSE）、嵌入式SIM卡（eSIM）中或直接位于主应用程序处理器（Android的HCE）中。</p>
+<img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/ce-mode.jpg" class="">
+
+<p>该模式下，NFC 手机的工作类似于标准的非接触式IC卡，为此ISO 14443定义了Type A 和 Type B两种数据传输标准（Type F不是正式标准），后续有详细技术分析。</p>
+<blockquote>
+<p>对于“刷手机”场景，NFC 手机工作在被动模式，它只在机具发出的射频场中被动响应，<strong>数据传输是安全的</strong>。</p>
+</blockquote>
+<h3 id="点对点模式（Peer-to-Peer-Mode）"><a href="#点对点模式（Peer-to-Peer-Mode）" class="headerlink" title="点对点模式（Peer-to-Peer Mode）"></a>点对点模式（Peer-to-Peer Mode）</h3><p>此模式设计用于交换两个NFC设备（如移动电话）之间的联系人信息等数据。每个点轮流作为读卡器（收发器）和标签，以实现双方之间的完整交换。</p>
+<p>在点对点 （P2P）中，具有 NFC 功能的设备工作在主动模式。其中的一个设备会发起通信链接。一旦链接建立，设备就会交替地与其他设备通信，并遵守 “说前先听(listen-before-talk)” 规则。该通信模式下的数据交换相比其他模式更快，因此可以交换更多的数据。</p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>从协议栈的角度，三种工作模式的分析如下：</p>
+<img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/rf.jpg" class="">
+
+<h2 id="NFC的数据传输协议"><a href="#NFC的数据传输协议" class="headerlink" title="NFC的数据传输协议"></a>NFC的数据传输协议</h2><p>NFC Forum定义了5种数据传输方式，其中：</p>
+<ul>
+<li>NFC-A：对应<code>ISO 14443 Type A</code></li>
+<li>NFC-B：对应<code>ISO 14443 Type B</code></li>
+<li>NFC-F：对应非ISO标准的<code>FeliCa</code>，也称为Type-F</li>
+<li>NFC-V：对应<code>ISO 15693</code></li>
+<li>P2P：基于<code>ISO 18092</code>，主要用于Android Beam，实现两台 Android 设备之间进行简单的点对点数据交换</li>
+</ul>
+<p><code>ISO 14443</code>全称为非接触式IC卡标准，它从RF层面定义了如何与不同的非接触式IC卡（其实物可以是NFC Tag、RFID Tag、Smart Cards）交互。</p>
+<p>该标准包含四个部分：</p>
+<ul>
+<li>ISO&#x2F;IEC14443-1:   制定了有关非接触卡的物理特性；</li>
+<li>ISO&#x2F;IEC14443-2:   制定了有关射频功率及信号界面的特性；</li>
+<li>ISO&#x2F;IEC14443-3:   则为非接触卡的初始化及防冲突机制；</li>
+<li>ISO&#x2F;IEC14443-4:   位有关的交易协定。</li>
+</ul>
+<p>ISO 14443定义了Type A和Type B两种非接触式IC卡。不同TYPE的主要的区别在于信号发送的载波调制深度、二进制数编码方式存在差异。此外，防冲突机制的原理也完全不同，TYPE A是基于 BIT 冲突检测协议，TYPE B则是通过字节、帧及命令完成防冲突。</p>
+<h3 id="NFC-A-ISO-IEC-14443-3-Type-A"><a href="#NFC-A-ISO-IEC-14443-3-Type-A" class="headerlink" title="NFC-A &#x3D; ISO&#x2F;IEC 14443-3 Type A"></a>NFC-A &#x3D; ISO&#x2F;IEC 14443-3 Type A</h3><p>最早由Philips公司制订（其生产的芯片商标名为MIFARE，现在由从Philips独立出来的NXP公司拥有），目前世界上70%左右的非接触式IC卡都使用了MIFARE芯片，例如北京市的公交卡，特点是采用Modified Miller编码。</p>
+<blockquote>
+<p>Android 4.4 支持基于NFC-Forum ISO-DEP规范（基于ISO&#x2F;IEC 14443-4）的模拟卡，要求仅使用 Nfc-A (ISO&#x2F;IEC 14443-3 Type A) 技术模拟 ISO-DEP，但也可以支持 Nfc-B (ISO&#x2F;IEC 14443-4 Type B) 技术。</p>
+</blockquote>
+<h3 id="NFC-B-ISO-IEC-14443-4-Type-B"><a href="#NFC-B-ISO-IEC-14443-4-Type-B" class="headerlink" title="NFC-B &#x3D; ISO&#x2F;IEC 14443-4 Type B"></a>NFC-B &#x3D; ISO&#x2F;IEC 14443-4 Type B</h3><p>由TI公司制订，主要用在法国市场，特点是采用NRZ编码，二者最终都成为ISO标准。</p>
+<blockquote>
+<p>第二代居民身份证采用的是Type B标准。</p>
+</blockquote>
+<h3 id="NFC-F-FeliCa-JIS-X6319-4"><a href="#NFC-F-FeliCa-JIS-X6319-4" class="headerlink" title="NFC-F &#x3D; FeliCa &#x3D; JIS X6319-4"></a>NFC-F &#x3D; FeliCa &#x3D; JIS X6319-4</h3><p>FeliCa是Sony为了非接触式IC卡而开发出来的通信技术，与ISO 14443标准的主要区别是采用曼彻斯特编码。<br>1998年，FeliCa原本被提案为ISO 14443 type C，但悲剧的是未被采纳，只能成为日本工业标准<code>JIS X6319-4</code>。之后，FeliCa和其向后相容方式被标准化为<code>ISO 18092</code>。</p>
+<blockquote>
+<p>目前，Felica也被称为Type F，主要应用于日本市场，境外只有香港的“八达通”仍有继续使用。</p>
+</blockquote>
+<h3 id="NFC-V-ISO-IEC-15693-2"><a href="#NFC-V-ISO-IEC-15693-2" class="headerlink" title="NFC-V &#x3D; ISO&#x2F;IEC 15693-2"></a>NFC-V &#x3D; ISO&#x2F;IEC 15693-2</h3><p><code>ISO/IEC 15693</code> 标准最初是为访问控制而设计的，符合此标准的标签的读取范围高达 3 英尺（0.9 米）,主要用于公共图书馆 RFID 系统和带 RFID 卡或 RFID 票证的滑雪通行证 RFID 系统.<br>对比，<code>ISO/IEC 14443 Type A</code> 标签，由于其主要为银行RFID卡、交通RFID卡等金融交易而设计，为防止有人截获从标签发送到读取器的数据，读取距离设计为非常短，安全性要求更高。</p>
+<h2 id="NFC的标签类型"><a href="#NFC的标签类型" class="headerlink" title="NFC的标签类型"></a>NFC的标签类型</h2><p>NFC 论坛定义了四种类型的 NFC 标签，第五种标签与 NFC-V 技术相关，目前它还不是NFC 论坛规范中的一部分。</p>
+<table>
+<thead>
+<tr>
+<th align="center">项目</th>
+<th align="center">Type 1</th>
+<th align="center">Type 2</th>
+<th align="center">Type 3</th>
+<th align="center">Type 4</th>
+<th align="center">Type 5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">对应规范</td>
+<td align="center">ISO 14443 Type A</td>
+<td align="center">ISO 14443 Type A</td>
+<td align="center">JIS X 6319-4、FELICA</td>
+<td align="center">ISO 14443 Type A&#x2F;B</td>
+<td align="center">ISO&#x2F;IEC 15693</td>
+</tr>
+<tr>
+<td align="center">常见芯片</td>
+<td align="center">Topaz</td>
+<td align="center">MIFARE</td>
+<td align="center">Felica</td>
+<td align="center">MIFARE-DESFire</td>
+<td align="center">NXP的I Code系列，ST的ST25TV系列</td>
+</tr>
+<tr>
+<td align="center">存储容量</td>
+<td align="center">最大1KB</td>
+<td align="center">最大2KB</td>
+<td align="center">最大1MB</td>
+<td align="center">最大64KB</td>
+<td align="center">高达 8 KB</td>
+</tr>
+<tr>
+<td align="center">读写速率</td>
+<td align="center">106kbps</td>
+<td align="center">106kbps</td>
+<td align="center">212kbps</td>
+<td align="center">106-424kbps</td>
+<td align="center">26.48 kbps</td>
+</tr>
+<tr>
+<td align="center">价格</td>
+<td align="center">低</td>
+<td align="center">低</td>
+<td align="center">高</td>
+<td align="center">中等&#x2F;高</td>
+<td align="center">低</td>
+</tr>
+<tr>
+<td align="center">安全性</td>
+<td align="center">数字签名保护</td>
+<td align="center">不安全</td>
+<td align="center">数字签名保护</td>
+<td align="center">可选</td>
+<td align="center">N&#x2F;A</td>
+</tr>
+<tr>
+<td align="center">说明</td>
+<td align="center">Topaz由Innovision公司推出</td>
+<td align="center">MIFARE由NXP公司推出</td>
+<td align="center">由Sony公司推出，价格比较贵</td>
+<td align="center">这类芯片在出厂时就被配置好是否只读或可读写</td>
+<td align="center">上海贝岭等</td>
+</tr>
+</tbody></table>
+<h2 id="NFC的数据交换格式"><a href="#NFC的数据交换格式" class="headerlink" title="NFC的数据交换格式"></a>NFC的数据交换格式</h2><p>NFC Forum定义了两个通用的数据结构用于在NFC Device之间（包括R&#x2F;W模式中的NFC Reader和NFC Tag）传递数据。这两个通用数据结构分别是NFC Data Exchange Format（简写为<code>NDEF</code>）以及NFC Record。</p>
+<p>NFC设备中的数据根据结构化格式整理为记录，称为NFC数据交换格式（NDEF）。记录包含根据记录类型定义（RTD）规范所编码的信息：</p>
+<ul>
+<li>“设备信息”，例如固件版本</li>
+<li>“文本”字符串</li>
+<li>“通用资源标识符”，例如网页URL</li>
+<li>“连接切换”，用于配对</li>
+<li>“签名”，用于验证</li>
+<li>“智能标贴”，类似于SMS消息的文本</li>
+</ul>
+<p>NDEF还定义了如何将记录封装到消息中，以便将它们传输到其他设备。所有符合NFC标准的设备都支持NDEF，无论其类型如何。<br>对于移动设备，NDEF消息由内置软件处理，它将触发设备本身的相应操作，如：</p>
+<ul>
+<li>发送电子邮件或SMS</li>
+<li>打开网页</li>
+<li>拨打电话</li>
+<li>打开特定应用程序</li>
+</ul>
+<p>NFC Forum定义和维护了完整的操作列表和RTD。</p>
+<img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/nedf.png" class="">
+
+<p>在点对点模式下，交换的数据愈发复杂，数量更庞大。数据交换根据简单NDEF交换协议（SNEP）完成，以确保高效、稳健和快速的交互。<br>SNEP使用可靠的传输层：逻辑链路控制协议（LLCP）。</p>
+<h2 id="NFC标准的最新进展"><a href="#NFC标准的最新进展" class="headerlink" title="NFC标准的最新进展"></a>NFC标准的最新进展</h2><h3 id="NFCIP-1-ISO-IEC-18092-ECMA-340"><a href="#NFCIP-1-ISO-IEC-18092-ECMA-340" class="headerlink" title="NFCIP-1 &#x3D; ISO&#x2F;IEC 18092 &#x3D; ECMA 340"></a>NFCIP-1 &#x3D; ISO&#x2F;IEC 18092 &#x3D; ECMA 340</h3><p><code>ECMA 340</code>是基础版本，被ISO接纳成为<code>ISO/IEC 18092</code>，同时在NFC Forum中被称为<code>NFCIP-1</code>，这三者就是一回事。</p>
+<p><code>ISO/IEC 18092</code>（NFCIP-1 近场通信 - 接口和协议规范）的基本内容包括：</p>
+<ul>
+<li>在RF层面，直接继承自<code>ISO 14443 Type A</code>，并且还继承自日本<code>JIS 6319-4</code>（Sony FeliCa也基于该标准）由NFC论坛3型标签标准使用）,结果是NFC设备（读取器&#x2F;写入器模式）与ISO 14443智能卡兼容。</li>
+<li>在应用层面，为实现P2P通讯，定义了<code>Active（主动）</code>和<code>Passive（被动）</code>等两种通信模式，并使用不同的命令协议来代替 <code>ISO/IEC 14443-4</code></li>
+<li>进一步的，定义了R&#x2F;W、CE、P2P等三种操作模式，从而实现NFC 设备以点对点模式与其他 NFC 设备和 NFC 标签（卡）的互操作</li>
+</ul>
+<blockquote>
+<p>NFC论坛指出，在卡模拟模式下，支持NFC的手机可以支持<code>EMV CCPS</code> v2.0规定的非接触式卡EMV支付应用要求，具体体现在American Express ExpressPay 2.0、MasterCard PayPass 2.0和Visa payWave 2.1.1。</p>
+</blockquote>
+<h3 id="NFCIP-2-ISO-IEC-21481-ECMA-352"><a href="#NFCIP-2-ISO-IEC-21481-ECMA-352" class="headerlink" title="NFCIP-2 &#x3D; ISO&#x2F;IEC 21481 &#x3D; ECMA 352"></a>NFCIP-2 &#x3D; ISO&#x2F;IEC 21481 &#x3D; ECMA 352</h3><p><code>ECMA 352</code>是<code>ISO 21481</code>的前身，定义了在相同频率13.56Mhz上运行的不同非接触技术之间的选择机制。<br>最重要的变化是，在支持根据<code>ISO/IEC 18092</code>的基础上，兼容支持<code>ISO 15693</code>。</p>
+<h3 id="后续演进"><a href="#后续演进" class="headerlink" title="后续演进"></a>后续演进</h3><p>NFC技术的发展方兴未艾，当前还在快速变化中，最新进展包含了几个正在积极申请的新标准。</p>
+<img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/nfc-protocol-3.bmp" class="">
+
+<p>立此存照，未来可期！！！</p>
+<hr>
+<h2 id="附录一：NFC的核心技术标准清单"><a href="#附录一：NFC的核心技术标准清单" class="headerlink" title="附录一：NFC的核心技术标准清单"></a>附录一：NFC的核心技术标准清单</h2><img src="/2021/08/15/%E5%85%B3%E4%BA%8ENFC%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E4%BD%93%E7%B3%BB%E7%9A%84%E7%BB%BC%E8%BF%B0/protocol-3.png" class="">
+
+<h2 id="附录二：NFC主流芯片型号"><a href="#附录二：NFC主流芯片型号" class="headerlink" title="附录二：NFC主流芯片型号"></a>附录二：NFC主流芯片型号</h2><h3 id="ISO-14443-Type-A"><a href="#ISO-14443-Type-A" class="headerlink" title="ISO 14443 Type A"></a>ISO 14443 Type A</h3><ul>
+<li>MF1 IC S20：国内常称为MIFARE Mini，原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。</li>
+<li>SLE66R35：德国英飞凌（infineon），兼容MF1 IC S50。</li>
+<li>FM11RF08：芯片厂家为上海复旦，兼容MF1 IC S50。</li>
+<li>Mifare Std 1k MF1 IC S50及其兼容卡：原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。</li>
+<li>Mifare Std 4k MF1 IC S70及其兼容卡：原装芯片厂家为荷兰恩智浦(NXP)，在一卡通方面应用普遍。</li>
+<li>Mifare Ultralight MF0 IC U1X：国内常称为U10,芯片厂家为荷兰恩智浦(NXP)，广深高速火车票为典型应用。</li>
+<li>Mifare Ultralight C：原装芯片厂家为荷兰恩智浦（NXP）。</li>
+<li>FM11RF005:芯片厂家为上海复旦,包括FM11RF005SH与FM11RF005M,上海地铁单程票、上海轮渡单程票为典型应用。</li>
+<li>FM11RF08:芯片厂家为上海复旦</li>
+<li>Mifare DESfire 2k MF3 IC D21：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3 2k。</li>
+<li>Mifare DESfire 4k MF3 IC D41：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3。南京地铁卡为典型应用。</li>
+<li>Mifare DESfire 8k MF3 IC D81：芯片厂家为荷兰恩智浦（NXP），国内常称为MF3 8k。</li>
+<li>Mifare ProX：芯片厂家为荷兰恩智浦（NXP）。不判别容量</li>
+<li>SHC1102：芯片厂家为上海华虹，上海一卡通为典型应用。</li>
+<li>Advant ATC2048-MP：芯片厂家为瑞士LEGIC。</li>
+<li>MF1 PLUS 2k：芯片厂家为荷兰恩智浦（NXP），国内常称为PLUS S。</li>
+<li>MF1 PLUS 4k：芯片厂家为荷兰恩智浦（NXP），国内常称为PLUS X。</li>
+<li>JEWEL：芯片厂家为英国innovision，国内常称为宝石卡。不读序列号。</li>
+<li>IS23SC4456：芯片厂家为美国ISSI，可兼容MF1 IC S50的CPU卡。</li>
+<li>CPU卡（兼容MF1）：芯片厂家为上海复旦、上海华虹等，可兼容MF1 IC S50的CPU卡。该类也包含FM1208M1及其它类似的芯片卡。</li>
+<li>纯CPU卡：芯片厂家为上海复旦、美国ISSI等，纯CPU卡。该类也包含FM1208、IS23SC4456中的纯CPU卡及其它类似的芯片卡。</li>
+<li>X82A：芯片厂家为北京华大，CPU卡。</li>
+</ul>
+<h3 id="ISO-14443-Type-B"><a href="#ISO-14443-Type-B" class="headerlink" title="ISO 14443 Type B"></a>ISO 14443 Type B</h3><ul>
+<li>AT88RF020：芯片厂家为美国爱特梅尔（ATMEL），广州地铁卡为典型应用。</li>
+<li>SR176：芯片厂家为瑞士意法半导体（ST），主要用于防伪识别等。</li>
+<li>SRIX4K：芯片厂家为瑞士意法半导体（ST），主要用于防伪识别等。</li>
+<li>SRT512：芯片厂家为瑞士意法半导体（ST），主要用于防伪识别等。</li>
+<li>ST23YR18：芯片厂家为瑞士意法半导体（ST），CPU卡。</li>
+<li>THR1064：芯片厂家为北京同方，奥运门票为典型应用。</li>
+<li>THR2408：芯片厂家为北京同方，纯CPU卡。</li>
+<li>第二代居民身份证：芯片厂家为上海华虹、北京同方THR9904、天津大唐和北京华大，第二代身份证为典型应用。</li>
+</ul>
+<h3 id="ISO-15693"><a href="#ISO-15693" class="headerlink" title="ISO 15693"></a>ISO 15693</h3><ul>
+<li>EM4135：芯片厂家为瑞士EM，主要用于票证管理、防伪识别等。</li>
+<li>ICODE SL2 ICS53&#x2F;ICODE SL2 ICS54：芯片厂家为荷兰恩智浦（NXP），国内常称为ICODE SLI-S，主要用于物流仓储、票证管理等。</li>
+<li>ICODE SL2 ICS20：芯片厂家为荷兰恩智浦（NXP），国内常称为I CODE 2，主要用于物流仓储、票证管理等。</li>
+<li>ICODE SL2 ICS50&#x2F;ICODE SL2 ICS51：芯片厂家为荷兰恩智浦（NXP），国内常称为ICODE SLI-L，主要用于物流仓储、票证管理等。</li>
+<li>Tag-it HF-1 Plus：芯片厂家为美国德州仪器（TI），国内常称为TI2048，主要用于物流仓储、票证管理等。</li>
+<li>Tag-it HF-1 Standard：芯片厂家为美国德州仪器（TI），国内常称为TI256，主要用于物流仓储、票证管理等。</li>
+<li>BL75R04：芯片厂家为上海贝岭，兼容TI 2048，主要用于物流仓储、票证管理等。</li>
+<li>BL75R05：芯片厂家为上海贝岭，兼容I CODE 2，主要用于物流仓储、票证管理等。</li>
+<li>FM1302N：芯片厂家为上海复旦，兼容I CODE 2，主要用于物流仓储、票证管理等。</li>
+<li>Advant ATC128-MV：芯片厂家为瑞士LEGIC，主要用于一卡通等。</li>
+<li>Advant ATC256-MV：芯片厂家为瑞士LEGIC，主要用于一卡通等。</li>
+<li>Advant ATC1024-MV：芯片厂家为瑞士LEGIC，主要用于一卡通等。</li>
+<li>LRI2K：芯片厂家为瑞士意法半导体（ST）。</li>
+</ul>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://static.kancloud.cn/alex_wsc/android-wifi-nfc-gps">深入理解Android：Wi-Fi、NFC和GPS卷</a></li>
+<li><a target="_blank" rel="noopener" href="https://nfc-forum.org/our-work/specification-releases/">NFC-Forum官方网站的技术文档列表</a></li>
+<li><a target="_blank" rel="noopener" href="https://nfc-forum.org/products/certified-products">获得NFC-Forum官方认证的芯片清单</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/EMV">EMV组织的Wiki信息</a></li>
+<li><a target="_blank" rel="noopener" href="https://lishiwen4.github.io/nfc/nfc-introduce">NFC标准概述</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.st.com/resource/zh/brochure/nfc_solutions_from_st.pdf">ST意法半导体公司的NFC产品说明书</a></li>
+</ul>
+<h2 id="资料下载"><a href="#资料下载" class="headerlink" title="资料下载"></a>资料下载</h2><ul>
+<li><a href="ISO14443-Overview-v5.ppt">ISO14443 Overview-v5</a></li>
+<li><a href="tn1216-st25-nfc-guide-stmicroelectronics.pdf">NFC技术指南</a></li>
+<li><a href="Near_Field_Communication_with_Linux.pdf">NFC在Linux的技术实现</a></li>
+<li><a href="NFC_mcs.pdf">NFC技术综述-中华电信</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/07/10/%E8%B6%85%E7%BA%A7SIM%E5%8D%A1%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86%E5%88%86%E6%9E%90/" rel="prev" title="超级SIM卡的技术标准分析">
+                  <i class="fa fa-angle-left"></i> 超级SIM卡的技术标准分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/10/31/%E7%BC%96%E8%AF%91%E5%9E%8B%E8%AF%AD%E8%A8%80%E5%92%8C%E8%A7%A3%E9%87%8A%E5%9E%8B%E8%AF%AD%E8%A8%80%E7%9A%84%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86/" rel="next" title="编译型语言和解释型语言的基本原理">
+                  编译型语言和解释型语言的基本原理 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

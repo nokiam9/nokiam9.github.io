@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="1993 年，在美国的 TCSEC、欧洲的 ITSEC、加拿大的 CTCPEC、美国的 FC（Federal Criteria）等信息安全准则的基础上，由 6 个国家 7 方(美国国家安全局 NSA 和国家技术标准研究所 NIST、加、英、法、德、荷)共同提出了信息技术安全评价通用准则（The Common Criteria for Information Technology security">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Common Criteria 国际安全认证体系">
+<meta property="og:url" content="https://nokiam9.github.io/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="1993 年，在美国的 TCSEC、欧洲的 ITSEC、加拿大的 CTCPEC、美国的 FC（Federal Criteria）等信息安全准则的基础上，由 6 个国家 7 方(美国国家安全局 NSA 和国家技术标准研究所 NIST、加、英、法、德、荷)共同提出了信息技术安全评价通用准则（The Common Criteria for Information Technology security">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/CC-his.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/EAL.png">
+<meta property="article:published_time" content="2024-03-10T02:33:49.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.755Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/CC-his.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/","path":"2024/03/10/Common-Criteria-国际安全认证体系/","title":"Common Criteria 国际安全认证体系"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Common Criteria 国际安全认证体系 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A0%B8%E5%BF%83%E5%86%85%E5%AE%B9"><span class="nav-text">一、核心内容</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-text">1. 基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-SFR-%E5%AE%89%E5%85%A8%E5%8A%9F%E8%83%BD%E7%BB%84%E4%BB%B6"><span class="nav-text">2. SFR 安全功能组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-SAR-%E5%AE%89%E5%85%A8%E4%BF%9D%E9%9A%9C%E8%A6%81%E6%B1%82"><span class="nav-text">3. SAR 安全保障要求</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E8%AF%84%E4%BC%B0%E4%BF%9D%E6%8A%A4%E7%AD%89%E7%BA%A7-EAL"><span class="nav-text">二、评估保护等级 EAL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E4%B8%8E%E5%85%B6%E4%BB%96%E6%A0%87%E5%87%86%E5%8C%96%E7%BB%84%E7%BB%87%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-text">三、与其他标准化组织的关系</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81CCRA-%E5%9B%BD%E9%99%85%E4%BA%92%E8%AE%A4%E5%8D%8F%E5%AE%9A"><span class="nav-text">四、CCRA 国际互认协定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">官方文档下载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A%E4%B8%8B%E8%BD%BD"><span class="nav-text">分析报告下载</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Common Criteria 国际安全认证体系 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Common Criteria 国际安全认证体系
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-03-10 10:33:49" itemprop="dateCreated datePublished" datetime="2024-03-10T10:33:49+08:00">2024-03-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>9 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>1993 年，在美国的 TCSEC、欧洲的 ITSEC、加拿大的 CTCPEC、美国的 FC（Federal Criteria）等信息安全准则的基础上，由 6 个国家 7 方(美国国家安全局 NSA 和国家技术标准研究所 NIST、加、英、法、德、荷)共同提出了<strong>信息技术安全评价通用准则</strong>（The Common Criteria for Information Technology security Evaluation，简称 CC 标准），目标是采用一套公共的准则规范为 IT 保障类产品的广泛用户群体提供最大的便利，提供了一个更全面的框架用来评估信息系统、信息产品的安全性。</p>
+<p><img src="/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/CC-his.png" alt="历史"></p>
+<p>Common Criteria 先后发布了4个官方版本，当前最新版本是 v3.1，请参见<a target="_blank" rel="noopener" href="https://www.commoncriteriaportal.org/cc/index.cfm">https://www.commoncriteriaportal.org</a></p>
+<h2 id="一、核心内容"><a href="#一、核心内容" class="headerlink" title="一、核心内容"></a>一、核心内容</h2><p>2005年发布的 CC v2.3 是最经典的版本，其分为三个部分，此外还有一个用于国际认证的<a href="cemv2.3.pdf">通用评估方法论 CEM</a>。</p>
+<h3 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1. 基本概念"></a>1. 基本概念</h3><p><a href="ccpart1v2.3.pdf">第一部分</a>介绍了CC 的基本思路和一般模型，规定了撰写技术文档的格式及要点，核心概念包括：</p>
+<ul>
+<li>TOE（Target of Evaluation，评估对象）：作为安全评估对象的具体信息技术产品(如防火墙、计算机网络、密码模块等)，包括相关的管理员指南、用户指南、设计方案等文档。</li>
+<li>ST（Security Target，安全目标）：对某个特定的评估目标提出的要其满足的安全功能要求（Security Functional Requirements，简称 SFR）和安全保障要求（Security Assurance Requirements，简称SAR）。</li>
+<li>PP（Protection Profile，保护轮廓）：满足特定用户需求，与一类 TOE 实现无关的一组安全要求。</li>
+</ul>
+<p>总的来说，PP 相当于行业的一个规范或标准，它是对标整个行业的，表达“要求产品做成什么样子”；ST 是针对具体厂商 而言的，表达“产品想做成什么样子”，相当于产品的安全功能说明书；TOE 则是某个厂商的具体产品。</p>
+<h3 id="2-SFR-安全功能组件"><a href="#2-SFR-安全功能组件" class="headerlink" title="2. SFR 安全功能组件"></a>2. SFR 安全功能组件</h3><p><a href="ccpart2v2.3.pdf">第二部分</a>详细描述了可供 ST 或 PP 选用的安全功能组件，共分十一个大类，其中有安全审计、通信、密码支持、用户数据保护、标识和鉴别、安全管理、隐秘、TSF 保护、资源利用、TOE 访问和可信路径&#x2F;信道，这些安全功能组件集合了当前信息安全产业界最普遍使用的技术方法，并进一步细分到不同的族、组件及组成要素，是非常有价值的、可供参考的安全功能描述。</p>
+<p>CC 标准是有弹性可扩展的框架性体系（相当于一个标准化的安全需求目录），并非针对具体的产品，仍然保留了较大的灵活性。CC 标准既不强迫任何产品必须选用一些特定的安全功能组件，但也不能保证所有信息安全产品所需的安全功能都已存在相应描述，允许 ST 或 PP 的作者按照其已定义的安全功能组件的格式来定义描述新的安全功能组件。</p>
+<h3 id="3-SAR-安全保障要求"><a href="#3-SAR-安全保障要求" class="headerlink" title="3. SAR 安全保障要求"></a>3. SAR 安全保障要求</h3><p><a href="ccpart3v2.3.pdf">第三部分</a>详细描述了可供 ST 或 PP 选用的安全保障要求。安全保障要求覆盖到对 ST 的评估准则、TOE 的开发、生命周期支持、指导性文件、测试、脆弱性评定在内的六个方面。<br>根据在每个方面安全保障要求的数量多少和松紧程度，CC 第三部分中又定义了七个评估保障级（Evaluation Assurance Level，简称EAL），每个评估保障级都是将六个方面的安全保障要求的细节按一定方式搭配并固定下来。从 EAL1 到 EAL7，在六个方面的安全保障要求由少到多、由松到紧逐渐递增。</p>
+<h2 id="二、评估保护等级-EAL"><a href="#二、评估保护等级-EAL" class="headerlink" title="二、评估保护等级 EAL"></a>二、评估保护等级 EAL</h2><p>EAL（Evaluation Assurance Level，评估保护等级）描述了评估深度和严谨程度的数字评级，每级 EAL 都定义了 6 项 SAR，包括：ST 的评估准则、TOE 的开发、生命周期支持、指导性文件、测试、脆弱性评定等。</p>
+<ul>
+<li>EAL 1：功能测试，<strong>基础级别</strong>的安全保障，适用于对正确运行需要一定信任的场合，安全威胁应视为并不严重。<br>  依据一个规范的独立性测试和对所提供指导性文档的检查来为用户评估 TOE；<br>  无需开发者配合即可完成评估，仅确认 TOE 的功能与其文档在形式上是一致的，且对已标识的威胁提供了有效的保护。</li>
+<li>EAL2：结构（白盒）测试，适用于缺乏现成可用的完整的开发记录时，开发者或用户需要一种<strong>低等到中等级别</strong>的、独立保证的安全性。<br>  增加开发者测试及脆弱性分析和基于 TOE 规范的独立性测试；<br>  提供功能和接口的规范、指导性文档和TOE的高层设计的评估分析；<br>  要求开发者递交设计信息和测试结果，但不需要开发者增加过多费用或时间投入；<br>  评估证据包括安全功能的独立性测试、开发者自测结果确认、功能强度分析、脆弱性报告、TOE 的配置表和安全交付程序；</li>
+<li>EAL3：系统地测试和检查，适用于开发者或用户需要一个<strong>中等级别</strong>的、独立保证的安全性，且在不带大量重建费用的情况下，对 TOE 及其开发过程进行彻底审查。<br>  增加更完备的安全功能测试，及提供开发过程中不会被篡改的可行性机制或程序；<br>  增加开发环境现场核查，核查配置管理、 开发过程管理、交付过程管理等。</li>
+<li>EAL4：系统地设计、测试和复查，适用于开发者或用户对传统的商品化的 TOE 需要一个<strong>中等到高等级别</strong>的独立保证的安全性，并且准备负担额外的安全专用工程费用。<br>  增加更多的设计描述、实现的子集，以及提供开发或交付过程中不会被篡改的可信性改进机制或程序；<br>  增加对抵御攻击的能力的独立脆弱性分析、开发环境控制措施（如自动化的额外的配置管理和安全交付程序）、源码审查；<br>  需要分析 TOE 模块的低层设计和实现的子集；</li>
+<li>EAL5：半形式化设计和测试，<strong>高等级别</strong>，适用于开发者和使用者在有计划的开发中，采用严格的开发手段，以获得一个高级别的独立保证的安全性，不会因采取专业性安全工程技术而增加一些不合理的开销。<br>  需要分析所有的实现，还需要额外分析功能规范和高层设计的形式化模型和半形式化表示和论证；</li>
+<li>EAL6：半形式化验证的设计和测试，适用于在<strong>高风险</strong>环境下的特定安全产品或系统的开发，且要保护的资源值得花费一些额外的人力、物力和财力。</li>
+<li>EAL7：形式化验证的设计和测试，适用于一些安全性要求很高的 TOE 开发，这些 TOE 将应用在风险非常高的地方，或者所保护资产的价值很高的地方，非常罕见！</li>
+</ul>
+<p><img src="/2024/03/10/Common-Criteria-%E5%9B%BD%E9%99%85%E5%AE%89%E5%85%A8%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/EAL.png" alt="EAL"></p>
+<h2 id="三、与其他标准化组织的关系"><a href="#三、与其他标准化组织的关系" class="headerlink" title="三、与其他标准化组织的关系"></a>三、与其他标准化组织的关系</h2><p>2005年，国际标准组织（ISO）正式采纳 CC 2.3 版本为 <a target="_blank" rel="noopener" href="https://www.iso.org/obp/ui/en/#iso:std:iso-iec:15408:-1:ed-4:v1:en">ISO&#x2F;IEC 15408</a>。<br>2008年，中国也引入了 ISO&#x2F;IEC 标准作为 GB&#x2F;T 18336 国家标准，也是基于CC 2.3版本。</p>
+<p>目前 CCRA 互认的安全保障级别 EAL 最高为 4 级，为此该协定组织明确规定了通用标准评估方法论（Common Evaluation Methodology，CEM）作为互认协定所使用的标准基础，并被 ISO 组织接纳为国际标准 ISO&#x2F;IEC 18405。</p>
+<h2 id="四、CCRA-国际互认协定"><a href="#四、CCRA-国际互认协定" class="headerlink" title="四、CCRA 国际互认协定"></a>四、CCRA 国际互认协定</h2><p>1998 年，标准开发组的参与国联合了其他国家共同签署了 CC 互认协定（Common Criteria Recognition Arrangement，CCRA），目前包括美国、英国、德国、日本、韩国和澳大利亚等26个国家。<br>CCRA 各个成员国家的 CC 评估和认证体系均设有一个权威的认证机构和多个获得商业授权的评估实验室，他们与评估发起者（申请者）合作完成产品的评估和认证，权威认证机构接受所在国家政府职能机构和 CCRA 的双重监管。</p>
+<p>在美国，NIAP（National Information Assurance Partnership，美国国家信息保障合作组织）是 NSA（美国国家安全部）的一个部门，负责美国 CC 标准的实施。<br>CCEVS（Common Criteria Evaluation and Validation Scheme，通用标准评估与认证体系）是 NIAP 管理的一个国家计划，成立于 2009 年，核心任务是评估信息技术的安全功能是否符合 CC 国际标准。<br><a target="_blank" rel="noopener" href="https://www.niap-ccevs.org/Product/index.cfm">当前的认证产品列表</a>显示，Cisco、Microsoft、RedHat、Nokia等公司都在其列。</p>
+<p>在德国，CC 评测认证体系由德国 BSI（The Bundesamt fur Sicherheit in der Informationstechnik）负责开展，其是德国联邦政府的 IT 安全权威部门。</p>
+<p>目前中国没有参加 CCRA 组织。</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Common_Criteria">CC 标准 - Wiki</a></li>
+</ul>
+<h3 id="官方文档下载"><a href="#官方文档下载" class="headerlink" title="官方文档下载"></a>官方文档下载</h3><ul>
+<li><a href="ccpart1v2.3.pdf">CC v2.3 Part1</a></li>
+<li><a href="ccpart2v2.3.pdf">CC v2.3 Part2</a></li>
+<li><a href="ccpart3v2.3.pdf">CC v2.3 Part3</a></li>
+<li><a href="cemv2.3.pdf">CC v2.3 CEM</a></li>
+</ul>
+<h3 id="分析报告下载"><a href="#分析报告下载" class="headerlink" title="分析报告下载"></a>分析报告下载</h3><ul>
+<li><a href="CC_and_CCRA_Introduction.pdf">国际CC 认证体系和CCRA 简介</a></li>
+<li><a href="ICT-report.pdf">ICT 产品信息安全北美市场准入体系研究报告</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/02/11/Apple-File-System%E7%9A%84%E8%BD%AF%E4%BB%B6%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90/" rel="prev" title="Apple File System的软件加密分析">
+                  <i class="fa fa-angle-left"></i> Apple File System的软件加密分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/03/10/FIPS-140-%E8%AE%A4%E8%AF%81%E4%BD%93%E7%B3%BB/" rel="next" title="FIPS 140 认证体系">
+                  FIPS 140 认证体系 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

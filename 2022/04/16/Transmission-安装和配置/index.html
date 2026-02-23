@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、概述 Transmission是一个轻量级、跨平台、开源的 BitTorrent 客户端，官网地址是https:&#x2F;&#x2F;transmissionbt.com&#x2F;，源码地址是https:&#x2F;&#x2F;github.com&#x2F;transmission&#x2F;transmission，当前最新版本是3.0。    其实现了BT协议的几乎全部功能，覆盖了Linux、MacOS、Windows等所有主流操作系统，核心组件包括：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Transmission 安装和配置">
+<meta property="og:url" content="https://nokiam9.github.io/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、概述 Transmission是一个轻量级、跨平台、开源的 BitTorrent 客户端，官网地址是https:&#x2F;&#x2F;transmissionbt.com&#x2F;，源码地址是https:&#x2F;&#x2F;github.com&#x2F;transmission&#x2F;transmission，当前最新版本是3.0。    其实现了BT协议的几乎全部功能，覆盖了Linux、MacOS、Windows等所有主流操作系统，核心组件包括：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/home.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/arch.gif">
+<meta property="og:image" content="https://nokiam9.github.io/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/web.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/products.gif">
+<meta property="article:published_time" content="2022-04-16T11:16:25.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.898Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/home.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/","path":"2022/04/16/Transmission-安装和配置/","title":"Transmission 安装和配置"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Transmission 安装和配置 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Centos%E7%9A%84%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95"><span class="nav-text">二、Centos的安装配置方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%BD%AF%E4%BB%B6%E5%8C%85%E5%AE%89%E8%A3%85"><span class="nav-text">1. 软件包安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%B3%BB%E7%BB%9F%E8%87%AA%E5%90%AF%E5%8A%A8"><span class="nav-text">2. 系统自启动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%BF%90%E8%A1%8C%E7%9B%91%E6%8E%A7"><span class="nav-text">3. 运行监控</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81Transmission%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%9A%84%E6%9E%84%E6%88%90%E5%88%86%E6%9E%90"><span class="nav-text">三、Transmission软件包的构成分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%88%9B%E5%BB%BA%E9%BB%98%E8%AE%A4%E7%94%A8%E6%88%B7"><span class="nav-text">1. 创建默认用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8B%B7%E8%B4%9D%E5%8F%AF%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F"><span class="nav-text">2. 拷贝可执行程序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%8B%B7%E8%B4%9D%E8%BD%AF%E4%BB%B6%E6%96%87%E6%A1%A3"><span class="nav-text">3. 拷贝软件文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%8B%B7%E8%B4%9DWeb-UI"><span class="nav-text">4. 拷贝Web UI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%AE%BE%E7%BD%AE%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="nav-text">5. 设置系统启动服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E8%AE%BE%E7%BD%AE%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95"><span class="nav-text">6. 设置软件包的数据目录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Transmission%E8%B7%A8%E5%B9%B3%E5%8F%B0%E6%8A%80%E6%9C%AF%E6%96%B9%E6%A1%88%E5%88%86%E6%9E%90"><span class="nav-text">四、Transmission跨平台技术方案分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-MacOS"><span class="nav-text">1. MacOS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Windows"><span class="nav-text">2. Windows</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Linux%E6%A1%8C%E9%9D%A2%E7%89%88"><span class="nav-text">3. Linux桌面版</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Linux%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-text">4. Linux服务器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%AE%BE%E5%A4%87"><span class="nav-text">5. 嵌入式设备</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E7%9A%84%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-text">五、常见问题的解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-UDP%E7%BC%93%E5%86%B2%E5%8C%BA%E4%B8%8D%E8%B6%B3%E5%AF%BC%E8%87%B4Daemon%E5%90%AF%E5%8A%A8%E5%A4%B1%E8%B4%A5"><span class="nav-text">1. UDP缓冲区不足导致Daemon启动失败</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Web-UI%E7%95%8C%E9%9D%A2%E6%97%A0%E6%B3%95%E6%89%93%E5%BC%80"><span class="nav-text">2. Web UI界面无法打开</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9ATransmission-%E5%85%A8%E9%87%8F%E9%85%8D%E7%BD%AE%E5%8F%82%E6%95%B0"><span class="nav-text">附录一：Transmission 全量配置参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9ASamba-SMB-%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E6%9C%8D%E5%8A%A1"><span class="nav-text">附录二：Samba SMB 文件共享服务</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95"><span class="nav-text">安装方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE"><span class="nav-text">参数配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%96%B9%E5%BC%8F"><span class="nav-text">启动方式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%89%EF%BC%9A%E5%85%B3%E4%BA%8EQt-%E5%92%8C-GTK"><span class="nav-text">附录三：关于Qt 和 GTK</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Qt"><span class="nav-text">Qt</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GTK"><span class="nav-text">GTK</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Transmission 安装和配置 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Transmission 安装和配置
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-04-16 19:16:25" itemprop="dateCreated datePublished" datetime="2022-04-16T19:16:25+08:00">2022-04-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.7k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>17 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>Transmission是一个轻量级、跨平台、开源的 BitTorrent 客户端，官网地址是<a target="_blank" rel="noopener" href="https://transmissionbt.com/">https://transmissionbt.com/</a>，源码地址是<a target="_blank" rel="noopener" href="https://github.com/transmission/transmission">https://github.com/transmission/transmission</a>，当前最新版本是3.0。</p>
+<p><img src="/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/home.png" alt="Transmission 的官网首页"></p>
+<p>其实现了BT协议的几乎全部功能，覆盖了Linux、MacOS、Windows等所有主流操作系统，核心组件包括：</p>
+<ul>
+<li>1个基于MacOS的Native Application</li>
+<li>2个基于Linux的Native Application，分别支持 GTK GUI和 QT GUI</li>
+<li>1个基于Linux的守护服务，用于服务器或路由器的后台服务</li>
+<li>1个WEB UI前端界面，通过Json RPC接口服务提供浏览器访问</li>
+</ul>
+<p><img src="/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/arch.gif" alt="Transmission技术架构"></p>
+<h2 id="二、Centos的安装配置方法"><a href="#二、Centos的安装配置方法" class="headerlink" title="二、Centos的安装配置方法"></a>二、Centos的安装配置方法</h2><p>下面以Centos为例，介绍其安装和配置的基本步骤。</p>
+<h3 id="1-软件包安装"><a href="#1-软件包安装" class="headerlink" title="1. 软件包安装"></a>1. 软件包安装</h3><p>最简便的方法是使用EPEL源，简单粗暴就是：<code>yum install transmission</code>，当然严谨一点就是:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install transmission-daemon</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-系统自启动"><a href="#2-系统自启动" class="headerlink" title="2. 系统自启动"></a>2. 系统自启动</h3><p><code>transmission-daemon</code>支持<code>systemd</code>启动方式。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl start transmission-daemon --now</span><br><span class="line">systemctl status transmission-daemon</span><br></pre></td></tr></table></figure>
+
+<p>如果后台服务正常启动，可以看到如下启动信息：</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@test transmission]# systemctl status transmission-daemon</span><br><span class="line">● transmission-daemon.service - Transmission BitTorrent Daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/transmission-daemon.service; disabled; vendor preset: disabled)</span><br><span class="line">   Active: active (running) since 六 2022-04-16 22:10:31 CST; 34min ago</span><br><span class="line"> Main PID: 12051 (transmission-da)</span><br><span class="line">   Status: &quot;Idle.&quot;</span><br><span class="line">   CGroup: /system.slice/transmission-daemon.service</span><br><span class="line">           └─12051 /usr/bin/transmission-daemon -f --log-error</span><br><span class="line"></span><br><span class="line">4月 16 22:10:31 test.caogo.local systemd[1]: Starting Transmission BitTorrent Daemon...</span><br><span class="line">4月 16 22:10:31 test.caogo.local systemd[1]: Started Transmission BitTorrent Daemon.</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-运行监控"><a href="#3-运行监控" class="headerlink" title="3. 运行监控"></a>3. 运行监控</h3><p>后台服务启动成功后，可以看到占用tcp&#x2F;udp 51413作为BT通信端口，占用tcp 9091端口用于访问Web UI。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@test lib]# netstat -tunpl |grep transmission</span><br><span class="line">tcp        0      0 0.0.0.0:51413           0.0.0.0:*               LISTEN      11846/transmission- </span><br><span class="line">tcp        0      0 0.0.0.0:9091            0.0.0.0:*               LISTEN      11846/transmission- </span><br><span class="line">tcp6       0      0 :::51413                :::*                    LISTEN      11846/transmission- </span><br><span class="line">udp        0      0 0.0.0.0:51413           0.0.0.0:*                           11846/transmission- </span><br></pre></td></tr></table></figure>
+
+<p>此时，通过浏览器打开<code>http://&lt;IP地址&gt;:9091</code>，就可以看到Web UI的局面了。</p>
+<p><img src="/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/web.png" alt="Web UI"></p>
+<h2 id="三、Transmission软件包的构成分析"><a href="#三、Transmission软件包的构成分析" class="headerlink" title="三、Transmission软件包的构成分析"></a>三、Transmission软件包的构成分析</h2><p>最简便的方法是使用EPEL源，通过<code>yum search transmission</code>搜索，主要有以下软件包：</p>
+<ul>
+<li><code>transmission-common</code>: 核心组件，包含1个 Web GUI 和 4个命令行程序：<code>transmission-create | edit | remote | show</code></li>
+<li><code>transmission-daemon</code>: &#x3D; <code>transmission-common</code> + 1个后台守护程序<code>transmission-daemon</code></li>
+<li><code>transmission-cli</code>: &#x3D; <code>transmission-common</code> + 1个系统配置命令行程序<code>transmission-cli</code></li>
+<li><code>transmission-gtk</code>：&#x3D; <code>transmission-common</code> + 基于GTK GUI的Applicaition</li>
+<li><code>transmission-qt</code>：&#x3D; <code>transmission-common</code> + 基于Qt GUI的Applicaition</li>
+<li><code>transmission</code>: &#x3D; 常用安装包名，默认采用GTK，基本等于<code>transmission-gtk</code></li>
+</ul>
+<p>通过<code>yum info transmission-common</code>可以查看该软件包的基本信息。<br>通过<code>repoquery -ql transmission-common.x86_64</code>，可以查看该软件包的全部文件信息。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[root@test transmission]# yum info transmission-common</span><br><span class="line">已加载插件：fastestmirror</span><br><span class="line">Loading mirror speeds from cached hostfile</span><br><span class="line">已安装的软件包</span><br><span class="line">名称    ：transmission-common</span><br><span class="line">架构    ：x86_64</span><br><span class="line">版本    ：2.94</span><br><span class="line">发布    ：9.el7</span><br><span class="line">大小    ：3.0 M</span><br><span class="line">源    ：installed</span><br><span class="line">来自源：epel</span><br><span class="line">简介    ： Transmission common files</span><br><span class="line">网址    ：http://www.transmissionbt.com</span><br><span class="line">协议    ： MIT and GPLv2</span><br><span class="line">描述    ： Common files for Transmission BitTorrent client sub-packages. It includes</span><br><span class="line">         : the web user interface, icons and transmission-remote, transmission-create,</span><br><span class="line">         : transmission-edit, transmission-show utilities.</span><br><span class="line"></span><br><span class="line">[root@test transmission]# repoquery -ql transmission-daemon.x86_64</span><br><span class="line">/usr/bin/transmission-daemon</span><br><span class="line">/usr/lib/systemd/system/transmission-daemon.service</span><br><span class="line">/usr/share/man/man1/transmission-daemon.1.gz</span><br><span class="line">/var/lib/transmission</span><br></pre></td></tr></table></figure>
+
+<p>由此可以分析得出<code>transmission-daemon</code>安装过程的主要步骤包括：</p>
+<h3 id="1-创建默认用户"><a href="#1-创建默认用户" class="headerlink" title="1. 创建默认用户"></a>1. 创建默认用户</h3><p>安装完成后检查<code>/etc/passwd</code>，发现添加了一个不能登录的系统用户<code>transmission</code>。</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">transmission:x:998:995:transmission daemon account:/var/lib/transmission:/sbin/nologin</span><br></pre></td></tr></table></figure>
+
+<p>HOME就是软件包的默认安装目录<code>/var/lib/transmission</code>。</p>
+<h3 id="2-拷贝可执行程序"><a href="#2-拷贝可执行程序" class="headerlink" title="2. 拷贝可执行程序"></a>2. 拷贝可执行程序</h3><p>可执行程序的安装位置是<code>/usr/bin/</code>，可以发现有<code>transmission-daemon</code>等5个程序。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost transmission-daemon]# <span class="built_in">ls</span> -l /usr/bin/transmission*</span><br><span class="line">-rwxr-xr-x 1 root root 560880 5月  18 2020 /usr/bin/transmission-create</span><br><span class="line">-rwxr-xr-x 1 root root 577152 5月  18 2020 /usr/bin/transmission-daemon</span><br><span class="line">-rwxr-xr-x 1 root root 556456 5月  18 2020 /usr/bin/transmission-edit</span><br><span class="line">-rwxr-xr-x 1 root root 597360 5月  18 2020 /usr/bin/transmission-remote</span><br><span class="line">-rwxr-xr-x 1 root root 556464 5月  18 2020 /usr/bin/transmission-show</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-拷贝软件文档"><a href="#3-拷贝软件文档" class="headerlink" title="3. 拷贝软件文档"></a>3. 拷贝软件文档</h3><p>yum安装软件包时，通常在以下目录补充该软件的文档信息：</p>
+<ul>
+<li>&#x2F;usr&#x2F;share&#x2F;doc&#x2F;：本软件使用说明书</li>
+<li>&#x2F;usr&#x2F;share&#x2F;icons&#x2F;：本软件使用的各种尺寸的图标</li>
+<li>&#x2F;usr&#x2F;share&#x2F;licenses&#x2F;：本软件的许可证文件</li>
+<li>&#x2F;usr&#x2F;share&#x2F;man&#x2F;：man命令的帮助信息</li>
+<li>&#x2F;usr&#x2F;share&#x2F;pixmaps&#x2F;：本软件Logo的位图</li>
+</ul>
+<h3 id="4-拷贝Web-UI"><a href="#4-拷贝Web-UI" class="headerlink" title="4. 拷贝Web UI"></a>4. 拷贝Web UI</h3><p>Transmission的Web UI的入口文件存储在<code>/usr/share/transmission/web/index.html</code>，其结构与普通网站一致：</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">web</span><br><span class="line">├── images</span><br><span class="line">├── index.html</span><br><span class="line">├── javascript</span><br><span class="line">├── LICENSE</span><br><span class="line">└── style</span><br><span class="line">    ├── jqueryui</span><br><span class="line">    └── transmission</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-设置系统启动服务"><a href="#5-设置系统启动服务" class="headerlink" title="5. 设置系统启动服务"></a>5. 设置系统启动服务</h3><p>采用systemd的启动方式，服务配置文件是<code>/usr/lib/systemd/system/transmission-daemon.service</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Unit]</span><br><span class="line">Description=Transmission BitTorrent Daemon</span><br><span class="line">After=network.target</span><br><span class="line"></span><br><span class="line">[Service]</span><br><span class="line">User=transmission</span><br><span class="line">Type=notify</span><br><span class="line">ExecStart=/usr/bin/transmission-daemon -f --log-error</span><br><span class="line">ExecReload=/bin/kill -s HUP $MAINPID</span><br><span class="line"></span><br><span class="line">[Install]</span><br><span class="line">WantedBy=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-设置软件包的数据目录"><a href="#6-设置软件包的数据目录" class="headerlink" title="6. 设置软件包的数据目录"></a>6. 设置软件包的数据目录</h3><p>Transmission-daemon的配置文件隐藏在<code>$HOME/.config/transmission-daemon/</code>，而不是常规的<code>/etc/</code><br>HOME的目录结构如下：</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@test transmission]# tree /var/lib/transmission -a</span><br><span class="line">/var/lib/transmission</span><br><span class="line">├── .config/                    # 配置文件目录</span><br><span class="line">│   └── transmission-daemon/ </span><br><span class="line">│       ├── blocklists/         # 各个种子文件的数据块信息</span><br><span class="line">│       ├── resume/             # 各个种子文件的运行状态</span><br><span class="line">│       ├── settings.json       # 主配置文件，json格式</span><br><span class="line">│       ├── stats.json          # 当前系统运行状态，json格式</span><br><span class="line">│       ├── dht.dat             # 存储DHT节点信息</span><br><span class="line">│       └── torrents/           # 种子文件的存储目录</span><br><span class="line">├── Downloads/                  # 下载数据文件的存储目录</span><br><span class="line">└── .pki/</span><br><span class="line">    └── nssdb/</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、Transmission跨平台技术方案分析"><a href="#四、Transmission跨平台技术方案分析" class="headerlink" title="四、Transmission跨平台技术方案分析"></a>四、Transmission跨平台技术方案分析</h2><p><code>Transmission core</code>作为核心引擎，负责实现BT协议的全部功能，其底层依赖两个外部库函数：</p>
+<ul>
+<li><code>libevent</code>：一个异步事件处理软件库。libevent提供了一组应用程序编程接口（API），允许开发者为事件注册回调函数，用来取代网络服务器所使用的事件循环检查框架。</li>
+<li><code>libnatpmp</code>：一个NAT-PMP协议库。NAT-PMP（Network Address Translation Port Mapping Protocol）协议通过端口映射的方式获取外网主机的IP地址。</li>
+</ul>
+<p>其对外提供服务主要通过以下接口实现：</p>
+<ul>
+<li><code>JSON RPC Server</code>：提供网络远程调用接口，以JSON格式</li>
+<li><code>Web App Server</code>：基于通用Web Server，以Web形式通过网络App应用服务接口</li>
+<li><code>Lib Transmission</code>：提供C语言的库函数接口，仅能用于Native Application</li>
+</ul>
+<p><img src="/2022/04/16/Transmission-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE/products.gif" alt="APP结构"><br>以上各软件包的技术依赖关系参见<a target="_blank" rel="noopener" href="https://github.com/transmission/transmission/blob/main/docs/Transmission-Architecture.md">Transmission技术架构</a></p>
+<h3 id="1-MacOS"><a href="#1-MacOS" class="headerlink" title="1. MacOS"></a>1. MacOS</h3><p>Transmission以Native Application的方式发布，形态是一个DMG安装包。<br>开发了一个基于GTK GUI的Native GUI，直接采用Transmission core提供的Lib库函数。</p>
+<blockquote>
+<p>Mac OS平台的配置文件目录存在差异，每个种子文件的状态信息位于：<code>~/Library/Application Support/Transmission</code>，而全局配置文件位于：<code>~/Library/Preferences/org.m0k.transmission.plist</code></p>
+</blockquote>
+<h3 id="2-Windows"><a href="#2-Windows" class="headerlink" title="2. Windows"></a>2. Windows</h3><p>Transmission以Native Application的方式发布，形态是一个MSI安装包，分为32位和64位两个版本。<br>开发了一个基于Qt GUI的Native GUI，注意其采用的是JSON RPC接口服务，需要网络组件支持。</p>
+<h3 id="3-Linux桌面版"><a href="#3-Linux桌面版" class="headerlink" title="3. Linux桌面版"></a>3. Linux桌面版</h3><p>Linux桌面系统的市场份额很少，但是很庞杂：</p>
+<ul>
+<li>KDE：排名第一，基于Qt GUI开发</li>
+<li>GNOME：简单速度快，红帽等Linux发行版常用，基于GPK GUI开发<br>此外，GNOME还有多个不同版本的变种，包括Unity、MATE、Cinnamon等</li>
+</ul>
+<blockquote>
+<p>Qt GUI和GPK GUI的配置文件都存储在：<code>$HOME/.config/transmission/</code></p>
+</blockquote>
+<h3 id="4-Linux服务器"><a href="#4-Linux服务器" class="headerlink" title="4. Linux服务器"></a>4. Linux服务器</h3><p>安装<code>transmission-daemon</code>提供后台服务，再通过Web UI提供管理界面是最直接的方案。<br>本机也可以通过<code>transmission-cli</code>提供一个字符界面的管理工具，但是没有人有兴趣使用如此简陋的工具。</p>
+<blockquote>
+<p>transmission-cli的配置文件存储在：<code>$HOME/.config/transmission-cli/</code></p>
+</blockquote>
+<h3 id="5-嵌入式设备"><a href="#5-嵌入式设备" class="headerlink" title="5. 嵌入式设备"></a>5. 嵌入式设备</h3><p>群晖NAS、西部数据NAS、D-Link路由器等嵌入式设备都是基于Linux核心，因此也可以安装Transmission。<br>以西部数据NAS为例，MyBookLive、MyCloud在技术上都可支持，但由于不属于官方项目，因此版本升级时经常被限制。<br>具体安装方法参见<a target="_blank" rel="noopener" href="http://mybookworld.wikidot.com/optware">http://mybookworld.wikidot.com/optware</a></p>
+<h2 id="五、常见问题的解决方案"><a href="#五、常见问题的解决方案" class="headerlink" title="五、常见问题的解决方案"></a>五、常见问题的解决方案</h2><h3 id="1-UDP缓冲区不足导致Daemon启动失败"><a href="#1-UDP缓冲区不足导致Daemon启动失败" class="headerlink" title="1. UDP缓冲区不足导致Daemon启动失败"></a>1. UDP缓冲区不足导致Daemon启动失败</h3><p>如果启动失败，并产生如下信息，通常是操作系统的UDP网络缓冲区不足</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">UDP Failed to set receive buffer: requested 4194304, got 425984 (tr-udp.c:84)</span><br><span class="line">UDP Failed to set send buffer: requested 1048576, got 425984 (tr-udp.c:95)</span><br></pre></td></tr></table></figure>
+
+<p>解决办法是通过<code>sysctl -p</code>命令来检查，并修改位于<code>/etc/sysctl.conf</code>的内核参数</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo &#x27;net.core.rmem_max = 16777216&#x27; &gt;&gt; /etc/sysctl.conf</span><br><span class="line">echo &#x27;net.core.wmem_max = 4194304&#x27; &gt;&gt; /etc/sysctl.conf</span><br><span class="line">sysctl -p</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Web-UI界面无法打开"><a href="#2-Web-UI界面无法打开" class="headerlink" title="2. Web UI界面无法打开"></a>2. Web UI界面无法打开</h3><p>如果浏览器提示“403: Forbidden”错误信息，并提示“Unauthorized IP Addres”，通常是因为默认只允许来自本机<code>127.0.0.1</code>的白名单访问。<br>解决方法是：</p>
+<ol>
+<li><p>停止守护进程，否则修改无法存盘；</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop transmission-daemon</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编辑配置文件，修改<code>rpc-whitelist-enabled</code>为<code>false</code></p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /var/lib/transmission/.config/transmission-daemon/settings.json</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重新启动守护进程，并打开浏览器正常访问。</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start transmission-daemon</span><br></pre></td></tr></table></figure></li>
+</ol>
+<hr>
+<h2 id="附录一：Transmission-全量配置参数"><a href="#附录一：Transmission-全量配置参数" class="headerlink" title="附录一：Transmission 全量配置参数"></a>附录一：Transmission 全量配置参数</h2><p>以 Centos 7为例，<br>默认配置文件路径：<code>/var/lib/transmission/.config/transmission-daemon/settings.json</code><br>默认下载文件目录：<code>/var/lib/transmission/Downloads</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;alt-speed-up&quot;</span>: 500, <span class="comment">#计划时段上传限速值</span></span><br><span class="line"><span class="string">&quot;alt-speed-down&quot;</span>: 500, <span class="comment">#计划时段下载限速值</span></span><br><span class="line"><span class="string">&quot;alt-speed-enabled&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;alt-speed-time-begin&quot;</span>: 540,</span><br><span class="line"><span class="string">&quot;alt-speed-time-day&quot;</span>: 127,</span><br><span class="line"><span class="string">&quot;alt-speed-time-enabled&quot;</span>: <span class="literal">true</span>, <span class="comment">#启用计划工作，为false时，以上计划配置则不生效</span></span><br><span class="line"><span class="string">&quot;alt-speed-time-end&quot;</span>: 420, <span class="comment">#计划结束时间，为零点到开始时间的分钟数，比如7:00就是7*60=420。另外，该时间是用的GMT时间，即北京时间-8小时。比如你计划北京时间7点30分开始，这个数字应该是（7-8+24）*60+30=1410</span></span><br><span class="line"><span class="string">&quot;bind-address-ipv4&quot;</span>: <span class="string">&quot;0.0.0.0&quot;</span>,</span><br><span class="line"><span class="string">&quot;bind-address-ipv6&quot;</span>: <span class="string">&quot;::&quot;</span>,</span><br><span class="line"><span class="string">&quot;blocklist-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;blocklist-updates-enabled&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;blocklist-url&quot;</span>: <span class="string">&quot;http://www.example.com/blocklist&quot;</span>,</span><br><span class="line"><span class="string">&quot;cache-size-mb&quot;</span>: 4, <span class="comment">#缓存大小，以MB为单位，建议设大一些，避免频繁读写硬盘而伤硬盘，建议设为内存大小的1/6～1/4</span></span><br><span class="line"><span class="string">&quot;compact-view&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;dht-enabled&quot;</span>: <span class="literal">false</span>, <span class="comment">#关闭DHT（不通过tracker寻找节点）功能，不少PT站的要求，但BT下载设置为true会使得下载更好</span></span><br><span class="line"><span class="string">&quot;download-dir&quot;</span>: <span class="string">&quot;/var/lib/transmission/Downloads&quot;</span>, <span class="comment">#已完成下载的内容存放目录</span></span><br><span class="line"><span class="string">&quot;download-queue-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;download-queue-size&quot;</span>: 5,</span><br><span class="line"><span class="string">&quot;encryption&quot;</span>: 1, <span class="comment">#0=不加密，1=优先加密，2=必须加密</span></span><br><span class="line"><span class="string">&quot;idle-seeding-limit&quot;</span>: 30,</span><br><span class="line"><span class="string">&quot;idle-seeding-limit-enabled&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;incomplete-dir&quot;</span>: <span class="string">&quot;/var/lib/transmission/Downloads&quot;</span>, <span class="comment">#正在下载的内容存放目录</span></span><br><span class="line"><span class="string">&quot;incomplete-dir-enabled&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;inhibit-desktop-hibernation&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;lpd-enabled&quot;</span>: <span class="literal">false</span>, <span class="comment">#禁用LDP（本地节点发现，用于在本地网络寻找节点）,不少PT站的要求</span></span><br><span class="line"><span class="string">&quot;main-window-height&quot;</span>: 500,</span><br><span class="line"><span class="string">&quot;main-window-is-maximized&quot;</span>: 0,</span><br><span class="line"><span class="string">&quot;main-window-width&quot;</span>: 615,</span><br><span class="line"><span class="string">&quot;main-window-x&quot;</span>: 337,</span><br><span class="line"><span class="string">&quot;main-window-y&quot;</span>: 211,</span><br><span class="line"><span class="string">&quot;message-level&quot;</span>: 2,</span><br><span class="line"><span class="string">&quot;open-dialog-dir&quot;</span>: <span class="string">&quot;/home/yys/\u684c\u9762&quot;</span>,</span><br><span class="line"><span class="string">&quot;peer-congestion-algorithm&quot;</span>: <span class="string">&quot;&quot;</span>,</span><br><span class="line"><span class="string">&quot;peer-limit-global&quot;</span>: 240, <span class="comment">#全局连接数</span></span><br><span class="line"><span class="string">&quot;peer-limit-per-torrent&quot;</span>: 60, <span class="comment">#每个种子最多的连接数</span></span><br><span class="line"><span class="string">&quot;peer-port&quot;</span>: 51413, <span class="comment">#预设的port口</span></span><br><span class="line"><span class="string">&quot;peer-port-random-high&quot;</span>: 65535,</span><br><span class="line"><span class="string">&quot;peer-port-random-low&quot;</span>: 49152,</span><br><span class="line"><span class="string">&quot;peer-port-random-on-start&quot;</span>: <span class="literal">false</span>, <span class="comment">#不建议改为true</span></span><br><span class="line"><span class="string">&quot;peer-socket-tos&quot;</span>: <span class="string">&quot;default&quot;</span>,</span><br><span class="line"><span class="string">&quot;pex-enabled&quot;</span>: <span class="literal">false</span>, <span class="comment">#禁用PEX（节点交换，用于同已与您相连接的节点交换节点名单）,不少PT站的要求</span></span><br><span class="line"><span class="string">&quot;port-forwarding-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;preallocation&quot;</span>: 1, <span class="comment">#预分配文件磁盘空间，0=关闭，1=快速，2=完全。建议取1开启该功能，防止下载大半了才发现磁盘不够。取2时，可以减少磁盘碎片，但速度较慢。</span></span><br><span class="line"><span class="string">&quot;prefetch-enabled&quot;</span>: 1,</span><br><span class="line"><span class="string">&quot;queue-stalled-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;queue-stalled-minutes&quot;</span>: 30,</span><br><span class="line"><span class="string">&quot;ratio-limit&quot;</span>: 2,</span><br><span class="line"><span class="string">&quot;ratio-limit-enabled&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;rename-partial-files&quot;</span>: <span class="literal">true</span>, <span class="comment">#在未完成的文件名后添加后缀.part,false=禁用</span></span><br><span class="line"><span class="string">&quot;rpc-authentication-required&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;rpc-bind-address&quot;</span>: <span class="string">&quot;0.0.0.0&quot;</span>,</span><br><span class="line"><span class="string">&quot;rpc-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;rpc-password&quot;</span>: <span class="string">&quot;&#123;c8c083168db9fff40b5136b6d0f3f4a864110a78\/oH51JaE&quot;</span>, <span class="comment">#web-ui的密码，可直接修改，重新运行或者reload服务的时候会自动被加密</span></span><br><span class="line"><span class="string">&quot;rpc-port&quot;</span>: 9091, <span class="comment">#默认web-ui的port口，可自行更改</span></span><br><span class="line"><span class="string">&quot;rpc-url&quot;</span>: <span class="string">&quot;/transmission/&quot;</span>,</span><br><span class="line"><span class="string">&quot;rpc-username&quot;</span>: <span class="string">&quot;transmission&quot;</span>, <span class="comment">#默认登入名称</span></span><br><span class="line"><span class="string">&quot;rpc-whitelist&quot;</span>: <span class="string">&quot;127.0.0.1&quot;</span>,</span><br><span class="line"><span class="string">&quot;rpc-whitelist-enabled&quot;</span>: <span class="literal">true</span>, <span class="comment">#如果你要让其他网段连入，请设false</span></span><br><span class="line"><span class="string">&quot;scrape-paused-torrents-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;script-torrent-done-enabled&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;script-torrent-done-filename&quot;</span>: <span class="string">&quot;/home/yys&quot;</span>,</span><br><span class="line"><span class="string">&quot;seed-queue-enabled&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;seed-queue-size&quot;</span>: 10,</span><br><span class="line"><span class="string">&quot;show-backup-trackers&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;show-extra-peer-details&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;show-filterbar&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;show-notification-area-icon&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;show-options-window&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;show-statusbar&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;show-toolbar&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;show-tracker-scrapes&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;sort-mode&quot;</span>: <span class="string">&quot;sort-by-age&quot;</span>,</span><br><span class="line"><span class="string">&quot;sort-reversed&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;speed-limit-down&quot;</span>: 300, <span class="comment">#平时的下载限速</span></span><br><span class="line"><span class="string">&quot;speed-limit-down-enabled&quot;</span>: <span class="literal">true</span>, <span class="comment">#启用平时下载限速</span></span><br><span class="line"><span class="string">&quot;speed-limit-up&quot;</span>: 30, <span class="comment">#平时上传限速</span></span><br><span class="line"><span class="string">&quot;speed-limit-up-enabled&quot;</span>: <span class="literal">true</span>, <span class="comment">#启用平时上传限速</span></span><br><span class="line"><span class="string">&quot;start-added-torrents&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;statusbar-stats&quot;</span>: <span class="string">&quot;total-ratio&quot;</span>,</span><br><span class="line"><span class="string">&quot;torrent-added-notification-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;torrent-complete-notification-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;torrent-complete-sound-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;trash-can-enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line"><span class="string">&quot;trash-original-torrent-files&quot;</span>: <span class="literal">false</span>,</span><br><span class="line"><span class="string">&quot;umask&quot;</span>: 18,</span><br><span class="line"><span class="string">&quot;upload-slots-per-torrent&quot;</span>: 14</span><br><span class="line"><span class="string">&quot;utp-enabled&quot;</span>: <span class="literal">true</span>, <span class="comment">#启用μTP协议</span></span><br><span class="line"><span class="string">&quot;watch-dir&quot;</span>: <span class="string">&quot;/home/yys/\u4e0b\u8f7d&quot;</span>,</span><br><span class="line"><span class="string">&quot;watch-dir-enabled&quot;</span>: <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="附录二：Samba-SMB-文件共享服务"><a href="#附录二：Samba-SMB-文件共享服务" class="headerlink" title="附录二：Samba SMB 文件共享服务"></a>附录二：Samba SMB 文件共享服务</h2><p>SMB（Server Message Block，服务器消息块）是一种<strong>计算机通信协议</strong>（并非一款具体的软件产品），最初由 IBM 开发，用于在本地局域网 LAN 的不同计算机之间共享文件、打印机、串口等资源。</p>
+<p>后来，Microsoft 对其进行了扩展和改进称为 CIFS（Common Internet File System，通用因特网文件系统），在 Windows 操作系统中得到广泛使用，并支持与其他操作系统实现文件共享。</p>
+<p>Samba 是一个开源的软件产品，主要功能是为 Linux 服务器实现文件服务器、身份授权和认证、名称解析和打印服务等功能，其中包含了 SMB 协议的实现，它允许 Windows 客户访问 Linux 系统上的目录、打印机和文件（就像访问 Windows 服务器时一样）。参见 <a target="_blank" rel="noopener" href="https://www.samba.org/">https://www.samba.org/</a></p>
+<blockquote>
+<p>Samba 可以在 Linux 服务器上自动构建一个 domain 控制器，以直接使用 Windows 域中的用户凭据。</p>
+</blockquote>
+<p>Samba 的早期版本使用 139 端口在 Windows 网络上建立会话和进行文件共享，但由于缺乏加密和身份验证的支持而存在安全风险。现代版本改用 445 端口，提供了更高的安全性和功能，包括对加密和身份验证的支持。</p>
+<h3 id="安装方法"><a href="#安装方法" class="headerlink" title="安装方法"></a>安装方法</h3><p>Samba 可以直接使用 YUM 软件源进行安装，参见<a target="_blank" rel="noopener" href="https://www.cnblogs.com/ling-yu-amen/p/10756076.html">Centos 7 的 Samba 服务安装和配置详解</a>。<br>由于其使用了专用网络端口，注意关闭 selinux 和防火墙。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y samba</span><br></pre></td></tr></table></figure>
+
+<h3 id="参数配置"><a href="#参数配置" class="headerlink" title="参数配置"></a>参数配置</h3><p>Samba 的配置文件位于<code>/etc/samba/smb.conf</code>，初始配置信息为：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">[global]</span><br><span class="line">    workgroup = SAMBA</span><br><span class="line">    security = user             # 安全验证方式，可选：user, share, server, domain</span><br><span class="line"></span><br><span class="line">    passdb backend = tdbsam     # 后端鉴权方式，可选：smbpasswd, tdbsam, ldapsam</span><br><span class="line"></span><br><span class="line">    printing = cups</span><br><span class="line">    printcap name = cups</span><br><span class="line">    load printers = yes</span><br><span class="line">    cups options = raw</span><br><span class="line"></span><br><span class="line">[homes]</span><br><span class="line">    comment = Home Directories</span><br><span class="line">    valid users = %S, %D%w%S</span><br><span class="line">    browseable = No</span><br><span class="line">    read only = No</span><br><span class="line">    inherit acls = Yes</span><br><span class="line"></span><br><span class="line">[printers]</span><br><span class="line">    comment = All Printers</span><br><span class="line">    path = /var/tmp</span><br><span class="line">    printable = Yes</span><br><span class="line">    create mask = 0600</span><br><span class="line">    browseable = No</span><br><span class="line"></span><br><span class="line">[print$]</span><br><span class="line">    comment = Printer Drivers</span><br><span class="line">    path = /var/lib/samba/drivers</span><br><span class="line">    write list = @printadmin root</span><br><span class="line">    force group = @printadmin</span><br><span class="line">    create mask = 0664</span><br><span class="line">    directory mask = 0775</span><br></pre></td></tr></table></figure>
+
+<p>用户可以设置文件共享目录，方法是在配置文件中增加如下信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[transmission]</span><br><span class="line">    comment = transmission                      # 连接服务器的提示信息</span><br><span class="line">    path = /var/lib/transmission/Downloads/     # 共享目录的绝对路径</span><br><span class="line">    public = yes                                # 允许公开</span><br><span class="line">    browseable = yes                            # 允许浏览目录</span><br><span class="line">    writable = yes                              # 允许写入</span><br><span class="line">    guest ok = yes                              # 允许 guest 登录，无需用户名和口令</span><br><span class="line">    create mask = 0644                  </span><br><span class="line">    directory mask = 0775</span><br></pre></td></tr></table></figure>
+
+<p>为了支持 guest 匿名登录，还需要修改 <code>[global]</code> 段落的配置信息，注释取消 <code>passdb backend = tdbsam</code> ，并增加以下信息，即以 <code>transmission</code> 用户身份读写文件。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">map to guest = bad user</span><br><span class="line">guest account = transmission</span><br></pre></td></tr></table></figure>
+
+<h3 id="启动方式"><a href="#启动方式" class="headerlink" title="启动方式"></a>启动方式</h3><p>注意 Samba 的系统服务名称为<code>smb.service</code>，因此其启动方式为：</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[root@Copy-of-VM-Centos7 ~]# systemctl enable --now smb</span><br><span class="line">Created symlink from /etc/systemd/system/multi-user.target.wants/smb.service to /usr/lib/systemd/system/smb.service.</span><br><span class="line"></span><br><span class="line">[root@Copy-of-VM-Centos7 ~]# systemctl status smb</span><br><span class="line">● smb.service - Samba SMB Daemon</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/smb.service; enabled; vendor preset: disabled)</span><br><span class="line">   Active: active (running) since 六 2024-08-31 15:49:08 CST; 6s ago</span><br><span class="line">     Docs: man:smbd(8)</span><br><span class="line">           man:samba(7)</span><br><span class="line">           man:smb.conf(5)</span><br><span class="line"> Main PID: 1376 (smbd)</span><br><span class="line">   Status: &quot;smbd: ready to serve connections...&quot;</span><br><span class="line">   CGroup: /system.slice/smb.service</span><br><span class="line">           ├─1376 /usr/sbin/smbd --foreground --no-process-group</span><br><span class="line">           ├─1378 /usr/sbin/smbd --foreground --no-process-group</span><br><span class="line">           ├─1379 /usr/sbin/smbd --foreground --no-process-group</span><br><span class="line">           └─1380 /usr/sbin/smbd --foreground --no-process-group</span><br><span class="line"></span><br><span class="line">8月 31 15:49:07 Copy-of-VM-Centos7.8-local systemd[1]: Starting Samba SMB Daemon...</span><br><span class="line">8月 31 15:49:08 Copy-of-VM-Centos7.8-local smbd[1376]: [2024/08/31 15:49:08.961337,  0] ../../lib/util/become_daemon.c:136(daemon_ready)</span><br><span class="line">8月 31 15:49:08 Copy-of-VM-Centos7.8-local systemd[1]: Started Samba SMB Daemon.</span><br><span class="line">8月 31 15:49:08 Copy-of-VM-Centos7.8-local smbd[1376]:   daemon_ready: daemon &#x27;smbd&#x27; finished starting up and ready to serve connections</span><br></pre></td></tr></table></figure>
+
+<p>SMB 服务启动成功后，客户端 mac 电脑就可以通过 <code>Finder</code> - <code>前往</code> - <code>连接服务器</code>，并输入<code>smb://192.168.0.x</code> 连接共享目录了！</p>
+<h2 id="附录三：关于Qt-和-GTK"><a href="#附录三：关于Qt-和-GTK" class="headerlink" title="附录三：关于Qt 和 GTK"></a>附录三：关于Qt 和 GTK</h2><h3 id="Qt"><a href="#Qt" class="headerlink" title="Qt"></a>Qt</h3><p>1991年，Haavard Nord 和 Eirik Chambe-Eng 开发了 Qt ，该工具包名为 Qt 是因为字母 Q 在 Haavard 的 Emacs 字体特别漂亮，而 t 代表 toolkit，灵感来自 Xt，X toolkit。<br>后来，两人成立了 Trolltech 公司（中文名是“奇趣科技”），2008年被 NOKIA 公司收购，以增强该公司在跨平台软件研发方面的实力，更名 Qt Software并 宣布开放 Qt 源代码，<br>2012年8月9日，Digia 宣布已完成对诺基亚 Qt 业务及软件技术的全面收购，并计划将 Qt 应用到 Android、iOS 及Windows 8 平台上。</p>
+<p>Qt 的图形用户界面的基础是 QWidget。Qt 中所有类型的 GUI 组件如按钮、标签、工具栏等都派生自 QWidget，而QWidget 本身则为 QObject 的子类。Widget 负责接收鼠标，键盘和来自窗口系统的其他事件，并描绘了自身显示在屏幕上。每一个 GUI 组件都是一个 widget，widget 还可以作为容器，在其内包含其他 Widget。<br>使用 Qt 开发的软件，相同的代码可以在任何支持的平台上编译与执行，而不需要修改源代码。会自动依平台的不同，表现平台特有的图形界面风格。<br>Qt 开放源代码，并提供 LGPL 和 GPL 的自由软件用户协议，可以免费使用，但商业版需收取授权费。</p>
+<p>KDE Plasma Workspaces 就是基于 Qt 开发的 Linux GUI，此外 Symbain、MeeGo 等手机厂商也采用 Qt 框架，但现在已经是 Android 的天下了！！！</p>
+<h3 id="GTK"><a href="#GTK" class="headerlink" title="GTK"></a>GTK</h3><p>GTK（原名GTK+）最初是 GIMP 的专用开发库（GIMP Toolkit），后来发展为类 Unix 系统下开发图形界面的应用程序的主流开发工具之一。<br>GTK 是自由软件，并且是 GNU 计划的一部分。自 2019 年 2 月 6 日起，GTK+ 改名为 GTK。<br>GTK 使用 C 语言开发，但使用了面向对象技术，也提供了C++（gtkmm）、Perl、Ruby、Java 和 Python（PyGTK）绑定，其他的绑定有 Ada、D、Haskell、PHP和 所有的 .NET 编程语言。</p>
+<p>GNOME 是以 GTK 为基础，就是说使用 GTK 做为其工具箱，Firefox 也是基于 GTK 开发的。</p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://transmissionbt.com/">Transmission 的官网 - transmissionbt.com</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/transmission/transmission">Transmission 的源码</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/transmission/transmission/blob/main/docs/Editing-Configuration-Files.md">settings.json 的参数设置</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Qt">Qt 的 Wiki</a></li>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/GTK">GTK 的 Wiki</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.uuz.moe/2017/02/install_transmission/">Transmission 的安装与配置 - Ubuntu发行版</a></li>
+<li><a target="_blank" rel="noopener" href="https://wiki.archlinux.org/title/Transmission_(%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87)#%E6%8E%A5%E6%94%B6/%E5%8F%91%E9%80%81%E7%BC%93%E5%86%B2%E5%8C%BA%E8%AE%BE%E7%BD%AE%E5%A4%B1%E8%B4%A5">Transmission 的安装与配置 - Archlinux发行版</a></li>
+<li><a target="_blank" rel="noopener" href="http://ronhks.hu/2018/12/30/transmission-network-problem/">UDP缓冲区不足导致daemon启动失败的解决方案</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/04/10/HEXO%E7%9A%84Next%E4%B8%BB%E9%A2%98%E5%BC%95%E5%85%A5mermaid%E6%B5%81%E7%A8%8B%E5%9B%BE%E6%8F%92%E4%BB%B6/" rel="prev" title="HEXO的Next主题引入mermaid流程图插件">
+                  <i class="fa fa-angle-left"></i> HEXO的Next主题引入mermaid流程图插件
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/04/23/Nginx-%E5%AE%89%E8%A3%85%E5%92%8C%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95/" rel="next" title="Nginx 安装和配置方法">
+                  Nginx 安装和配置方法 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

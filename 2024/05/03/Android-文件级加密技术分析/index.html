@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="Full-Disk Encryption（全盘加密）是一种单密钥的加密系统，有硬件、软件两种实现方案。   * 硬件方案：也称为 Self Encryption Drive（自加密硬盘），一般由存储器件厂商、安全厂商提供，出厂时内嵌预启动环境 bootLoader，上电后先运行 Pre-Boot 程序并验证 AK（Authentication Key），再进行正常的加载引导。请参见Seagate">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 文件级加密技术分析">
+<meta property="og:url" content="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="Full-Disk Encryption（全盘加密）是一种单密钥的加密系统，有硬件、软件两种实现方案。   * 硬件方案：也称为 Self Encryption Drive（自加密硬盘），一般由存储器件厂商、安全厂商提供，出厂时内嵌预启动环境 bootLoader，上电后先运行 Pre-Boot 程序并验证 AK（Authentication Key），再进行正常的加载引导。请参见Seagate">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/android.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/fbe-key-hierarchy-standard.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/fbe-key-hierarchy-hw-wrapped.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/F2FS.jpg">
+<meta property="article:published_time" content="2024-05-03T01:56:21.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.657Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch.jpg">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/","path":"2024/05/03/Android-文件级加密技术分析/","title":"Android 文件级加密技术分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Android 文件级加密技术分析 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84"><span class="nav-text">二、技术架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%AE%9E%E7%8E%B0%E6%96%B9%E6%A1%88"><span class="nav-text">三、实现方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%AF%86%E9%92%A5%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="nav-text">四、密钥层次结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%B0%81%E8%A3%85%E5%AF%86%E9%92%A5"><span class="nav-text">不使用硬件封装密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%A1%AC%E4%BB%B6%E5%B0%81%E8%A3%85%E5%AF%86%E9%92%A5"><span class="nav-text">使用硬件封装密钥</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9AF2FS-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-text">附录：F2FS 文件系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-text">官方文档</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Android 文件级加密技术分析 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android 文件级加密技术分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-05-03 09:56:21" itemprop="dateCreated datePublished" datetime="2024-05-03T09:56:21+08:00">2024-05-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.3k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>Full-Disk Encryption（全盘加密）是一种单密钥的加密系统，有硬件、软件两种实现方案。</p>
+<ul>
+<li>硬件方案：也称为 Self Encryption Drive（自加密硬盘），一般由存储器件厂商、安全厂商提供，出厂时内嵌预启动环境 bootLoader，上电后先运行 Pre-Boot 程序并验证 AK（Authentication Key），再进行正常的加载引导。请参见<a target="_blank" rel="noopener" href="https://csrc.nist.gov/csrc/media/projects/cryptographic-module-validation-program/documents/security-policies/140sp1299.pdf">Seagate 硬盘 的 NIST FIPS 140-2 认证报告</a>。</li>
+<li>软件方案：采用不加密boot分区的方式，一般在 initial ramdisk 集成 PBA 功能并完成验证。例如 Windows 的BitLocker、Apple 的 FileVault、以及 Linux 的 dm-crypt&#x2F;LUKS。</li>
+</ul>
+<p>File-Based Encryption 是一种多密钥的加密系统，又称 Filesystem-Level Encryption（文件系统加密）。相比于 FBE，第二个名字更能体现方案基于文件系统的技术特点。而其基于文件系统的特点，一方面决定了只能由软件实现，另一方面决定了各方案差异也主要在文件系统，有两种类型：</p>
+<ul>
+<li>Stackable cryptographic filesystem（堆叠加密文件系统）：新增一个加解密文件系统，堆叠在现有存储软件栈的某一层。例如 Linux 内核自 v2.6.19 开始支持，已很成熟稳定的 <a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/v5.7/filesystems/ecryptfs.html">eCryptfs</a> 方案，就是在 VFS -&gt; Native FS 层之间加入新加解密文件系统支持。类似还有基于用户态文件系统 <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/FUSE">FUSE - Filesystem in Userspace</a>的各种方案。</li>
+<li>Native filesystem with encryption（原生加密文件系统）：在现有文件系统中引入加解密功能。例如 Linux 内核自 v4.1 支持的 Ext4 文件系统加密，自 v4.2 支持的 <a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/v5.7/filesystems/f2fs.html">F2FS 文件系统</a>加密，自 v4.10 后支持的 UBIFS 文件系统加密。需要说明的是，内核中 Ext4、F2FS、ubifs 共用加解密功能模块，即内核 <a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/v4.18/filesystems/fscrypt.html">fscrypt</a> 特性。</li>
+</ul>
+<p>和 FDE 方案相比，FBE 有几个显著的特点：</p>
+<ul>
+<li>支持单独的目录或文件加密，方便灵活使用配置。只加密目标对象，不加密整个磁盘，降低了系统加解密负载开销。</li>
+<li>支持不同目录&#x2F;文件使用不同加密密钥。</li>
+<li>加密目录和非加密目录并存（甚至一个加密目录中加密和非加密文件也可以并存）。加密目录文件的备份传输灵活方便。</li>
+</ul>
+<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>Android 设备可以访问和存储用户的个人隐私数据，如果设备一旦丢失，会极大的增加用户数据泄露的风险。从 Android 4.4 开始，Google 相继推出多种加密方案：</p>
+<ul>
+<li>Android 5.0 到 Android 9 支持 FDE 加密方案</li>
+<li>Android 7.0 及更高版本支持 FBE 加密方案</li>
+<li>Android 9 引入了 ME（Metadata Encryption，文件元数据加密），但需要硬件支持</li>
+</ul>
+<p>为了安全地使用 AOSP 的 FBE 实现，设备需要满足以下依赖关系：</p>
+<ul>
+<li>对 Ext4 加密或 F2FS 加密的内核支持</li>
+<li>基于 1.0 或更高版本 HAL 的 Keymaster 支持，不支持 Keymaster 0.3</li>
+<li>必须在可信执行环境 (TEE) 中实现 Keymaster&#x2F;Keystore 和 Gatekeeper，以便为 DE 密钥提供保护，从而使未经授权的操作系统（刷写到设备上的定制操作系统）无法直接请求 DE 密钥</li>
+<li>硬件信任根和启动时验证需要绑定到 Keymaster 初始化进程，以确保未经授权的操作系统无法获取 DE 密钥</li>
+</ul>
+<h2 id="二、技术架构"><a href="#二、技术架构" class="headerlink" title="二、技术架构"></a>二、技术架构</h2><p>Android FBE 特性依赖 UFS（Universal Flash Storage，通用闪存存储） 和 TEE（Trusted Execution Environment，可行执行环境）。其中，TEE 提供基于硬件环境的 KMS（Key Management Service），该服务提供密钥操作，如密钥创建（Key Generation）、密钥派生（Key Derivation）、密钥编程（Key Programming）等；UFS 包括 UFS Core 和 UFS Device，UFS Controller 工作在 UFS Core 内部，用于接收来自 AP 的数据和命令。</p>
+<p><img src="/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/arch.jpg" alt="ARCH"><br>ICE &#x3D; Inline Crypto Engine（内联加密引擎），KSM &#x3D; KeySlot Manager（密钥槽管理器）<br>TA &#x3D; Trusted Application（可信应用），HAL &#x3D; Hardware Abstract Layer（硬件抽象层）</p>
+<h2 id="三、实现方案"><a href="#三、实现方案" class="headerlink" title="三、实现方案"></a>三、实现方案</h2><p>AOSP 实现基于 Linux 内核的 fscrypt 特性（受 ext4 和 f2fs 支持），并通常配置如下：</p>
+<ul>
+<li>借助采用 XTS 模式的 AES-256 算法加密文件内容</li>
+<li>借助采用 CBC-CTS 模式的 AES-256 算法加密文件名</li>
+<li>对于部分 CPU 不支持 AES 指令的早期设备，AOSP 提供了 Adiantum 加密方法</li>
+</ul>
+<p>Android 根据文件内容的私密性，把用户数据分区的存储位置划分安全等级，包括下几类：</p>
+<ul>
+<li>Unencrypted Storage：不加密的存储位置。iOS 没有该类型。</li>
+<li>System Device Encrypted (DE) Storage ：相当于 Class D。一般存储一些设备相关，Framework 相关等用户无关的数据。</li>
+<li>Device Encrypted (DE) Storage ：相当于 Class C，与用户相关的数据，安全性要求一般，在设备启动后以及用户解锁设备后都可以直接访问。</li>
+<li>Credential Encrypted (CE) Storage ：相当于 Class A，与用户密切相关的数据，安全性等级高，如果用户设置了锁屏密码，必须在用户解锁设备后这些存储位置的数据才可用。</li>
+<li>Android 没有相当于 Class B 的类型，可以用 DE 替代。</li>
+</ul>
+<p><img src="/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/android.jpg" alt="A"></p>
+<p>不同的 Storage 使用不同密钥。其中，System DE Storage 对应 SYSTEM_DE_KEY，User DE Storage 对应USER_DE_KEY，User CE Storage 对应 USER_CE_KEY。请参见<a target="_blank" rel="noopener" href="https://source.android.com/docs/security/features/encryption/file-based?hl=zh-cn#key-storage-and-protection">官方文档</a></p>
+<h2 id="四、密钥层次结构"><a href="#四、密钥层次结构" class="headerlink" title="四、密钥层次结构"></a>四、密钥层次结构</h2><p>可以利用 HKDF 等 KDF（密钥派生函数）从其他密钥派生密钥，从而生成密钥层次结构。</p>
+<h3 id="不使用硬件封装密钥"><a href="#不使用硬件封装密钥" class="headerlink" title="不使用硬件封装密钥"></a>不使用硬件封装密钥</h3><p><img src="/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/fbe-key-hierarchy-standard.png" alt="SW-key"></p>
+<p>FBE 类密钥是 Android 传递给 Linux 内核以解锁一组特定加密目录（例如针对特定 Android 用户的凭据加密存储空间）的原始加密密钥。（在此内核中，这种密钥称为 fscrypt 主密钥）。内核会根据该密钥派生以下子密钥：</p>
+<ul>
+<li>密钥标识符。此标识符不用于加密，而是作为一个值用于标识保护特定文件或目录的密钥。</li>
+<li>文件内容加密密钥</li>
+<li>文件名加密密钥</li>
+</ul>
+<h3 id="使用硬件封装密钥"><a href="#使用硬件封装密钥" class="headerlink" title="使用硬件封装密钥"></a>使用硬件封装密钥</h3><p><img src="/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/fbe-key-hierarchy-hw-wrapped.png" alt="HW-key"></p>
+<p>与前一种情况相比，此密钥层次结构新增了一个额外级别，并且改变了文件内容加密密钥的位置。根节点仍代表由 Android 传递到 Linux 以解锁一组加密目录的密钥。但是，该密钥现在采用<strong>临时封装</strong>形式，并且必须传给<strong>专用硬件</strong>才能使用。该硬件必须实现两个获取一个临时封装密钥的接口：</p>
+<ul>
+<li>第一个接口用于派生<code>inline_encryption_key</code>并将其直接编程到内嵌加密引擎的密钥槽。这样，软件无需访问原始密钥，即可加密&#x2F;解密文件内容。在 Android 通用内核中，此接口与<code>blk_crypto_ll_ops::keyslot_program</code>操作相对应，此操作必须由存储驱动程序实现。</li>
+<li>第二个接口用于派生并返回<code>sw_secret</code>（“软件 Secret”，在某些地方也称为“原始 Secret”），后者作为一个密钥由 Linux 用于为文件内容加密之外的所有加密派生子密钥。在 Android 通用内核中，此接口与 <code>blk_crypto_ll_ops::derive_sw_secret</code> 操作相对应，此操作必须由存储驱动程序实现。</li>
+</ul>
+<p>如需从原始存储密钥派生<code>inline_encryption_key</code>和<code>sw_secret</code>，硬件必须使用强加密 KDF。此 KDF 必须遵循加密最佳实践；至少具有 256 位的安全性，也就是说，足以应对以后使用的任何算法。在派生每种类型的子密钥时，此 KDF 还必须使用不同的标签、上下文和&#x2F;或应用特定信息字符串，以确保生成的子密钥经过加密隔离，也就是说，知道其中一个子密钥并不会泄露任何其他子密钥。原始存储密钥已是均匀随机密钥，因此不需要延伸密钥。</p>
+<p>从技术上讲，可以使用任何满足安全要求的 KDF。但是，出于测试目的，需要在测试代码中重新实现相同的 KDF。目前，已审核并实现了一个 KDF；可以在<a target="_blank" rel="noopener" href="https://android.googlesource.com/platform/test/vts-testcase/kernel/+/4be1bd95bb9879375bd3f12089b0bc156529f19f/encryption/utils.cpp#402">vts_kernel_encryption_test 的源代码</a>中找到该 KDF。建议硬件使用此 KDF，此 KDF 使用 <a target="_blank" rel="noopener" href="https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-108.pdf">NIST SP 800-108“计数器模式的 KDF”</a>，并将 AES-256-CMAC 作为 PRF。请注意，为确保兼容性，该算法的所有部分都必须完全相同，包括为每个子密钥选择的 KDF 上下文和标签。</p>
+<hr>
+<h2 id="附录：F2FS-文件系统"><a href="#附录：F2FS-文件系统" class="headerlink" title="附录：F2FS 文件系统"></a>附录：F2FS 文件系统</h2><p>F2FS - Flash Friendly File System 是三星开发的、专门为闪存设备设计的开源 Flash 文件系统。</p>
+<p>F2FS将整个卷切分成大量的 Segments，每个 Segment 的大小固定为 2MB。连续若干个 Segments 构成 Section，连续若干个 Section 构成 Zone。F2FS 文件系统将整个卷切分成 6 个区域，除了超级块（Superblock，简称SB）外，其余每个区域都包含多个 Segments，其结构如下图所示:<br><img src="/2024/05/03/Android-%E6%96%87%E4%BB%B6%E7%BA%A7%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/F2FS.jpg" alt="F2FS"></p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/read/cv24307831/">详解Linux内核安全技术 - 磁盘加密技术概述</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/feelabclihu/article/details/131016357">Android系统安全技术 - FBE密钥框架和技术详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.kaotenforensic.com/android/android_encryption/">Android 檔案系統加密機制</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.kaotenforensic.com/android/booting-partitions/">Android 系統基本架構 - 開機流程與分區說明</a></li>
+<li><a target="_blank" rel="noopener" href="https://page.om.qq.com/page/O3yauEIx2l-9WrUkHgQgRUBw0">你的安卓手机究竟是FDE加密还是FBE加密？</a></li>
+</ul>
+<h3 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a>官方文档</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://source.android.com/docs/security/features/encryption/file-based?hl=zh-cn">FBE 文件级加密原理 - Android官方</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/04/07/Apple-Secure-Key-Store-%E7%A1%AC%E4%BB%B6%E5%8A%A0%E5%AF%86%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" rel="prev" title="Apple Secure Key Store 硬件加密技术分析">
+                  <i class="fa fa-angle-left"></i> Apple Secure Key Store 硬件加密技术分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/05/26/CNN-%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%AE%80%E4%BB%8B/" rel="next" title="CNN 卷积神经网络简介">
+                  CNN 卷积神经网络简介 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

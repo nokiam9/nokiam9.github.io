@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、概述 OpenWrt 是一个为嵌入式设备（通常是无线路由器）开发的高扩展度的 GNU&#x2F;Linux 发行版。与许多其他路由器的发行版不同，OpenWrt 是一个完全为嵌入式设备构建的功能全面、易于修改、由现代 Linux 内核驱动的操作系统。在实践中，这意味着您可以得到需要的所有功能，却仍能避免臃肿。  LEDE（Linux Embedded Development Environment）曾经">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OpenWrt 安装笔记">
+<meta property="og:url" content="https://nokiam9.github.io/2025/01/11/OpenWrt-%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、概述 OpenWrt 是一个为嵌入式设备（通常是无线路由器）开发的高扩展度的 GNU&#x2F;Linux 发行版。与许多其他路由器的发行版不同，OpenWrt 是一个完全为嵌入式设备构建的功能全面、易于修改、由现代 Linux 内核驱动的操作系统。在实践中，这意味着您可以得到需要的所有功能，却仍能避免臃肿。  LEDE（Linux Embedded Development Environment）曾经">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-01-11T10:42:26.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.879Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2025/01/11/OpenWrt-%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2025/01/11/OpenWrt-%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/","path":"2025/01/11/OpenWrt-安装笔记/","title":"OpenWrt 安装笔记"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>OpenWrt 安装笔记 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E7%BA%BF%E7%89%88%E6%9C%AC"><span class="nav-text">1. 基线版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-opkg-%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8"><span class="nav-text">2. opkg 包管理器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-LuCI-Lua-UCI"><span class="nav-text">3. LuCI &#x3D; Lua + UCI</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E7%A1%80%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85"><span class="nav-text">二、基础系统安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-VM-%E5%87%86%E5%A4%87"><span class="nav-text">1. VM 准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE"><span class="nav-text">2. 网络配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%A3%81%E7%9B%98%E6%89%A9%E5%AE%B9"><span class="nav-text">3. 磁盘扩容</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%96%B0%E5%BB%BA%E7%A3%81%E7%9B%98%EF%BC%88%E5%8F%AF%E9%80%89%EF%BC%89"><span class="nav-text">新建磁盘（可选）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%85%B6%E4%BB%96%E9%85%8D%E7%BD%AE"><span class="nav-text">4. 其他配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%90%AF%E7%94%A8%E7%B3%BB%E7%BB%9F%E6%97%B6%E9%97%B4%E6%9C%8D%E5%8A%A1"><span class="nav-text">启用系统时间服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E6%97%B6%E5%8C%BA"><span class="nav-text">设置时区</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%97%AD-DHCP-%E6%9C%8D%E5%8A%A1"><span class="nav-text">关闭 DHCP 服务</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81Transmission-%E9%83%A8%E7%BD%B2"><span class="nav-text">三、Transmission 部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8E%E7%BB%AD%E8%B0%83%E6%95%B4%E7%A3%81%E7%9B%98"><span class="nav-text">后续调整磁盘</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81Samba4-%E9%83%A8%E7%BD%B2"><span class="nav-text">四、Samba4 部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81Frp-%E9%83%A8%E7%BD%B2"><span class="nav-text">五、Frp 部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81Passwall-%E9%83%A8%E7%BD%B2"><span class="nav-text">六、Passwall 部署</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-text">七、简要分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%80%EF%BC%9AUCI-%E7%BB%9F%E4%B8%80%E9%85%8D%E7%BD%AE%E6%8E%A5%E5%8F%A3"><span class="nav-text">附录一：UCI 统一配置接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E8%AF%AD%E6%B3%95"><span class="nav-text">配置文件的语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-text">配置文件的操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%90%AF%E5%8A%A8"><span class="nav-text">系统服务的启动</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%BA%8C%EF%BC%9Aopkg-%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-text">附录二：opkg 常用命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%E4%B8%89%EF%BC%9A%E7%91%9E%E5%A3%AB%E5%86%9B%E5%88%80-busybox"><span class="nav-text">附录三：瑞士军刀 busybox</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-text">官方文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2025/01/11/OpenWrt-%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="OpenWrt 安装笔记 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OpenWrt 安装笔记
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2025-01-11 18:42:26" itemprop="dateCreated datePublished" datetime="2025-01-11T18:42:26+08:00">2025-01-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>15 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p><a target="_blank" rel="noopener" href="https://openwrt.org/">OpenWrt</a> 是一个为嵌入式设备（通常是无线路由器）开发的高扩展度的 GNU&#x2F;Linux 发行版。与许多其他路由器的发行版不同，OpenWrt 是一个完全为嵌入式设备构建的功能全面、易于修改、由现代 Linux 内核驱动的操作系统。在实践中，这意味着您可以得到需要的所有功能，却仍能避免臃肿。</p>
+<blockquote>
+<p>LEDE（Linux Embedded Development Environment）曾经是 OpenWrt 的一个分支项目，2018 年合并后的项目使用 OpenWrt 的名字、LEDE的源代码。</p>
+</blockquote>
+<h3 id="1-基线版本"><a href="#1-基线版本" class="headerlink" title="1. 基线版本"></a>1. 基线版本</h3><p>OpenWrt 的版本序列参见：<a target="_blank" rel="noopener" href="https://downloads.openwrt.org/releases/">https://downloads.openwrt.org/releases/</a>，当前稳定版是 23.05，本文的基线版本是 2024 年 5 月发布的 23.05.3。</p>
+<p>OpenWrt 是为嵌入式设备设计的，其支持的 CPU 架构非常广泛，甚至树莓派等低端设备都可以，本文采用 PVE 虚拟机安装，当然就是 x86-64 了，基础镜像为：<a target="_blank" rel="noopener" href="https://downloads.openwrt.org/releases/23.05.3/targets/x86/64">openwrt-23.05.3-x86-64-generic-ext4-combined.img</a>，采用 ext4 文件系统便于后续扩容。</p>
+<blockquote>
+<p>Squashfs 是一个<strong>开源、只读、压缩</strong>的文件系统，常被用于 Linux 发行版的 LiveCD 中。</p>
+</blockquote>
+<h3 id="2-opkg-包管理器"><a href="#2-opkg-包管理器" class="headerlink" title="2. opkg 包管理器"></a>2. opkg 包管理器</h3><p>OpenWrt 的软件包管理工具是 opkg，功能与 dpkg 基本一致，其软件仓库大约有 3500 个包。<br>opkg 系统源的配置文件：<code>/etc/opkg/distfeeds.conf</code>，默认指向<a target="_blank" rel="noopener" href="https://downloads.openwrt.org/releases/23.05.3/packages/x86_64">https://downloads.openwrt.org</a><br>手工替换为阿里云的镜像源，以加快软件安装速度。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sed -i <span class="string">&#x27;s_downloads.openwrt.org_mirrors.aliyun.com/openwrt_&#x27;</span> /etc/opkg/distfeeds.conf</span><br></pre></td></tr></table></figure>
+
+<p>处理结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">src/gz openwrt_core https://mirrors.aliyun.com/openwrt/releases/23.05.3/targets/x86/64/packages</span><br><span class="line">src/gz openwrt_base https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/base</span><br><span class="line">src/gz openwrt_luci https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/luci</span><br><span class="line">src/gz openwrt_packages https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/packages</span><br><span class="line">src/gz openwrt_routing https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/routing</span><br><span class="line">src/gz openwrt_telephony https://mirrors.aliyun.com/openwrt/releases/23.05.3/packages/x86_64/telephony</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>清华源似乎有点问题，PassWall 安装时有兼容性问题</p>
+</blockquote>
+<h3 id="3-LuCI-Lua-UCI"><a href="#3-LuCI-Lua-UCI" class="headerlink" title="3. LuCI &#x3D; Lua + UCI"></a>3. LuCI &#x3D; Lua + UCI</h3><p><a target="_blank" rel="noopener" href="https://openwrt.org/zh/docs/guide-user/base-system/uci">UCI（Unified Configuration Interface）</a>是 Openwrt 中为实现所有系统配置的统一配置接口，只包括一个精简的核心和最基本的库，体积小、启动速度快，意在 实现 OpenWrt 整个系统的配置集中化。<br>LuCI 是一个使用 Lua 语言开发的 Web UI，采用 MVC 三层架构，提供 OpenWrt 的系统管理功能。<br>LuCI 的统一配置文件目录：<code>/etc/config/</code>，登录方式为 <code>http://&lt;LAN IP&gt;:80</code>。</p>
+<h2 id="二、基础系统安装"><a href="#二、基础系统安装" class="headerlink" title="二、基础系统安装"></a>二、基础系统安装</h2><p>准备好基础镜像后，就可以创建一个虚拟机准备安装了。</p>
+<h3 id="1-VM-准备"><a href="#1-VM-准备" class="headerlink" title="1. VM 准备"></a>1. VM 准备</h3><p>建议配置 1C + 1G、默认硬盘（无所谓，后面会删除）、默认 Lan 端口（因为是旁路无需增加 Wan 端口）。</p>
+<ul>
+<li>将基础镜像 SCP 到 node（OpenWrt默认不支持 sftp）的目录空间</li>
+<li>登录 node 的 Shell，加载基础镜像磁盘（展开后约 124 MB）<br>  <code>qm importdisk &lt;VM ID&gt; &lt;Img Filename&gt; local-lvm</code></li>
+<li>删除 CDROM 和默认硬盘；加载镜像盘并<strong>适当扩容</strong>（建议 1GB）；</li>
+<li>注意检查 <strong>Boot Order</strong>，确保从镜像硬盘启动！</li>
+</ul>
+<p>现在启动 VM，如果一切正常就可以从 Console 登录了。<br>建议替换 opkg 的软件源为国内镜像，以加快后续安装速度</p>
+<h3 id="2-网络配置"><a href="#2-网络配置" class="headerlink" title="2. 网络配置"></a>2. 网络配置</h3><p>新系统初次启动后，通过 <code>ip a</code> 查看网络状态，默认状态为：</p>
+<ul>
+<li>lo：本地还回地址，127.0.0.1&#x2F;8</li>
+<li>eth0：默认物理网口，实际指向<code>br-lan</code></li>
+<li>br-lan：本地网桥接口，默认地址为<code>192.168.1.1</code>。</li>
+</ul>
+<p>为了防止 IP 地址冲突，通常需要修改 <code>/etc/config/network</code> 配置文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">config interface &#x27;lan&#x27;</span><br><span class="line">    option device &#x27;br-lan&#x27;</span><br><span class="line">    option proto &#x27;dhcp&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>最后，就是重启网络服务了！</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service network restart</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-磁盘扩容"><a href="#3-磁盘扩容" class="headerlink" title="3. 磁盘扩容"></a>3. 磁盘扩容</h3><p>如果系统硬盘做了扩容，启动后磁盘信息如下：</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Device     Boot  Start     End Sectors  Size Id Type</span><br><span class="line">/dev/sda1  *       512   33279   32768   16M 83 Linux</span><br><span class="line">/dev/sda2        33792  246783  212992  104M 83 Linux</span><br><span class="line">/dev/sda3       247808 2351103 2103296    1G 83 Linux</span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>/dev/sda1</code> 是 Boot 引导盘，<code>/dev/sda2</code>是系统盘，<code>/dev/sda3</code>是新增但尚未使用的磁盘空间。</p>
+<ol>
+<li>安装工具软件：<code>opkg install parted fdisk block-mount blockdev</code></li>
+<li>使用 <code>fdisk /dev/sda</code> 新增一个分区：m-帮助、p-列出、n-新增、w-存盘退出！</li>
+<li>使用 <code>mkfs.ext4 /dev/sda3</code> 将新分区格式化为 ext4 文件系统</li>
+<li>通过 overlay 文件系统，以<strong>叠加</strong>方式完成 root 文件系统扩容</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">DEVICE=<span class="string">&quot;/dev/sda3&quot;</span></span><br><span class="line"><span class="built_in">eval</span> $(block info <span class="string">&quot;<span class="variable">$&#123;DEVICE&#125;</span>&quot;</span> | grep -o -e <span class="string">&quot;UUID=\S*&quot;</span>)</span><br><span class="line">uci -q delete fstab.overlay</span><br><span class="line">uci <span class="built_in">set</span> fstab.overlay=<span class="string">&quot;mount&quot;</span></span><br><span class="line">uci <span class="built_in">set</span> fstab.overlay.uuid=<span class="string">&quot;<span class="variable">$&#123;UUID&#125;</span>&quot;</span></span><br><span class="line">uci <span class="built_in">set</span> fstab.overlay.target=<span class="string">&quot;/overlay&quot;</span></span><br><span class="line">uci commit fstab</span><br></pre></td></tr></table></figure>
+
+<p>最后，文件系统是如下形式，也可以通过 Web GUI 的 system - Mount Points 页面查看。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Filesystem                Size      Used Available Use% Mounted on</span><br><span class="line">/dev/root               102.3M     18.7M     81.5M  19% /rom</span><br><span class="line">tmpfs                   493.2M      1.0M    492.2M   0% /tmp</span><br><span class="line">/dev/sda3               976.3M      8.6M    900.4M   1% /overlay</span><br><span class="line">overlayfs:/overlay      976.3M      8.6M    900.4M   1% /</span><br><span class="line">/dev/sda1                15.7M      5.5M      9.8M  36% /boot</span><br><span class="line">/dev/sda1                15.7M      5.5M      9.8M  36% /boot</span><br><span class="line">tmpfs                   512.0K         0    512.0K   0% /dev</span><br></pre></td></tr></table></figure>
+
+<h4 id="新建磁盘（可选）"><a href="#新建磁盘（可选）" class="headerlink" title="新建磁盘（可选）"></a>新建磁盘（可选）</h4><p>对于一个新增磁盘（例如<code>/dev/sdb</code>），基本的处理流程也类似，但注意目标磁盘不同！</p>
+<ol>
+<li>使用 <code>fdisk /dev/sdb</code> 新增一个分区：m-帮助、p-列出、n-新增、w-存盘退出！</li>
+<li>使用 <code>mkfs.ext4 /dev/sdb1</code> 将新分区格式化为 ext4 文件系统</li>
+<li>直接编辑 <code>/etc/config/fstab</code> 增加如下段落，然后重启即可！</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">config mount</span><br><span class="line">    option target &#x27;/mnt&#x27;</span><br><span class="line">    option device &#x27;/dev/sdb1&#x27;</span><br><span class="line">    option fstype ext4</span><br><span class="line">    option options rw,sync</span><br><span class="line">    option enabled 1</span><br><span class="line">    option enable_fsck 0</span><br></pre></td></tr></table></figure>
+
+<p>这一步也可通过 LuCI 的 system - Mount Points 页面的 Mount Points 段落的 Add 按钮进行编辑</p>
+<h3 id="4-其他配置"><a href="#4-其他配置" class="headerlink" title="4. 其他配置"></a>4. 其他配置</h3><p>OpenWrt 安装启动后，许多操作就可以通过 LuCI 操作了。</p>
+<h4 id="启用系统时间服务"><a href="#启用系统时间服务" class="headerlink" title="启用系统时间服务"></a>启用系统时间服务</h4><p>System - System 页面，点击 System Properties 段落的 Time Synchronization 标签：</p>
+<ul>
+<li>Enable NTP Client：开关</li>
+<li>Provide NTP Server：开关</li>
+<li>Bind NTP server：绑定 ntpd 服务的网络端口</li>
+<li>Use DHCP adertised servers：开关</li>
+<li>NTP Server candidates：上游时间服务器列表</li>
+</ul>
+<h4 id="设置时区"><a href="#设置时区" class="headerlink" title="设置时区"></a>设置时区</h4><p>System - System 页面，点击 System Properties 段落的 General Settings 标签：</p>
+<ul>
+<li>TimeZone：Aisa&#x2F;Shanghai；点击 Save &amp; Apply 生效</li>
+</ul>
+<h4 id="关闭-DHCP-服务"><a href="#关闭-DHCP-服务" class="headerlink" title="关闭 DHCP 服务"></a>关闭 DHCP 服务</h4><p>Network - DHCP and DNS 页面，点击 CFG01411C 段落的 General 便签：</p>
+<ul>
+<li>Authoritative：取消勾选，不提供 DHCP 服务；点击 Save &amp; Apply 生效</li>
+</ul>
+<blockquote>
+<p>23.05.3 更新了 DHCP 的管理页，现在可以管理多个 Dnsmasq 实例<br>CFG01411C 是缺省名称，查看 ps w ｜grep dnsmasq</p>
+</blockquote>
+<h2 id="三、Transmission-部署"><a href="#三、Transmission-部署" class="headerlink" title="三、Transmission 部署"></a>三、Transmission 部署</h2><ol>
+<li><p>安装软件包</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">opkg update</span><br><span class="line">opkg install luci-app-transmission transmission-web</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>刷新 LuCI 界面，将新增出现 Service - Transmission 菜单；<br> 编辑如下字段，Save &amp; Apply 保存并应用配置信息</p>
+<ul>
+<li><strong>Enabled</strong>：勾选。</li>
+<li>Run daemon as user &amp; Run daemon as group：修改 transmission -&gt; root。不为权限烦恼！</li>
+<li>Config file directory：默认 &#x2F;tmp&#x2F;transmission。加挂磁盘后再次修改！</li>
+<li>Download directory：默认 &#x2F;tmp&#x2F;transmission&#x2F;done。加挂磁盘后再次修改，这也是以后的共享目录！</li>
+<li>Incomplete directory enabled：默认取消。没啥好处</li>
+<li>Cache size in MB：默认 2M</li>
+</ul>
+</li>
+<li><p>手工启动 transmission 服务</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service transmission start</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>现在可以打开 Transmission 管理界面：<code>http://&lt;LAN IP&gt;:9091</code>。软件安装已完成！<br>现在下载数据目录<code>/tmp/transmission/</code> 的内容如下：</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">drwxr-xr-x    2 root     root          4096 Jan 12 02:29 blocklists</span><br><span class="line">drwxr-xr-x    2 root     root          4096 Jan 12 02:29 done</span><br><span class="line">drwxr-xr-x    2 root     root          4096 Jan 12 02:29 resume</span><br><span class="line">-rw-r--r--    1 root     root          1355 Jan 12 02:29 settings.json</span><br><span class="line">-rw-r--r--    1 root     root             0 Jan 12 02:29 stats.json</span><br><span class="line">drwxr-xr-x    2 root     root          4096 Jan 12 02:29 torrents</span><br></pre></td></tr></table></figure>
+
+<h3 id="后续调整磁盘"><a href="#后续调整磁盘" class="headerlink" title="后续调整磁盘"></a>后续调整磁盘</h3><p>后续使用时需要大容量磁盘，处理步骤包括：</p>
+<ol>
+<li>为 VM 添加磁盘</li>
+<li>对新增磁盘建立分区、格式化文件系统、设置 fstab</li>
+<li>进入 Transmission 配置页面，将下载目录调整到磁盘挂载目录<code>/mnt/transmission/</code></li>
+<li>重启 Transmission 服务</li>
+</ol>
+<h2 id="四、Samba4-部署"><a href="#四、Samba4-部署" class="headerlink" title="四、Samba4 部署"></a>四、Samba4 部署</h2><ol>
+<li><p>安装软件包</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">opkg update</span><br><span class="line">opkg luci-app-samba4</span><br></pre></td></tr></table></figure>
+
+<p> 如果是挂载其他文件系统格式的硬盘，需要安装相应的软件驱动：<br> <code>opkg install kmod-fs-ext4 kmod-fs-exfat kmod-fs-ntfs3</code><br> 如果挂载是通过 USB 外接硬盘，还需要安装相关 USB 驱动和模块：<br> <code>opkg install kmod-usb3 kmod-usb-storage-uas usbutils block-mount mount-utils luci-app-hd-idle</code></p>
+</li>
+<li><p>软件包安装成功后，LuCI 新增 Services - Network Shares 菜单。</p>
+<ul>
+<li>Interface：选择提供服务的网络端口</li>
+<li>Enable extra Tuning：建议勾选</li>
+<li>Enable macOS compatible shares：建议勾选</li>
+<li>Shared Directories 段落：共享目录管理，按需要操作即可。建议勾选 Force Root 简化权限问题。</li>
+</ul>
+</li>
+<li><p>无需手工处理，samba4 服务已经启动，现在可以发现网络共享目录了！</p>
+</li>
+</ol>
+<h2 id="五、Frp-部署"><a href="#五、Frp-部署" class="headerlink" title="五、Frp 部署"></a>五、Frp 部署</h2><ol>
+<li><p>安装软件包。frpc 是客户端软件，也可以根据需要安装服务端软件 frps。</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">opkg update</span><br><span class="line">opkg install luci-app-frpc</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>软件包安装成功后，LuCI 新增 Services -frp client 菜单。</p>
+<ul>
+<li>Server address：服务端域名或 IP 地址</li>
+<li>Server port：服务端的管理端口号</li>
+<li>Token：服务端的鉴权凭证</li>
+<li>Proxy Settings 段落：代理服务设置，支持 tcp udp http https stcp xtcp 等类型</li>
+</ul>
+</li>
+<li><p>无需手工启动服务，但如果服务端配置错误，frpc 服务将不可见。</p>
+</li>
+</ol>
+<h2 id="六、Passwall-部署"><a href="#六、Passwall-部署" class="headerlink" title="六、Passwall 部署"></a>六、Passwall 部署</h2><p>本文略，如有兴趣可以参见<a target="_blank" rel="noopener" href="https://www.rultr.com/tutorials/68311.html">OpenWrt 官方固件安装使用 passwall 详解</a>。<br>注意需要通过 SCP 拷贝 ipk 文件，并在本地手工安装。</p>
+<h2 id="七、简要分析"><a href="#七、简要分析" class="headerlink" title="七、简要分析"></a>七、简要分析</h2><p>以 Transmission 安装包为例，对 OpenWrt 技术特点做个简要分析。先说结论：</p>
+<ol>
+<li>OpenWrt 软件安装应选择 <code>luci-app-xxx</code> 的安装包，其不仅包含了软件的基础功能，并通过 UCI 统一配置接口支持 LuCI 界面配置。</li>
+<li>应用安装后，不要按照 Linux 习惯去 &#x2F;etc&#x2F;xxx 目录管理配置，现在都在 &#x2F;etc&#x2F;config&#x2F; 目录集中管理。</li>
+<li>系统服务管理是传统的 Server 模式，不是现代的 Systemd 模式。</li>
+<li>LuCI 界面的汉化语言包命名为 <code>luci-i18n-xxx-zh-cn</code>，不建议安装，原文更准确！</li>
+</ol>
+<p><code>luci-app-transmission</code> 是 Transmission 在 OpenWrt 的软件包名称，分析其构成。<br>一是有 2 个底层依赖包，分别是 transmission-deamon 和 libc；<br>二是自带 3 个文件，其实是 LuCI 定制菜单 Service-Transmission 的配置信息。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">root@OpenWrt:~# opkg info luci-app-transmission</span><br><span class="line">Package: luci-app-transmission</span><br><span class="line">Version: git-24.364.71483-75d2b84</span><br><span class="line">Depends: libc, transmission-daemon                                  # 2个依赖包</span><br><span class="line">Status: install user installed</span><br><span class="line">Section: luci</span><br><span class="line">Architecture: all</span><br><span class="line">Size: 3807</span><br><span class="line">Filename: luci-app-transmission_git-24.364.71483-75d2b84_all.ipk    # 实际 ipk 文件名</span><br><span class="line">Description: LuCI Support for Transmission</span><br><span class="line">Installed-Time: 1736645046</span><br><span class="line"></span><br><span class="line">root@OpenWrt:~# opkg files luci-app-transmission</span><br><span class="line">Package luci-app-transmission (git-24.364.71483-75d2b84) is installed on root and has the following files:</span><br><span class="line">/www/luci-static/resources/view/transmission.js                     # LuCI 的定制 UI </span><br><span class="line">/usr/share/rpcd/acl.d/luci-app-transmission.json</span><br><span class="line">/usr/share/luci/menu.d/luci-app-transmission.json</span><br></pre></td></tr></table></figure>
+
+<p>继续分析<code>transmission-daemon</code> ，这是 Transmission 提供的，与其他 Linux 系统的软件包完全一致。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">root@OpenWrt:~# opkg files transmission-daemon</span><br><span class="line">Package transmission-daemon (4.0.6-1) is installed on root and has the following files:</span><br><span class="line">/etc/seccomp/transmission-daemon.json       # 系统服务参数</span><br><span class="line">/etc/init.d/transmission                    # 系统启动脚本</span><br><span class="line">/etc/sysctl.d/20-transmission.conf          # 环境参数配置文件</span><br><span class="line">/usr/bin/transmission-daemon                # 二进制代码</span><br><span class="line">/etc/config/transmission                    # 应用参数配置文件</span><br></pre></td></tr></table></figure>
+
+<p>至于<code>libc</code>就没啥说的了，这是更基础的 Linux 系统提供的动态链接库。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@OpenWrt:~# opkg files libc</span><br><span class="line">Package libc (1.2.4-4) is installed on root and has the following files:</span><br><span class="line">/lib/ld-musl-x86_64.so.1                    # 软链接，用于动态连接库的版本控制</span><br><span class="line">/lib/libc.so                                # 动态连接库</span><br><span class="line">/usr/bin/ldd                                # 二进制代码，用于判断某个 binary 档案含有什么动态函式库</span><br></pre></td></tr></table></figure>
+
+<p>此外，Transmisson 还提供了几个可选软件包：</p>
+<ul>
+<li>transmission-web：必选。标准的下载管理 UI 界面。</li>
+<li>transmission-web-control：与 transmission-web 互斥。另一个下载管理 UI 界面，信息更丰富。</li>
+<li>transmission-cli：可选。命令行工具。</li>
+<li>transmission-remote：可选。远程操作组件。</li>
+</ul>
+<hr>
+<h2 id="附录一：UCI-统一配置接口"><a href="#附录一：UCI-统一配置接口" class="headerlink" title="附录一：UCI 统一配置接口"></a>附录一：UCI 统一配置接口</h2><p>UCI 的统一配置文件目录：<code>/etc/config/</code>，每个系统服务都有一个相应的配置文件。</p>
+<table>
+<thead>
+<tr>
+<th align="left">配置文件名</th>
+<th align="center">服务描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;dhcp</td>
+<td align="center">dnsmasq和DHCP的配置</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;dropbear</td>
+<td align="center">SSH服务的替代品</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;firewall</td>
+<td align="center">Linux系统防火墙配置</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;network</td>
+<td align="center">本机网络接口和路由配置</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;system</td>
+<td align="center">杂项与系统配置</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;wireless</td>
+<td align="center">无线接口设置和无线网络定义</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;fstab</td>
+<td align="center">挂载点及swap</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;luci</td>
+<td align="center">基础 LuCI 配置</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;mountd</td>
+<td align="center">OpenWrt 自动挂载进程(类似autofs)</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;samba</td>
+<td align="center">samba配置(Microsoft文件共享)</td>
+</tr>
+<tr>
+<td align="left">&#x2F;etc&#x2F;config&#x2F;transmission</td>
+<td align="center">BitTorrent配置</td>
+</tr>
+</tbody></table>
+<p>所有系统服务清单及其作用，参见<a target="_blank" rel="noopener" href="https://openwrt.org/zh/docs/guide-user/base-system/uci">OpenWrt UCI 系统</a>。</p>
+<h3 id="配置文件的语法"><a href="#配置文件的语法" class="headerlink" title="配置文件的语法"></a>配置文件的语法</h3><p>以<code>/etc/config/network</code>为例，其语法形式包括：</p>
+<ul>
+<li>config：表示当前节点（section）</li>
+<li>option：表示节点的一个元素（key-value），建议使用<strong>单引号</strong>包裹 value</li>
+<li>list：表示列表（list）形式的一组参数</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">config interface &#x27;loopback&#x27;</span><br><span class="line">    option device &#x27;lo&#x27;</span><br><span class="line">    option proto &#x27;static&#x27;</span><br><span class="line">    option ipaddr &#x27;127.0.0.1&#x27;</span><br><span class="line">    option netmask &#x27;255.0.0.0&#x27;</span><br><span class="line"></span><br><span class="line">config globals &#x27;globals&#x27;</span><br><span class="line">    option ula_prefix &#x27;fdfc:4d51:93dd::/48&#x27;</span><br><span class="line"></span><br><span class="line">config device</span><br><span class="line">    option name &#x27;br-lan&#x27;</span><br><span class="line">    option type &#x27;bridge&#x27;</span><br><span class="line">    list ports &#x27;eth0&#x27;</span><br><span class="line"></span><br><span class="line">config interface &#x27;lan&#x27;</span><br><span class="line">    option device &#x27;br-lan&#x27;</span><br><span class="line">    option proto &#x27;dhcp&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="配置文件的操作"><a href="#配置文件的操作" class="headerlink" title="配置文件的操作"></a>配置文件的操作</h3><p>uci 是 UCI 的命令行工具，提供 add set get show delete rename commit 等操作方法。<br>例如，磁盘扩容的几个命令行，换个角度看就是去处理 <code>/etc/config/fstab</code> 文件，其结果如下：</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">config global</span><br><span class="line">    option anon_swap &#x27;0&#x27;</span><br><span class="line">    option anon_mount &#x27;0&#x27;</span><br><span class="line">    option auto_swap &#x27;1&#x27;</span><br><span class="line">    option auto_mount &#x27;1&#x27;</span><br><span class="line">    option delay_root &#x27;5&#x27;</span><br><span class="line">    option check_fs &#x27;0&#x27;</span><br><span class="line"></span><br><span class="line">config mount</span><br><span class="line">    option target &#x27;/boot&#x27;</span><br><span class="line">    option uuid &#x27;84173db5-fa99-e35a-95c6-28613cc79ea9&#x27;</span><br><span class="line">    option enabled &#x27;0&#x27;</span><br><span class="line"></span><br><span class="line">config mount</span><br><span class="line">    option target &#x27;/&#x27;</span><br><span class="line">    option uuid &#x27;ff313567-e9f1-5a5d-9895-3ba130b4a864&#x27;</span><br><span class="line">    option enabled &#x27;0&#x27;</span><br><span class="line"></span><br><span class="line">config mount &#x27;overlay&#x27;</span><br><span class="line">    option uuid &#x27;70bbf914-80d7-455c-810a-fa19c6ed50a3&#x27;</span><br><span class="line">    option target &#x27;/overlay&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="系统服务的启动"><a href="#系统服务的启动" class="headerlink" title="系统服务的启动"></a>系统服务的启动</h3><p>OpenWrt 软件包一般采用 UCI 模式管理，通常是以 <code>luci-app-xxx</code> 形式命名的软件包，其典型启动流程为：</p>
+<ol>
+<li>启动脚本 <code>/etc/init.d/samba</code>，或者 <code>serive samba &lt;start|stop|restart|enable|disable&gt;</code></li>
+<li>启动脚本通过 UCI 分析库从 <code>/etc/config/samba</code> 获得启动参数</li>
+<li>应用启动脚本完成正常启动</li>
+</ol>
+<p>service 命令的执行过程实际上就是操作<code>/etc/init.d/</code>目录下的初始化脚本，这是传承自 System V 的标准风格。<br>值得一提的是，比<code>/etc/init.d/</code>优先级更高的是<code>/etc/rc[0..6].d/</code> 目录，其设定了不同级别的启动脚本，这也是 System V 的典型风格。当然，还有最高优先级的<code>/etc/inittab</code>脚本。</p>
+<p>OpenWrt 的系统服务管理命令：</p>
+<ul>
+<li><p><code>service</code>：显示系统服务列表，包括服务名称、初始状态、运行状态</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Usage: service &lt;service&gt; [command]</span><br><span class="line">/etc/init.d/boot                   enabled     stopped</span><br><span class="line">/etc/init.d/cron                   enabled     stopped</span><br><span class="line">/etc/init.d/dnsmasq                enabled     running</span><br><span class="line">/etc/init.d/log                    enabled     running</span><br><span class="line">/etc/init.d/network                enabled     running</span><br><span class="line">/etc/init.d/sysctl                 enabled     stopped</span><br><span class="line">/etc/init.d/system                 enabled     stopped</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>service &lt;service&gt; [command]</code>：对某个 serive 执行操作：</p>
+  <figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Available commands:</span><br><span class="line">    start           Start the service</span><br><span class="line">    stop            Stop the service</span><br><span class="line">    restart         Restart the service</span><br><span class="line">    reload          Reload configuration files (or restart if service does not implement reload)</span><br><span class="line">    enable          Enable service autostart</span><br><span class="line">    disable         Disable service autostart</span><br><span class="line">    enabled         Check if service is started on boot</span><br><span class="line">    running         Check if service is running</span><br><span class="line">    status          Service status</span><br><span class="line">    trace           Start with syscall trace</span><br><span class="line">    info            Dump procd service info</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="附录二：opkg-常用命令"><a href="#附录二：opkg-常用命令" class="headerlink" title="附录二：opkg 常用命令"></a>附录二：opkg 常用命令</h2><p>opkg 环境的配置目录：<code>/etc/opkg.conf</code><br>opkg 源的配置目录：<code>/etc/opkg/</code>，具体内容为：</p>
+<ul>
+<li><code>distfeeds.conf</code> ：默认软件源的路径，指向 <a target="_blank" rel="noopener" href="https://downloads.openwrt.org/releases/23.05.3/packages/x86_64">https://downloads.openwrt.org</a></li>
+<li><code>customfeeds.conf</code>：用户软件源，初始为空。</li>
+<li><code>keys/</code>：用于密钥管理</li>
+</ul>
+<p>opkg 常用命令：</p>
+<ul>
+<li>opkg update：更新可以获取的软件包列表</li>
+<li>opkg upgrade：对已经安装的软件包升级</li>
+<li>opkg list：获取软件列表</li>
+<li>opkg list installed：获取已安装的软件列表</li>
+<li>opkg install &lt; pkg &gt;：安装指定的软件包</li>
+<li>opkg remove &lt; pkg &gt;：卸载已经安装的指定的软件包</li>
+<li>opkg info &lt; pkg &gt;：获取某个软件包的完整信息，例如底层依赖</li>
+<li>opkg files &lt; pkg&gt;：获取某个软件包的文件清单</li>
+</ul>
+<h2 id="附录三：瑞士军刀-busybox"><a href="#附录三：瑞士军刀-busybox" class="headerlink" title="附录三：瑞士军刀 busybox"></a>附录三：瑞士军刀 busybox</h2><p>BusyBox 被称为“嵌入式 Linux 的瑞士军刀”，设计目标就是在单一的可执行文件（不超过一张软盘）中提供精简的 Unix 工具集（200+ 应用程序），可运行于多款 POSIX 环境的操作系统。<br>查看 OpenWrt 的应用目录<code>\bin</code>，可以发现大部分的操作系统常用命令都是 busybox 提供的。</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">-rwxr-xr-x    1 root     root        405522 Mar 23  2024 busybox</span><br><span class="line">lrwxrwxrwx    1 root     root             7 Mar 23  2024 cat -&gt; busybox</span><br><span class="line">lrwxrwxrwx    1 root     root             7 Mar 23  2024 cp -&gt; busybox</span><br><span class="line">lrwxrwxrwx    1 root     root             7 Mar 23  2024 login -&gt; busybox</span><br><span class="line">lrwxrwxrwx    1 root     root             7 Mar 23  2024 ls -&gt; busybox</span><br><span class="line">-rwxr-xr-x    1 root     root        155131 Mar 23  2024 opkg</span><br><span class="line">lrwxrwxrwx    1 root     root             7 Mar 23  2024 passwd -&gt; busybox</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="官方文档"><a href="#官方文档" class="headerlink" title="官方文档"></a>官方文档</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://downloads.openwrt.org/releases/">OpenWrt 历史版本清单</a></li>
+<li><a target="_blank" rel="noopener" href="https://downloads.openwrt.org/releases/23.05.3/targets/x86/64">OpenWrt 系统镜像下载</a></li>
+<li><a target="_blank" rel="noopener" href="https://mirror-03.infra.openwrt.org/releases/23.05.3/packages/x86_64/">OpenWrt 软件源目录</a></li>
+<li><a target="_blank" rel="noopener" href="https://openwrt.org/zh/docs/guide-user/base-system/uci">OpenWrt UCI 介绍</a></li>
+<li><a target="_blank" rel="noopener" href="https://openwrt.org/docs/guide-user/services/ntp/client-server">NTP client &#x2F; NTP server</a></li>
+</ul>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.barhe.org/archives/1234">如何在 PVE 上安装一个官方版的 Openwrt</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_35718410/article/details/53113894">uci命令系统详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/436450556">Linux overlayfs文件系统介绍</a></li>
+<li><a target="_blank" rel="noopener" href="https://cn.linux-console.net/?p=10009">OverlayFS简介</a></li>
+<li><a target="_blank" rel="noopener" href="https://sspai.com/post/68511">Openwrt 作为旁路网关（不是旁路由、单臂路由）的终极设置方法</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/01/04/OpenVPN-%E5%AE%89%E8%A3%85%E7%AC%94%E8%AE%B0/" rel="prev" title="OpenVPN 安装笔记">
+                  <i class="fa fa-angle-left"></i> OpenVPN 安装笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/01/22/OpenVPN-OpenWrt-%E7%9A%84%E5%86%85%E7%BD%91%E7%A9%BF%E9%80%8F%E6%96%B9%E6%A1%88/" rel="next" title="OpenVPN + OpenWrt 的内网穿透方案">
+                  OpenVPN + OpenWrt 的内网穿透方案 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

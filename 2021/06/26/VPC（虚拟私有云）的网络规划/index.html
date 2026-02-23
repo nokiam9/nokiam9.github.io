@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、前言 虚拟私有云（Virtual Private Cloud，以下简称VPC，有的厂商也称为私有网络），是一个用户自定义的、逻辑隔离的虚拟网络环境，以提升用户云上资源的安全性，并满足不同的应用场景需求。  您可以在VPC中定义安全组、VPN、IP地址段、带宽等网络特性。用户可以通过VPC方便地管理、配置内部网络，进行安全、快捷的网络变更。同时，用户可以自定义安全组内与组间弹性云服务器的访问规则">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VPC（虚拟私有云）的网络规划">
+<meta property="og:url" content="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、前言 虚拟私有云（Virtual Private Cloud，以下简称VPC，有的厂商也称为私有网络），是一个用户自定义的、逻辑隔离的虚拟网络环境，以提升用户云上资源的安全性，并满足不同的应用场景需求。  您可以在VPC中定义安全组、VPN、IP地址段、带宽等网络特性。用户可以通过VPC方便地管理、配置内部网络，进行安全、快捷的网络变更。同时，用户可以自定义安全组内与组间弹性云服务器的访问规则">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/zone.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-infra.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-desktop.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-4.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-3.png">
+<meta property="article:published_time" content="2021-06-26T15:07:16.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.915Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/zone.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/","path":"2021/06/26/VPC（虚拟私有云）的网络规划/","title":"VPC（虚拟私有云）的网络规划"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>VPC（虚拟私有云）的网络规划 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%89%8D%E8%A8%80"><span class="nav-text">一、前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Region-%E5%9C%B0%E5%9F%9F"><span class="nav-text">Region - 地域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Zone-%E5%8F%AF%E7%94%A8%E5%8C%BA"><span class="nav-text">Zone - 可用区</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81VPC%E7%9A%84%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="nav-text">二、VPC的核心组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CIDR-%E7%A7%81%E6%9C%89%E7%BD%91%E7%BB%9C%E7%BD%91%E6%AE%B5"><span class="nav-text">CIDR - 私有网络网段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Subnet-%E5%AD%90%E7%BD%91"><span class="nav-text">Subnet - 子网</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Router-%E8%B7%AF%E7%94%B1%E8%A1%A8"><span class="nav-text">Router - 路由表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ACL%EF%BC%88Access-Control-List%EF%BC%89-%E6%8E%A5%E5%85%A5%E6%8E%A7%E5%88%B6%E5%88%97%E8%A1%A8"><span class="nav-text">ACL（Access Control List） - 接入控制列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Secruity-Group-%E5%AE%89%E5%85%A8%E7%BB%84"><span class="nav-text">Secruity Group - 安全组</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81VPC%E7%9A%84%E5%A2%9E%E5%BC%BA%E7%BB%84%E4%BB%B6"><span class="nav-text">三、VPC的增强组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#EIP%EF%BC%88Elastic-IP-Address%EF%BC%89-%E5%BC%B9%E6%80%A7%E5%85%AC%E7%BD%91IP"><span class="nav-text">EIP（Elastic IP Address） - 弹性公网IP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CLB%EF%BC%88Cloud-Load-Balancer%EF%BC%8CCLB%EF%BC%89-%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="nav-text">CLB（Cloud Load Balancer，CLB）- 负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E7%AD%89%E8%BF%9E%E6%8E%A5"><span class="nav-text">对等连接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%87%A0%E4%B8%AA%E5%85%B8%E5%9E%8BVPC%E7%BD%91%E7%BB%9C%E7%9A%84%E8%A7%84%E5%88%92%E5%88%86%E6%9E%90"><span class="nav-text">四、几个典型VPC网络的规划分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81AWS%E7%9A%84%E7%A7%81%E6%9C%89%E7%BD%91%E7%BB%9C%E5%AE%9E%E4%BE%8B"><span class="nav-text">1、AWS的私有网络实例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Subnet1-%E5%85%AC%E7%BD%91%E4%BA%92%E8%81%94%E5%87%BA%E5%8F%A3"><span class="nav-text">Subnet1 - 公网互联出口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Subnet2-%E5%86%85%E9%83%A8%E5%BA%94%E7%94%A8"><span class="nav-text">Subnet2 - 内部应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Subnet3-%E7%B3%BB%E7%BB%9F%E7%BB%B4%E6%8A%A4%E5%87%BA%E5%8F%A3"><span class="nav-text">Subnet3 - 系统维护出口</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E4%B8%80%E4%B8%AA%E5%85%B8%E5%9E%8B%E7%9A%84VPC%E7%A7%9F%E6%88%B7"><span class="nav-text">2、一个典型的VPC租户</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83VPC"><span class="nav-text">核心VPC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%92%E8%81%94%E7%BD%91VPC"><span class="nav-text">互联网VPC</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E4%B8%80%E4%B8%AA%E5%A4%A7%E8%A7%84%E6%A8%A1%E7%9A%84VPC%E7%A7%9F%E6%88%B7"><span class="nav-text">3、一个大规模的VPC租户</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="VPC（虚拟私有云）的网络规划 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VPC（虚拟私有云）的网络规划
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-06-26 23:07:16" itemprop="dateCreated datePublished" datetime="2021-06-26T23:07:16+08:00">2021-06-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>虚拟私有云（Virtual Private Cloud，以下简称VPC，有的厂商也称为<code>私有网络</code>），是一个<strong>用户自定义的</strong>、<strong>逻辑隔离</strong>的虚拟网络环境，以提升用户云上资源的安全性，并满足不同的应用场景需求。</p>
+<p>您可以在VPC中定义安全组、VPN、IP地址段、带宽等网络特性。用户可以通过VPC方便地管理、配置内部网络，进行安全、快捷的网络变更。同时，用户可以自定义安全组内与组间弹性云服务器的访问规则，加强弹性云服务器的安全保护。</p>
+<p>从业务连续性的角度，大型业务系统必须支持多中心部署，例如“两地三中心”，“四地八中心”等，为此VPC的网络规划需要基于 Region 和 Zone 。</p>
+<img src="/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/zone.png" class="">
+
+<h3 id="Region-地域"><a href="#Region-地域" class="headerlink" title="Region - 地域"></a>Region - 地域</h3><p>地域（Region）是指物理的数据中心的地理区域。<br>不同Region之间的距离一般大于30公里（预防地震、战争等严重灾害），但是一般不超过1000公里（过高的网络传输延迟可能影响数据同步）。</p>
+<blockquote>
+<p>不同地域之间的VPC完全物理隔离，不同地域之间的VPC默认不能通过内网通信，只能通过公网进行通信。</p>
+</blockquote>
+<h3 id="Zone-可用区"><a href="#Zone-可用区" class="headerlink" title="Zone - 可用区"></a>Zone - 可用区</h3><p>可用区（Zone）是指同一地域内电力和网络互相独立的物理数据中心。其目标是能够保证可用区间故障相互隔离（大型灾害或者大型电力故障除外），不出现故障扩散，使得用户的业务持续在线服务。</p>
+<p>实际上，Zone就是同一个Region（城）的多个数据中心，一般距离小于30公里，具备独立的物理机房、电力供应和网络传输，而且之间有高速数据专线。</p>
+<h2 id="二、VPC的核心组件"><a href="#二、VPC的核心组件" class="headerlink" title="二、VPC的核心组件"></a>二、VPC的核心组件</h2><p>VPC有几个核心组成部分：私有网络网段、子网、路由表、接入控制列表、安全组。<br>VPC的基本框架如下图：</p>
+<img src="/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-infra.png" class="">
+
+<h3 id="CIDR-私有网络网段"><a href="#CIDR-私有网络网段" class="headerlink" title="CIDR - 私有网络网段"></a>CIDR - 私有网络网段</h3><p>用户在创建私有网络时，需要用 <code>CIDR</code>（无类别域间路由） 作为私有网络指定 IP 地址组。</p>
+<blockquote>
+<p>私有网络<code>CIDR</code>支持使用如下私有网段中的任意一个：<br>A类：10.0.0.0&#x2F;8，一个A类网络<br>B类：172.16.0.0&#x2F;12，即172.16.0.1-172.31.255.254共16个B类网络<br>C类：192.168.0.0&#x2F;16，即192.168.0.1-192.168.255.254共256个C类网络</p>
+</blockquote>
+<h3 id="Subnet-子网"><a href="#Subnet-子网" class="headerlink" title="Subnet - 子网"></a>Subnet - 子网</h3><p>一个VPC由至少一个子网组成，VPC中的所有云资源（如云服务器、云数据库等）都必须部署在子网内，子网的 CIDR 必须在VPC的 CIDR 内。</p>
+<blockquote>
+<p>单一VPC不能跨Region（如广州IDC）部署，但是可以划分为多个子网，并部署在不同Zone（如广州一区）<br>同一VPC下，不同Subnet之间<strong>默认内网互通</strong><br>不同VPC之间，无论是否在同一地域，均<strong>默认内网隔离</strong>，但可通过创建<strong>对等连接</strong>实现互联互通</p>
+</blockquote>
+<h3 id="Router-路由表"><a href="#Router-路由表" class="headerlink" title="Router - 路由表"></a>Router - 路由表</h3><p>路由表由一系列路由规则组成，用于控制虚拟私有云内子网的出流量走向。</p>
+<blockquote>
+<p>用户创建私有网络时，系统会自动为其生成一个默认路由表，以保证同一个私有网络下的所有子网互通<br>每个子网都必须关联一个路由表，但一个路由表可以关联多个子网</p>
+</blockquote>
+<h3 id="ACL（Access-Control-List）-接入控制列表"><a href="#ACL（Access-Control-List）-接入控制列表" class="headerlink" title="ACL（Access Control List） - 接入控制列表"></a>ACL（Access Control List） - 接入控制列表</h3><p>网络 ACL 是一个子网级别的、无状态的包过滤虚拟防火墙，用于控制进出子网的数据流，可以精确到协议和端口粒度。</p>
+<p>实际上，ACL的本质就是用于描述一个IP数据包、以太网数据帧若干特征的集合。然后根据这些集合去匹配网络中的流量，根据策略来“允许”或者“禁止”。</p>
+<h3 id="Secruity-Group-安全组"><a href="#Secruity-Group-安全组" class="headerlink" title="Secruity Group - 安全组"></a>Secruity Group - 安全组</h3><p>安全组是一种有状态的包过滤虚拟防火墙，用于控制实例级别的出入流量，为同一个VPC内具有相同安全保护需求并相互信任的云服务器提供访问策略。</p>
+<p>系统为每个用户默认创建一个安全组，默认安全组的规则是在出方向上的数据报文全部放行，入方向访问受限，安全组内的云服务器无需添加规则即可互相访问。</p>
+<h2 id="三、VPC的增强组件"><a href="#三、VPC的增强组件" class="headerlink" title="三、VPC的增强组件"></a>三、VPC的增强组件</h2><p>除了VPC路由器、子网、安全组等核心功能，通常VPC还提供一些附加技术组件，以方便租户的系统部署。</p>
+<img src="/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-desktop.png" class="">
+
+<h3 id="EIP（Elastic-IP-Address）-弹性公网IP"><a href="#EIP（Elastic-IP-Address）-弹性公网IP" class="headerlink" title="EIP（Elastic IP Address） - 弹性公网IP"></a>EIP（Elastic IP Address） - 弹性公网IP</h3><p>弹性公网IP是可以独立购买和持有的公网IP地址资源，实现IP与服务实例分离，可以动态解绑和绑定可绑定到专有网络VPC内的ECS实例、私网SLB实例和NAT网关上。</p>
+<blockquote>
+<p>EIP实则是一种NAT IP，位于阿里云公网网关上，通过NAT映射的方式绑定到VPC网络的ECS&#x2F;SLB&#x2F;NAT等实例的私网网卡上。<br>对于某个VPC，可以在不同Zone的子网上部署多个实例共享EIP，从而实现公网服务的主用&#x2F;备用切换。</p>
+</blockquote>
+<h3 id="CLB（Cloud-Load-Balancer，CLB）-负载均衡"><a href="#CLB（Cloud-Load-Balancer，CLB）-负载均衡" class="headerlink" title="CLB（Cloud Load Balancer，CLB）- 负载均衡"></a>CLB（Cloud Load Balancer，CLB）- 负载均衡</h3><p>CLB提供安全快捷的流量分发服务，访问流量经由 CLB 可以自动分配到云中的多台云服务器上，扩展系统的服务能力并消除单点故障。</p>
+<h3 id="对等连接"><a href="#对等连接" class="headerlink" title="对等连接"></a>对等连接</h3><p>对等连接是指两个VPC之间的网络连接。您可以使用私有IP地址在两个VPC之间进行通信，就像两个VPC在同一个网络中一样。<br>同一区域内，您可以在自己的VPC之间创建对等连接，也可以在自己的VPC与其他帐户的VPC之间创建对等连接。<br>不同区域间的VPC之间不能创建对等连接。</p>
+<h2 id="四、几个典型VPC网络的规划分析"><a href="#四、几个典型VPC网络的规划分析" class="headerlink" title="四、几个典型VPC网络的规划分析"></a>四、几个典型VPC网络的规划分析</h2><h3 id="1、AWS的私有网络实例"><a href="#1、AWS的私有网络实例" class="headerlink" title="1、AWS的私有网络实例"></a>1、AWS的私有网络实例</h3><img src="/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-4.png" class="">
+
+<p>本VPC的CIDR网络地址块为<code>10.0</code>.0.0&#x2F;16，包含了3个子网：</p>
+<h4 id="Subnet1-公网互联出口"><a href="#Subnet1-公网互联出口" class="headerlink" title="Subnet1 - 公网互联出口"></a>Subnet1 - 公网互联出口</h4><ul>
+<li>子网地址块为<code>10.0.0</code>.0&#x2F;24，位于Zone A</li>
+<li>包含2个实例，分别是 1A 实例（10.0.0.5）和 1B 实例(10.0.0.6）</li>
+<li>1A实例绑定了一个IPV4公网地址（198.51.100.1），1B实例绑定了一个IPV6公网地址</li>
+</ul>
+<h4 id="Subnet2-内部应用"><a href="#Subnet2-内部应用" class="headerlink" title="Subnet2 - 内部应用"></a>Subnet2 - 内部应用</h4><ul>
+<li>子网地址块为<code>10.0.1</code>.0&#x2F;24，位于Zone B</li>
+<li>包含1个实例，2A 实例（10.0.1.5）</li>
+<li>这个子网及其内部实例位于VPC内部，不能直接访问公网，也不能被公网直接访问</li>
+</ul>
+<h4 id="Subnet3-系统维护出口"><a href="#Subnet3-系统维护出口" class="headerlink" title="Subnet3 - 系统维护出口"></a>Subnet3 - 系统维护出口</h4><ul>
+<li>子网地址块为<code>10.0.2</code>.0&#x2F;24，位于Zone C</li>
+<li>包含1个实例，3A 实例（10.0.2.5）</li>
+<li>通过 VPN 连接到企业内部网络，用于开发、维护</li>
+</ul>
+<h3 id="2、一个典型的VPC租户"><a href="#2、一个典型的VPC租户" class="headerlink" title="2、一个典型的VPC租户"></a>2、一个典型的VPC租户</h3><img src="/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-2.png" class="">
+
+<ul>
+<li>设置独立的互联网边界防火墙，并拥有负载均衡设备CLB，弹性地址EIP。</li>
+<li>内部子网通过ACL实现南北流量控制，安全组负责实现东西流量控制</li>
+</ul>
+<h4 id="核心VPC"><a href="#核心VPC" class="headerlink" title="核心VPC"></a>核心VPC</h4><ul>
+<li>可以认为是一个中台系统，是一个独立的租户</li>
+<li>内部分为2个子网，分别承载数据库系统、后台逻辑</li>
+</ul>
+<h4 id="互联网VPC"><a href="#互联网VPC" class="headerlink" title="互联网VPC"></a>互联网VPC</h4><ul>
+<li>可以认为是某个前台系统，通过VPC边界防火墙与核心VPC互联</li>
+<li>内部分为2个子网，分别承载数据库系统、后台逻辑、前端应用</li>
+</ul>
+<h3 id="3、一个大规模的VPC租户"><a href="#3、一个大规模的VPC租户" class="headerlink" title="3、一个大规模的VPC租户"></a>3、一个大规模的VPC租户</h3><img src="/2021/06/26/VPC%EF%BC%88%E8%99%9A%E6%8B%9F%E7%A7%81%E6%9C%89%E4%BA%91%EF%BC%89%E7%9A%84%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92/vpc-3.png" class="">
+
+<ul>
+<li>2个Mysql数据库的子网，采用主用&#x2F;备用方式，子网位于不同Zone，有利于提高业务可用性</li>
+<li>2个APP应用的子网，也是位于不同Zone，但是采用双活方案，通过 ELB 实现负载均衡</li>
+<li>独立设置NAT子网，负责保护公网出口</li>
+<li>Bastion是一个堡垒机子网，为开发、维护人员提供安全接入，一般通过浏览器接入云平台门户，不需要公共IP地址，不需要代理，也不需要专门的客户端软件</li>
+</ul>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://support.huaweicloud.com/eu-west-0-usermanual-vpc/vpc_0001.html">华为云的网络规划介绍</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.coding-daddy.com/other/aws-deploy.html#_1-vpc%E5%AE%9A%E4%B9%89">AWS VPC网络部署参考</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_24550639/article/details/109202811">Azure Bastion 堡垒机的介绍</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/35130978?ivk_sa=1024320u">UCloud云平台的VPC部署案例</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/06/20/%E5%9F%BA%E4%BA%8ESpring-Cloud%E7%9A%84%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%88%86%E6%9E%90/" rel="prev" title="基于Spring Cloud的微服务架构分析">
+                  <i class="fa fa-angle-left"></i> 基于Spring Cloud的微服务架构分析
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/06/27/VPC%E7%BD%91%E7%BB%9C%E8%A7%84%E5%88%92%E7%9A%84%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" rel="next" title="VPC网络规划的关键技术分析">
+                  VPC网络规划的关键技术分析 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="NFS - Network File System（网络文件系统），是一种基于TCP&#x2F;IP传输的网络文件系统协议，最早由SUN公司研发，通过使用NFS协议，客户机可以像访问本地目录一样，访问远程服务器中的共享资源。 NFS 的基本原则是“容许不同的客户端及服务端通过一组RPC分享相同的文件系统”，它是独立于操作系统，容许不同硬件及操作系统的系统共同进行文件的分享。  概述 NFS在文件传送或信息传">
+<meta property="og:type" content="article">
+<meta property="og:title" content="NFS网络文件共享的安装要点">
+<meta property="og:url" content="https://nokiam9.github.io/2021/12/11/NFS%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E7%9A%84%E5%AE%89%E8%A3%85%E8%A6%81%E7%82%B9/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="NFS - Network File System（网络文件系统），是一种基于TCP&#x2F;IP传输的网络文件系统协议，最早由SUN公司研发，通过使用NFS协议，客户机可以像访问本地目录一样，访问远程服务器中的共享资源。 NFS 的基本原则是“容许不同的客户端及服务端通过一组RPC分享相同的文件系统”，它是独立于操作系统，容许不同硬件及操作系统的系统共同进行文件的分享。  概述 NFS在文件传送或信息传">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-11T08:48:33.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.872Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2021/12/11/NFS%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E7%9A%84%E5%AE%89%E8%A3%85%E8%A6%81%E7%82%B9/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2021/12/11/NFS%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E7%9A%84%E5%AE%89%E8%A3%85%E8%A6%81%E7%82%B9/","path":"2021/12/11/NFS网络文件共享的安装要点/","title":"NFS网络文件共享的安装要点"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>NFS网络文件共享的安装要点 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A6%82%E8%BF%B0"><span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NFS-Server-%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95"><span class="nav-text">NFS Server 安装方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Server%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="nav-text">1. Server软件安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Server%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE"><span class="nav-text">2. Server服务配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Server%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="nav-text">3. Server启动服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NFS-Client-%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95"><span class="nav-text">NFS Client 安装方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Client%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="nav-text">1. Client软件安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Client%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE"><span class="nav-text">2. Client服务配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Client%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="nav-text">3. Client启动服务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%8F%E9%AA%8C%E4%B9%8B%E4%B8%80%EF%BC%9A%E5%A6%82%E4%BD%95%E5%A4%84%E7%90%86NFS%E6%9C%8D%E5%8A%A1%E5%BB%B6%E8%BF%9F%E5%8A%A0%E8%BD%BD%E9%97%AE%E9%A2%98"><span class="nav-text">经验之一：如何处理NFS服务延迟加载问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2021/12/11/NFS%E7%BD%91%E7%BB%9C%E6%96%87%E4%BB%B6%E5%85%B1%E4%BA%AB%E7%9A%84%E5%AE%89%E8%A3%85%E8%A6%81%E7%82%B9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="NFS网络文件共享的安装要点 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          NFS网络文件共享的安装要点
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-12-11 16:48:33" itemprop="dateCreated datePublished" datetime="2021-12-11T16:48:33+08:00">2021-12-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>NFS - Network File System（网络文件系统），是一种基于TCP&#x2F;IP传输的网络文件系统协议，最早由SUN公司研发，通过使用NFS协议，客户机可以像访问本地目录一样，访问远程服务器中的共享资源。<br>NFS 的基本原则是“容许不同的客户端及服务端通过一组RPC分享相同的文件系统”，它是独立于操作系统，容许不同硬件及操作系统的系统共同进行文件的分享。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>NFS在文件传送或信息传送过程中依赖于RPC协议。RPC，远程过程调用 (Remote Procedure Call) 是能使客户端执行其他系统中程序的一种机制。NFS本身是没有提供信息传输的协议和功能的，但NFS却能让我们通过网络进行资料的分享，这是因为NFS使用了一些其它的传输协议。而这些传输协议用到这个RPC功能的。可以说NFS本身就是使用RPC的一个程序。或者说NFS也是一个RPC SERVER。所以只要用到NFS的地方都要启动RPC服务，不论是NFS SERVER或者NFS CLIENT。这样SERVER和CLIENT才能通过RPC来实现PROGRAM PORT的对应。</p>
+<p>可以这么理解RPC和NFS的关系：NFS是一个文件系统，而RPC是负责负责信息的传输。</p>
+<p>目前最新版本是 NFS 4.X，但3.X版本仍然很普遍。</p>
+<p>启用NFS服务器，只需要安装两个软件包<code>nfs-utils</code> 和<code>rpcbind</code>（前身为<code>portmap</code>软件包，任务是提供RPC服务）。<br>由于<code>nfs-utils</code>软件包依赖<code>rpcbind</code>软件，所以使用yum安装时只需要<code>yum install -y nfs-utils</code>就搞定了。</p>
+<p>从NFS服务端的角度看，包含2个核心后台进程：</p>
+<ul>
+<li><code>nfsd</code>：它是基本的NFS守护进程，主要功能是管理客户端是否能够登录服务器；</li>
+<li><code>rpc.mountd</code>：它是RPC安装守护进程，主要功能是管理NFS的文件系统。当客户端顺利通过nfsd登录NFS服务器后，在使用NFS服务所提供的文件前，还必须通过文件使用权限的验证。它会读取NFS的配置文件<code>/etc/exports</code>来对比客户端权限。</li>
+</ul>
+<p>当客户端尝试使用RPC Server所提供的服务时，由于Client需要取得一个可以连接的端口（port）才能够使用RPC Server所提供的服务，因此，客户端首先去请求rpcbind，然后，rpcbind将自己管理的端口映射告知客户端，好让客户端可以连接上服务，因此启动NFS之前，一定要先启动rpcbind。</p>
+<blockquote>
+<p>RPC后台服务占用网络端口111，<code>/etc/services</code>中描述为<code>sunrpc</code>，并有TCP和UDP两种模式。</p>
+</blockquote>
+<p>NFS的常用目录</p>
+<ul>
+<li>&#x2F;etc&#x2F;exports：NFS服务的主要配置文件</li>
+<li>&#x2F;usr&#x2F;sbin&#x2F;exportfs：NFS服务的管理命令</li>
+<li>&#x2F;usr&#x2F;sbin&#x2F;showmount：客户端的查看命令</li>
+<li>&#x2F;var&#x2F;lib&#x2F;nfs&#x2F;etab：记录NFS分享出来的目录的完整权限设定值</li>
+<li>&#x2F;var&#x2F;lib&#x2F;nfs&#x2F;xtab：记录曾经登录过的客户端信息</li>
+</ul>
+<h2 id="NFS-Server-安装方法"><a href="#NFS-Server-安装方法" class="headerlink" title="NFS Server 安装方法"></a>NFS Server 安装方法</h2><h3 id="1-Server软件安装"><a href="#1-Server软件安装" class="headerlink" title="1. Server软件安装"></a>1. Server软件安装</h3><p>安装<code>nfs-utils</code>软件包，并设置系统启动服务<code>rpcbind</code>和<code>nfs</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y nfs-utils</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：如果启用了防火墙，需要打开 rpc-bind 和 nfs 的服务</p>
+</blockquote>
+<h3 id="2-Server服务配置"><a href="#2-Server服务配置" class="headerlink" title="2. Server服务配置"></a>2. Server服务配置</h3><p>为加载NFS服务，需要创建一个共享目录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /data</span><br><span class="line"><span class="built_in">chmod</span> 755 /data</span><br></pre></td></tr></table></figure>
+
+<p>根据这个加载点，在<code>/etc/exports</code>配置导出目录，添加如下行：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/data/     192.168.0.0/24(rw,sync,no_root_squash,no_all_squash)</span><br></pre></td></tr></table></figure>
+
+<p>主要的配置参数包括：</p>
+<ul>
+<li><code>/data</code>: 共享目录位置。</li>
+<li><code>192.168.0.0/24</code>: 客户端 IP 范围，* 代表所有，即没有限制。</li>
+<li><code>rw</code>: 权限设置，可读可写。</li>
+<li><code>sync|async</code>：&#x3D;sync，数据同步写入到内存与硬盘当中；&#x3D;async，数据会先暂存于内存当中，而非直接写入硬盘</li>
+<li><code>no_root_squash｜root_squash</code>: &#x3D;no_root_squash，如果Client的登录用户是root，则对于这个分享目录的Server来说，他就具有root的权限，也就是不压缩权限！；否则。。。</li>
+<li><code>all_squash｜no_all_squash</code>: &#x3D;all_squash，不论Client的使用者是什么身份，都会被压缩成匿名使用者；否则。。。</li>
+<li><code>anonuid= &amp; anonnid=</code>：当Client登录到分享目录中，在Server其身份是uid:gid。注意，必须在&#x2F;etc&#x2F;passwd和&#x2F;etc&#x2F;group中存在该ID。</li>
+</ul>
+<blockquote>
+<p>squash：这里是动词 “压缩、压扁”的意思，还有的含义是名词“南瓜、壁球”</p>
+</blockquote>
+<h3 id="3-Server启动服务"><a href="#3-Server启动服务" class="headerlink" title="3. Server启动服务"></a>3. Server启动服务</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">systemctl <span class="built_in">enable</span> rpcbind --now</span><br><span class="line">systemctl <span class="built_in">enable</span> nfs --now</span><br><span class="line">systemctl status rpcbind</span><br><span class="line">systemctl status nfs</span><br><span class="line">showmount -e localhost</span><br></pre></td></tr></table></figure>
+
+<p>这样，服务端就配置好了，接下来配置客户端，连接服务端，使用共享目录。</p>
+<h2 id="NFS-Client-安装方法"><a href="#NFS-Client-安装方法" class="headerlink" title="NFS Client 安装方法"></a>NFS Client 安装方法</h2><h3 id="1-Client软件安装"><a href="#1-Client软件安装" class="headerlink" title="1. Client软件安装"></a>1. Client软件安装</h3><p>软件包的名称是<code>nfs-utils</code>，系统服务的名称是<code>rpcbind</code>。</p>
+<blockquote>
+<p>客户端不需要打开防火墙，因为客户端时发出请求方，网络能连接到服务端即可。<br>客户端也不需要开启 NFS 服务，因为不共享目录。</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">yum install -y nfs-utils</span><br><span class="line">systemctl <span class="built_in">enable</span> rpcbind --now</span><br><span class="line">systemctl status rpcbind</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Client服务配置"><a href="#2-Client服务配置" class="headerlink" title="2. Client服务配置"></a>2. Client服务配置</h3><p>使用<code>showmount</code>命令，查看NFS服务器资源。<br>使用<code>mount</code>命令，手工挂载NFS资源。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">[root@yum ~]# showmount -e 192.168.0.139</span><br><span class="line">Export list <span class="keyword">for</span> 192.168.0.139:</span><br><span class="line">/mnt/HD/HD_a2/NFS *</span><br><span class="line"></span><br><span class="line">[root@yum ~]# mount 192.168.0.139:/mnt/HD/HD_a2/NFS /mnt</span><br><span class="line">[root@yum ~]# <span class="built_in">df</span> -h</span><br><span class="line">文件系统                         容量  已用  可用 已用% 挂载点</span><br><span class="line">devtmpfs                         486M     0  486M    0% /dev</span><br><span class="line">tmpfs                            496M     0  496M    0% /dev/shm</span><br><span class="line">tmpfs                            496M  6.8M  489M    2% /run</span><br><span class="line">tmpfs                            496M     0  496M    0% /sys/fs/cgroup</span><br><span class="line">/dev/sda1                        8.0G  1.9G  6.2G   24% /</span><br><span class="line">tmpfs                            100M     0  100M    0% /run/user/0</span><br><span class="line">192.168.0.139:/mnt/HD/HD_a2/NFS  3.6T  2.9T  721G   81% /mnt</span><br><span class="line"></span><br><span class="line">[root@yum ~]# mount</span><br><span class="line">sysfs on /sys <span class="built_in">type</span> sysfs (rw,nosuid,nodev,noexec,relatime)</span><br><span class="line">proc on /proc <span class="built_in">type</span> proc (rw,nosuid,nodev,noexec,relatime)</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">192.168.0.139:/mnt/HD/HD_a2/NFS on /mnt <span class="built_in">type</span> nfs (rw,relatime,vers=3,rsize=65536,wsize=65536,namlen=255,hard,proto=tcp,timeo=600,retrans=2,sec=sys,mountaddr=192.168.0.139,mountvers=3,mountport=57811,mountproto=udp,local_lock=none,addr=192.168.0.139)</span><br></pre></td></tr></table></figure>
+
+<p>其中，可以看到NFS的全部默认参数，包括：hard模式，软件版本v3，网络报文大小64K，</p>
+<h3 id="3-Client启动服务"><a href="#3-Client启动服务" class="headerlink" title="3. Client启动服务"></a>3. Client启动服务</h3><p>编辑<code>/etc/fstab</code>文件，设置系统启动时自动加载</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@yum ~]# more /etc/fstab</span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># /etc/fstab</span></span><br><span class="line"><span class="comment"># Created by anaconda on Sun Nov  7 10:03:44 2021</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Accessible filesystems, by reference, are maintained under &#x27;/dev/disk&#x27;</span></span><br><span class="line"><span class="comment"># See man pages fstab(5), findfs(8), mount(8) and/or blkid(8) for more info</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">UUID=99f4f882-0886-4b1e-8252-a63e2ffc6cfa /                       xfs     defaults        0 0</span><br><span class="line">192.168.0.139:/mnt/HD/HD_a2/NFS /mnt nfs defaults 0 0</span><br></pre></td></tr></table></figure>
+
+<p>注意：需要重启systemd服务已更新目录配置！！！</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">systemctl daemon-reload</span><br><span class="line"><span class="built_in">df</span> -h</span><br></pre></td></tr></table></figure>
+
+<h2 id="经验之一：如何处理NFS服务延迟加载问题"><a href="#经验之一：如何处理NFS服务延迟加载问题" class="headerlink" title="经验之一：如何处理NFS服务延迟加载问题"></a>经验之一：如何处理NFS服务延迟加载问题</h2><p>NFS服务位于独立的WDCLOUD，客户端位于192.168.0.148，全部重启时由于NFS Server尚未完成启动，Client自动加载失败。<br>分析fstab的配置参数：</p>
+<ul>
+<li><code>fg/bg=fg</code>: 设置挂载失败后mount命令的行为<br>  默认为fg，表示挂载失败时将直接报错退出。<br>  如果是bg，挂载失败后会创建一个子进程不断在后台挂载，而父进程mount自身则立即退出并返回0状态码。  </li>
+<li><code>timeo=600</code>: NFS客户端等待下一次重发NFS请求的时间间隔<br>  单位为十分之一秒。默认值&#x3D;600（60秒）</li>
+<li><code>hard/soft=hard</code>: 设置NFS客户端当NFS请求超时时的恢复行为方式<br>  如果是hard，将无限重新发送NFS请求。例如在客户端使用<code>df -h</code>查看文件系统时就会不断等待。<br>  如果是soft，当retrans次数耗尽时，NFS客户端将认为NFS请求失败，从而返回一个错误给调用它的程序。</li>
+<li><code>retrans=3</code>: NFS客户端最多发送的请求次数<br>  NFS客户端最多发送次数耗尽后将报错表示连接失败。如果hard挂载选项生效，则会进一步尝试恢复连接。</li>
+<li><code>rsize,wsize=131072</code>：一次读出(rsize)和写入(wsize)的区块大小。<br>  单位为字节，必须为1024的倍数，且最大只能设置为1M。<br>  Centos 5默认1024，Cenots 6以上默认131072<br>  如果网络带宽大，这两个值设置大一点能提升传输能力。最好设置到带宽的临界值。</li>
+</ul>
+<p>解决办法是：在<code>/etc/fstab</code>中，设置nfs目录的属性为<code>bg</code>，即后台启动。</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.0.139:/mnt/HD/HD_a2/NFS /data nfs defaults,_netdev,bg 0 0</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://wiki.archlinux.org/title/NFS">ArchLinux | NFS 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/storage_administration_guide/ch-nfs">RedHat关于 NFS 的技术文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://man.archlinux.org/man/mount.8#FILESYSTEM-INDEPENDENT_MOUNT_OPTIONS">Linux关于 mount 的man官方手册</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/zh_cn/efs/latest/ug/mounting-fs-nfs-mount-settings.html">AWS推荐的 NFS 挂载选项</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/f85c4371a43d">Linux 下的 NFS 系统简介</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.daimajiaoliu.com/daima/4870e3973100414">linux环境下嵌入式产品的NFS应用</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/mchina/archive/2013/01/03/2840040.html">Linux NFS服务器的安装与配置</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/11/21/OpenJDK%E7%9A%84%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0/" rel="prev" title="OpenJDK的技术概述">
+                  <i class="fa fa-angle-left"></i> OpenJDK的技术概述
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/12/19/HEXO-5-4-NEXT-8-8-2-%E7%89%88%E6%9C%AC%E5%8D%87%E7%BA%A7%E8%AE%B0%E5%BD%95/" rel="next" title="HEXO 5.4 &amp; NEXT 8.8.2 版本升级记录">
+                  HEXO 5.4 & NEXT 8.8.2 版本升级记录 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

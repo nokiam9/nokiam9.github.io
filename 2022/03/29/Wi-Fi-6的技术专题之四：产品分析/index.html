@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="2014年，雷军发布了小米第一台路由器，号称要引领路由器市场的革命，定位是家庭网络入口，形态是路由器+NAS存储。理想很丰满、现实很骨感！两个都想做，两个都做不好，路由器的网络质量屡屡被吐槽，口碑炸裂。。。 从Wi-Fi 6开始，小米痛下决心只做纯粹的路由器，招安了斐讯研发团队，芯片也转向高通的整体方案。从早期的AX1800初入江湖到 Redmi AX5\AX6补全产品线，从AX3600开始普及家">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Wi-Fi 6的技术专题之四：产品分析">
+<meta property="og:url" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="2014年，雷军发布了小米第一台路由器，号称要引领路由器市场的革命，定位是家庭网络入口，形态是路由器+NAS存储。理想很丰满、现实很骨感！两个都想做，两个都做不好，路由器的网络质量屡屡被吐槽，口碑炸裂。。。 从Wi-Fi 6开始，小米痛下决心只做纯粹的路由器，招安了斐讯研发团队，芯片也转向高通的整体方案。从早期的AX1800初入江湖到 Redmi AX5\AX6补全产品线，从AX3600开始普及家">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/%E5%9F%BA%E6%9C%AC%E5%8F%82%E6%95%B0.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/ax9000.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/%E5%B0%8F%E7%B1%B3AX9000.jpeg">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/%E5%9B%9B%E6%A0%B9%E5%A4%A9%E7%BA%BF.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/%E5%A4%A9%E7%BA%BF.jpeg">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/AIoT%E5%A4%A9%E7%BA%BF.jpg">
+<meta property="article:published_time" content="2022-03-29T07:09:53.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.991Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/%E5%9F%BA%E6%9C%AC%E5%8F%82%E6%95%B0.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/","path":"2022/03/29/Wi-Fi-6的技术专题之四：产品分析/","title":"Wi-Fi 6的技术专题之四：产品分析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Wi-Fi 6的技术专题之四：产品分析 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81AX9000%E7%9A%84%E6%9D%A5%E7%94%B1"><span class="nav-text">一、AX9000的来由</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E6%A0%B8%E5%BF%83%E8%8A%AF%E7%89%87"><span class="nav-text">二、核心芯片</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E5%A4%84%E7%90%86%E6%A8%A1%E7%BB%84"><span class="nav-text">核心处理模组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2GHz%E9%80%9A%E4%BF%A1%E6%A8%A1%E7%BB%84"><span class="nav-text">5.2GHz通信模组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-8GHz%E9%80%9A%E4%BF%A1%E6%A8%A1%E7%BB%84"><span class="nav-text">5.8GHz通信模组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4GHZ%E9%80%9A%E4%BF%A1%E6%A8%A1%E7%BB%84"><span class="nav-text">2.4GHZ通信模组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AIoT%E9%80%9A%E4%BF%A1%E6%A8%A1%E7%BB%84"><span class="nav-text">AIoT通信模组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E8%BE%85%E5%8A%A9%E8%8A%AF%E7%89%87"><span class="nav-text">其他辅助芯片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%A4%A9%E7%BA%BF%E7%BB%84%E4%BB%B6"><span class="nav-text">三、天线组件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%96%E7%BD%AE%E5%A4%A9%E7%BA%BF"><span class="nav-text">外置天线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AIoT%E5%A4%A9%E7%BA%BF"><span class="nav-text">AIoT天线</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E5%85%A8%E4%BA%A7%E5%93%81%E7%9F%A9%E9%98%B5"><span class="nav-text">四、全产品矩阵</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E6%B5%81%E4%BA%A7%E5%93%81"><span class="nav-text">主流产品</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E4%BA%A7%E5%93%81"><span class="nav-text">其他产品</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E6%95%99%E6%9D%90"><span class="nav-text">视频教材</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Wi-Fi 6的技术专题之四：产品分析 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Wi-Fi 6的技术专题之四：产品分析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-29 15:09:53" itemprop="dateCreated datePublished" datetime="2022-03-29T15:09:53+08:00">2022-03-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.1k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>8 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>2014年，雷军发布了小米第一台路由器，号称要引领路由器市场的革命，定位是家庭网络入口，形态是路由器+NAS存储。理想很丰满、现实很骨感！两个都想做，两个都做不好，路由器的网络质量屡屡被吐槽，口碑炸裂。。。<br>从Wi-Fi 6开始，小米痛下决心只做纯粹的路由器，招安了斐讯研发团队，芯片也转向高通的整体方案。从早期的AX1800初入江湖到 Redmi AX5\AX6补全产品线，从AX3600开始普及家用Wi-Fi 6再到AX6000紧跟手机SOC的发展进一步提高无线规格，小米路由器在逐渐在中高端站稳了脚跟，有了进一步向更高层冲击的实力。<br>2021年，小米发布了高端旗舰路由器小米AX9000，这是小米对于Wi-Fi 6时代何为顶级路由器的答卷，更代表着小米踏上了千元高端路由领域新的征程，请参见<a target="_blank" rel="noopener" href="https://www.mi.com/mirouter/ax9000/specs">官方主页</a>。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/%E5%9F%BA%E6%9C%AC%E5%8F%82%E6%95%B0.png" class="">
+
+<h2 id="一、AX9000的来由"><a href="#一、AX9000的来由" class="headerlink" title="一、AX9000的来由"></a>一、AX9000的来由</h2><p>小米AX9000路由器，AX代表其采用IEEE 802.11ax标准，那9000是怎么来的呢，其实是多组天线并发的最大速率。当然，这仅仅是理论速率！</p>
+<ul>
+<li>2.4GHz频段：最大速率1147Mbps &#x3D; 4 * 286.8 ，基于HE40、MSC 11、4*4 MIMO</li>
+<li>5.2GHz频段：最大速率4804Mbps &#x3D; 4 * 1201 ，基于HE160、MSC 11、4*4 MIMO</li>
+<li>5.8GHz频段：最大速率2402Mbps &#x3D; 4 * 600.5 ，基于HE180、MSC 11、4*4 MIMO</li>
+</ul>
+<p>此外，小米路由器为智能家居设置了AIoT专用天线，但为了兼容低端设备仅支持802.11ac。</p>
+<ul>
+<li>2.4GHz频段：最大速率150Mbps，基于VHT40、MSC 7</li>
+<li>5GHz频段：最大速率433Mbps，基于VHT80、MSC 9</li>
+</ul>
+<p><code>1147 + 4804 + 2402 + 150 + 433 = 8936</code>，取个整数就是9000了！！！</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/ax9000.png" class="">
+
+<h2 id="二、核心芯片"><a href="#二、核心芯片" class="headerlink" title="二、核心芯片"></a>二、核心芯片</h2><p>小米现在采用高通的全套方案，产品发布价格999元，但由于全球芯片短缺，现在顺势涨价到1299元，但仍然经常缺货。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/%E5%B0%8F%E7%B1%B3AX9000.jpeg" class="">
+
+<h3 id="核心处理模组"><a href="#核心处理模组" class="headerlink" title="核心处理模组"></a>核心处理模组</h3><ul>
+<li>CPU：Qualcomm IPQ8072A * 1，四核2.2GHz，A53架构，14nm制程，内建双核1.7GHz NPU</li>
+<li>内存：EtronTech M6HE16EWAKG-10H * 2，DDR3L，单个512MB，总计1GB，台湾钰创科技</li>
+<li>闪存：Winbond W29N02GZSIBA * 1，容量256MB，台湾华邦电子</li>
+</ul>
+<h3 id="5-2GHz通信模组"><a href="#5-2GHz通信模组" class="headerlink" title="5.2GHz通信模组"></a>5.2GHz通信模组</h3><ul>
+<li>无线芯片：Qualcomm QCN9024 * 1，高档配置，支持4x4 HE160，最高速率4804Mbps，在2x2 MIMO下支持4096-QAM</li>
+<li>射频前端：Qorvo QCN5054 * 4，分别连接4根外置天线</li>
+<li>介质滤波器：5235 * 4，过滤5.8GHz频段干扰，信号衰减2dB。注意：5235指的是仅允许5.235Hz频率通过！</li>
+</ul>
+<h3 id="5-8GHz通信模组"><a href="#5-8GHz通信模组" class="headerlink" title="5.8GHz通信模组"></a>5.8GHz通信模组</h3><ul>
+<li>无线芯片：Qualcomm QCN5054 * 1，中档配置，支持4x4 HE160 或 2×2 HE160，不支持4096-QAM</li>
+<li>射频前端：Qorvo QCN5054 * 4，分别连接4根外置天线</li>
+<li>介质滤波器：5697 * 4，过滤5.2GHz频段干扰，信号衰减2dB，功能同上</li>
+</ul>
+<h3 id="2-4GHZ通信模组"><a href="#2-4GHZ通信模组" class="headerlink" title="2.4GHZ通信模组"></a>2.4GHZ通信模组</h3><ul>
+<li>无线芯片：Qualcomm QCN5024 * 1，中档配置，支持4x4 HE40，最高速率1147Mbps</li>
+<li>射频前端：Qorvo QPF4288 * 4，分别连接4根外置天线。滤波器就不需要了</li>
+</ul>
+<h3 id="AIoT通信模组"><a href="#AIoT通信模组" class="headerlink" title="AIoT通信模组"></a>AIoT通信模组</h3><ul>
+<li>无线芯片：Qualcomm QCA9889 * 1，低档配置，仅支持802.11ac协议，不支持MIMO；2.4G最高速率150Mbps，5G是高速率433Mbps</li>
+<li>射频前端：无，连接1根内置双频天线</li>
+</ul>
+<h3 id="其他辅助芯片"><a href="#其他辅助芯片" class="headerlink" title="其他辅助芯片"></a>其他辅助芯片</h3><ul>
+<li>Qualcomm QCA8075 * 1：负责连接5个千兆以太网的物理接口</li>
+<li>Qualcomm QCA8081 * 1：负责连接2.5G的双链路聚合LAN口，由用户决定用于WAN或者LAN</li>
+<li>Qualcomm PMP8074 * 1：与高通CPU配套的电源管理芯片，负责管理CPU的供电</li>
+</ul>
+<blockquote>
+<p>AX9000有三组无线芯片，每组均有4个FEM芯片和4根外置天线，这就是“三频路由器”的原因<br>FEM，Front-end Modules，即就是前端模块，负责射频信号的发送放大以及接收放大、滤波，甚至包含功率检测、控制和开关等作用。主流厂家包括美国的Skyworks、Qorvo，台湾的Richwave，国内的康希通信。<br>AIoT就是个垃圾！只负责米家智能设备的自动接入和同步资料，其他终端设备均无法使用，刷刷数据还要涨价！</p>
+</blockquote>
+<h2 id="三、天线组件"><a href="#三、天线组件" class="headerlink" title="三、天线组件"></a>三、天线组件</h2><h3 id="外置天线"><a href="#外置天线" class="headerlink" title="外置天线"></a>外置天线</h3><p>小米AX9000共有12根外置天线，在顶部分为4组，每组包含2.4GHz、5.2GHz和5.8GHz各1根。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/%E5%9B%9B%E6%A0%B9%E5%A4%A9%E7%BA%BF.jpg" class="">
+
+<p>小米把5.2GHz称为电竞频段5G_GAME，理由是有160MHz带宽，哪家的路由器不是这个参数呢？<br>两根5G天线的位置分开，且PCB天线的平面是相互垂直的，这样布局倒是有利于减少干扰。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/%E5%A4%A9%E7%BA%BF.jpeg" class="">
+
+<p>三频路由器对于Mesh组网有帮助。在没有有线回程的情况下，如果使用两台AX9000组网，可以利用完整的5.2G频段承担起无线回程的重任，保证接入的终端设备可以全带宽运行；但是如果其中一台是双频路由器的话，就只能分享5G频段了。</p>
+<h3 id="AIoT天线"><a href="#AIoT天线" class="headerlink" title="AIoT天线"></a>AIoT天线</h3><img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/AIoT%E5%A4%A9%E7%BA%BF.jpg" class="">
+
+<p>红色框里的是AIoT天线，贴在机身内侧，是双频天线。据说位置有讲究，与相邻的2.4G不能近于15CM，与5G不能近于7CM。</p>
+<h2 id="四、全产品矩阵"><a href="#四、全产品矩阵" class="headerlink" title="四、全产品矩阵"></a>四、全产品矩阵</h2><h3 id="主流产品"><a href="#主流产品" class="headerlink" title="主流产品"></a>主流产品</h3><table>
+<thead>
+<tr>
+<th align="center">型号</th>
+<th align="center">定位</th>
+<th align="center">售价</th>
+<th align="center">性能参数</th>
+<th align="center">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">小米AX9000</td>
+<td align="center">旗舰</td>
+<td align="center">1299</td>
+<td align="center">IPQ8072A，1GB，QCN5024 + QCN9024 + QCN5054 <br> 外置天线12根，1147+2402+4804+583</td>
+<td align="center">唯一的三频路由器</td>
+</tr>
+<tr>
+<td align="center">小米AX6000</td>
+<td align="center">中档</td>
+<td align="center">599</td>
+<td align="center">IPQ5018，512MB，QCN9024 <br> 外置天线6+1根，574+4804+583</td>
+<td align="center">小米AX3600的马甲</td>
+</tr>
+<tr>
+<td align="center">小米AX3000</td>
+<td align="center">入门</td>
+<td align="center">349</td>
+<td align="center">IPQ5000，256MB，QCN6102 <br> 隐藏天线4根，574+2402</td>
+<td align="center">红米同款的颜值货</td>
+</tr>
+<tr>
+<td align="center">红米AX5400</td>
+<td align="center">中档</td>
+<td align="center">399</td>
+<td align="center">IPQ5018，512MB，QCN9024 <br> 外置天线6根，574+4804</td>
+<td align="center">红米AX6的马甲</td>
+</tr>
+<tr>
+<td align="center">红米AX3000</td>
+<td align="center">实惠</td>
+<td align="center">269</td>
+<td align="center">IPQ5000，256MB，QCN6102 <br> 外置天线4根，574+2402</td>
+<td align="center"><a href="%E7%BA%A2%E7%B1%B3AX3000.jpg">从节点的首选</a></td>
+</tr>
+</tbody></table>
+<ol>
+<li>关于核心CPU，中低档路由器均采用<a href="IPQ5x.png">高通5x系列</a>，2核A53+1核NPU，而且内部集成2.4GHz Wi-Fi6也需要消耗CPU资源。<br>相比之下，AX9000采用的8x系列，4核A53+2核NPU，性能更强悍，且每个频段都有独立无线芯片，因此主板带宽充足，有效解决吞吐量瓶颈。</li>
+<li>关于5GHz频段，中档路由器采用1个QCN9024（高通旗舰QCN9074阉割了6GHz功能的高档货），低档采用1个QCN6012，因此都是双频路由器。<br>相比之下，AX9000的5.2GHz频段也是QCN9024，但5.8GHz频段的无线芯片采用5x系列，比中档路由器的6x系列更差，有偷工减料的嫌疑；而且QCN5024似乎仅支持2*2 MIMO，难道宣传2.4GHz的1147Mbps是假的？</li>
+<li>关于天线，中低档路由器2.4GHz的天线都是2根，仅支持2 * 2 MIMO，区别是在5GHz频段，低档是2根天线支持2 * 2 MIMO；中档是4根天线支持4 * 4 MIMO。</li>
+<li>关于内存，也是一个明显的区隔指标，分别是1024MB、512MB和256MB。</li>
+<li>好消息是，AX系列全部产品均支持Mesh组网！当然，必须都是小米品牌的。</li>
+</ol>
+<h3 id="其他产品"><a href="#其他产品" class="headerlink" title="其他产品"></a>其他产品</h3><ul>
+<li><strong>红米AX6S</strong>：MTK芯片的实验品，性能配置与红米AX6相当。黑色外套好区分，便宜20元。</li>
+<li><strong>红米电竞AX5400</strong>：红米AX5400的兄弟款，主打电竞市场的智商税；换个黑色外套和灯光，2个WAN口 + 2.5G的LAN口，但涨价200元。</li>
+<li><strong>小米AX3600</strong>：售价499元，曾经的性价比之王，已下架；替代品AX6000，将IPQ8071的CPU降档为IPQ5018，增加了几个然并L的智能家居、4*4 MIMO等功能，然后涨价100元！</li>
+<li><strong>红米AX6</strong>：CPU是IPQ8071，QCN5052+QCN5054的双无线芯片，配置模式很有AX9000的影子，可惜也下架了，少量存货加价300+</li>
+<li>其他早期下架产品还有：小米AX1800、红米AX1800、红米AX5等。</li>
+</ul>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.acwifi.net/13681.html">小米AX9000三频无线路由器拆机</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.acwifi.net/12621.html">小米AX6000拆机，拆完后开不了机</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.acwifi.net/15091.html">红米AX3000拆机</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.acwifi.net/10272.html">红米AX5拆机，不用看了跟小米AX1800一样</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.acwifi.net/11176.html">红米AX6拆机，旧款WIFI6无线路由器</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.10bests.com/wifi6-routers-by-chip-qualcomm/">高通芯片方案的Wi-Fi6路由器汇总和推荐</a></li>
+</ul>
+<h3 id="视频教材"><a href="#视频教材" class="headerlink" title="视频教材"></a>视频教材</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://www.ixigua.com/6973629022425055781?logTag=8860c8362a7f51e7d691">小米AX9000高端功能及性能评测</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ixigua.com/6900819345442603524?id=6958306910969791012&logTag=0781892ee341492262db">小米路由器AX9000 无线mesh组网评测</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/" rel="prev" title="Wi-Fi 6的技术专题之三：关键技术">
+                  <i class="fa fa-angle-left"></i> Wi-Fi 6的技术专题之三：关键技术
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/04/10/HEXO%E7%9A%84Next%E4%B8%BB%E9%A2%98%E5%BC%95%E5%85%A5mermaid%E6%B5%81%E7%A8%8B%E5%9B%BE%E6%8F%92%E4%BB%B6/" rel="next" title="HEXO的Next主题引入mermaid流程图插件">
+                  HEXO的Next主题引入mermaid流程图插件 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

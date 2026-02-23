@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="从理论上看，Wi-Fi的理论速率与以下因素密切相关：频宽、频率复用技术、调制方法、编码方案和天线数量等，可以表示为下面的公式：  回顾整个 802.11 协议标准的发展历程，每一代新的协议都在与3GPP的移动通信技术相互借鉴，传输速率和数据吞吐率方面有着较大的提升，尤其是演进到 802.11ac 协议后，无线网络带宽与有线差距越来越小，基本可以满足大部分应用的需求。但802.11ac 的最大速率6">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Wi-Fi 6的技术专题之三：关键技术">
+<meta property="og:url" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="从理论上看，Wi-Fi的理论速率与以下因素密切相关：频宽、频率复用技术、调制方法、编码方案和天线数量等，可以表示为下面的公式：  回顾整个 802.11 协议标准的发展历程，每一代新的协议都在与3GPP的移动通信技术相互借鉴，传输速率和数据吞吐率方面有着较大的提升，尤其是演进到 802.11ac 协议后，无线网络带宽与有线差距越来越小，基本可以满足大部分应用的需求。但802.11ac 的最大速率6">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/rate.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/arch.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ofdm.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ofdma.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/DL-MIMO.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/UL-MIMO.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/subcarrier.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ru.jpeg">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ac-msc.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ax-msc.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/QAM.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/obss.jpeg">
+<meta property="og:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/phy.png">
+<meta property="article:published_time" content="2022-03-29T07:02:07.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.976Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/rate.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/","path":"2022/03/29/Wi-Fi-6的技术专题之三：关键技术/","title":"Wi-Fi 6的技术专题之三：关键技术"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Wi-Fi 6的技术专题之三：关键技术 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81OFDMA-%E5%A4%9A%E7%94%A8%E6%88%B7%E7%9A%84-OFDM"><span class="nav-text">一、OFDMA &#x3D; 多用户的 OFDM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81DL-MU-MIMO-UL-MU-MIMO"><span class="nav-text">二、DL MU-MIMO + UL MU-MIMO</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E8%A1%8C-MU-MIMO"><span class="nav-text">下行 MU-MIMO</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8A%E8%A1%8C-MU-MIMO"><span class="nav-text">上行 MU-MIMO</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%9B%B4%E9%AB%98%E5%AF%86%E5%BA%A6%E7%9A%84%E5%AD%90%E8%BD%BD%E6%B3%A2"><span class="nav-text">三、更高密度的子载波</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%B6%E5%9F%9F%E5%B8%A7%E6%A0%BC%E5%BC%8F"><span class="nav-text">时域帧格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%91%E5%9F%9F%E8%B5%84%E6%BA%90%E5%8D%95%E4%BD%8DRU"><span class="nav-text">频域资源单位RU</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%9B%B4%E9%AB%98%E6%95%88%E7%8E%87%E7%9A%84%E8%B0%83%E5%88%B6%E7%BC%96%E7%A0%81%E7%AD%96%E7%95%A5"><span class="nav-text">四、更高效率的调制编码策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#256QAM-%E2%80%93-1024QAM"><span class="nav-text">256QAM –&gt; 1024QAM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E9%95%BF%E7%9A%84-Symbol-%E6%97%B6%E9%95%BF-%E6%9B%B4%E7%9F%AD%E7%9A%84-GI-%E9%97%B4%E9%9A%94"><span class="nav-text">更长的 Symbol 时长 + 更短的 GI 间隔</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81BSS-Coloring-%E7%9D%80%E8%89%B2%E6%9C%BA%E5%88%B6"><span class="nav-text">五、BSS Coloring - 着色机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81TWT-%E7%9B%AE%E6%A0%87%E5%94%A4%E9%86%92%E6%97%B6%E9%97%B4"><span class="nav-text">六、TWT - 目标唤醒时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E6%96%B0%E7%9A%84%E5%AE%89%E5%85%A8%E6%A0%87%E5%87%86WPA3"><span class="nav-text">七、新的安全标准WPA3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AB%E3%80%81%E5%B0%8F%E7%BB%93"><span class="nav-text">八、小结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B9%9D%E3%80%81%E5%B1%95%E6%9C%9B-Wi-Fi-7"><span class="nav-text">九、展望 Wi-Fi 7</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%BD%95%EF%BC%9A%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-text">附录：名词解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B5%84%E6%96%99%E4%B8%8B%E8%BD%BD"><span class="nav-text">资料下载</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Wi-Fi 6的技术专题之三：关键技术 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Wi-Fi 6的技术专题之三：关键技术
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-29 15:02:07" itemprop="dateCreated datePublished" datetime="2022-03-29T15:02:07+08:00">2022-03-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>17 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>从理论上看，Wi-Fi的理论速率与以下因素密切相关：频宽、频率复用技术、调制方法、编码方案和天线数量等，可以表示为下面的公式：</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/rate.png" class="">
+
+<p>回顾整个 802.11 协议标准的发展历程，每一代新的协议都在与3GPP的移动通信技术相互借鉴，传输速率和数据吞吐率方面有着较大的提升，尤其是演进到 802.11ac 协议后，无线网络带宽与有线差距越来越小，基本可以满足大部分应用的需求。但802.11ac 的最大速率6.9Gbps只是实验室环境的理论值，在实际应用场景的有效带宽远远低于理论值，且并发用户数越多，有效吞吐率就会越差。</p>
+<p>802.11ax 的关键字是高效率无线标准（HEW，High-Efficiency Wireless），任务目标是：</p>
+<ul>
+<li>进一步提高理论最大速率，从 802.11ac 的6.9Gbps提高到 9.6Gbps；</li>
+<li>更重要的是，大幅度提高多用户并发效率，提供密集用户环境下4倍实际吞吐量的提升</li>
+<li>以及，更好适应物联网等室外场景的应用。</li>
+</ul>
+<p>从技术栈的角度看，Wi-Fi 6主要采用了以下优化技术，分别工作在PHY物理层和MAC链路层。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/arch.png" class="">
+
+<h2 id="一、OFDMA-多用户的-OFDM"><a href="#一、OFDMA-多用户的-OFDM" class="headerlink" title="一、OFDMA &#x3D; 多用户的 OFDM"></a>一、OFDMA &#x3D; 多用户的 OFDM</h2><p>从 802.11a 开始直到 802.11ac，数据传输一直采用OFDM（正交频分复用）模式，单一信道被分成了多个子载波，每一个子载波是正交的，通过快速傅里叶变换（FFT）和快速傅里叶逆变换（IFFT）来构成的，不会互相干扰。<br>但是，在OFDM模式下，不同用户是通过不同时间片段区分出来的，因此对于每一个时间片段，一个用户完整占据所有的子载波并发送一个完整的数据包，因此如果某个用户发送的数据不多，频率资源用不满的情况下，其他用户只能干巴巴地排队等着，频谱资源的使用效率不高。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ofdm.png" class="">
+
+<p>为了解决这个问题，802.11ax 引入了OFDMA（正交频分复用多址）技术，后面多了个字母A代表多址，就是多用户复用的意思，也就是OFDM的多用户版本。</p>
+<blockquote>
+<p>实际上，OFDMA技术来自于3GPP LTE，802.11ax就是简单抄袭过来的</p>
+</blockquote>
+<p>具体实现方式是利用 OFDM 对信道进行父载波化，将同一个带宽下的所有子载波划分成若干个子载波组，每一个组被称作一个 RU（Resouce Unit，资源单元），可以同时分配给不同的用户使用，每一个时间片上可有多个用户同时发送，这样就提高了用户数据速率并减少了延迟，特别适用于大量具有短帧或低速率要求的设备，如物联网设备。<br>在 OFDMA 中，一个 OFDM 信号是由多个子载波组成，这些子载波就组成了一个用户自己的带宽，每个用户可分配的 RU 大小可以是不同的。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ofdma.png" class="">
+
+<p>与传统OFDM相比，OFDMA并不能显著提升单用户速率，但对于多用户并发将带来明显的优势：</p>
+<ul>
+<li>更稳定的传输效率：在部分节点信道状态不太好的情况下，可以根据信道质量分配发送功率，来更精细化的分配信道时频资源</li>
+<li>更短的传输延迟：因为 802.11ac 及之前的标准都是占据整个信道传输数据的，如果有一个 QOS 数据包需要发送，其一定要等之前的发送者释放完整个信道才行，所以会存在较长的时延。在OFDMA 模式下，由于一个发送者只占据整个信道的部分资源，一次可以发送多个用户的数据，所以能够减少 QOS 节点接入的时延</li>
+<li>更高的用户并发度：OFDMA将整个信道资源划分成多个子载波，子载波又按不同 RU 类型被分成若干组，每个用户可以占用一组或多组 RU 以满足不同带宽需求的业务</li>
+</ul>
+<h2 id="二、DL-MU-MIMO-UL-MU-MIMO"><a href="#二、DL-MU-MIMO-UL-MU-MIMO" class="headerlink" title="二、DL MU-MIMO + UL MU-MIMO"></a>二、DL MU-MIMO + UL MU-MIMO</h2><p>路由器上面的天线数量是越来越多，现在不管啥价钱的路由器，都长得跟螃蟹似的，张牙舞爪好不唬人。为啥要用这么多天线？就是为了更好地实现MIMO（多输入多输出）技术。简单来说，就是在信号发射时，用多根天线来同时发送多路不同的数据，速度自然成倍提升；在接收时，多个天线同时接收手机发来的信号，跟戴了助听器一样，接收灵敏度也得到了增强。</p>
+<p>在传统的SU-MIMO中，若具有多条空间流的路由器下同时连接了多个只支持单个空间流的设备，在它们同时下载时，路由器只能使用一条空间流轮流与这些设备通信，剩下的空间流均会被浪费。</p>
+<h3 id="下行-MU-MIMO"><a href="#下行-MU-MIMO" class="headerlink" title="下行 MU-MIMO"></a>下行 MU-MIMO</h3><p>2016年推出的802.11ac wave2中，增加了MU-MIMO（Multi-User MIMO）的支持（仅下行方向），AP可以使用不同的空间流（天线）与不同的设备进行通信，从而带来多路复用增益，实现了对多用户下行并发场景性能的提升。</p>
+<blockquote>
+<p>MU-MIMO技术在制定之时，最多只允许3条流同时传输，如今更多手机均使用2x2MIMO，但两台这样的手机是无法激活MU-MIMO的。<br>而且，MU-MIMO仅会在多台均支持MU-MIMO的设备同时吞吐时才会生效，若无线网络中支持MU-MIMO的终端设备较少，其效果将会非常有限。</p>
+</blockquote>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/DL-MIMO.png" class="">
+
+<p>802.11ac 只支持DL 4x4 MU-MIMO（下行），在802.11ax中进一步增加了MU-MIMO数量，可支持DL 8x8 MU-MIMO，同时借助DL OFDMA技术（下行），可同时进行MU-MIMO传输和分配不同RU进行多用户多址传输，既增加了系统并发接入量，又均衡了吞吐量。<br>在信道评估阶段，802.11ax 使用 OFDMA 机制中的 trigger 方式来完成 AP 收集各 STA 的信道 CBF（Compressed Beamforming Feedback，压缩波束成形反馈信息）信息，进行信道质量评估。</p>
+<h3 id="上行-MU-MIMO"><a href="#上行-MU-MIMO" class="headerlink" title="上行 MU-MIMO"></a>上行 MU-MIMO</h3><p>UL MU-MIMO（上行）是802.11ax中引入的一个重要特性，UL MU-MIMO的概念和UL SU-MIMO的概念类似，都是通过发射机和接收机多天线技术使用相同的信道资源在多个空间流上同时传输数据，唯一的差别点在于UL MU-MIMO的多个数据流是来自多个用户。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/UL-MIMO.png" class="">
+
+<p>802.11ac及之前的802.11标准都是UL SU-MIMO，即只能接受一个用户发来的数据，多用户并发场景效率较低，802.11ax支持UL MU-MIMO后，借助UL OFDMA技术（上行），可同时进行MU-MIMO传输和分配不同RU进行多用户多址传输，提升多用户并发场景效率，大大降低了应用时延。</p>
+<h2 id="三、更高密度的子载波"><a href="#三、更高密度的子载波" class="headerlink" title="三、更高密度的子载波"></a>三、更高密度的子载波</h2><p>载波类似于频域上的 Symbol，一个子载波承载一个 Symbol。<br>在Wi-Fi 5及以前（802.11a&#x2F;b&#x2F;g&#x2F;n&#x2F;ac），子载波宽度是312.5KHz。以HT20（20MHz带宽）为例，其被划分为64个子载波，其中52个用于承载数据，4个用于导频，8个作为保护频带。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/subcarrier.png" class="">
+
+<h3 id="时域帧格式"><a href="#时域帧格式" class="headerlink" title="时域帧格式"></a>时域帧格式</h3><p>802.11ax根据不同的用途，时域可以分为4种帧格式。这四种HE PPDU（Presentation Protocol Data Unit，表示协议数据单元）包括HE SU-PPDU（单用户）、HE MU-PPDU（多用户）、HE Extended Range SU-PPDU（扩展的单用户协议）以及基于Trigger的HE PPDU。<br>高效的前导则包含HE-SIG-A、HE-SIG-B（可选）、HE-STF和HE-LTF。其中HE-LTF主要是用来做信道估计和MIMO检测。</p>
+<h3 id="频域资源单位RU"><a href="#频域资源单位RU" class="headerlink" title="频域资源单位RU"></a>频域资源单位RU</h3><p>对于802.11ax，子载波密度提高了4倍，包含256个子载波，其宽度也缩小为78.125KHz，并基于 OFDMA 模式以 RU 为单位分配频率资源，最小RU为包含26个子载波的2MHz带宽，此外还有52、106、242、484或996数量的子载波。</p>
+<p>下图是20MHz和40MHz带宽的 RU 帧结构图，以最常见的第一行为例，总共256个子载波中，有效子载波为234个（9个包含26个子载波的RU），此外还有首尾11个保护载波 、4个导频载波、7个中央直流载波。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ru.jpeg" class="">
+
+<blockquote>
+<p>蓝色部分是有效子载波，其它颜色是导频（橙黄色）、直流（DC）和保护子载波（edge）<br>除了信道中央位置的直流载波，资源单位是相邻和连续的</p>
+</blockquote>
+<h2 id="四、更高效率的调制编码策略"><a href="#四、更高效率的调制编码策略" class="headerlink" title="四、更高效率的调制编码策略"></a>四、更高效率的调制编码策略</h2><p>调制编码，分为调制和编码两部分，它们共同决定了单位时间可以同时发送的比特数。其中：</p>
+<ul>
+<li>调制方式：规定每次能够同时发送的比特数，例如BPSK、QPSK、16QAM，64QAM和256QAM</li>
+<li>码率：有用的数据在编码后总数据量中的占比。如果码率是3&#x2F;4，就是指编码后的数据中，3位数据比特 + 1位冗余比特。</li>
+</ul>
+<p>我们一般将调制和编码两部分组合起来分为多个等级，级别越高，数据发送的速率也就越快，这就是调制编码策略 MCS（Modulation Coding Scheme）。<br>802.11ac的基础MSC如下表：</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ac-msc.png" class="">
+
+<p>802.11ac的常见速率 867Mbps &#x3D; 433.3 Mbps * 2，此时采用 2*2 MIMO，工作在MSC 9模式（80MHz传输带宽、256-QAM调制模式、0.4us保护间隔、5&#x2F;6的编码方式）。</p>
+<p>802.11ax的基础MSC如下表：</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/ax-msc.png" class="">
+
+<p>上表是基于单流的数据，MIMO速率就是直接乘上通道数量。<br>802.11ax的理论最大速率 9.6Gbps &#x3D; 1201 Mbps * 8，此时采用 8*8 MIMO，工作在MSC 11模式（160MHz传输带宽、1024-QAM调制模式、0.8us保护间隔、5&#x2F;6的编码方式）。</p>
+<h3 id="256QAM-–-1024QAM"><a href="#256QAM-–-1024QAM" class="headerlink" title="256QAM –&gt; 1024QAM"></a>256QAM –&gt; 1024QAM</h3><p>常用的调制方式包括BPSK、QPSK、16QAM，64QAM和256QAM，能同时发送的比特数为1个，2个，4个，6个和8个。<br>802.11ac 协议采用最高 256-QAM 正交幅度调制，即每个符号可以传输 8bit 数据。</p>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/QAM.png" class="">
+
+<p>802.11ax 协议采用最高 1024-QAM 正交幅度调制，即每个符号可以传输 10bit 数据，10bit&#x2F;8bit&#x3D;1.25，因此相对于 802.11ac 来说，802.11ax 的速率会提升 25%。</p>
+<blockquote>
+<p>高通已提供4096-QAM，理论速率提高20%，也称为MCS12~MCS13，但最大仅支持2*2 MIMO，同时终端支持也非常有限</p>
+</blockquote>
+<h3 id="更长的-Symbol-时长-更短的-GI-间隔"><a href="#更长的-Symbol-时长-更短的-GI-间隔" class="headerlink" title="更长的 Symbol 时长 + 更短的 GI 间隔"></a>更长的 Symbol 时长 + 更短的 GI 间隔</h3><p>Symbol就是时域上的传输信号，相邻的两个Symbol之间需要有一定的空隙（GI），以避免Symbol之间的干扰。就像中国的高铁一样，每列车相当于一个Symbol，同一个车站发出的两列车之间一定要有一个时间间隙，否则两列车就可能会发生碰撞。不同Wi-Fi标准下的间隙也有不同，一般来说传输速率较快时GI需要适当增大，就像同一车道上两列350KM&#x2F;h时速的高铁发车时间间隙要比时速250KM&#x2F;h时速的高铁发车间隙要大一些。</p>
+<p>对于 802.11ac，Symbol的有效传输时长为3.2us，GI 有0.4us 和 0.8us 的两种模式。<br>对于 802.11ax 由于子载波密度提高了4倍，Symbol的有效传输时长提高到 3.2 * 4 &#x3D; 12.8us，GI 提高到 0.8us 和 1.6us。换句话说，Wi-Fi 6 的传输容量提高了4倍，但信号间隔只提高了2倍，因此传输效率又了显著提升。</p>
+<p>在 GI 同为 800ns 的情况下，对于 802.11ac来说：<br>    每个 Symbol 的传输时间为(3.2+0.8)&#x3D;4.0us，有效数据传输时间占比为 3.2&#x2F;4.0&#x3D;0.8，<br>而对于 802.11ax 来说：<br>    每个 Symbol 的传输时间为(12.8+0.8)&#x3D;13.6us，有效数据传输时间占比为 12.8&#x2F;13.6&#x3D;0.94。</p>
+<h2 id="五、BSS-Coloring-着色机制"><a href="#五、BSS-Coloring-着色机制" class="headerlink" title="五、BSS Coloring - 着色机制"></a>五、BSS Coloring - 着色机制</h2><p>Wi-Fi射频的传输原理是在任何指定时间内，一个信道上只允许一个用户传输数据，如果Wi-Fi AP和客户端在同一信道上侦听到有其他802.11无线电传输，则会自动进行冲突避免，推迟传输，因此每个用户都必须轮流使用（这就是CSMA&#x2F;CA的原理）。<br>802.11ac及之前的标准，通常采用动态调整CCA门限的机制来改善同频信道间的干扰，通过识别同频干扰强度，动态调整CCA门限，忽略同频弱干扰信号实现同频并发传输，提升系统吞吐容量。</p>
+<p>Spatial Reuse（空间复用），也被称作“BSS着色”（BSS coloring），通过此技术可以实现更多同步传输，即AP可以识别两个相距不远但并不相邻的AP和终端设备，能够在同一时间内实现无线并发传输而不会相互影响。用于解决不同AP在相同信道下并发冲突的问题。</p>
+<blockquote>
+<p>BSS着色技术来源于 802.11ah，由于其应用的室外场景往往多个AP同时工作，利用BSS染色技术可以快速检测网络环境以减少干扰</p>
+</blockquote>
+<img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/obss.jpeg" class="">
+
+<ul>
+<li>当路由器或设备在发送数据前侦听到信道已被占用时，会首先检查该“占用”的BSS Color（<strong>此处可以看出 BSS Color 是要优先于 MAC address判断的</strong>），确定是否是同一AP的网络，如果不是，则不用避让，从而允许多个AP在同一信道上运行，并智能管理多用户同时并行传输</li>
+<li>采用BSS着色机制，接收端可以及早识别同频传输干扰信号并停止接收，避免浪费收发机时间。如果颜色相同，则认为是同一BSS内的干扰信号，发送将推迟；如果颜色不同，则认为两者之间无干扰，两个Wi-Fi设备可同信道同频并行传输。</li>
+</ul>
+<h2 id="六、TWT-目标唤醒时间"><a href="#六、TWT-目标唤醒时间" class="headerlink" title="六、TWT - 目标唤醒时间"></a>六、TWT - 目标唤醒时间</h2><p>目标唤醒时间（TWT）是802.11ax支持的另一个重要的资源调度功能，它借鉴于<strong>802.11ah</strong>标准。它允许设备协商什么时候和多久会被唤醒，然后发送或接收数据。<br>此外，Wi-Fi AP可以将客户端设备分组到不同的TWT周期，从而减少唤醒后同时竞争无线介质的设备数量。TWT还增加了设备睡眠时间，对采用电池供电的终端来说，大大提高了电池寿命。</p>
+<h2 id="七、新的安全标准WPA3"><a href="#七、新的安全标准WPA3" class="headerlink" title="七、新的安全标准WPA3"></a>七、新的安全标准WPA3</h2><p>面前主流的Wi-Fi安全标准WEP2已经发布20多年了（之前更古老的是WPA和WEP，以及未流行的WAPI），存在许多明显的安全隐患，为此Wi-Fi联盟发布了新的安全标准WPA3，主要特性是：</p>
+<ul>
+<li>建立了 Wi-Fi设备配置协议（DPP），WPA3不需要使用共享密码即可注册新设备，从而摆脱了对屏幕和键盘输入的依赖，特别适用于智能灯泡等物联网设备。实现方式是用户使用二维码或NFC标签，通过拍摄照片或接收来自于路由器的无线电信号，以传输系统访问权限的方式获得相应的网络授权，而非通过屏幕输入密码。</li>
+<li>提供“个性化数据加密”功能，当您连接到开放的Wi-Fi网络时，即使您在连接时未输入密码，设备与Wi-Fi接入点之间的流量也会被加密</li>
+<li>字典攻击不再可用，因为WPA 3安全协议会限制错误密码次数，从而击败基于字典爆破的尝试</li>
+<li>加密强度升到了192位（CNSA标准）</li>
+<li>修正了KRACK（重装密钥攻击）问题</li>
+</ul>
+<p>由于WPA3的实现需要AP和终端设备的共同改造，目前还没有实现大规模的商业普及！</p>
+<h2 id="八、小结"><a href="#八、小结" class="headerlink" title="八、小结"></a>八、小结</h2><img src="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%B8%89%EF%BC%9A%E5%85%B3%E9%94%AE%E6%8A%80%E6%9C%AF/phy.png" class="">
+
+<h2 id="九、展望-Wi-Fi-7"><a href="#九、展望-Wi-Fi-7" class="headerlink" title="九、展望 Wi-Fi 7"></a>九、展望 Wi-Fi 7</h2><p>IEEE 802.11be是计划中802.11 IEEE标准的下一个版本，将会命名为Wi-Fi 7，预计2024年发布。</p>
+<p>候选特性：</p>
+<ul>
+<li><strong>支持全新的6GHz频谱</strong>，并适配相应的监管法规</li>
+<li>支持320MHz的信道宽度，高效地利用充裕的频谱</li>
+<li>支持16个空间流，多输入多输出 (MIMO) 协议改进</li>
+<li>支持全新的 4096-QAM (4K-QAM)</li>
+<li>新的帧格式，改进的前向兼容</li>
+<li>多带宽／多信道聚合运作，对拥塞和频谱和充裕的频谱分别引入 320&#x2F;160+160 MHz 和 240&#x2F;160+80 MHz 带宽，</li>
+<li>接入点 (AP) 间协调（传输协调与联合传输）</li>
+<li>更高级的链路适应和重新传输协议，例如混合自动重请求 (HARQ)</li>
+<li>集成时效性网络 (TSN) 扩展，应对低时延实时流量 (IEEE 802.11aa)</li>
+<li>改进正交频分多址的资源分配</li>
+<li>改进信道探测，降低探测时间，隐式信道探测，更灵活的 preamble puncturing 方法</li>
+<li>对直接链路的支持，由接入点主导</li>
+</ul>
+<h2 id="附录：名词解释"><a href="#附录：名词解释" class="headerlink" title="附录：名词解释"></a>附录：名词解释</h2><table>
+<thead>
+<tr>
+<th>缩略语</th>
+<th>英文全名</th>
+<th>中文解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OFDMA</td>
+<td>Orthogonal Frequency Division Multiple Access</td>
+<td>正交频分多址接入</td>
+</tr>
+<tr>
+<td>HE</td>
+<td>Hight Efficiency</td>
+<td>高效率</td>
+</tr>
+<tr>
+<td>PPDU</td>
+<td>physical layer (PHY) protocol data unit</td>
+<td>物理层协议数据单元</td>
+</tr>
+<tr>
+<td>RU</td>
+<td>Resource Unit</td>
+<td>资源单元</td>
+</tr>
+<tr>
+<td>OBSS</td>
+<td>Overlapping Basic Service Sets</td>
+<td>重叠基本服务集</td>
+</tr>
+<tr>
+<td>SR</td>
+<td>Spatial Reused</td>
+<td>空间重用</td>
+</tr>
+<tr>
+<td>TWT</td>
+<td>Target Wake Times</td>
+<td>目标唤醒时间</td>
+</tr>
+<tr>
+<td>BPSK</td>
+<td>Binary Phase Shift Keying</td>
+<td>二相相移键控</td>
+</tr>
+<tr>
+<td>QPSK</td>
+<td>Quadrature Phase Shift Keying</td>
+<td>四相相移键控信号</td>
+</tr>
+<tr>
+<td>QAM</td>
+<td>Quadrature Amplitude Modulation</td>
+<td>正交幅度调制 ,16QAM是指包含16种符号的QAM调制方式，256QAM，1024QAM等类似</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/IEEE_802.11">IEEE 802.11 的 Wiki</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.intel.cn/content/www/cn/zh/gaming/resources/wifi-6.html">Intel关于Wifi 6的介绍</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.semiinsights.com/s/electronic_components/23/38911.shtml">关于WiFi 6技术，这篇说得最详细</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/373074671">什么是调制、为什么要调制、调制有哪些？</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.elettroamici.org/zh/modulazione-digitale/">数字调制技术的对比分析</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.ruijie.com.cn/fa/xw-hlw/81858/">第七代无线技术802.11ax详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.eet-china.com/mp/a44484.html">Wi-Fi 技术的演进</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/359250747">WIFI6技术概述</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.mwrf.net/tech/tm/2021/28003.html">802.11ax（Wi-Fi 6）技术简介和射频测试</a></li>
+</ul>
+<h3 id="资料下载"><a href="#资料下载" class="headerlink" title="资料下载"></a>资料下载</h3><ul>
+<li><a href="80211ax%E6%8A%80%E6%9C%AF%E7%99%BD%E7%9A%AE%E4%B9%A6.pdf">IEEE 802.11ax 技术白皮书 - H3C</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/03/27/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%8A%80%E6%9C%AF%E6%A0%87%E5%87%86/" rel="prev" title="Wi-Fi 6的技术专题之二：技术标准">
+                  <i class="fa fa-angle-left"></i> Wi-Fi 6的技术专题之二：技术标准
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/03/29/Wi-Fi-6%E7%9A%84%E6%8A%80%E6%9C%AF%E4%B8%93%E9%A2%98%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BA%A7%E5%93%81%E5%88%86%E6%9E%90/" rel="next" title="Wi-Fi 6的技术专题之四：产品分析">
+                  Wi-Fi 6的技术专题之四：产品分析 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

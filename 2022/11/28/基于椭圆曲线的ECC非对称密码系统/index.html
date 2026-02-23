@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="一、概述 ECC（椭圆曲线密码学，Elliptic Curve Cryptography）是一种基于有限域上椭圆曲线的公开密钥加密算法。 与 RSA 加密算法相比，ECC的主要优势是使用较小的密钥长度并提供相当等级的安全性，另一个优势是可以定义群之间的双线性映射，基于 Weil 对或是 Tate 对；双线性映射已经在密码学中发现了大量的应用，例如基于身份的加密。  椭圆曲线在密码学中的使用是在19">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于椭圆曲线的ECC非对称密码系统">
+<meta property="og:url" content="https://nokiam9.github.io/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="一、概述 ECC（椭圆曲线密码学，Elliptic Curve Cryptography）是一种基于有限域上椭圆曲线的公开密钥加密算法。 与 RSA 加密算法相比，ECC的主要优势是使用较小的密钥长度并提供相当等级的安全性，另一个优势是可以定义群之间的双线性映射，基于 Weil 对或是 Tate 对；双线性映射已经在密码学中发现了大量的应用，例如基于身份的加密。  椭圆曲线在密码学中的使用是在19">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/ecc.jpg">
+<meta property="og:image" content="https://nokiam9.github.io/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/onePassECCCDH.png">
+<meta property="og:image" content="https://nokiam9.github.io/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/onePassECCCDH-2.png">
+<meta property="article:published_time" content="2022-11-27T16:31:04.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.140Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/ecc.jpg">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/","path":"2022/11/28/基于椭圆曲线的ECC非对称密码系统/","title":"基于椭圆曲线的ECC非对称密码系统"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>基于椭圆曲线的ECC非对称密码系统 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%9F%BA%E4%BA%8E%E7%B4%A0%E6%95%B0%E5%9F%9F"><span class="nav-text">二、基于素数域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%9F%BA%E4%BA%8E%E4%BC%BD%E7%BD%97%E7%93%A6%E5%9F%9F"><span class="nav-text">三、基于伽罗瓦域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E6%AC%A1%E6%80%A7%E8%BF%AA%E8%8F%B2-%E8%B5%AB%E5%B0%94%E6%9B%BC%E5%AF%86%E9%92%A5%E4%BA%A4%E6%8D%A2%E5%8D%8F%E8%AE%AE"><span class="nav-text">一次性迪菲-赫尔曼密钥交换协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%88%9D%E5%A7%8B%E5%8C%96%E5%AD%98%E5%82%A8%E4%BB%8B%E8%B4%A8%E7%9A%84%E7%8E%AF%E8%8A%82"><span class="nav-text">1. 初始化存储介质的环节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%EF%BC%88%E6%9F%90%E4%B8%AA%EF%BC%89%E6%96%87%E4%BB%B6%E5%88%9B%E5%BB%BA%E7%9A%84%E7%8E%AF%E8%8A%82"><span class="nav-text">2.（某个）文件创建的环节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%EF%BC%88%E9%87%8D%E6%96%B0%EF%BC%89%E6%89%93%E5%BC%80%E6%96%87%E4%BB%B6%E7%9A%84%E7%8E%AF%E8%8A%82"><span class="nav-text">3.（重新）打开文件的环节</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%94%A8%E6%88%B7%E9%87%8D%E7%BD%AEpasscode"><span class="nav-text">4. 用户重置passcode</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E6%A1%A3%E4%B8%8B%E8%BD%BD"><span class="nav-text">文档下载</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="基于椭圆曲线的ECC非对称密码系统 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于椭圆曲线的ECC非对称密码系统
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-11-28 00:31:04" itemprop="dateCreated datePublished" datetime="2022-11-28T00:31:04+08:00">2022-11-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>7 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>ECC（椭圆曲线密码学，Elliptic Curve Cryptography）是一种基于有限域上椭圆曲线的公开密钥加密算法。<br>与 RSA 加密算法相比，ECC的主要优势是使用较小的密钥长度并提供相当等级的安全性，另一个优势是可以定义群之间的双线性映射，基于 Weil 对或是 Tate 对；双线性映射已经在密码学中发现了大量的应用，例如基于身份的加密。</p>
+<p>椭圆曲线在密码学中的使用是在1985年由 Neal Koblitz 和 Victor Miller 分别独立提出的。椭圆曲线密码学的算法是在2004年至2005年开始广泛应用。<br>目前主要有两种有限域在 ECC 中被广泛应用，分别基于素数域和伽罗瓦域。</p>
+<h2 id="二、基于素数域"><a href="#二、基于素数域" class="headerlink" title="二、基于素数域"></a>二、基于素数域</h2><p>方程式：$y^2&#x3D;x^3+ax+b \mod p$<br>参数格式：$(p,a,b,G,n,h)$，其中$G$</p>
+<ul>
+<li>以素数为模的整数域: $\mathbb {F} _{p}$在通用处理器上计算很快</li>
+<li>以 2 的幂为模的整数域: $\mathbb {F} _{2^{m}}$当使用专用硬件时，计算速度很快</li>
+</ul>
+<h2 id="三、基于伽罗瓦域"><a href="#三、基于伽罗瓦域" class="headerlink" title="三、基于伽罗瓦域"></a>三、基于伽罗瓦域</h2><ul>
+<li>基于伽罗瓦域的形式：$y^2+xy&#x3D;x^3+ax^2+1$<br>  曲线的参数格式：$(m,f(x),a,b,G,n,h)$，对应不同的$GF(2^m)$域</li>
+</ul>
+<p>蒙哥马利曲线（Montgomery curve）是另一种形式的椭圆曲线，方程如下：<br>$by^2 &#x3D; x^3 + ax^2 + x$</p>
+<p><img src="/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/ecc.jpg" alt="ECC"></p>
+<p>RFC 7748 收录了两种蒙哥马利曲线，分别是 Curve25519 和 Curve448。<br>Curve25519 是蒙哥马利曲线形式的一个实例， 声称是最快的 Diffie-Hellman 密钥交换函数，由 Daniel J. Bernstein 在2005年设计，提供128比特位安全性，并未被任何已知专利所涵盖。<br>Curve448 是 Mike Hamburg 在 2015 年设计的新曲线, 旨在提供 224 比特的安全性。<br>RFC 7748 同时给出了基于两条椭圆曲线的仅依赖 x 坐标的 ECDH 密钥交换协议 X25519 和 X448.</p>
+<p>$(q,FR,a,b\{,SEED\},G,n,h)$，其中：</p>
+<ul>
+<li>$q$：有限域的阶（元素的个数）。对于素数域，$q&#x3D;p$；对于伽罗瓦域，$q&#x3D;2^m$</li>
+<li>$FR$：域表示。对于素数域，$FR$为空；对于伽罗瓦域，$q&#x3D;2^m$</li>
+<li>$a,b$：椭圆曲线方程的参数。</li>
+<li>$SEED$：可选，用于生成和验证a、b以及可能的G(取决于生成方法)的规范过程。</li>
+<li>$G$：生成点。是一个由 a 和 b 确定的点$(G_x,G_y)$。</li>
+<li>$n$：生成点$G$的阶。</li>
+<li>$h$：由$G$生成的循环子群的协因子。</li>
+</ul>
+<p>其中，q为域的阶，FR为域表示，S为种子，a，b为椭圆曲线参数，P为基点，n为点P的阶，h为余因子；</p>
+<p>自 。[17] 从 2014 年开始，OpenSSH[18] 默认为基于 Curve25519 的 ECDH，而 GnuPG 增加了对 Ed25519 密钥的支持，用于签名和加密。[19]2020年，曲线的使用最终在密钥交换和签名方面都实现了标准化。[20][21]</p>
+<p>2017 年，NIST 宣布将 Curve25519 和 Curve448 添加到特别出版物 800-186 中，该出版物指定了供美国联邦政府使用的已批准的椭圆曲线。[22] 两者都在RFC 7748中进行了描述。[23] 2019 年“FIPS 186-5”草案指出，打算允许使用 Ed25519[24] 进行数字签名。2023 年特别出版物 800-186 的更新允许使用 Curve25519。[25]</p>
+<ul>
+<li>椭圆方程：$y^2 &#x3D; x^3 + 486662x^2 + x$，即：a&#x3D;486662，b&#x3D;1</li>
+<li>有限域：$GF(2^{255}-19)$，也是名字中<code>25519</code>的由来</li>
+<li>基点 $x &#x3D; 9$，阶数 $n &#x3D; 2^{252} + 27742317777372353535851937790883648493$</li>
+</ul>
+<p>Curve25519 的构造使其避免了许多潜在的实现缺陷。根据设计，它不受定时攻击的影响，并且它接受任何32字节的字符串作为有效的公钥，并且不需要验证。</p>
+<p>本文重点关注 Curve25519 及相应的密钥交换协议 X25519. Curve25519 是定义在有限域<br>Fp, p &#x3D; 2255 − 19 的蒙哥马利形式椭圆曲线 y<br>2 &#x3D; x<br>3 + 486662x<br>2 + x, 其中曲线上点的个数<br>#E(Fp) &#x3D; 8 · n1, 也即余因子为 8, 并且有<br>n1 &#x3D; 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed,</p>
+<h2 id="一次性迪菲-赫尔曼密钥交换协议"><a href="#一次性迪菲-赫尔曼密钥交换协议" class="headerlink" title="一次性迪菲-赫尔曼密钥交换协议"></a>一次性迪菲-赫尔曼密钥交换协议</h2><p>一次性迪菲-赫尔曼密钥交换协议（One-Pass Diffie-Hellman Key Agreement），定义在 <a href="NIST.SP.800-56Ar2.pdf">NISP SP 800-56A</a> 的 6.2.2.2 章节，名称为<code>One-Pass Diffie-Hellman, C(1e,1s,ECC CDH) Scheme</code>，含义是：</p>
+<ul>
+<li>密钥交换通过一次性的DH（Diffie-Hellman）协议，C 是指协因子（Cofactor）</li>
+<li>使用了1个临时密钥，1个静态密钥</li>
+<li>加密算法是椭圆曲线加密算法 ECC（Elliptic Curve Cryptography）</li>
+</ul>
+<blockquote>
+<p>DH 协议最初采用 FFC 算法（Finite Field Cryptography，有限域加密），也称为幂等算法，安全强度较低<br>Curve 25519 使用蒙哥马利曲线：$y^2 &#x3D; x^3 + 486662x^2 + x$<br>该曲线定义在由素数定义的素数场的二次扩展上，使用基点x &#x3D; 9<br>这个基点的阶数是</p>
+<p>蒙哥马利曲线（Montgomery curve）是另一种形式的椭圆曲线，方程如下：</p>
+</blockquote>
+<p><img src="/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/onePassECCCDH.png" alt="onePassECCCDH"></p>
+<p>素数域$p &#x3D; 2^{255}-19$，也是名字中25519的由来。</p>
+<ul>
+<li>$p &#x3D; 2^{255} − 19$</li>
+<li>域空间大小：q &#x3D; </li>
+<li>FR &#x3D;</li>
+<li>参数：a &#x3D; 486662</li>
+<li>参数：b &#x3D; 1</li>
+<li>初始值（可选）：SEED &#x3D; N&#x2F;A</li>
+<li>生成元：G &#x3D; </li>
+<li>辅因子：h &#x3D; 8</li>
+<li></li>
+</ul>
+<p>对于<code>Protected Unless Open</code>的文件保护类型，分析其实现方案是：</p>
+<h3 id="1-初始化存储介质的环节"><a href="#1-初始化存储介质的环节" class="headerlink" title="1. 初始化存储介质的环节"></a>1. 初始化存储介质的环节</h3><ul>
+<li>安全隔区随机生成一对非对称密钥（静态）</li>
+<li>静态私钥就是 Class B Key，包裹后的密文<strong>持久化存储</strong>在系统密钥包</li>
+</ul>
+<h3 id="2-（某个）文件创建的环节"><a href="#2-（某个）文件创建的环节" class="headerlink" title="2.（某个）文件创建的环节"></a>2.（某个）文件创建的环节</h3><ul>
+<li>安全隔区随机生成一个文件独有密钥 per-file key</li>
+<li>安全隔区随机生成一对非对称密钥（临时），封装密钥 &#x3D;（静态私钥，临时公钥），生成 per-file key！</li>
+<li>安全隔区将（临时公钥，per-file key！）发给操作系统</li>
+<li>操作系统创建 cnode 元数据，持久化存储 per-file key!，并增加了一个字段存储临时公钥</li>
+<li>安全隔区将 per-file key 发给 AES 引擎，实现文件内容的加密存储</li>
+</ul>
+<blockquote>
+<p>临时私钥从为被使用？好像没有哪个文档提及其用途</p>
+</blockquote>
+<h3 id="3-（重新）打开文件的环节"><a href="#3-（重新）打开文件的环节" class="headerlink" title="3.（重新）打开文件的环节"></a>3.（重新）打开文件的环节</h3><ul>
+<li>操作系统作从文件元数据中获得（临时公钥，per-file key！），并发送给安全隔区</li>
+<li>安全隔区以 Class B key 作为静态私钥，解封密钥 &#x3D;（静态私钥，临时公钥），将 per-file key！解封为 per-file key</li>
+<li>安全隔区将 per-file key 发给 AES 引擎，实现文件内容的加密读写</li>
+<li>一旦该文件被关闭，安全隔区就在内存中丢弃 per-file key，该文件将无法读写</li>
+</ul>
+<h3 id="4-用户重置passcode"><a href="#4-用户重置passcode" class="headerlink" title="4. 用户重置passcode"></a>4. 用户重置passcode</h3><p>理论上应有如下操作：</p>
+<ol>
+<li>根据新的 passcode 重新执行 KDF 函数，生成新的 Class B key</li>
+<li>找到所有数据保护类型为 Class B 的文件元数据，执行如下循环操作：<ul>
+<li>解封密钥 &#x3D;（旧的静态私钥，临时公钥），将 per-file key！恢复为 per-file key</li>
+<li>封装密钥 &#x3D;（新的静态私钥，临时公钥），将 per-file key 封装为新的 per-file key！</li>
+<li>操作系统接受新的 per-file key！，并持久化存储在元数据 cnode 的 cprotect 字段</li>
+</ul>
+</li>
+<li>循环结束后，将新的 Class B key 持久化存储在系统钥匙包</li>
+</ol>
+<blockquote>
+<p>静态私钥保存在 Class B key，但没有文档提及其用途和持久化存储位置，似乎被丢弃了<br>临时私钥的情况也是类似，而且似乎丢弃了也不影响算法的实现。。。</p>
+</blockquote>
+<p><img src="/2022/11/28/%E5%9F%BA%E4%BA%8E%E6%A4%AD%E5%9C%86%E6%9B%B2%E7%BA%BF%E7%9A%84ECC%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%AF%86%E7%A0%81%E7%B3%BB%E7%BB%9F/onePassECCCDH-2.png" alt="onePassECCCDH"></p>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://www.desmos.com/calculator/ialhd71we3?lang=zh-CN">一个椭圆曲线的演示图</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.secg.org/sec2-v2.pdf">secp256k1标准</a></li>
+<li><a target="_blank" rel="noopener" href="https://learnblockchain.cn/tags/%E5%8C%BA%E5%9D%97%E9%93%BE%E4%B8%AD%E7%9A%84%E6%95%B0%E5%AD%A6">区块链中的数学 - 系列文章</a></li>
+</ul>
+<h3 id="文档下载"><a href="#文档下载" class="headerlink" title="文档下载"></a>文档下载</h3><ul>
+<li><a href="NIST.SP.800-56Ar3.pdf">基于离散对数的非对称密钥建立方案 - R3</a></li>
+<li><a href="NIST.SP.800-56Ar2.pdf">基于离散对数的非对称密钥建立方案 - R2</a></li>
+<li><a href="190902-intro-x25519.pdf">深入理解 X25519</a></li>
+<li><a href="sec1-v1.99.dif">Elliptic Curve Cryptography - 椭圆曲线密码学</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/10/18/%E5%AF%86%E9%92%A5%E6%B4%BE%E7%94%9F%E5%87%BD%E6%95%B0%EF%BC%88KDF%EF%BC%89%E6%A6%82%E8%BF%B0/" rel="prev" title="密钥派生函数（KDF）概述">
+                  <i class="fa fa-angle-left"></i> 密钥派生函数（KDF）概述
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/12/17/%E5%88%86%E7%BB%84%E5%8A%A0%E5%AF%86%E7%9A%84%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F%E6%A6%82%E8%BF%B0/" rel="next" title="分组加密的工作模式概述">
+                  分组加密的工作模式概述 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

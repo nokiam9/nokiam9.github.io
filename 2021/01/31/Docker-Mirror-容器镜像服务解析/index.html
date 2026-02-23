@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="在实际生产环境下，机器都不能访问外部互联网，或者访问互联网络的带宽有限，同时有大量的容器镜像需要从外部下载，如果每次开发、测试、部署时都需要从互联网下载容器镜像，则将占用大量的带宽而且效率较低。同时，在某些场景如物联网场景中，需要使用移动网络接入互联网，这时带宽可能是系统部署的瓶颈。  更为严重的问题是，Docker Hub公有云容器镜像服务对客户端有限流设置，当镜像拉取操作达到一定流量时，会导致">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker Mirror 容器镜像服务解析">
+<meta property="og:url" content="https://nokiam9.github.io/2021/01/31/Docker-Mirror-%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9C%8D%E5%8A%A1%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="在实际生产环境下，机器都不能访问外部互联网，或者访问互联网络的带宽有限，同时有大量的容器镜像需要从外部下载，如果每次开发、测试、部署时都需要从互联网下载容器镜像，则将占用大量的带宽而且效率较低。同时，在某些场景如物联网场景中，需要使用移动网络接入互联网，这时带宽可能是系统部署的瓶颈。  更为严重的问题是，Docker Hub公有云容器镜像服务对客户端有限流设置，当镜像拉取操作达到一定流量时，会导致">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-01-31T00:53:09.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:15.779Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2021/01/31/Docker-Mirror-%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9C%8D%E5%8A%A1%E8%A7%A3%E6%9E%90/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2021/01/31/Docker-Mirror-%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9C%8D%E5%8A%A1%E8%A7%A3%E6%9E%90/","path":"2021/01/31/Docker-Mirror-容器镜像服务解析/","title":"Docker Mirror 容器镜像服务解析"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Docker Mirror 容器镜像服务解析 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#image%E5%91%BD%E5%90%8D%E8%A7%84%E5%88%99"><span class="nav-text">image命名规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#docker-pull-%E9%95%9C%E5%83%8F%E6%8B%89%E5%8F%96%E6%B5%81%E7%A8%8B"><span class="nav-text">docker pull 镜像拉取流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-Registry-%E9%95%9C%E5%83%8F%E6%B3%A8%E5%86%8C%E6%9C%8D%E5%8A%A1"><span class="nav-text">Docker Registry 镜像注册服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8ERegistry%E7%9A%84%E7%9B%B4%E9%80%9A%E7%BC%93%E5%AD%98%E6%9C%8D%E5%8A%A1%EF%BC%88pull-through-cache%EF%BC%89"><span class="nav-text">基于Registry的直通缓存服务（pull-through cache）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Registry-mirror%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-text">Registry mirror的原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84%E9%83%A8%E7%BD%B2%E6%96%B9%E6%B3%95"><span class="nav-text">1. 服务端的部署方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E7%9A%84%E6%B5%8B%E8%AF%95%E6%96%B9%E6%B3%95"><span class="nav-text">2. 服务端的测试方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AE%A2%E6%88%B7%E7%AB%AF%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%B9%E6%B3%95"><span class="nav-text">3.客户端的配置方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-text">结论</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2021/01/31/Docker-Mirror-%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9C%8D%E5%8A%A1%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Docker Mirror 容器镜像服务解析 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Docker Mirror 容器镜像服务解析
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-31 08:53:09" itemprop="dateCreated datePublished" datetime="2021-01-31T08:53:09+08:00">2021-01-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>2.6k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>10 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>在实际生产环境下，机器都不能访问外部互联网，或者访问互联网络的带宽有限，同时有大量的容器镜像需要从外部下载，如果每次开发、测试、部署时都需要从互联网下载容器镜像，则将占用大量的带宽而且效率较低。同时，在某些场景如物联网场景中，需要使用移动网络接入互联网，这时带宽可能是系统部署的瓶颈。</p>
+<p>更为严重的问题是，Docker Hub公有云容器镜像服务对客户端有限流设置，当镜像拉取操作达到一定流量时，会导致服务无法使用。Docker Hub最新免费服务条款（11月1日生效），匿名用户每6小时只允许拉取100次，登录用户200次，只有付费用户不受此限制。</p>
+<p>Mirror代理缓存仓库的作用就是为了以上问题，通过运行一个缓存仓库允许你在本地储存镜像，减少过多的通过互联网从<code>Docker Hub</code>拉取镜像，这个特性对于一些在他们环境中拥有数量庞大的Docker引擎的用户来说很有用。</p>
+<h2 id="image命名规则"><a href="#image命名规则" class="headerlink" title="image命名规则"></a>image命名规则</h2><p>容器镜像（iamge）的命名规则是：<code>myregistrydomain:port/foo/bar</code>，其中包含了几个关键信息：HUB域名或IP地址、端口号、仓库名、软件名、标记名。<br>例如，命令<code>docker pull harbor.caogo.local:80/library/mongo:3.6</code>的含义是：从<code>harbor.caogo.local</code>服务器，通过http端口，获取liblary仓库的mongo软件镜像，标签为3.6</p>
+<p><code>docker.io</code>是Docker的官方HUB，其中<code>/library</code>是官方仓库所在位置，而<code>/calico</code>等则是开发者在官方HUB的自定义仓库。因此，Docker规定官方镜像可以采用省略所有前缀的简写方式，即：<br><code>docker pull docker.io/library/ubuntu</code> &#x3D;&#x3D; <code>docker pull ubuntu</code></p>
+<p>常用的镜像仓库HUB包括：</p>
+<ul>
+<li><code>registry-1.docker.io</code>                    Docker官方镜像</li>
+<li><code>k8s.gcr.io</code>                              Google Kubernetes系统镜像</li>
+<li><code>quay.io</code>                                 重要的第三方镜像</li>
+<li><code>registry.cn-hangzhou.aliyuncs.com</code>       阿里云的系统镜像</li>
+</ul>
+<h2 id="docker-pull-镜像拉取流程"><a href="#docker-pull-镜像拉取流程" class="headerlink" title="docker pull 镜像拉取流程"></a>docker pull 镜像拉取流程</h2><p>根据<a target="_blank" rel="noopener" href="https://docs.docker.com/registry/spec/api/#pulling-an-image">Pulling An Image 官方文档</a>的解释：</p>
+<blockquote>
+<p>An “image” is a combination of a JSON manifest and individual layer files.</p>
+</blockquote>
+<p>一个镜像image包含了以下要素：</p>
+<ul>
+<li>名称 name：The name of the image.</li>
+<li>标记 tag：The tag for this version of the image.</li>
+<li>分层文件 fsLayers：A list of layer descriptors (including digest)</li>
+<li>签名 signature：A JWS used to verify the manifest content</li>
+</ul>
+<blockquote>
+<p>image已经建立了行业标准 - OCI(Open Container Initiative)镜像规范，确保Docker、Podman等不同容器产品之间共享image，可以参见附录继续研究</p>
+</blockquote>
+<p>docker pull的过程很复杂，包括鉴权、校验，下载、合并镜像层，解压缩等等，但最核心的是两个步骤：</p>
+<ol>
+<li>发送请求 <code>GET /v2/&lt;name&gt;/manifests/&lt;reference&gt;</code> ，获取镜像的mainfest清单文件<br> reference可以是标记tag，或摘要digest。</li>
+<li>发送请求 <code>GET /v2/&lt;name&gt;/blobs/&lt;digest&gt;</code> ，获取镜像层文件</li>
+</ol>
+<p>通过<code>curl -X GET http://localhost:5000/v2/alpine/manifests/3.6</code>，获取镜像的manifest清单文件，其格式为</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">   <span class="attr">&quot;schemaVersion&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">,</span></span><br><span class="line">   <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;alpine&quot;</span><span class="punctuation">,</span></span><br><span class="line">   <span class="attr">&quot;tag&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3.6&quot;</span><span class="punctuation">,</span></span><br><span class="line">   <span class="attr">&quot;architecture&quot;</span><span class="punctuation">:</span> <span class="string">&quot;amd64&quot;</span><span class="punctuation">,</span></span><br><span class="line">   <span class="attr">&quot;fsLayers&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">         <span class="attr">&quot;blobSum&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sha256:a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">         <span class="attr">&quot;blobSum&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sha256:5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">   <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">   <span class="attr">&quot;history&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">         <span class="attr">&quot;v1Compatibility&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&#123;\&quot;architecture\&quot;:\&quot;amd64\&quot;,\&quot;config\&quot;:&#123;\&quot;Hostname\&quot;:\&quot;\&quot;,\&quot;Domainname\&quot;:\&quot;\&quot;,\&quot;User\&quot;:\&quot;\&quot;,\&quot;AttachStdin\&quot;:false,\&quot;AttachStdout\&quot;:false,\&quot;AttachStderr\&quot;:false,\&quot;Tty\&quot;:false,\&quot;OpenStdin\&quot;:false,\&quot;StdinOnce\&quot;:false,\&quot;Env\&quot;:[\&quot;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\&quot;],\&quot;Cmd\&quot;:[\&quot;/bin/sh\&quot;],\&quot;ArgsEscaped\&quot;:true,\&quot;Image\&quot;:\&quot;sha256:143f9315f5a85306192ccffd37fbfa65db21f67aaa938c2538bd50f52123a12f\&quot;,\&quot;Volumes\&quot;:null,\&quot;WorkingDir\&quot;:\&quot;\&quot;,\&quot;Entrypoint\&quot;:null,\&quot;OnBuild\&quot;:null,\&quot;Labels\&quot;:null&#125;,\&quot;container\&quot;:\&quot;fd086f4b9352674c6a1ae4d02051f95a4e0a55cda943c5780483938dedfb2d8f\&quot;,\&quot;container_config\&quot;:&#123;\&quot;Hostname\&quot;:\&quot;fd086f4b9352\&quot;,\&quot;Domainname\&quot;:\&quot;\&quot;,\&quot;User\&quot;:\&quot;\&quot;,\&quot;AttachStdin\&quot;:false,\&quot;AttachStdout\&quot;:false,\&quot;AttachStderr\&quot;:false,\&quot;Tty\&quot;:false,\&quot;OpenStdin\&quot;:false,\&quot;StdinOnce\&quot;:false,\&quot;Env\&quot;:[\&quot;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\&quot;],\&quot;Cmd\&quot;:[\&quot;/bin/sh\&quot;,\&quot;-c\&quot;,\&quot;#(nop) \&quot;,\&quot;CMD [\\\&quot;/bin/sh\\\&quot;]\&quot;],\&quot;ArgsEscaped\&quot;:true,\&quot;Image\&quot;:\&quot;sha256:143f9315f5a85306192ccffd37fbfa65db21f67aaa938c2538bd50f52123a12f\&quot;,\&quot;Volumes\&quot;:null,\&quot;WorkingDir\&quot;:\&quot;\&quot;,\&quot;Entrypoint\&quot;:null,\&quot;OnBuild\&quot;:null,\&quot;Labels\&quot;:&#123;&#125;&#125;,\&quot;created\&quot;:\&quot;2019-03-07T22:20:00.563496859Z\&quot;,\&quot;docker_version\&quot;:\&quot;18.06.1-ce\&quot;,\&quot;id\&quot;:\&quot;baaf9c1caf4fb211f173d053029997dcfade0644ac354c8a068e4ebf23fcf1c5\&quot;,\&quot;os\&quot;:\&quot;linux\&quot;,\&quot;parent\&quot;:\&quot;5d8f720b0ab2b92a29a7e338aa90cad32dac2bf6518c7aae5844aab896ee36ec\&quot;,\&quot;throwaway\&quot;:true&#125;&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">         <span class="attr">&quot;v1Compatibility&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&#123;\&quot;id\&quot;:\&quot;5d8f720b0ab2b92a29a7e338aa90cad32dac2bf6518c7aae5844aab896ee36ec\&quot;,\&quot;created\&quot;:\&quot;2019-03-07T22:20:00.434038891Z\&quot;,\&quot;container_config\&quot;:&#123;\&quot;Cmd\&quot;:[\&quot;/bin/sh -c #(nop) ADD file:9714761bb81de664e431dec41f12db20f0438047615df2ecd9fdc88933d6c20f in / \&quot;]&#125;&#125;&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">   <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">   <span class="attr">&quot;signatures&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">      <span class="punctuation">&#123;</span></span><br><span class="line">         <span class="attr">&quot;header&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;jwk&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">               <span class="attr">&quot;crv&quot;</span><span class="punctuation">:</span> <span class="string">&quot;P-256&quot;</span><span class="punctuation">,</span></span><br><span class="line">               <span class="attr">&quot;kid&quot;</span><span class="punctuation">:</span> <span class="string">&quot;KMUD:PVGZ:P2LO:LC7C:JSZZ:DCUO:FB3A:VXIA:U7UM:WVMY:7KJT:5TPS&quot;</span><span class="punctuation">,</span></span><br><span class="line">               <span class="attr">&quot;kty&quot;</span><span class="punctuation">:</span> <span class="string">&quot;EC&quot;</span><span class="punctuation">,</span></span><br><span class="line">               <span class="attr">&quot;x&quot;</span><span class="punctuation">:</span> <span class="string">&quot;M5uDyG_04QhZKJx2FFku4t2UUWeYYeyg0-LhmrNf5OQ&quot;</span><span class="punctuation">,</span></span><br><span class="line">               <span class="attr">&quot;y&quot;</span><span class="punctuation">:</span> <span class="string">&quot;TdXi_yetmEqWSEKqTudnjb7tn5m-AVQmxGeknXVL8w8&quot;</span></span><br><span class="line">            <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="attr">&quot;alg&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ES256&quot;</span></span><br><span class="line">         <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">         <span class="attr">&quot;signature&quot;</span><span class="punctuation">:</span> <span class="string">&quot;xSwT9ePqDKjDm3i9AHkgFxnZGO6TdVIePcl6XxTvrCPSjOx_Xd1jf8YgouhXWDffBygicwp8DDnxJ7bB30puuw&quot;</span><span class="punctuation">,</span></span><br><span class="line">         <span class="attr">&quot;protected&quot;</span><span class="punctuation">:</span> <span class="string">&quot;eyJmb3JtYXRMZW5ndGgiOjIxMzAsImZvcm1hdFRhaWwiOiJDbjAiLCJ0aW1lIjoiMjAyMS0wMS0zMVQxMzo1NjoxNFoifQ&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">   <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Docker-Registry-镜像注册服务"><a href="#Docker-Registry-镜像注册服务" class="headerlink" title="Docker Registry 镜像注册服务"></a>Docker Registry 镜像注册服务</h2><p>Registry是Docker提供的镜像注册服务，其设计目标是一套存储和分发镜像的处理机制，实现方式是在Docker引擎中运行一个来自<code>docker.io/library/registry</code>的实例。</p>
+<p>需要注意的是，Registry管理镜像是基于文件系统的,数据存储目录位于实例所在容器的<code>/var/lib/registry</code></p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">~ # tree /var/lib/registry</span><br><span class="line">/var/lib/registry</span><br><span class="line">└── docker</span><br><span class="line">    └── registry</span><br><span class="line">        └── v2</span><br><span class="line">            ├── blobs</span><br><span class="line">            │   └── sha256</span><br><span class="line">            │       ├── 36</span><br><span class="line">            │       │   └── 36c3a913e62f77a82582eb7ce30d255f805c3d1e11d58e1f805e14d33c2bc5a5</span><br><span class="line">            │       │       └── data</span><br><span class="line">            │       ├── 43</span><br><span class="line">            │       │   └── 43773d1dba76c4d537b494a8454558a41729b92aa2ad0feb23521c3e58cd0440</span><br><span class="line">            │       │       └── data</span><br><span class="line">            │       ├── 5a</span><br><span class="line">            │       │   └── 5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a</span><br><span class="line">            │       │       └── data</span><br><span class="line">            │       └── a3</span><br><span class="line">            │           └── a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4</span><br><span class="line">            │               └── data</span><br><span class="line">            └── repositories</span><br><span class="line">                ├── alpine</span><br><span class="line">                │   ├── _layers</span><br><span class="line">                │   │   └── sha256</span><br><span class="line">                │   │       ├── 43773d1dba76c4d537b494a8454558a41729b92aa2ad0feb23521c3e58cd0440</span><br><span class="line">                │   │       │   └── link</span><br><span class="line">                │   │       ├── 5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a</span><br><span class="line">                │   │       │   └── link</span><br><span class="line">                │   │       └── a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4</span><br><span class="line">                │   │           └── link</span><br><span class="line">                │   ├── _manifests</span><br><span class="line">                │   │   ├── revisions</span><br><span class="line">                │   │   │   └── sha256</span><br><span class="line">                │   │   │       └── 36c3a913e62f77a82582eb7ce30d255f805c3d1e11d58e1f805e14d33c2bc5a5</span><br><span class="line">                │   │   │           └── link</span><br><span class="line">                │   │   └── tags</span><br><span class="line">                │   │       └── 3.6</span><br><span class="line">                │   │           ├── current</span><br><span class="line">                │   │           │   └── link</span><br><span class="line">                │   │           └── index</span><br><span class="line">                │   │               └── sha256</span><br><span class="line">                │   │                   └── 36c3a913e62f77a82582eb7ce30d255f805c3d1e11d58e1f805e14d33c2bc5a5</span><br><span class="line">                │   │                       └── link</span><br><span class="line">                │   └── _uploads</span><br><span class="line">                └── myregistry</span><br><span class="line">                    ├── _layers</span><br><span class="line">                    │   └── sha256</span><br><span class="line">                    │       ├── 43773d1dba76c4d537b494a8454558a41729b92aa2ad0feb23521c3e58cd0440</span><br><span class="line">                    │       │   └── link</span><br><span class="line">                    │       ├── 5a3ea8efae5d0abb93d2a04be0a4870087042b8ecab8001f613cdc2a9440616a</span><br><span class="line">                    │       │   └── link</span><br><span class="line">                    │       └── a3ed95caeb02ffe68cdd9fd84406680ae93d633cb16422d00e8a7c22955b46d4</span><br><span class="line">                    │           └── link</span><br><span class="line">                    ├── _manifests</span><br><span class="line">                    │   ├── revisions</span><br><span class="line">                    │   │   └── sha256</span><br><span class="line">                    │   │       └── 36c3a913e62f77a82582eb7ce30d255f805c3d1e11d58e1f805e14d33c2bc5a5</span><br><span class="line">                    │   │           └── link</span><br><span class="line">                    │   └── tags</span><br><span class="line">                    │       └── latest</span><br><span class="line">                    │           ├── current</span><br><span class="line">                    │           │   └── link</span><br><span class="line">                    │           └── index</span><br><span class="line">                    │               └── sha256</span><br><span class="line">                    │                   └── 36c3a913e62f77a82582eb7ce30d255f805c3d1e11d58e1f805e14d33c2bc5a5</span><br><span class="line">                    │                       └── link</span><br><span class="line">                    └── _uploads</span><br><span class="line"></span><br><span class="line">48 directories, 16 files</span><br></pre></td></tr></table></figure>
+
+<p>Registry的默认配置文件，位于实例所在容器的<code>/etc/docker/registry/config.yml</code>，默认基本内容是：<br>全量配置信息请见<a target="_blank" rel="noopener" href="https://docs.docker.com/registry/configuration/#list-of-configuration-options">config.yml</a></p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">~ # cat /etc/docker/registry/config.yml</span><br><span class="line">version: 0.1</span><br><span class="line">log:</span><br><span class="line">  fields:</span><br><span class="line">    service: registry</span><br><span class="line">storage:</span><br><span class="line">  cache:</span><br><span class="line">    blobdescriptor: inmemory</span><br><span class="line">  filesystem:</span><br><span class="line">    rootdirectory: /var/lib/registry</span><br><span class="line">http:</span><br><span class="line">  addr: :5000</span><br><span class="line">  headers:</span><br><span class="line">    X-Content-Type-Options: [nosniff]</span><br><span class="line">health:</span><br><span class="line">  storagedriver:</span><br><span class="line">    enabled: true</span><br><span class="line">    interval: 10s</span><br><span class="line">    threshold: 3</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Docker提供的标准镜像服务称为<code>registry</code>，当前版本是由go语言开发的v2（之前python开发的registry v1在网上已被标为废弃，最后版本是v1.6）, 新版 registry v2对镜像存储格式进行了重新设计，并且和旧版还不兼容，docker从1.6版本开始支持registry v2。</p>
+</blockquote>
+<h2 id="基于Registry的直通缓存服务（pull-through-cache）"><a href="#基于Registry的直通缓存服务（pull-through-cache）" class="headerlink" title="基于Registry的直通缓存服务（pull-through cache）"></a>基于Registry的直通缓存服务（pull-through cache）</h2><p>如果您的环境中运行着多个Docker实例，例如多个物理机或虚拟机都运行Docker，则每个Docker守护程序都将访问Internet，并从Docker Hub获取本地没有的映像。<br>为此，我们可以部署一个本地Registry Mirror服务，并将所有Docker引擎的Mirror Sever指向该服务器，以免产生额外的互联网流量。</p>
+<h3 id="Registry-mirror的原理"><a href="#Registry-mirror的原理" class="headerlink" title="Registry mirror的原理"></a>Registry mirror的原理</h3><p>Docker Hub的镜像数据分为两部分：index数据和registry数据。前者保存了镜像的一些元数据信息，数据量很小；后者保存了镜像的实际数据，数据量比较大。平时我们使用docker pull命令拉取一个镜像时的过程是：先去index获取镜像的一些元数据，然后再去registry获取镜像数据。</p>
+<p>所谓registry mirror就是搭建一个registry，然后将docker hub的registry数据缓存到自己本地的registry。<br>整个过程是：当我们使用docker pull去拉镜像的时候，会先从我们本地的registry mirror去获取镜像数据，如果不存在，registry mirror会先从docker hub的registry拉取数据进行缓存，再传给我们。</p>
+<p>整个过程是流式的，registry mirror并不会等全部缓存完再给我们传，而且边缓存边给客户端传。</p>
+<p>对于缓存，我们都知道一致性非常重要。<br>registry mirror与docker官方保持一致的方法是：registry mirror只是缓存了docker hub的registry数据，并不缓存index数据。<br>所以我们pull镜像的步骤是：</p>
+<ul>
+<li>先连docker hub的index获取镜像的元数据，如果我们registry mirror里面有该镜像的缓存，且数据与从index处获取到的元数据一致，则从registry mirror拉取；</li>
+<li>如果我们的registry mirror有该镜像的缓存，但数据与index处获取的元数据不一致，或者根本就没有该镜像的缓存，则先从docker hub的registry缓存或者更新数据。</li>
+</ul>
+<h3 id="1-服务端的部署方法"><a href="#1-服务端的部署方法" class="headerlink" title="1. 服务端的部署方法"></a>1. 服务端的部署方法</h3><p>在一个已经安装Docker引擎的服务器<code>192.168.0.147</code>上部署一个Regsitry服务，其配置文件中，可以增加proxy配置段支持代理缓存服务，格式为：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">proxy:</span></span><br><span class="line">  <span class="attr">remoteurl:</span> <span class="string">https://registry-1.docker.io</span></span><br><span class="line">  <span class="attr">username:</span> [<span class="string">username</span>]</span><br><span class="line">  <span class="attr">password:</span> [<span class="string">password</span>]</span><br></pre></td></tr></table></figure>
+
+<p>注意，缓存默认保存7天，配置信息位于：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">storage:</span></span><br><span class="line">  <span class="attr">maintenance:</span></span><br><span class="line">    <span class="attr">uploadpurging:</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">age:</span> <span class="string">168h</span></span><br><span class="line">      <span class="attr">interval:</span> <span class="string">24h</span></span><br><span class="line">      <span class="attr">dryrun:</span> <span class="literal">false</span></span><br><span class="line">    <span class="attr">readonly:</span></span><br><span class="line">      <span class="attr">enabled:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p><code>uploadpurging</code>是一个后台过程，该过程会定期从注册表的<code>uploads</code>目录中删除孤立的文件。<br>默认情况下启用该后台进程，并设置以下参数。</p>
+<blockquote>
+<p>TODO: 缓存的镜像的有效期默认是一周（168hour），这个配置似乎并不解决？？？</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="center">参数名称</th>
+<th align="center">必选项</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">enabled</td>
+<td align="center">yes</td>
+<td align="left">Set to true to enable upload purging. Defaults to true.</td>
+</tr>
+<tr>
+<td align="center">age</td>
+<td align="center">yes</td>
+<td align="left">Upload directories which are older than this age will be deleted.Defaults to 168h (1 week).</td>
+</tr>
+<tr>
+<td align="center">interval</td>
+<td align="center">yes</td>
+<td align="left">The interval between upload directory purging. Defaults to 24h.</td>
+</tr>
+<tr>
+<td align="center">dryrun</td>
+<td align="center">yes</td>
+<td align="left">Set dryrun to true to obtain a summary of what directories will be deleted. Defaults to false.</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>获取Resistry默认配置文件的方法：<br><code>docker run -it --rm --entrypoint cat registry:2 /etc/docker/registry/config.yml</code></p>
+</blockquote>
+<p>因此，你可以在启动Registry服务时挂载自定义yml文件的方式，实现pull-through cache。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -d --restart=always --name registry \</span><br><span class="line">    -p 5000:5000 \</span><br><span class="line">    -v /data:/var/lib/registry \</span><br><span class="line">    -v ./myconfig.yml:/var/lib/registry/config.yml \</span><br><span class="line">    registry:2 </span><br></pre></td></tr></table></figure>
+
+<p>还有一个更方便的方法，不用修改配置文件，直接在启动Registry服务时设置环境变量即可，例如：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">docker run -p 5000:5000 -d --restart=always --name registry   \</span><br><span class="line">  -e REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io \</span><br><span class="line">  -v /data:/var/lib/registry \</span><br><span class="line">  registry:2</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-服务端的测试方法"><a href="#2-服务端的测试方法" class="headerlink" title="2. 服务端的测试方法"></a>2. 服务端的测试方法</h3><p>检查Registry服务是否正常启动，可以通过以下方法：</p>
+<figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@bl-local ~]# curl -ski -X GET http://localhost:5000/v2/_catalog</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Content-Type: application/json; charset=utf-8</span><br><span class="line">Docker-Distribution-Api-Version: registry/2.0</span><br><span class="line">X-Content-Type-Options: nosniff</span><br><span class="line">Date: Sun, 31 Jan 2021 15:58:44 GMT</span><br><span class="line">Content-Length: 66</span><br><span class="line"></span><br><span class="line">&#123;&quot;repositories&quot;:[&quot;calico/cni&quot;,&quot;library/alpine&quot;,&quot;library/python&quot;]&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-客户端的配置方法"><a href="#3-客户端的配置方法" class="headerlink" title="3.客户端的配置方法"></a>3.客户端的配置方法</h3><p>作为直通镜像使用方，需要修改Docker引擎配置文件<code>/etc/docker/daemon.json</code>，并在其中增加<code>registry-mirrors</code>信息段</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@d7y-2:~# <span class="built_in">cat</span> &lt;&lt;<span class="string">EOD &gt;/etc/docker/daemon.json</span></span><br><span class="line"><span class="string">&#123;</span></span><br><span class="line"><span class="string">&quot;registry-mirrors&quot;: [&quot;http://192.168.0.147:5000&quot;]</span></span><br><span class="line"><span class="string">&#125;</span></span><br><span class="line"><span class="string">EOD</span></span><br></pre></td></tr></table></figure>
+
+<p>当然，你也可以在Docker守护进程上，增加启动配置信息，例如：<br><code>--registry-mirror=https://&lt;my-docker-mirror-host&gt;:&lt;port-number&gt;</code></p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><ol>
+<li>Docker Registry提供的Pull-throgh cache服务部署很方便，但是缺乏UI管理界面导致维护比较困难，一般适合小规模本地部署。</li>
+<li>受到Docker pull机制的制约，Mirror仅支持Docker官方镜像，第三方或者私有仓库的mirror服务比较困难。</li>
+<li>由于Registry负责管理镜像的mainfest信息和镜像层文件，而所有docker pull都是基于上述标准流程和接口方式，因此Harbor、Dragnonfly等镜像管理产品都是必须基于Registry开发，并增加了一些复制、分发、UI管理等功能。</li>
+</ol>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://docs.docker.com/registry/recipes/mirror/">Docker Mirror官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://niyanchun.com/deploy-registry-mirror.html">搭建registry mirror的操作记录</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/1413239">一种Harbor部署私有Mirror服务的不正规方法</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.sohu.com/a/421272143_609552">Harbor 2.1新增镜像代理和P2P镜像预热功能</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/dragonflyoss/Dragonfly/issues/525">为什么 Dragonfly 不能很好的支持 HTTPS 镜像仓库</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/moby/moby/pull/34319">Github关于Add private-registry mirror support的讨论</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/ztsinghua/article/details/51496658">Docker Registry API接口示例</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/hyzhou33550336/article/details/65633502">容器OCI规范 镜像规范</a></li>
+<li><a target="_blank" rel="noopener" href="https://xuanwo.io/2019/08/06/oci-intro/">开放容器标准(OCI) 内部分享</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/707053">浙江移动容器云基于 Dragonfly 的统一文件分发平台生产实践</a></li>
+<li><a target="_blank" rel="noopener" href="https://my.oschina.net/markz0928/blog/856652">Docker Registry&#x2F;Distribution概述</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/01/17/Proxmox-VE%E7%9A%84%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86%E5%B0%8F%E7%BB%93/" rel="prev" title="Proxmox-VE的存储管理小结">
+                  <i class="fa fa-angle-left"></i> Proxmox-VE的存储管理小结
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/02/12/%E5%BE%AE%E4%BF%A1%E5%B0%8F%E7%A8%8B%E5%BA%8F%E7%9A%84%E8%BF%90%E8%A1%8C%E6%80%81%E7%8E%AF%E5%A2%83/" rel="next" title="微信小程序的运行态环境">
+                  微信小程序的运行态环境 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

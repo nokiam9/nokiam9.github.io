@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="在机器学习中，损失函数是代价函数的一部分，而代价函数则是目标函数的一种类型。   * 损失函数（Loss function）：用于定义单个训练样本与真实值之间的误差；  * 代价函数（Cost function）：用于定义单个批次，或整个训练集样本与真实值之间的误差；  * 目标函数（Objective function）：泛指任意可以被优化的函数。  损失函数是用于衡量模型所作出的预测离真实值（">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大模型学习笔记之三：损失函数">
+<meta property="og:url" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/index.html">
+<meta property="og:site_name" content="Alex的技术博客">
+<meta property="og:description" content="在机器学习中，损失函数是代价函数的一部分，而代价函数则是目标函数的一种类型。   * 损失函数（Loss function）：用于定义单个训练样本与真实值之间的误差；  * 代价函数（Cost function）：用于定义单个批次，或整个训练集样本与真实值之间的误差；  * 目标函数（Objective function）：泛指任意可以被优化的函数。  损失函数是用于衡量模型所作出的预测离真实值（">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/demo.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/loss01.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/CE-2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/focal.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/exp-loss.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/hinge.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/huber-class.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/regression.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/family2.png">
+<meta property="og:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/family.jpg">
+<meta property="article:published_time" content="2024-08-02T12:59:08.000Z">
+<meta property="article:modified_time" content="2026-02-23T08:34:16.161Z">
+<meta property="article:author" content="Alex Sun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/demo.png">
+
+
+<link rel="canonical" href="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/","path":"2024/08/02/大模型学习笔记之三：损失函数/","title":"大模型学习笔记之三：损失函数"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>大模型学习笔记之三：损失函数 | Alex的技术博客</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script><script src="/js/bookmark.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.1/pdfobject.min.js","integrity":"sha256-jI72I8ZLVflVOisZIOaLvRew3tyvzeu6aZXFm7P7dEo="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js" defer></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.1/mermaid.min.js","integrity":"sha256-BmQmdWDS8X2OTbrwELWK366LV6escyWhHHe0XCTU/Hk="}}</script>
+  <script src="/js/third-party/tags/mermaid.js" defer></script>
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js" defer></script>
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Alex的技术博客</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%A6%82%E8%BF%B0"><span class="nav-text">一、概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%9D%A2%E5%90%91%E5%88%86%E7%B1%BB%E7%9A%84%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-text">二、面向分类的损失函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Cross-Entropy-Loss%EF%BC%88%E4%BA%A4%E5%8F%89%E7%86%B5%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%89-Logistic-Loss%EF%BC%88%E5%AF%B9%E6%95%B0%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">1. Cross Entropy Loss（交叉熵损失函数）&#x3D; Logistic Loss（对数损失函数）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E5%88%86%E7%B1%BB"><span class="nav-text">二分类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E5%88%86%E7%B1%BB"><span class="nav-text">多分类</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Focal-Loss%EF%BC%88%E7%84%A6%E7%82%B9%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">2. Focal Loss（焦点损失函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Exponential-Loss%EF%BC%88%E6%8C%87%E6%95%B0%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">3. Exponential Loss（指数损失函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Hinge-Loss%EF%BC%88%E5%90%88%E9%A1%B5%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">4. Hinge Loss（合页损失函数）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Huber-Loss%EF%BC%88Huber%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%89"><span class="nav-text">5. Huber Loss（Huber损失函数）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E9%9D%A2%E5%90%91%E5%9B%9E%E5%BD%92%E7%9A%84%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-text">三、面向回归的损失函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-MAE%EF%BC%88Mean-Averange-Error%EF%BC%8C%E5%B9%B3%E5%9D%87%E7%BB%9D%E5%AF%B9%E8%AF%AF%E5%B7%AE%EF%BC%89"><span class="nav-text">1. MAE（Mean Averange Error，平均绝对误差）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-MSE%EF%BC%88Mean-Square-Error%EF%BC%8C%E5%9D%87%E6%96%B9%E8%AF%AF%E5%B7%AE%EF%BC%89"><span class="nav-text">2. MSE（Mean Square Error，均方误差）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Huber-Loss"><span class="nav-text">3. Huber Loss</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Smooth-L1%EF%BC%88%E5%B9%B3%E6%BB%91%E4%B9%8B%E5%90%8E%E7%9A%84L1%EF%BC%89"><span class="nav-text">4. Smooth L1（平滑之后的L1）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%AE%80%E8%A6%81%E5%88%86%E6%9E%90"><span class="nav-text">三、简要分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E9%9D%A2%E5%90%91%E5%88%86%E7%B1%BB%E7%9A%84%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E9%80%9A%E5%B8%B8%E4%BD%BF%E7%94%A8%E4%BA%A4%E5%8F%89%E7%86%B5%EF%BC%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E4%BD%BF%E7%94%A8%E5%9D%87%E6%96%B9%E5%B7%AE%E6%8D%9F%E5%A4%B1%EF%BC%9F"><span class="nav-text">1. 面向分类的损失函数通常使用交叉熵，为什么不使用均方差损失？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%9D%A2%E5%90%91%E5%88%86%E7%B1%BB%E7%9A%84%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-text">2. 面向分类的损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%9D%A2%E5%90%91%E5%9B%9E%E5%BD%92%E7%9A%84%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0"><span class="nav-text">3. 面向回归的损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E7%9A%84%E5%85%A8%E5%AE%B6%E7%A6%8F"><span class="nav-text">4. 损失函数的全家福</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%86%E9%A2%91%E8%AE%B2%E8%A7%A3"><span class="nav-text">视频讲解</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Alex Sun</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">114</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Alex Sun">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="大模型学习笔记之三：损失函数 | Alex的技术博客">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          大模型学习笔记之三：损失函数
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-08-02 20:59:08" itemprop="dateCreated datePublished" datetime="2024-08-02T20:59:08+08:00">2024-08-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2026-02-23 16:34:16" itemprop="dateModified" datetime="2026-02-23T16:34:16+08:00">2026-02-23</time>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>4.4k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>16 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>在机器学习中，损失函数是代价函数的一部分，而代价函数则是目标函数的一种类型。</p>
+<ul>
+<li>损失函数（Loss function）：用于定义<strong>单个训练样本</strong>与真实值之间的误差；</li>
+<li>代价函数（Cost function）：用于定义<strong>单个批次</strong>，或整个训练集样本与真实值之间的误差；</li>
+<li>目标函数（Objective function）：泛指任意可以被优化的函数。</li>
+</ul>
+<p>损失函数是用于衡量模型所作出的预测离真实值（Ground Truth）之间的偏离程度。</p>
+<h2 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h2><p>在深度学习广为使用的今天，我们可以在脑海里清晰的知道，一个模型想要达到很好的效果需要学习（&#x3D;训练）。一个好的训练离不开优质的负反馈，损失函数（Loss Functions）就是模型的负反馈。简化地说，损失函数可以定义为具有两个参数的函数：一是预测输出（Predicted Output），二是实际输出（True Output）。</p>
+<p><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/demo.png" alt="Group"></p>
+<p>对于样本空间 $X$ 的某个训练样本 $x$，人脑中有一个真实的概率分布模型，其输出就是正确答案 $y$，而神经网络就是基于内置参数 $(w,b)$ 计算预测的另一个概率分布模型，其输出 Y_pred 就是$f(x)$，所谓<strong>损失函数就是比较真实分布和预测分布之间的差距</strong>。若损失函数很小，表明机器学习模型与数据真实分布很接近，则模型性能良好；若损失函数很大，表明机器学习模型与数据真实分布差别较大，则模型性能不佳。</p>
+<p>损失函数大致可分为两种，一是分类问题，其目标是预测一个离散的标签（判断题），例如垃圾邮件检测、疾病诊断等；二是回归问题，其目标是预测一个连续的数值（填空题），例如房价预测、气温预测等。主要区别是：</p>
+<ul>
+<li>问题类型：回归问题面向连续性变量，分类问题面向离散型变量</li>
+<li>误差度量：回归问题关注预测值与实际值之间的差异，表示为 $y-f(x)$，也称为“<strong>残差（Residual）</strong>”；而分类问题关注的是预测类别是否正确，表示为 $yf(x)$，也称为“<strong>边界（Margin）</strong>”</li>
+<li>优化目标：回归模型优化的是预测值与实际值之间的连续误差，分类模型优化的是预测类别的准确性</li>
+</ul>
+<p>俗话说，任何事情必然有它的两面性，因此，并没有一种万能的损失函数能够适用于所有的机器学习任务，所以在这里我们需要知道每一种损失函数的优点和局限性，才能更好的利用它们去解决实际的问题。</p>
+<h2 id="二、面向分类的损失函数"><a href="#二、面向分类的损失函数" class="headerlink" title="二、面向分类的损失函数"></a>二、面向分类的损失函数</h2><p>对于二分类问题，定义 $y \in \{ −1,+1 \} $，损失函数最直观的思路就是<strong>0-1损失（zero-one loss）</strong>，数学表达为：<br>$$ L(y,f(x)) &#x3D;  \begin {cases}<br>                        0,&amp;  yf(x) \geq 0 \\<br>                        1,&amp;  yf(x) &lt; 0<br>                \end{cases}<br>$$</p>
+<p><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/loss01.png" alt="0-1"></p>
+<p>0-1损失函数存在两个明显的问题，一是对每个错误的分类点都施以相同的惩罚（取值1），这样那些“错的离谱“ (即 $yf(x) 是一个很大的负数)的样本并没有接受较大的惩罚，这在直觉上不是很合适；二是函数不连续、非凸的特点导致计算不方便，因而我们通常使用其他的代理损失函数进行优化。</p>
+<h3 id="1-Cross-Entropy-Loss（交叉熵损失函数）-Logistic-Loss（对数损失函数）"><a href="#1-Cross-Entropy-Loss（交叉熵损失函数）-Logistic-Loss（对数损失函数）" class="headerlink" title="1. Cross Entropy Loss（交叉熵损失函数）&#x3D; Logistic Loss（对数损失函数）"></a>1. Cross Entropy Loss（交叉熵损失函数）&#x3D; Logistic Loss（对数损失函数）</h3><p>物理学上的熵表示一个热力学系统的无序程度。为了解决对信息的量化度量问题，香农在 1948年 提出了“信息熵”的概念，使用对数函数表示对不确定性的测量。熵越高，表示能传输的信息越多，熵越少，表示传输的信息越少，可以直接将熵理解为信息量。交叉熵（cross-entropy，CE）刻画了两个概率分布之间的距离，更适合用在分类问题上，因为交叉熵表达预测输入样本属于某一类的概率。</p>
+<p>可以证明，<strong>交叉熵,KL散度,极大似然估计这几种求解模型参数的方法，最终的结果都是等价的</strong>，由于交叉熵形式比较接近最终损失函数形式，人们默认交叉熵就是 softmax 分类器的损失函数。<br>但是要注意，<strong>这三者等价的前提是：标签只有一类是正确分类（即 one-hot）</strong>，这符合分类问题的定义。但如果你考虑的问题不是分类问题，或者标签是非平凡的（并不只有一类为1，其它全为0）,再使用交叉熵就不合理了。</p>
+<h4 id="二分类"><a href="#二分类" class="headerlink" title="二分类"></a>二分类</h4><p>对于给定输入的样本 $x_i$，人脑的真实分布输出（即标签）为 $y_i$，取值为 $y_i \in \{0,1\}$（集合，非0即1），而预测模型的输出 $f(x_i)$ 记为 $\hat{y_i}$，通常使用 Sigmoid 函数压缩为 $\hat{y_i} \in [ 0,1 ]$ （闭区间，从0到1的所有实数）。</p>
+<p>假设单个观测的数据遵循伯努利分布（扩展到固定数量的独立观测，就是二项分布）。根据伯努利分布（Bernoulli distribution，也称两点分布或者0-1分布），记其成功概率为 $p(0 \leqslant p \leqslant 1)$，失败概率为 $q&#x3D;1-p$，其概率密度函数为：<br>$$ f(x)&#x3D;p^x(1-p)^{(1-x)} &#x3D;<br>\begin{cases}<br>    p, &amp;  x &#x3D; 1 \\<br>    1-p, &amp;  x &#x3D;0<br>\end{cases}<br>$$</p>
+<p>则有：<br>$$p(y_i|x_i) &#x3D; (\hat{y_i}^{y_i})(1-\hat{y_i})^{1-y_i}$$</p>
+<p>假设数据点之间独立同分布，则似然值可以表示为<br>$$L(x,y) &#x3D; \prod_{i&#x3D;1}^{n} (\hat{y_i}^{y_i})(1-\hat{y_i})^{1-y_i} $$</p>
+<p>对似然值取对数，然后加负号变成最小化负对数似然值，即为交叉熵损失函数的形式：<br>$$Loss(y_i,\hat{y_i}) &#x3D; - \sum_{i&#x3D;1}^{n} (({y_i} \log \hat{y_i}) + (1-y_i) \log (1-\hat{y_i})) $$</p>
+<p>对公式的解释如下：</p>
+<ul>
+<li>当 $y_i&#x3D;1$（样本标签为正类）时，损失函数为 $- \log \hat{y_i}$，损失与模型预测为正类的概率的对数成正比</li>
+<li>当 $y_i&#x3D;0$（样本标签为负类）时，损失函数为 $- \log (1-\hat{y_i})$，损失与模型预测为负类的概率的对数成正比</li>
+</ul>
+<p><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/CE-2.png" alt="CE-2"></p>
+<h4 id="多分类"><a href="#多分类" class="headerlink" title="多分类"></a>多分类</h4><p>以二分类问题为基础，扩展到多分类问题，则有：</p>
+<p>假设有 $C$ 个类别，每个样本 $x_i$ 的实际标签为 $y_i$ ，其中 $y_i$ 是一个独热编码的向量，表示类别的索引。模型预测每个类别的概率分布为 $\hat{y_i}$，其中 表示 $\hat{y_{i,c}}$ 样本属于类别 $c$ 的预测概率。</p>
+<p>交叉熵损失函数的数学定义为：<br>$$Loss(y_i,\hat{y_i}) &#x3D; - \sum_{i&#x3D;1}^{n} \sum_{c&#x3D;1}^{C} y_{i,c} \log{\hat{y_{i,c}}}$$</p>
+<p>其中：</p>
+<ul>
+<li>$y$ 是实际标签的集合</li>
+<li>$\hat y$ 是模型预测的概率分布</li>
+<li>$n$ 是样本数量</li>
+<li>$C$ 是类别数量</li>
+<li>$y_{i,c}$ 是独热编码的实际标签，如果样本 $x_i$ 属于类别 $c$ 则 $y_{i,c}$&#x3D;1，否则 $y_{i,c}$&#x3D;0</li>
+<li>$\hat{y_{i,c}}$ 是模型预测样本 $x_i$ 属于类别 $c$ 的概率。</li>
+</ul>
+<p>总结一下，交叉熵 Loss 的优点是在整个实数域内，Loss 近似线性变化。尤其是当 margin &lt;&lt; 0 的时候，Loss 更近似线性。这样，模型受异常点的干扰就较小。 而且，交叉熵 Loss 连续可导，便于求导计算，是使用最广泛的损失函数之一。</p>
+<h3 id="2-Focal-Loss（焦点损失函数）"><a href="#2-Focal-Loss（焦点损失函数）" class="headerlink" title="2. Focal Loss（焦点损失函数）"></a>2. Focal Loss（焦点损失函数）</h3><p>Focal loss 损失函数是为了解决 one-stage 目标检测中<strong>正负样本极度不平衡</strong>的问题，是一个密集目标检测的损失函数。在训练深层神经网络解决目标检测和分类问题时，这是最常见的选择之一。</p>
+<p>焦点损失，出自何凯明的<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1708.02002">Focal Loss for Dense Object Detection</a>，出发点是解决目标检测领域中 one-stage 算法（如 YOLO 系列算法）准确率不高的问题。作者认为样本的类别不均衡（比如前景和背景）是导致这个问题的主要原因。比如在很多输入图片中，我们利用网格去划分小窗口，大多数的窗口是不包含目标的。如此一来，如果我们直接运用原始的交叉熵损失，那么负样本所占比例会非常大，主导梯度的优化方向，即网络会偏向于将前景预测为背景。即使我们可以使用 OHEM（在线困难样本挖掘）算法来处理不均衡的问题，虽然其增加了误分类样本的权重，但也容易忽略掉易分类样本。而 Focal loss 则是聚焦于训练一个困难样本的稀疏集，通过直接在标准的交叉熵损失基础上做改进，引进了两个惩罚因子，来减少易分类样本的权重，使得模型在训练过程中更专注于困难样本。</p>
+<p>Focal Loss 的数学公式为：<br>$$ FL &#x3D; -\alpha_t(1-\hat{p_t})^\gamma \log(\hat{p_t})$$</p>
+<p>其基本定义如下：</p>
+<ul>
+<li>$\hat{p_t}$ 是模型对于每个类别 $t$ 的预测概率</li>
+<li>$y_t$ 是实际的标签，如果样本属于类别 $t$，则 $y_t&#x3D;1$，否则 $y_t&#x3D;0$</li>
+<li>$\alpha_t$ 是一个平衡正负样本的权重因子，通常对于正样本设置为 1，对于负样本可以设置为一个较小的值。</li>
+<li>$\gamma$ 是一个调节因子（focal系数），用于减少对易分类样本的关注，通常设置为 2 或 5</li>
+<li>当 $\hat{p_t}$ 接近 1（对于正样本）或 0（对于负样本）时，$(1-\hat{p_t})^\gamma$ 项会接近 0，以减少这些样本的损失贡献</li>
+</ul>
+<p><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/focal.png" alt="focus"></p>
+<p>实验中，作者取（$\alpha_t$&#x3D;0.25，$\gamma$&#x3D;0.2）的效果最好，具体还需要根据任务的情况调整。由此可见，应用 Focal-loss 也会额外引入两个超参数，需要丰富的经验才能调好。</p>
+<h3 id="3-Exponential-Loss（指数损失函数）"><a href="#3-Exponential-Loss（指数损失函数）" class="headerlink" title="3. Exponential Loss（指数损失函数）"></a>3. Exponential Loss（指数损失函数）</h3><p>Exponential Loss，又称指数损失，其表达式如下：<br>$$Loss(y,f(x)) &#x3D; e^{-yf(x)}$$</p>
+<p>Exponential Loss 与交叉熵损失函数类似，但它是指数下降的，因此梯度较其它损失函数更大一些。<br><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/exp-loss.png" alt="exp"></p>
+<p>Exponential Loss 是 AdaBoost 中使用的损失函数，可以比较方便地利用加法模型推导出 AdaBoost 算法。然而其和Squared Loss 一样，对异常点较为敏感，鲁棒性不够。</p>
+<h3 id="4-Hinge-Loss（合页损失函数）"><a href="#4-Hinge-Loss（合页损失函数）" class="headerlink" title="4. Hinge Loss（合页损失函数）"></a>4. Hinge Loss（合页损失函数）</h3><p>Hinge loss 损失函数通常适用于二分类的场景中，可以用来解决间隔最大化的问题。数学表达为：<br>$$ Loss(y,f(x)) &#x3D; max(0, 1-yf(x))$$</p>
+<p>Hinge 损失函数将与分类边界之间的差值或距离纳入成本计算。即使新的观察结果被正确分类，如果决策边界的差距不够大，它们也会受到惩罚，损失呈线性增加。<br><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/hinge.png" alt="hinge"></p>
+<p>Hinge Loss 的形状就像一本要合上的书，故称为合页损失。显然，只有当 ys &lt; 1 时，Loss 才大于零；对于 ys &gt; 1 的情况，Loss 始终为零。Hinge Loss 一般多用于支持向量机（SVM）中，体现了 SVM 距离最大化的思想。而且，当 Loss 大于零时，是线性函数，便于梯度下降算法求导。<br>Hinge Loss 的另一个优点是使得 ys &gt; 0 的样本损失皆为 0，由此带来了稀疏解，使得 SVM 仅通过少量的支持向量就能确定最终超平面。</p>
+<h3 id="5-Huber-Loss（Huber损失函数）"><a href="#5-Huber-Loss（Huber损失函数）" class="headerlink" title="5. Huber Loss（Huber损失函数）"></a>5. Huber Loss（Huber损失函数）</h3><p>Huber Loss 结合了均方损失（MSE）和绝对值损失（MAE）的优点，当 $|y-f(x)|$ 小于一个指定的 $\delta$（&#x3D;-1） 时，变为平方损失，大于 $\delta$（&#x3D;-1）时变为绝对值损失，因此比前两者更有鲁棒性。数学表达是：<br>$$Loss(y,f(x)) &#x3D;<br>    \begin{cases}<br>        0，                 &amp; yf(x) \geqslant 1 \\<br>        (1-yf(x))^2,        &amp; 0 &gt; yf(x) \geqslant -1 \\<br>        -4yf(x),            &amp; yf(x) &lt; -1<br>    \end{cases}<br>$$</p>
+<p>从表达式和 Loss 图形上看，Huber Loss 结合了 Hinge Loss 和 交叉熵 Loss 的优点。一方面能在 ys &gt; 1 时产生稀疏解提高训练效率；另一方面对于 ys &lt; −1 样本的惩罚以线性增加，这意味着受异常点的干扰较少。</p>
+<p><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/huber-class.png" alt="huber"></p>
+<blockquote>
+<p>Huber Loss 既可以用于回归问题，也能应用于分类问题中.</p>
+</blockquote>
+<h2 id="三、面向回归的损失函数"><a href="#三、面向回归的损失函数" class="headerlink" title="三、面向回归的损失函数"></a>三、面向回归的损失函数</h2><p>回归问题中 y 和 f(x) 都是实数，因此直接使用<strong>残差</strong>（ $y−f(x)$）来度量二者的不一致程度。残差 (的绝对值) 越大，则损失函数越大，学习出来的模型效果就越差（这里不考虑正则化问题）。</p>
+<h3 id="1-MAE（Mean-Averange-Error，平均绝对误差）"><a href="#1-MAE（Mean-Averange-Error，平均绝对误差）" class="headerlink" title="1. MAE（Mean Averange Error，平均绝对误差）"></a>1. MAE（Mean Averange Error，平均绝对误差）</h3><p>平均绝对误差（MAE）是另一种常用的回归损失函数，它是目标值与预测值之差绝对值和的均值，表示了预测值的平均误差幅度，而不需要考虑误差的方向，也称为 <strong>L1 Loss 损失函数</strong>（注：平均偏差误差 MBE 则是考虑的方向的误差，是残差的和），范围是 0 到 $\infty$，其公式如下所示：<br>$$ MAE &#x3D; \frac{1}{N} \sum_{i&#x3D;1}^{N} \vert y_i-f(x_i) \vert $$</p>
+<h3 id="2-MSE（Mean-Square-Error，均方误差）"><a href="#2-MSE（Mean-Square-Error，均方误差）" class="headerlink" title="2. MSE（Mean Square Error，均方误差）"></a>2. MSE（Mean Square Error，均方误差）</h3><p>均方误差（Mean Square Error,MSE）是回归损失函数中最常用的误差，它是预测值f(x)与目标值y之间差值平方和的均值，也称为 <strong>L2 Loss 损失函数</strong>，其公式如下所示：<br>$$ MSE &#x3D; \frac{1}{N} \sum_{i&#x3D;1}^{N} (y_i-f(x_i))^2 $$</p>
+<h3 id="3-Huber-Loss"><a href="#3-Huber-Loss" class="headerlink" title="3. Huber Loss"></a>3. Huber Loss</h3><p>MSE 和 MAE 各有优点和缺点，Huber 提出了一个综合二者特点的改进方案，公式如下：<br>$$ Loss(y,f(x)) &#x3D;<br>\begin{cases}<br>    \frac {1}{2} (y-f(x))^2, &amp; \vert y-f(x) \vert &lt; \delta \\<br>    \delta \vert y-f(x) \vert - \frac {1}{2} \delta ^2, &amp; \vert y-f(x) \vert \geqslant \delta<br>\end{cases}<br>$$</p>
+<p>Huber Loss 包含了一个超参数$\delta$，$\delta$ 的大小决定了 Huber Loss 对 MSE 和 MAE 的侧重性，使其同时具备两者的优点，减小了对离群点的敏感度问题，还实现了处处可导的功能。</p>
+<ul>
+<li>当$\vert y−f(x) \vert &lt; \delta$ 时，变为 MSE，梯度逐渐减小，保证模型更精确地得到全局最优解</li>
+<li>当$\vert y−f(x) \vert \geqslant \delta$时，则变成类似于 MAE，梯度一直近似为 $\delta$ ，保证了模型的快速收敛</li>
+</ul>
+<p>通常来说，超参数 $\delta$ 可以通过交叉验证选取最佳值。下面分别取 $\delta$ &#x3D; 3、$\delta$ &#x3D; 1.5，绘制相应的 Huber Loss，如下图所示：</p>
+<p><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/regression.png" alt="回归类"></p>
+<h3 id="4-Smooth-L1（平滑之后的L1）"><a href="#4-Smooth-L1（平滑之后的L1）" class="headerlink" title="4. Smooth L1（平滑之后的L1）"></a>4. Smooth L1（平滑之后的L1）</h3><p>根据 <a target="_blank" rel="noopener" href="https://pytorch.org/docs/stable/generated/torch.nn.SmoothL1Loss.html#smoothl1loss">PyTorch SmoothL1Loss 函数</a>的定义，其公式为：<br>$$ Loss(y,f(x)) &#x3D;<br>\begin{cases}<br>    \frac{1}{2\delta}(y-f(x))^2, &amp; \vert y - f(x) \vert &lt; \delta  \\<br>    \vert y-f(x) \vert - \frac {1}{2}\delta, &amp; \vert y - f(x) \vert \geqslant \delta<br>\end{cases}<br>$$</p>
+<p>Smooth L1 Loss 与 Huber Loss 的效果差不多，只是构造函数有所区别。</p>
+<h2 id="三、简要分析"><a href="#三、简要分析" class="headerlink" title="三、简要分析"></a>三、简要分析</h2><h3 id="1-面向分类的损失函数通常使用交叉熵，为什么不使用均方差损失？"><a href="#1-面向分类的损失函数通常使用交叉熵，为什么不使用均方差损失？" class="headerlink" title="1. 面向分类的损失函数通常使用交叉熵，为什么不使用均方差损失？"></a>1. 面向分类的损失函数通常使用交叉熵，为什么不使用均方差损失？</h3><p>在统计学中，平均平方误差是对于无法观察的参数 $\theta$ 的一个估计函数，通常与高斯分布（正态分布）相关联。例如，线性回归模型通常假设数据的误差（预测值与实际值之间的差异）是随机的，并且遵循均值为零、恒定方差的正态分布。</p>
+<p>面向分类问题的结果，通常是一个离散的标签值（二分类就是[0,1]），此时用正态分布来描述误差显然是不合适的，因此我们直接衡量预测概率与实际标签之间的差异，即关注于模型预测的概率分布是否接近实际的标签分布，也就是极大似然估计法，其等价于交叉熵法。</p>
+<h3 id="2-面向分类的损失函数"><a href="#2-面向分类的损失函数" class="headerlink" title="2. 面向分类的损失函数"></a>2. 面向分类的损失函数</h3><p><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/family2.png" alt="family2"></p>
+<h3 id="3-面向回归的损失函数"><a href="#3-面向回归的损失函数" class="headerlink" title="3. 面向回归的损失函数"></a>3. 面向回归的损失函数</h3><ul>
+<li>从梯度的求解以及收敛上，MSE 是优于 MAE 的。MSE 处处可导，而且梯度值也是动态变化的，能够快速的收敛；而 MAE 在零点处不可导，且其梯度保持不变。对于很小的损失值其梯度也很大，在深度学习中，就需要使用变化的学习率，在损失值很小时降低学习率。</li>
+<li>对离群（异常）值的处理上，MAE 要明显好于 MSE 。如果离群点（异常值）需要被检测出来，则可以选择 MSE 作为损失函数；如果离群点只是当做受损的数据处理，则可以选择 MAE 作为损失函数。</li>
+</ul>
+<h3 id="4-损失函数的全家福"><a href="#4-损失函数的全家福" class="headerlink" title="4. 损失函数的全家福"></a>4. 损失函数的全家福</h3><p><img src="/2024/08/02/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%B8%89%EF%BC%9A%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0/family.jpg" alt="Group"></p>
+<blockquote>
+<p>注意！此图的 Smooth L1 Loss 函数定义有错误，PyTorch 的定义应该是准确的。</p>
+</blockquote>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2322229">神经网络中的损失函数</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cvmart.net/community/detail/4879">一文看尽深度学习中的各种损失函数</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/nefetaria/article/details/111238515">MSE, MAE, Huber loss详解</a></li>
+<li><a target="_blank" rel="noopener" href="https://datawhalechina.github.io/thorough-pytorch/%E7%AC%AC%E4%B8%89%E7%AB%A0/3.6%20%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0.html">深入浅出PyTorch - 损失函数</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/chao_shine/article/details/89925762">交叉熵损失函数（cross-entropy loss function）原理及Pytorch代码简介</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/massquantity/p/8964029.html">常见回归和分类损失函数比较</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/cy0628/p/13925930.html">机器学习常用分类的损失函数</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/77686118">机器学习常用损失函数小结</a></li>
+<li><a target="_blank" rel="noopener" href="https://kezhi.tech/e295e676.html">PyTorch中的CrossEntropyLoss与交叉熵计算不一致</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/hello_dear_you/article/details/128892040">分类损失函数的推导</a></li>
+</ul>
+<h3 id="视频讲解"><a href="#视频讲解" class="headerlink" title="视频讲解"></a>视频讲解</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV15V411W7VB/?spm_id_from=333.788&vd_source=735a6376f6214c7b974a1074096ba0fa">“交叉熵”如何做损失函数？打包理解“信息量”、“比特”、“熵”、“KL散度”、“交叉熵”</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1Y64y1Q7hi/?spm_id_from=333.788&vd_source=735a6376f6214c7b974a1074096ba0fa">“损失函数”是如何设计出来的？直观理解“最小二乘法”和“极大似然估计法”</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1p5411c7nZ/?spm_id_from=333.337.search-card.all.click&vd_source=735a6376f6214c7b974a1074096ba0fa">常见的损失函数</a></li>
+<li><a target="_blank" rel="noopener" href="https://paulxiong.medium.com/%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%E7%9A%84%E8%A7%A3%E9%87%8A-c2b6f165c842">损失函数的解释</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2024/08/01/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E4%BA%8C%EF%BC%9A%E6%BF%80%E6%B4%BB%E5%87%BD%E6%95%B0/" rel="prev" title="大模型学习笔记之二：激活函数">
+                  <i class="fa fa-angle-left"></i> 大模型学习笔记之二：激活函数
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2024/08/03/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%E4%B9%8B%E5%9B%9B%EF%BC%9A%E4%BC%98%E5%8C%96%E7%AE%97%E6%B3%95/" rel="next" title="大模型学习笔记之四：优化算法">
+                  大模型学习笔记之四：优化算法 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2026</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Alex Sun</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+      <span>站点总字数：</span>
+    <span title="站点总字数">278k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span>站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">16:51</span>
+  </span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/nokiam9/nokiam9.github.io.git" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
