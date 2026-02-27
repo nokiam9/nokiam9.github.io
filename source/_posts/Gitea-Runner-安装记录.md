@@ -242,3 +242,4 @@ jobs:
 - [nektosact act 主页](https://nektosact.com/introduction.html)
 - [GitHub Actions 使用介绍](https://oragekk.me/tutorial/github/github-action.html)
 - [Gitlab-CICD最简单明了的入门教程](https://cloud.tencent.com/developer/article/2098099)
+- [GitHub Actions 入门教程 - 阮一峰](https://www.ruanyifeng.com/blog/2019/09/getting-started-with-github-actions.html)
