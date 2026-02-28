@@ -4,7 +4,7 @@ date: 2026-02-23 17:36:45
 tags:
 ---
 
-前几天，重新制作了 Debian 12 的基线模版，意外发现 clone 多个虚拟机时，它们的 IP 地址都是相同的，导致无法正常 ssh 登录。
+前几天重新制作了 Debian 12 的基线模版，意外发现 clone 多个虚拟机时，它们的 IP 地址都是相同的，导致无法正常 ssh 登录。
 检查 PVE 宿主机的 cloudinit 配置，其 MAC 地址各不相同，IP 都是 DHCP 模式，为什么呢？
 
 `systemd-networkd`是 Debian 12 的默认网络管理软件，根据 [systemd.network官方文档](https://manpages.debian.org/buster/systemd/systemd.network.5.en.html)，DHCP 配置有个`ClientIdentifier`选项，取值范围是[‘mac’, ‘duid’, 'duid-only']。
