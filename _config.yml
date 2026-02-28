@@ -90,7 +90,7 @@ deploy:
     repository: https://github.com/nokiam9/nokiam9.github.io
     branch: master
   - type: git
-    repository: git@hexo.caogo.cn:/home/git/blog.git
+    repository: root@hexo.caogo.cn:/var/repo/hexo.git
     branch: master
 
 # 添加百度/谷歌/本地 自定义站点内容搜索
