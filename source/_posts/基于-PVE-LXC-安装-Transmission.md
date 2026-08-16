@@ -16,8 +16,8 @@ apk add transmission-daemon
 rc-service transmission-daemon start
 ```
 
-配置文件位于：`/var/lib/transmission/config/settings.json`\
-下载目录位于：`/var/lib/transmission/downloads/`\
+配置文件位于：`/var/lib/transmission/config/settings.json`
+下载目录位于：`/var/lib/transmission/downloads/`
 
 根据需要修改配置，但注意**必须停止服务**，否则重启服务后修改又被默认配置覆盖！
 
