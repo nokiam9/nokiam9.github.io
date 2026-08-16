@@ -17,7 +17,7 @@ QDevice 的资源需求很小，最低配置：1 核 + 256M 内存即可，树�
 
 Qdevice 是开源软件，支持各种 Linux 平台，但 PVE 宿主机的 Debain 肯定是最合适的！
 
-- 基于 debian-12-nocloud-amd64.qcow2 安装，默认用户root，无口令
+- 基于 `debian-12-nocloud-amd64.qcow2` 安装，默认用户root，无口令
 - 1C、1G、默认HD=3G
 - 设置系统自启动
 
@@ -73,7 +73,7 @@ netplan apply
 
 # 检查 ip 地址
 ip a
-    ```
+```
 
 ### 3. 安装 corosync-qnetd 软件包
 
@@ -169,5 +169,6 @@ Membership information
 2. 每台宿主机L：均需清理老证书
 
     ```bash
-    rm -rf /etc/corosync/qdevice/net/nssdb rm -f /etc/pve/qdevice-net-node.p12 
+    rm -rf /etc/corosync/qdevice/net/nssdb 
+    rm -f /etc/pve/qdevice-net-node.p12 
     ```
