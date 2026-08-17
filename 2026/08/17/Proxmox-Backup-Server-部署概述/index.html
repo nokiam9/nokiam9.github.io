@@ -19,26 +19,26 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nokiam9.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.27.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":true,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js" defer></script>
 
-    <meta name="description" content="重装Centos系统 使用Centos安装U盘，选择最小化安装，设置root口令，设置失去，最后重新启动。  配置有线网卡 安装完成后，编辑网卡配置文件&#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eno1  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20   [root@localhost network-scri">
+    <meta name="description" content="Proxmox 备份服务器是一款面向企业级环境的开源备份解决方案，专为虚拟机、容器及物理主机的高效备份与恢复而设计，具有以下特点：  与 Proxmox VE 实现深度集成，为虚拟机和容器提供高效、无缝的备份解决方案，适用于本地环境及跨远程站点的统一数据保护 采用增量备份机制，仅将客户端发生变化的数据块传输至服务器端，并在接收时执行去重处理 采用 ZSTD 压缩算法，具备卓越的数据压缩能力，可在单">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Centos的服务器网卡设置方法">
-<meta property="og:url" content="https://nokiam9.github.io/2020/06/25/Centos%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:title" content="Proxmox Backup Server 部署概述">
+<meta property="og:url" content="https://nokiam9.github.io/2026/08/17/Proxmox-Backup-Server-%E9%83%A8%E7%BD%B2%E6%A6%82%E8%BF%B0/index.html">
 <meta property="og:site_name" content="Alex的技术博客">
-<meta property="og:description" content="重装Centos系统 使用Centos安装U盘，选择最小化安装，设置root口令，设置失去，最后重新启动。  配置有线网卡 安装完成后，编辑网卡配置文件&#x2F;etc&#x2F;sysconfig&#x2F;network-scripts&#x2F;ifcfg-eno1  1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20   [root@localhost network-scri">
+<meta property="og:description" content="Proxmox 备份服务器是一款面向企业级环境的开源备份解决方案，专为虚拟机、容器及物理主机的高效备份与恢复而设计，具有以下特点：  与 Proxmox VE 实现深度集成，为虚拟机和容器提供高效、无缝的备份解决方案，适用于本地环境及跨远程站点的统一数据保护 采用增量备份机制，仅将客户端发生变化的数据块传输至服务器端，并在接收时执行去重处理 采用 ZSTD 压缩算法，具备卓越的数据压缩能力，可在单">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-06-25T15:44:17.000Z">
-<meta property="article:modified_time" content="2026-02-23T08:34:15.755Z">
+<meta property="article:published_time" content="2026-08-17T15:40:54.000Z">
+<meta property="article:modified_time" content="2026-08-17T16:44:19.640Z">
 <meta property="article:author" content="Alex Sun">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://nokiam9.github.io/2020/06/25/Centos%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/">
+<link rel="canonical" href="https://nokiam9.github.io/2026/08/17/Proxmox-Backup-Server-%E9%83%A8%E7%BD%B2%E6%A6%82%E8%BF%B0/">
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2020/06/25/Centos%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/","path":"2020/06/25/Centos的服务器网卡设置方法/","title":"Centos的服务器网卡设置方法"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nokiam9.github.io/2026/08/17/Proxmox-Backup-Server-%E9%83%A8%E7%BD%B2%E6%A6%82%E8%BF%B0/","path":"2026/08/17/Proxmox-Backup-Server-部署概述/","title":"Proxmox Backup Server 部署概述"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>Centos的服务器网卡设置方法 | Alex的技术博客</title>
+<title>Proxmox Backup Server 部署概述 | Alex的技术博客</title>
   
 
 
@@ -167,7 +167,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%87%8D%E8%A3%85Centos%E7%B3%BB%E7%BB%9F"><span class="nav-text">重装Centos系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%9C%89%E7%BA%BF%E7%BD%91%E5%8D%A1"><span class="nav-text">配置有线网卡</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="nav-text">一、软件安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88"><span class="nav-text">二、部署方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-text">参考文献</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -218,7 +218,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2020/06/25/Centos%E7%9A%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%BD%91%E5%8D%A1%E8%AE%BE%E7%BD%AE%E6%96%B9%E6%B3%95/">
+    <link itemprop="mainEntityOfPage" href="https://nokiam9.github.io/2026/08/17/Proxmox-Backup-Server-%E9%83%A8%E7%BD%B2%E6%A6%82%E8%BF%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -231,12 +231,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="Centos的服务器网卡设置方法 | Alex的技术博客">
+      <meta itemprop="name" content="Proxmox Backup Server 部署概述 | Alex的技术博客">
       <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          Centos的服务器网卡设置方法
+          Proxmox Backup Server 部署概述
         </h1>
 
         <div class="post-meta-container">
@@ -247,14 +247,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2020-06-25 23:44:17" itemprop="dateCreated datePublished" datetime="2020-06-25T23:44:17+08:00">2020-06-25</time>
+      <time title="创建时间：2026-08-17 23:40:54" itemprop="dateCreated datePublished" datetime="2026-08-17T23:40:54+08:00">2026-08-17</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2026-02-23 16:34:15" itemprop="dateModified" datetime="2026-02-23T16:34:15+08:00">2026-02-23</time>
+      <time title="修改时间：2026-08-18 00:44:19" itemprop="dateModified" datetime="2026-08-18T00:44:19+08:00">2026-08-18</time>
     </span>
 
   
@@ -271,14 +271,14 @@
         <i class="far fa-file-word"></i>
       </span>
       <span class="post-meta-item-text">本文字数：</span>
-      <span>130</span>
+      <span>747</span>
     </span>
     <span class="post-meta-item" title="阅读时长">
       <span class="post-meta-item-icon">
         <i class="far fa-clock"></i>
       </span>
       <span class="post-meta-item-text">阅读时长 &asymp;</span>
-      <span>1 分钟</span>
+      <span>3 分钟</span>
     </span>
 </div>
 
@@ -288,9 +288,42 @@
     
     
     
-    <div class="post-body" itemprop="articleBody"><h2 id="重装Centos系统"><a href="#重装Centos系统" class="headerlink" title="重装Centos系统"></a>重装Centos系统</h2><p>使用Centos安装U盘，选择最小化安装，设置root口令，设置失去，最后重新启动。</p>
-<h2 id="配置有线网卡"><a href="#配置有线网卡" class="headerlink" title="配置有线网卡"></a>配置有线网卡</h2><p>安装完成后，编辑网卡配置文件<code>/etc/sysconfig/network-scripts/ifcfg-eno1</code></p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost network-scripts]# more /etc/sysconfig/network-scripts/ifcfg-eno1</span><br><span class="line">TYPE=Ethernet</span><br><span class="line">PROXY_METHOD=none</span><br><span class="line">BROWSER_ONLY=no</span><br><span class="line">BOOTPROTO=static            # 修改默认值dhcp</span><br><span class="line">DEFROUTE=yes</span><br><span class="line">IPV4_FAILURE_FATAL=no</span><br><span class="line">IPV6INIT=yes</span><br><span class="line">IPV6_AUTOCONF=yes</span><br><span class="line">IPV6_DEFROUTE=yes</span><br><span class="line">IPV6_FAILURE_FATAL=no</span><br><span class="line">IPV6_ADDR_GEN_MODE=stable-privacy</span><br><span class="line">NAME=eno1</span><br><span class="line">UUID=47adb195-54ee-4c74-85a2-2b1fcb499e01</span><br><span class="line">DEVICE=eno1</span><br><span class="line">ONBOOT=yes                  # 修改默认值no</span><br><span class="line">IPADDR=192.168.0.132        # New</span><br><span class="line">NETMASK=255.255.255.0       # New</span><br><span class="line">GATEWAY=192.168.0.1         # New</span><br><span class="line">DNS1=192.168.0.1            # New</span><br></pre></td></tr></table></figure>
+    <div class="post-body" itemprop="articleBody"><p>Proxmox 备份服务器是一款面向企业级环境的开源备份解决方案，专为虚拟机、容器及物理主机的高效备份与恢复而设计，具有以下特点：</p>
+<ul>
+<li>与 Proxmox VE 实现深度集成，为虚拟机和容器提供高效、无缝的备份解决方案，适用于本地环境及跨远程站点的统一数据保护</li>
+<li>采用增量备份机制，仅将客户端发生变化的数据块传输至服务器端，并在接收时执行去重处理</li>
+<li>采用 ZSTD 压缩算法，具备卓越的数据压缩能力，可在单秒内完成数吉字节数据的压缩处理</li>
+<li>采用客户端-服务器架构，实现备份系统的逻辑分离，支持多个独立主机共享同一备份服务器资源，支持将本地数据存储同步至远程位置</li>
+<li>提供原生集成的图形化管理界面（GUI），所有管理操作均可通过标准Web浏览器访问（https:&#x2F;&#x2F;:8007）完成</li>
+</ul>
+<h2 id="一、软件安装"><a href="#一、软件安装" class="headerlink" title="一、软件安装"></a>一、软件安装</h2><p>官方优先推荐使用 PBS ISO 全新安装，<a target="_blank" rel="noopener" href="https://enterprise.proxmox.com/iso/">ISO 下载页面</a>显示，当前最新版本是 4.2。<br>在已有 Debian 上用 apt 安装属于高级方式，需要自行处理 ZFS、存储、网络配置等，但考虑到一台裸机只做备份服务器太奢侈了，我们就高级了一把！采用在 Proxmox VE 8.4 宿主机的 apt 在线安装，实际版本为 3.4.9，因为这是 Debian12 的最新版本。</p>
+<blockquote>
+<p>PBS 4.x 基于 Debian 13 (Trixie)；PBS 3.x 基于 Debian12 (Bookworm)</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#导入gpg密钥</span></span><br><span class="line">wget https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg</span><br><span class="line"></span><br><span class="line"><span class="comment">#添加源</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;deb http://download.proxmox.com/debian/pbs bookworm pbs-no-subscription&quot;</span> &gt; /etc/apt/sources.list.d/pbs.list</span><br><span class="line"></span><br><span class="line">apt update</span><br><span class="line">apt install proxmox-backup-server -y</span><br></pre></td></tr></table></figure>
+
+<p>当前最新版本是 4.2-1，本次安装的版本是 3.4.9。</p>
+<h2 id="二、部署方案"><a href="#二、部署方案" class="headerlink" title="二、部署方案"></a>二、部署方案</h2><p>实际备份部署方案如下：</p>
+<ol>
+<li>2台 Proxmox VE 宿主机同时安装 Proxmox Backup Server，均可提供数据备份能力；</li>
+<li>PBS-130 作为主备份服务器，内置 1TB STAT 硬盘作为存储卷；</li>
+<li>Proxmox Datecenter 新增 Proxmox Backup Server &#x3D; PBS-130，并新增 Backup 任务，设置为每日3点备份所有 VM 和 CT；</li>
+<li>PBS-132 作为从备份服务器，USB外接 1TB STAT 硬盘作为存储卷；</li>
+<li>PBS-130 新增 Access Control ，定义用户 syncuser@pbs 并设置 Datastore Reader 权限；</li>
+<li>PBS-132 存储卷新增 Sync Jobs，设置每日5点从 PBS-130 <strong>Pull</strong> 获取 Datastore 数据存入本地硬盘。</li>
+</ol>
+<p>注意事项：</p>
+<ul>
+<li>为数据备份定时设置 Verify ，确保数据安全性</li>
+<li>2台 PVE 宿主机均兼作 PBS，拥有一个内置硬盘备份 + 一个USB硬盘备份，满足数据备份的 3-2-1 原则！</li>
+</ul>
+<hr>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://pbs.proxmox.com/docs/">Proxmox Backup Server 官方文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://pbs.proxmox.com/wiki/Roadmap">Proxmox Backup Server 技术路标</a></li>
+<li><a target="_blank" rel="noopener" href="https://shallowhave.github.io/p/proxmox-backup-server-guide/">Proxmox Backup Server 完全指南：增量备份、去重与自动化策略</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.zwbcc.cn/archives/022069b8-6436-488c-9c64-3e9fde02b4c6">用 Proxmox Backup Server 备份 PVE 虚拟机|容器教程</a></li>
+</ul>
 
     </div>
 
@@ -304,14 +337,11 @@
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2020/06/25/Kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84%E5%AE%89%E8%A3%85%E8%AE%B0%E5%BD%95/" rel="prev" title="Kubernetes集群的安装记录">
-                  <i class="fa fa-angle-left"></i> Kubernetes集群的安装记录
+                <a href="/2026/08/16/PVE-QDevice-%E4%BB%B2%E8%A3%81%E8%8A%82%E7%82%B9%E9%83%A8%E7%BD%B2/" rel="prev" title="PVE QDevice 仲裁节点部署">
+                  <i class="fa fa-angle-left"></i> PVE QDevice 仲裁节点部署
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2020/06/27/Yum%E8%BD%AF%E4%BB%B6%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8%E7%9A%84%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/" rel="next" title="Yum软件包管理器的技术分析">
-                  Yum软件包管理器的技术分析 <i class="fa fa-angle-right"></i>
-                </a>
             </div>
           </div>
     </footer>
